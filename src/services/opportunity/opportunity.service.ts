@@ -24,7 +24,6 @@ function formatUsd6(n: bigint | null | undefined): string {
   return s.slice(0, -6) + '.' + s.slice(-6);
 }
 
-
 @Injectable()
 export class OpportunityService {
   private readonly amountInWeth: string;
@@ -39,17 +38,21 @@ export class OpportunityService {
   /** Возвращает лучший DEX для продажи WETH->USDC на указанном объёме */
   async findOpportunity() {
     const [uni, sushi] = await Promise.all([
-      this.dex.uniBestOut(this.amountInWeth),     // { out:bigint, fee:number } | null
+      this.dex.uniBestOut(this.amountInWeth), // { out:bigint, fee:number } | null
       this.dex.sushiWethToUsdc(this.amountInWeth), // сделай объектную версию как для Uni: { out, fee:3000 } | null
     ]);
 
     // значения (bigint)
-    const uniOut  = uni?.out ?? null;
+    const uniOut = uni?.out ?? null;
     const sushiOut = sushi?.out ?? null;
 
     // комиссии (bigint, в минималках USDC)
-    const uniFeeUsdc   = uniOut  != null && uni?.fee   != null ? calcFeeUSDC(uniOut,  uni!.fee)   : null;
-    const sushiFeeUsdc = sushiOut!= null && sushi?.fee != null ? calcFeeUSDC(sushiOut,sushi!.fee) : null;
+    const uniFeeUsdc =
+      uniOut != null && uni?.fee != null ? calcFeeUSDC(uniOut, uni.fee) : null;
+    const sushiFeeUsdc =
+      sushiOut != null && sushi?.fee != null
+        ? calcFeeUSDC(sushiOut, sushi.fee)
+        : null;
 
     // кто лучше и спред (bigint)
     let better = 'EQUAL';
@@ -75,26 +78,33 @@ export class OpportunityService {
     }
 
     // переведём в числа (USD)
-    const uniUsd    = toUsd6(uniOut);
-    const sushiUsd  = toUsd6(sushiOut);
+    const uniUsd = toUsd6(uniOut);
+    const sushiUsd = toUsd6(sushiOut);
     const spreadUsd = toUsd6(spreadRaw);
-    const uniFeeUSD   = toUsd6(uniFeeUsdc);
+    const uniFeeUSD = toUsd6(uniFeeUsdc);
     const sushiFeeUSD = toUsd6(sushiFeeUsdc);
-    const feesUSD = (isFinite(uniFeeUSD) ? uniFeeUSD : 0) + (isFinite(sushiFeeUSD) ? sushiFeeUSD : 0);
+    const feesUSD =
+      (isFinite(uniFeeUSD) ? uniFeeUSD : 0) +
+      (isFinite(sushiFeeUSD) ? sushiFeeUSD : 0);
 
     // база для процентов — mid (устойчивее)
-    const midUSD = (isFinite(uniUsd) && isFinite(sushiUsd))
-      ? (uniUsd + sushiUsd) / 2
-      : (isFinite(uniUsd) ? uniUsd : sushiUsd);
+    const midUSD =
+      isFinite(uniUsd) && isFinite(sushiUsd)
+        ? (uniUsd + sushiUsd) / 2
+        : isFinite(uniUsd)
+          ? uniUsd
+          : sushiUsd;
 
-    const grossPct = (isFinite(spreadUsd) && isFinite(midUSD) && midUSD > 0)
-      ? (spreadUsd / midUSD) * 100
-      : NaN;
+    const grossPct =
+      isFinite(spreadUsd) && isFinite(midUSD) && midUSD > 0
+        ? (spreadUsd / midUSD) * 100
+        : NaN;
 
     const netUSD = (isFinite(spreadUsd) ? spreadUsd : 0) - feesUSD - GAS_USD;
-    const netPct = (isFinite(netUSD) && isFinite(midUSD) && midUSD > 0)
-      ? (netUSD / midUSD) * 100
-      : NaN;
+    const netPct =
+      isFinite(netUSD) && isFinite(midUSD) && midUSD > 0
+        ? (netUSD / midUSD) * 100
+        : NaN;
 
     return {
       amountInWeth: this.amountInWeth,
@@ -116,7 +126,4 @@ export class OpportunityService {
       netPct: isFinite(netPct) ? netPct.toFixed(3) + '%' : 'n/a',
     };
   }
-
-
-
 }
