@@ -3,15 +3,42 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { concat, ethers, toBeHex } from 'ethers';
 
+export interface IDexQuotes {
+  amountInWeth: string;
+  uniSellWethForUsdcBest: IAmountAndFeeResult | null;
+  uniBuyWethForUsdcBest: IAmountAndFeeResult | null;
+  sushiSellWethForUsdc: IAmountAndFeeResult | null;
+  sushiBuyWethForUsdc: IAmountAndFeeResult | null;
+}
+
 const UNI_V3_QUOTER_ABI = [
   'function quoteExactInput(bytes path, uint256 amountIn) view returns (uint256 amountOut, uint160, uint32, uint256)',
+  'function quoteExactOutput(bytes path, uint256 amountOut) view returns (uint256 amountIn, uint160, uint32, uint256)',
+  'function quoteExactOutputSingle(address tokenIn,address tokenOut,uint24 fee,uint256 amountOut,uint160 sqrtPriceLimitX96) view returns (uint256 amountIn, uint160, uint32, uint256)',
 ];
 const UNI_V3_FACTORY_ABI = [
   'function getPool(address,address,uint24) external view returns (address)',
 ];
 const SUSHI_V2_ROUTER_ABI = [
-  'function getAmountsOut(uint256,address[]) view returns (uint256[])',
+  'function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory)',
+  'function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory)',
 ];
+
+// вспомогалка для exact-output: ПУТЬ ОБРАТНЫЙ!
+function buildPathForExactOutput(
+  tokenIn: string,
+  tokenOut: string,
+  fee: number,
+): string {
+  // exact-output path = tokenOut -> fee -> tokenIn
+  const feeHex3 = toBeHex(fee, 3);
+  return concat([tokenOut, feeHex3, tokenIn]);
+}
+
+export interface IAmountAndFeeResult {
+  amount: bigint;
+  fee: 500 | 3000 | 10000 | null;
+}
 
 function buildPath(tokenIn: string, tokenOut: string, fee: number): string {
   // fee кодируем строго в 3 байта
@@ -55,35 +82,16 @@ export class DexProviderService {
     this.quote = this.cfg.get<string>('QUOTE_TOKEN')!;
   }
 
-  // // минимальный ABI пула
-  // UNI_V3_POOL_ABI = [
-  //   'function liquidity() external view returns (uint128)',
-  //   'function slot0() external view returns (uint160 sqrtPriceX96,int24 tick,uint16,uint16,uint16,uint8,bool)',
-  // ];
-  //
-  // async debugPools() {
-  //   for (const fee of [500, 3000, 10000] as const) {
-  //     const poolAddr: string = await this.factory.getPool(this.base, this.quote, fee);
-  //     console.log('fee', fee, 'pool', poolAddr);
-  //     if (poolAddr === ethers.ZeroAddress) continue;
-  //     const pool = new ethers.Contract(poolAddr, this.UNI_V3_POOL_ABI, this.provider);
-  //     try {
-  //       const [liq, s0] = await Promise.all([pool.liquidity(), pool.slot0()]);
-  //       console.log('  liquidity', liq.toString(), 'slot0.sqrt', s0[0].toString());
-  //     } catch (e) {
-  //       console.log('  pool read reverted');
-  //     }
-  //   }
-  // }
-
   /** Лучший вывод USDC для amountIn WETH по UniV3 (перебор fee-тиеров) */
-  async uniBestOut(
+  async uniSellWethForUsdcBest(
     amountInWeth: string,
-  ): Promise<{ fee: number; out: bigint } | null> {
+  ): Promise<IAmountAndFeeResult | null> {
     const amountInWei = ethers.parseEther(amountInWeth);
 
+    let bestFee: 500 | 3000 | 10000 | null = null;
+    let bestAmount: bigint = 0n;
+
     for (const fee of FEES) {
-      // 1) проверяем, что пул существует (у тебя он есть по логам)
       const poolAddr: string = await this.factory.getPool(
         this.base,
         this.quote,
@@ -92,32 +100,110 @@ export class DexProviderService {
       if (poolAddr === ethers.ZeroAddress) continue;
 
       try {
-        // 2) квотируем через path (без recipient — QuoterV2 так надёжнее)
         const path = buildPath(this.base, this.quote, fee);
-        const [out] = await this.quoter.quoteExactInput(path, amountInWei);
-        if (out > 0n) return { fee, out: out as bigint };
-      } catch {
-        // если конкретный fee ревертит — пробуем следующий
-        // (бывает на пустых/малоликвидных пулах под большой объём)
+        const [amount] = await this.quoter.quoteExactInput(path, amountInWei);
+        if (amount > bestAmount) {
+          bestAmount = amount;
+          bestFee = fee;
+        }
+      } catch (e) {
+        this.log.debug(`quoteExactInput reverted fee=${fee}`, e);
       }
     }
-    return null;
+
+    return bestFee ? { fee: bestFee, amount: bestAmount } : null;
+  }
+
+  /** Сколько USDC нужно на Uni V3, чтобы КУПИТЬ ровно amountOutWeth WETH (перебор fee-тиеров) */
+  async uniBuyWethForUsdcBest(
+    amountOutWeth: string,
+  ): Promise<IAmountAndFeeResult | null> {
+    const amountOutWei = ethers.parseEther(amountOutWeth); // хотим РОВНО столько WETH
+    let best: IAmountAndFeeResult | null = null;
+
+    for (const fee of FEES) {
+      // проверим, что пул существует
+      const poolAddr: string = await this.factory.getPool(
+        this.quote,
+        this.base,
+        fee,
+      );
+      if (poolAddr === ethers.ZeroAddress) continue;
+
+      try {
+        // строим path для exact-output: WETH -> fee -> USDC (обратный!)
+        const path = buildPathForExactOutput(this.quote, this.base, fee);
+        // ВАЖНО: order = tokenOut(=WETH),fee,tokenIn(=USDC)
+        const [amountIn] = await this.quoter.quoteExactOutput.staticCall(
+          path,
+          amountOutWei,
+        );
+        if (amountIn > 0n && (!best || amountIn < best.amount)) {
+          best = { fee: fee, amount: amountIn };
+        }
+      } catch (e) {
+        this.log.debug(
+          `quoteExactOutput reverted fee=${fee}, outWETH=${amountOutWei}`,
+          e,
+        );
+      }
+    }
+    return best;
   }
 
   /** Сколько USDC даст Sushi за amountIn WETH */
-  async sushiWethToUsdc(
+  async sushiSellWethForUsdc(
     amountInWeth: string,
-  ): Promise<{ fee: number; out: bigint } | null> {
+  ): Promise<IAmountAndFeeResult | null> {
     try {
       const wei = ethers.parseEther(amountInWeth);
       const path = [this.base, this.quote];
       const amounts: bigint[] = await this.sushi.getAmountsOut(wei, path);
-      const out: bigint = amounts.at(-1) as bigint;
+      const amount: bigint = amounts.at(-1) as bigint;
 
-      return { fee: 3000, out }; // у Sushiswap фиксированный fee 0.3%
+      return { fee: 3000, amount }; // у Sushiswap фиксированный fee 0.3%
     } catch (e) {
       this.log.debug('Sushi getAmountsOut reverted');
       return null;
     }
+  }
+
+  /** Сколько USDC нужно внести на Sushi, чтобы КУПИТЬ ровно amountOutWeth WETH */
+  async sushiBuyWethForUsdc(
+    amountOutWeth: string, // например "0.5"
+  ): Promise<IAmountAndFeeResult | null> {
+    try {
+      const outWeth = ethers.parseEther(amountOutWeth); // 18 знаков
+      const path = [this.quote, this.base]; // [USDC, WETH]
+      // amountsIn = [amountInUSDC, amountOutWETH] для пути из 2 токенов
+      const amounts: bigint[] = await this.sushi.getAmountsIn(outWeth, path);
+      const amount = amounts[0]; // 6 знаков у USDC
+      return { fee: 3000, amount };
+    } catch (e) {
+      this.log.debug('Sushi getAmountsIn reverted', e);
+      return null;
+    }
+  }
+
+  async getWethUsdcQuotes(amountInWeth: string): Promise<IDexQuotes> {
+    const [
+      uniSellWethForUsdcBest,
+      uniBuyWethForUsdcBest,
+      sushiSellWethForUsdc,
+      sushiBuyWethForUsdc,
+    ] = await Promise.all([
+      this.uniSellWethForUsdcBest(amountInWeth),
+      this.uniBuyWethForUsdcBest(amountInWeth),
+      this.sushiSellWethForUsdc(amountInWeth),
+      this.sushiBuyWethForUsdc(amountInWeth),
+    ]);
+
+    return {
+      amountInWeth,
+      uniSellWethForUsdcBest,
+      uniBuyWethForUsdcBest,
+      sushiSellWethForUsdc,
+      sushiBuyWethForUsdc,
+    };
   }
 }

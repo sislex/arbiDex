@@ -1,129 +1,180 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { DexProviderService } from '../dex-provider/dex-provider.service';
+import { IDexQuotes } from '../dex-provider/dex-provider.service';
+import { ethers } from 'ethers';
 
-const USDC_DEC = 1_000_000n;
+export type ArbDirection =
+  | 'UNI_BUY__SUSHI_SELL'
+  | 'SUSHI_BUY__UNI_SELL'
+  | 'NO_TRADE';
 
-function toUsd6(n: bigint | null | undefined): number {
-  if (n == null) return NaN;
-  return Number(n) / 1_000_000; // 6 знаков
+export interface ArbDecision {
+  shouldTrade: boolean;
+  direction: ArbDirection;
+  netUSDC: bigint; // чистая прибыль (min)
+  grossUSDC: bigint; // валовая (min)
+  gasUSDC: bigint; // (min)
+  minProfitUSDC: bigint; // (min)
+  // Новое:
+  grossPctBps: bigint; // валовая доходность в бипсах (1% = 100 bps)
+  netPctBps: bigint; // чистая доходность в бипсах
+  grossPctStr: string; // например "1.072%"
+  netPctStr: string; // например "0.981%"
+  amountInWeth: string;
+  amountInUsdc: bigint; // 💰 в минималках USDC
+  amountInUsdcStr: string; // 💰 человекопонятный вид
+  legs?: {
+    buy: {
+      dex: 'UNI' | 'SUSHI';
+      costUSDC: bigint;
+      fee: 500 | 3000 | 10000 | null;
+    };
+    sell: {
+      dex: 'UNI' | 'SUSHI';
+      proceedsUSDC: bigint;
+      fee: 500 | 3000 | 10000 | null;
+    };
+  };
 }
 
-// правильный расчёт комиссии по tier (500=0.05%, 3000=0.3%, 10000=1%)
-function calcFeeUSDC(out: bigint, feeTier: number): bigint {
-  return (out * BigInt(feeTier)) / 1_000_000n;
+function formatUsdc(amount: bigint): string {
+  return Number(ethers.formatUnits(amount, 6)).toFixed(2); // 2 знака после запятой
 }
 
-// возьми из .env, а пока константа для Arbitrum
-const GAS_USD = Number(process.env.GAS_USD ?? 0.02);
+function toPctStrFromBps(bps: bigint): string {
+  const neg = bps < 0n;
+  const abs = neg ? -bps : bps; // берём модуль
+  const whole = abs / 100n; // целые проценты
+  const frac = (abs % 100n).toString().padStart(2, '0'); // сотые
+  return `${neg ? '-' : ''}${whole}.${frac}%`;
+}
 
-function formatUsd6(n: bigint | null | undefined): string {
-  if (n == null) return 'n/a';
-  const s = n.toString();
-  if (s.length <= 6) return '0.' + s.padStart(6, '0');
-  return s.slice(0, -6) + '.' + s.slice(-6);
+function pctBps(numerator: bigint, denominator: bigint): bigint {
+  // (numerator / denominator) * 100% в бипсах
+  if (denominator <= 0n) return 0n;
+  return (numerator * 10_000n) / denominator; // целочисленное деление (сечёт вниз по модулю)
 }
 
 @Injectable()
 export class OpportunityService {
-  private readonly amountInWeth: string;
-
-  constructor(
-    private cfg: ConfigService,
-    private dex: DexProviderService,
-  ) {
-    this.amountInWeth = this.cfg.get<string>('AMOUNT_IN_WETH') ?? '0.10';
-  }
-
   /** Возвращает лучший DEX для продажи WETH->USDC на указанном объёме */
-  async findOpportunity() {
-    const [uni, sushi] = await Promise.all([
-      this.dex.uniBestOut(this.amountInWeth), // { out:bigint, fee:number } | null
-      this.dex.sushiWethToUsdc(this.amountInWeth), // сделай объектную версию как для Uni: { out, fee:3000 } | null
-    ]);
+  evaluateArbitrage(q: IDexQuotes): ArbDecision {
+    const gasUSDC = ethers.parseUnits(process.env.GAS_USD ?? '0.02', 6);
+    const minProfitUSDC = ethers.parseUnits(
+      process.env.MIN_ABS_PROFIT_USD ?? '0.01',
+      6,
+    );
 
-    // значения (bigint)
-    const uniOut = uni?.out ?? null;
-    const sushiOut = sushi?.out ?? null;
+    // Ветка A: UNI buy (cost) -> SUSHI sell (proceeds)
+    const canA = q.uniBuyWethForUsdcBest && q.sushiSellWethForUsdc;
+    const aCost = canA ? q.uniBuyWethForUsdcBest!.amount : 0n;
+    const aProceeds = canA ? q.sushiSellWethForUsdc!.amount : 0n;
+    const aGross = aProceeds - aCost;
+    const aNet = aGross - gasUSDC;
 
-    // комиссии (bigint, в минималках USDC)
-    const uniFeeUsdc =
-      uniOut != null && uni?.fee != null ? calcFeeUSDC(uniOut, uni.fee) : null;
-    const sushiFeeUsdc =
-      sushiOut != null && sushi?.fee != null
-        ? calcFeeUSDC(sushiOut, sushi.fee)
-        : null;
+    // Ветка B: SUSHI buy (cost) -> UNI sell (proceeds)
+    const canB = q.sushiBuyWethForUsdc && q.uniSellWethForUsdcBest;
+    const bCost = canB ? q.sushiBuyWethForUsdc!.amount : 0n;
+    const bProceeds = canB ? q.uniSellWethForUsdcBest!.amount : 0n;
+    const bGross = bProceeds - bCost;
+    const bNet = bGross - gasUSDC;
 
-    // кто лучше и спред (bigint)
-    let better = 'EQUAL';
-    let direction = 'NO_TRADE';
-    let spreadRaw: bigint | null = null;
+    // Выбираем лучшую ветку по NET
+    let direction: ArbDirection = 'NO_TRADE';
+    let netUSDC = 0n,
+      grossUSDC = 0n,
+      costUSDC = 0n;
+    let legs: ArbDecision['legs'] | undefined;
 
-    if (uniOut != null && sushiOut != null) {
-      if (uniOut > sushiOut) {
-        better = `UNISWAP_V3 (fee=${uni!.fee})`;
-        direction = 'SELL on Uniswap';
-        spreadRaw = uniOut - sushiOut;
-      } else if (sushiOut > uniOut) {
-        better = `SUSHI_V2 (fee=${sushi!.fee})`;
-        direction = 'SELL on Sushi';
-        spreadRaw = sushiOut - uniOut;
+    if (canA && canB) {
+      if (aNet >= bNet) {
+        direction = 'UNI_BUY__SUSHI_SELL';
+        netUSDC = aNet;
+        grossUSDC = aGross;
+        costUSDC = aCost;
+        legs = {
+          buy: {
+            dex: 'UNI',
+            costUSDC: aCost,
+            fee: q.uniBuyWethForUsdcBest!.fee,
+          },
+          sell: {
+            dex: 'SUSHI',
+            proceedsUSDC: aProceeds,
+            fee: q.sushiSellWethForUsdc!.fee,
+          },
+        };
+      } else {
+        direction = 'SUSHI_BUY__UNI_SELL';
+        netUSDC = bNet;
+        grossUSDC = bGross;
+        costUSDC = bCost;
+        legs = {
+          buy: {
+            dex: 'SUSHI',
+            costUSDC: bCost,
+            fee: q.sushiBuyWethForUsdc!.fee,
+          },
+          sell: {
+            dex: 'UNI',
+            proceedsUSDC: bProceeds,
+            fee: q.uniSellWethForUsdcBest!.fee,
+          },
+        };
       }
-    } else if (uniOut != null) {
-      better = `UNISWAP_V3 (fee=${uni!.fee})`;
-      direction = 'SELL on Uniswap';
-    } else if (sushiOut != null) {
-      better = `SUSHI_V2 (fee=${sushi!.fee})`;
-      direction = 'SELL on Sushi';
+    } else if (canA) {
+      direction = 'UNI_BUY__SUSHI_SELL';
+      netUSDC = aNet;
+      grossUSDC = aGross;
+      costUSDC = aCost;
+      legs = {
+        buy: { dex: 'UNI', costUSDC: aCost, fee: q.uniBuyWethForUsdcBest!.fee },
+        sell: {
+          dex: 'SUSHI',
+          proceedsUSDC: aProceeds,
+          fee: q.sushiSellWethForUsdc!.fee,
+        },
+      };
+    } else if (canB) {
+      direction = 'SUSHI_BUY__UNI_SELL';
+      netUSDC = bNet;
+      grossUSDC = bGross;
+      costUSDC = bCost;
+      legs = {
+        buy: { dex: 'SUSHI', costUSDC: bCost, fee: q.sushiBuyWethForUsdc!.fee },
+        sell: {
+          dex: 'UNI',
+          proceedsUSDC: bProceeds,
+          fee: q.uniSellWethForUsdcBest!.fee,
+        },
+      };
     }
 
-    // переведём в числа (USD)
-    const uniUsd = toUsd6(uniOut);
-    const sushiUsd = toUsd6(sushiOut);
-    const spreadUsd = toUsd6(spreadRaw);
-    const uniFeeUSD = toUsd6(uniFeeUsdc);
-    const sushiFeeUSD = toUsd6(sushiFeeUsdc);
-    const feesUSD =
-      (isFinite(uniFeeUSD) ? uniFeeUSD : 0) +
-      (isFinite(sushiFeeUSD) ? sushiFeeUSD : 0);
+    // Проценты (от стоимости входа)
+    const grossPctBps = pctBps(grossUSDC, costUSDC);
+    const netPctBps = pctBps(netUSDC, costUSDC);
+    const grossPctStr = toPctStrFromBps(grossPctBps);
+    const netPctStr = toPctStrFromBps(netPctBps);
 
-    // база для процентов — mid (устойчивее)
-    const midUSD =
-      isFinite(uniUsd) && isFinite(sushiUsd)
-        ? (uniUsd + sushiUsd) / 2
-        : isFinite(uniUsd)
-          ? uniUsd
-          : sushiUsd;
+    const shouldTrade = netUSDC >= minProfitUSDC;
 
-    const grossPct =
-      isFinite(spreadUsd) && isFinite(midUSD) && midUSD > 0
-        ? (spreadUsd / midUSD) * 100
-        : NaN;
-
-    const netUSD = (isFinite(spreadUsd) ? spreadUsd : 0) - feesUSD - GAS_USD;
-    const netPct =
-      isFinite(netUSD) && isFinite(midUSD) && midUSD > 0
-        ? (netUSD / midUSD) * 100
-        : NaN;
+    const amountInUsdc = costUSDC;
+    const amountInUsdcStr = formatUsdc(costUSDC);
 
     return {
-      amountInWeth: this.amountInWeth,
-      // сырье
-      uniOutUSDC: formatUsd6(uniOut),
-      sushiOutUSDC: formatUsd6(sushiOut),
-      uniFee: uni?.fee ?? null,
-      sushiFee: sushi?.fee ?? null,
-      uniFeeUSDC: isFinite(uniFeeUSD) ? uniFeeUSD.toFixed(6) : 'n/a',
-      sushiFeeUSDC: isFinite(sushiFeeUSD) ? sushiFeeUSD.toFixed(6) : 'n/a',
-      // спред/направление
-      better,
-      direction,
-      spreadUSDC: isFinite(spreadUsd) ? spreadUsd.toFixed(6) : 'n/a',
-      // итог
-      gasUSD: GAS_USD.toFixed(6),
-      netUSD: isFinite(netUSD) ? netUSD.toFixed(6) : 'n/a',
-      grossPct: isFinite(grossPct) ? grossPct.toFixed(3) + '%' : 'n/a',
-      netPct: isFinite(netPct) ? netPct.toFixed(3) + '%' : 'n/a',
+      shouldTrade: shouldTrade && direction !== 'NO_TRADE',
+      direction: shouldTrade ? direction : 'NO_TRADE',
+      netUSDC,
+      grossUSDC,
+      gasUSDC,
+      minProfitUSDC,
+      grossPctBps,
+      netPctBps,
+      grossPctStr,
+      netPctStr,
+      amountInWeth: q.amountInWeth,
+      amountInUsdc,
+      amountInUsdcStr,
+      legs: shouldTrade ? legs : undefined,
     };
   }
 }
