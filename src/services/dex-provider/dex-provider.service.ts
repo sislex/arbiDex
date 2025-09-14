@@ -2,6 +2,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { concat, ethers, toBeHex } from 'ethers';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { Dexes } from '../../db/entities/Dexes';
+import { Tokens } from '../../db/entities/Tokens';
+import { Markets } from '../../db/entities/Markets';
 
 export interface IDexQuotes {
   amountInWeth: string;
@@ -58,7 +64,12 @@ export class DexProviderService {
   readonly base: string;
   readonly quote: string;
 
-  constructor(private cfg: ConfigService) {
+  constructor(
+    private cfg: ConfigService,
+    @InjectRepository(Dexes) private dexRepo: Repository<Dexes>,
+    @InjectRepository(Tokens) private tokenRepo: Repository<Tokens>,
+    @InjectRepository(Markets) private marketRepo: Repository<Markets>,
+  ) {
     this.provider = new ethers.JsonRpcProvider(
       this.cfg.get<string>('RPC_URL'),
       { chainId: 42161, name: 'arbitrum' },
@@ -80,6 +91,42 @@ export class DexProviderService {
     );
     this.base = this.cfg.get<string>('BASE_TOKEN')!;
     this.quote = this.cfg.get<string>('QUOTE_TOKEN')!;
+  }
+
+  async onModuleInit() {
+    const chainId = 42161;
+
+    // 1. ищем рынок WETH/USDC
+    const base = await this.tokenRepo.findOneByOrFail({
+      chainId: chainId,
+      symbol: 'WETH',
+    });
+    const quote = await this.tokenRepo.findOneByOrFail({
+      chainId: chainId,
+      symbol: 'USDC',
+    });
+
+    const market = await this.marketRepo.findOneByOrFail({
+      chainId: chainId,
+      baseTokenId: base.tokenId,
+      quoteTokenId: quote.tokenId,
+    });
+
+    // 2. адреса dex
+    const uni = await this.dexRepo.findOneByOrFail({
+      chainId: chainId,
+      name: 'UniswapV3',
+    });
+    const sushi = await this.dexRepo.findOneByOrFail({
+      chainId: chainId,
+      name: 'SushiSwapV2',
+    });
+
+    this.log.log(
+      `Loaded config from DB: WETH=${base.address}, USDC=${quote.address}, UniQuoter=${uni.quoterAddr}, SushiRouter=${sushi.routerAddr}`,
+    );
+
+    // дальше инициализация ethers.Contract как раньше, только вместо cfg.get используешь эти переменные
   }
 
   /** Лучший вывод USDC для amountIn WETH по UniV3 (перебор fee-тиеров) */

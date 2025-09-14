@@ -7,6 +7,11 @@ import { Runner } from './runner';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Dexes } from './db/entities/Dexes';
+import { Tokens } from './db/entities/Tokens';
+import { Markets } from './db/entities/Markets';
+import { ArbEvals } from './db/entities/ArbEvals';
+import { Quotes } from './db/entities/Quotes';
 
 @Module({
   imports: [
@@ -31,6 +36,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         // logging: ['error'], // при необходимости
       }),
     }),
+    TypeOrmModule.forFeature([Dexes, Tokens, Markets, ArbEvals, Quotes]),
   ],
   controllers: [AppController],
   providers: [AppService, DexProviderService, OpportunityService, Runner],
