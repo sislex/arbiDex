@@ -21,3 +21,18 @@ export interface QuoteResult {
   amountQuoteAtomic: bigint; // в минималках QUOTE
   err?: string;
 }
+
+export type CreateUniOpts = {
+  dex: 'UniswapV3';
+  rpcUrl: string;
+  chainId: number;
+  quoterAddr: string;
+  factoryAddr: string;
+};
+
+export type CreateSushiOpts = {
+  dex: 'SushiV2';
+  rpcUrl: string;
+  chainId: number;
+  routerAddr: string;
+};

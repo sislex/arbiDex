@@ -66,7 +66,7 @@ export class Runner {
       this.signer,
     );
 
-    void this.loop();
+    // void this.loop();
     void this.demo();
   }
 
@@ -132,6 +132,7 @@ export class Runner {
       amountBase: this.amountInWETH,
       baseDecimals,
       quoteDecimals,
+      candidateFees: [3000],
     });
 
     const sellOnUni = await uni.getSellQuote({
@@ -141,6 +142,7 @@ export class Runner {
       amountBase: this.amountInWETH,
       baseDecimals,
       quoteDecimals,
+      candidateFees: [3000],
     });
 
     const buyOnSushi = await sushi.getBuyQuote({

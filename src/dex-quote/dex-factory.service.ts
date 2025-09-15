@@ -3,21 +3,7 @@ import { ethers } from 'ethers';
 import { DexQuoteProvider } from './dex-quote.provider';
 import { UniswapV3QuoteProvider } from './univ3-quote.provider';
 import { SushiV2QuoteProvider } from './sushiv2-quote.provider';
-
-type CreateUniOpts = {
-  dex: 'UniswapV3';
-  rpcUrl: string;
-  chainId: number;
-  quoterAddr: string;
-  factoryAddr: string;
-};
-
-type CreateSushiOpts = {
-  dex: 'SushiV2';
-  rpcUrl: string;
-  chainId: number;
-  routerAddr: string;
-};
+import { CreateSushiOpts, CreateUniOpts } from './types';
 
 type CreateOpts = CreateUniOpts | CreateSushiOpts;
 
