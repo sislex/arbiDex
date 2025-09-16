@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DexProviderService } from './services/dex-provider/dex-provider.service';
-import { OpportunityService } from './services/opportunity/opportunity.service';
 import { Runner } from './runner';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -12,7 +10,6 @@ import { Tokens } from './db/entities/Tokens';
 import { Markets } from './db/entities/Markets';
 import { ArbEvals } from './db/entities/ArbEvals';
 import { Quotes } from './db/entities/Quotes';
-import { QuotesService } from './db/services/quotes.service';
 import { DexQuoteModule } from './dex-quote/dex-quote.module';
 
 @Module({
@@ -44,10 +41,7 @@ import { DexQuoteModule } from './dex-quote/dex-quote.module';
   controllers: [AppController],
   providers: [
     AppService,
-    DexProviderService,
-    OpportunityService,
     Runner,
-    QuotesService,
   ],
 })
 export class AppModule {}
