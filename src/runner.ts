@@ -10,32 +10,63 @@ export class DexSwapModel {
   readonly dexId: string;
   readonly dexName: string;
   readonly dexQuoteProvider: DexQuoteProvider;
+  readonly feeTier: number;
   readonly baseTokenAddress: string;
   readonly quoteTokenAddress: string;
   readonly baseDecimals: number;
   readonly quoteDecimals: number;
-  readonly amountInWeth: string;
+  readonly amountInBase: string;
 
   constructor(config: {
     poolId: string;
     dexId: string;
     dexName: string;
     dexQuoteProvider: DexQuoteProvider;
+    feeTier: number;
     baseTokenAddress: string;
     quoteTokenAddress: string;
     baseDecimals: number;
     quoteDecimals: number;
-    amountInWeth: string;
+    amountInBase: string;
   }) {
     this.poolId = config.poolId;
     this.dexId = config.dexId;
     this.dexName = config.dexName;
     this.dexQuoteProvider = config.dexQuoteProvider;
+    this.feeTier = config.feeTier;
     this.baseTokenAddress = config.baseTokenAddress;
     this.quoteTokenAddress = config.quoteTokenAddress;
     this.baseDecimals = config.baseDecimals;
     this.quoteDecimals = config.quoteDecimals;
-    this.amountInWeth = config.amountInWeth;
+    this.amountInBase = config.amountInBase;
+  }
+
+  getQuotes() {
+    return Promise.all([this.getBuyQuote(), this.getSellQuote()]);
+  }
+
+  getBuyQuote() {
+    return this.dexQuoteProvider.getBuyQuote({
+      chainId: 42161,
+      base: this.baseTokenAddress,
+      quote: this.quoteTokenAddress,
+      amountBase: this.amountInBase,
+      baseDecimals: this.baseDecimals,
+      quoteDecimals: this.quoteDecimals,
+      candidateFees: [3000],
+    });
+  }
+
+  getSellQuote() {
+    return this.dexQuoteProvider.getSellQuote({
+      chainId: 42161,
+      base: this.baseTokenAddress,
+      quote: this.quoteTokenAddress,
+      amountBase: this.amountInBase,
+      baseDecimals: this.baseDecimals,
+      quoteDecimals: this.quoteDecimals,
+      candidateFees: [3000],
+    });
   }
 }
 
@@ -56,14 +87,23 @@ export class Runner {
     this.RPC_URL = this.cfg.get<string>('RPC_URL') ?? '';
     this.AMOUNT_IN_WETH = this.cfg.get<string>('AMOUNT_IN_WETH') ?? '0.05';
 
-    void this.setDexSwapModelList();
+    void this.init();
+    // void this.demo();
   }
 
-  async setDexSwapModelList() {
+  async init() {
+    this.swapList = await this.setDexSwapModelList();
+    console.log(this.swapList);
+    const quotes = await this.swapList[1].getQuotes();
+    console.log(quotes);
+  }
+
+  async setDexSwapModelList(): Promise<DexSwapModel[]> {
     const swapList: DexSwapModel[] = [];
     const baseDecimals = 18;
     const quoteDecimals = 6;
     const dexes = await this.dexesService.getAllWithExistPools();
+    console.log(dexes);
     dexes.forEach((dex: Dexes) => {
       const dexId = dex.dexId;
       const dexName = dex.name;
@@ -77,7 +117,12 @@ export class Runner {
           factoryAddr: dex.factoryAddr as string,
         });
       } else if (dex.name === 'SushiV2') {
-        console.log('SushiV2 not implemented yet');
+        dexQuoteProvider = this.dexFactory.create({
+          dex: dex.name,
+          rpcUrl: this.RPC_URL,
+          chainId: 42161,
+          routerAddr: dex.routerAddr as string,
+        });
       }
 
       dex.dexPools.forEach((dexPool) => {
@@ -86,11 +131,12 @@ export class Runner {
           dexId,
           dexName,
           dexQuoteProvider,
+          feeTier: dexPool.feeTier as number,
           baseTokenAddress: dexPool.market.baseToken.address,
           quoteTokenAddress: dexPool.market.quoteToken.address,
           baseDecimals,
           quoteDecimals,
-          amountInWeth: this.AMOUNT_IN_WETH,
+          amountInBase: this.AMOUNT_IN_WETH,
         };
 
         console.log(config);
@@ -98,69 +144,6 @@ export class Runner {
         swapList.push(new DexSwapModel(config));
       });
     });
-    this.swapList = swapList;
-    console.log(swapList);
-  }
-
-  async demo() {
-    const uni = this.dexFactory.create({
-      dex: 'UniswapV3',
-      rpcUrl: this.RPC_URL,
-      chainId: 42161,
-      quoterAddr: '0x61fFE014bA17989E743c5F6cB21bF9697530B21e',
-      factoryAddr: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
-    });
-
-    const sushi = this.dexFactory.create({
-      dex: 'SushiV2',
-      rpcUrl: this.RPC_URL,
-      chainId: 42161,
-      routerAddr: '0x1b02da8cb0d097eb8d57a175b88c7d8b47997506',
-    });
-
-    const base = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1'; // WETH
-    const quote = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'; // USDC
-    const baseDecimals = 18;
-    const quoteDecimals = 6;
-
-    const buyOnUni = await uni.getBuyQuote({
-      chainId: 42161,
-      base,
-      quote,
-      amountBase: this.AMOUNT_IN_WETH,
-      baseDecimals,
-      quoteDecimals,
-      candidateFees: [3000],
-    });
-
-    const sellOnUni = await uni.getSellQuote({
-      chainId: 42161,
-      base,
-      quote,
-      amountBase: this.AMOUNT_IN_WETH,
-      baseDecimals,
-      quoteDecimals,
-      candidateFees: [3000],
-    });
-
-    const buyOnSushi = await sushi.getBuyQuote({
-      chainId: 42161,
-      base,
-      quote,
-      amountBase: this.AMOUNT_IN_WETH,
-      baseDecimals,
-      quoteDecimals,
-    });
-
-    const sellOnSushi = await sushi.getSellQuote({
-      chainId: 42161,
-      base,
-      quote,
-      amountBase: this.AMOUNT_IN_WETH,
-      baseDecimals,
-      quoteDecimals,
-    });
-
-    console.log({ buyOnUni, sellOnUni, buyOnSushi, sellOnSushi });
+    return swapList;
   }
 }
