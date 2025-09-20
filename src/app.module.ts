@@ -11,6 +11,9 @@ import { Markets } from './db/entities/Markets';
 import { ArbEvals } from './db/entities/ArbEvals';
 import { Quotes } from './db/entities/Quotes';
 import { DexQuoteModule } from './dex-quote/dex-quote.module';
+import { TokensService } from './db/services/tokens/tokens.service';
+import { DexPools } from './db/entities/DexPools';
+import { DexesService } from './db/services/dexes/dexes.service';
 
 @Module({
   imports: [
@@ -35,13 +38,22 @@ import { DexQuoteModule } from './dex-quote/dex-quote.module';
         // logging: ['error'], // при необходимости
       }),
     }),
-    TypeOrmModule.forFeature([Dexes, Tokens, Markets, ArbEvals, Quotes]),
+    TypeOrmModule.forFeature([
+      Dexes,
+      Tokens,
+      Markets,
+      ArbEvals,
+      Quotes,
+      DexPools,
+    ]),
     DexQuoteModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     Runner,
+    TokensService,
+    DexesService,
   ],
 })
 export class AppModule {}

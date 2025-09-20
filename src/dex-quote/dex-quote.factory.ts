@@ -7,18 +7,26 @@ import { SushiV2QuoteProvider } from './sushiv2-quote.provider';
 @Injectable()
 export class DexQuoteFactory {
   create(opts: {
-    dex: 'UniswapV3' | 'SushiV2';
+    dex: string;
     rpcUrl: string;
     chainId: number;
     quoterAddr?: string;
     factoryAddr?: string;
     routerAddr?: string;
   }): DexQuoteProvider {
-    const provider = new ethers.JsonRpcProvider(opts.rpcUrl, { chainId: opts.chainId, name: 'evm' });
+    const provider = new ethers.JsonRpcProvider(opts.rpcUrl, {
+      chainId: opts.chainId,
+      name: 'evm',
+    });
 
     if (opts.dex === 'UniswapV3') {
-      if (!opts.quoterAddr || !opts.factoryAddr) throw new Error('UniswapV3 requires quoterAddr & factoryAddr');
-      return new UniswapV3QuoteProvider(provider, opts.quoterAddr, opts.factoryAddr);
+      if (!opts.quoterAddr || !opts.factoryAddr)
+        throw new Error('UniswapV3 requires quoterAddr & factoryAddr');
+      return new UniswapV3QuoteProvider(
+        provider,
+        opts.quoterAddr,
+        opts.factoryAddr,
+      );
     }
 
     if (opts.dex === 'SushiV2') {

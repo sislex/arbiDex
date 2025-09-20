@@ -1,26 +1,111 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DexFactoryService } from './dex-quote/dex-factory.service';
+import { DexesService } from './db/services/dexes/dexes.service';
+import { DexQuoteProvider } from './dex-quote/dex-quote.provider';
+import { Dexes } from './db/entities/Dexes';
+
+export class DexSwapModel {
+  readonly poolId: string;
+  readonly dexId: string;
+  readonly dexName: string;
+  readonly dexQuoteProvider: DexQuoteProvider;
+  readonly baseTokenAddress: string;
+  readonly quoteTokenAddress: string;
+  readonly baseDecimals: number;
+  readonly quoteDecimals: number;
+  readonly amountInWeth: string;
+
+  constructor(config: {
+    poolId: string;
+    dexId: string;
+    dexName: string;
+    dexQuoteProvider: DexQuoteProvider;
+    baseTokenAddress: string;
+    quoteTokenAddress: string;
+    baseDecimals: number;
+    quoteDecimals: number;
+    amountInWeth: string;
+  }) {
+    this.poolId = config.poolId;
+    this.dexId = config.dexId;
+    this.dexName = config.dexName;
+    this.dexQuoteProvider = config.dexQuoteProvider;
+    this.baseTokenAddress = config.baseTokenAddress;
+    this.quoteTokenAddress = config.quoteTokenAddress;
+    this.baseDecimals = config.baseDecimals;
+    this.quoteDecimals = config.quoteDecimals;
+    this.amountInWeth = config.amountInWeth;
+  }
+}
 
 @Injectable()
 export class Runner {
   private readonly logger = new Logger(Runner.name);
 
-  private readonly amountInWETH: string;
+  private readonly RPC_URL: string;
+  private readonly AMOUNT_IN_WETH: string;
+
+  private swapList: DexSwapModel[];
 
   constructor(
     private cfg: ConfigService,
     private readonly dexFactory: DexFactoryService,
+    private readonly dexesService: DexesService,
   ) {
-    this.amountInWETH = this.cfg.get<string>('AMOUNT_IN_WETH') ?? '0.05';
+    this.RPC_URL = this.cfg.get<string>('RPC_URL') ?? '';
+    this.AMOUNT_IN_WETH = this.cfg.get<string>('AMOUNT_IN_WETH') ?? '0.05';
 
-    void this.demo();
+    void this.setDexSwapModelList();
+  }
+
+  async setDexSwapModelList() {
+    const swapList: DexSwapModel[] = [];
+    const baseDecimals = 18;
+    const quoteDecimals = 6;
+    const dexes = await this.dexesService.getAllWithExistPools();
+    dexes.forEach((dex: Dexes) => {
+      const dexId = dex.dexId;
+      const dexName = dex.name;
+      let dexQuoteProvider: DexQuoteProvider;
+      if (dex.name === 'UniswapV3') {
+        dexQuoteProvider = this.dexFactory.create({
+          dex: dex.name,
+          rpcUrl: this.RPC_URL,
+          chainId: 42161,
+          quoterAddr: dex.quoterAddr as string,
+          factoryAddr: dex.factoryAddr as string,
+        });
+      } else if (dex.name === 'SushiV2') {
+        console.log('SushiV2 not implemented yet');
+      }
+
+      dex.dexPools.forEach((dexPool) => {
+        const config = {
+          poolId: dexPool.poolId,
+          dexId,
+          dexName,
+          dexQuoteProvider,
+          baseTokenAddress: dexPool.market.baseToken.address,
+          quoteTokenAddress: dexPool.market.quoteToken.address,
+          baseDecimals,
+          quoteDecimals,
+          amountInWeth: this.AMOUNT_IN_WETH,
+        };
+
+        console.log(config);
+
+        swapList.push(new DexSwapModel(config));
+      });
+    });
+    this.swapList = swapList;
+    console.log(swapList);
   }
 
   async demo() {
     const uni = this.dexFactory.create({
       dex: 'UniswapV3',
-      rpcUrl: 'https://arb1.arbitrum.io/rpc',
+      rpcUrl: this.RPC_URL,
       chainId: 42161,
       quoterAddr: '0x61fFE014bA17989E743c5F6cB21bF9697530B21e',
       factoryAddr: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
@@ -28,7 +113,7 @@ export class Runner {
 
     const sushi = this.dexFactory.create({
       dex: 'SushiV2',
-      rpcUrl: 'https://arb1.arbitrum.io/rpc',
+      rpcUrl: this.RPC_URL,
       chainId: 42161,
       routerAddr: '0x1b02da8cb0d097eb8d57a175b88c7d8b47997506',
     });
@@ -42,7 +127,7 @@ export class Runner {
       chainId: 42161,
       base,
       quote,
-      amountBase: this.amountInWETH,
+      amountBase: this.AMOUNT_IN_WETH,
       baseDecimals,
       quoteDecimals,
       candidateFees: [3000],
@@ -52,7 +137,7 @@ export class Runner {
       chainId: 42161,
       base,
       quote,
-      amountBase: this.amountInWETH,
+      amountBase: this.AMOUNT_IN_WETH,
       baseDecimals,
       quoteDecimals,
       candidateFees: [3000],
@@ -62,7 +147,7 @@ export class Runner {
       chainId: 42161,
       base,
       quote,
-      amountBase: this.amountInWETH,
+      amountBase: this.AMOUNT_IN_WETH,
       baseDecimals,
       quoteDecimals,
     });
@@ -71,7 +156,7 @@ export class Runner {
       chainId: 42161,
       base,
       quote,
-      amountBase: this.amountInWETH,
+      amountBase: this.AMOUNT_IN_WETH,
       baseDecimals,
       quoteDecimals,
     });
