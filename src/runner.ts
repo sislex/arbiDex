@@ -77,8 +77,6 @@ export class Runner {
           this.REQUEST_TIMEOUT_MS,
         );
 
-        // обработка результата
-        this.logger.warn('11111111111111111111111111111111111111111111111111111111111111111111');
         // this.logger.warn(buy);
         // this.logger.log(sell);
 
@@ -109,12 +107,12 @@ export class Runner {
           // error?: string | null;
         };
         const quote = await this.mapAndSaveQuote(swap, sellResult, 'EXACT_IN');
-        console.log(quote.id);
+        console.log(quote.id, quote.marketId);
 
 
         // сразу идём на следующий круг (без общей задержки)
         // при желании можно добавить микропаузу, чтобы не «забивать» RPC:
-        await sleep(5000);
+        await sleep(2500);
       } catch (err: any) {
         this.logger.warn(
           `[${index}] ${swap.dexName} pool=${swap.poolId} error: ${err?.message ?? err}`,
