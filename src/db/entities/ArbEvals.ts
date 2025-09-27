@@ -1,70 +1,54 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from "typeorm";
-import { Dexes } from "./Dexes";
-import { Markets } from "./Markets";
+import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
 
 @Index("arb_evals_pkey", ["id"], { unique: true })
-@Index("arb_mkt_ts_idx", ["marketId", "ts"], {})
-@Index("arb_evals_snapshot_id_key", ["snapshotId"], { unique: true })
-@Index("arb_ts_idx", ["ts"], {})
 @Entity("arb_evals", { schema: "public" })
 export class ArbEvals {
   @PrimaryGeneratedColumn({ type: "bigint", name: "id" })
   id: string;
 
-  @Column("uuid", { name: "snapshot_id", unique: true })
-  snapshotId: string;
+  @Column("bigint", { name: "quote_id" })
+  quoteId: string;
 
-  @Column("timestamp with time zone", { name: "ts" })
-  ts: Date;
+  @Column("numeric", { name: "best_buy", precision: 38, scale: 0 })
+  bestBuy: string;
 
-  @Column("integer", { name: "chain_id" })
-  chainId: number;
+  @Column("numeric", { name: "best_sell", precision: 38, scale: 0 })
+  bestSell: string;
 
-  @Column("bigint", { name: "market_id" })
-  marketId: string;
+  @Column("bigint", { name: "dex_id_buy" })
+  dexIdBuy: string;
 
-  @Column("text", { name: "direction" })
-  direction: string;
-
-  @Column("boolean", { name: "should_trade" })
-  shouldTrade: boolean;
+  @Column("bigint", { name: "dex_id_sell" })
+  dexIdSell: string;
 
   @Column("numeric", { name: "gross_quote", precision: 38, scale: 0 })
   grossQuote: string;
 
-  @Column("numeric", { name: "net_quote", precision: 38, scale: 0 })
-  netQuote: string;
+  @Column("numeric", { name: "gas_cost", precision: 38, scale: 0 })
+  gasCost: string;
 
-  @Column("numeric", { name: "gas_quote", precision: 38, scale: 0 })
-  gasQuote: string;
+  @Column("numeric", { name: "net_profit", precision: 38, scale: 0 })
+  netProfit: string;
 
-  @Column("numeric", { name: "min_profit_quote", precision: 38, scale: 0 })
-  minProfitQuote: string;
-
-  @Column("integer", { name: "gross_bps" })
-  grossBps: number;
-
-  @Column("integer", { name: "net_bps" })
-  netBps: number;
-
-  @ManyToOne(() => Dexes, (dexes) => dexes.arbEvals, { onDelete: "RESTRICT" })
-  @JoinColumn([{ name: "dex_buy_id", referencedColumnName: "dexId" }])
-  dexBuy: Dexes;
-
-  @ManyToOne(() => Dexes, (dexes) => dexes.arbEvals2, { onDelete: "RESTRICT" })
-  @JoinColumn([{ name: "dex_sell_id", referencedColumnName: "dexId" }])
-  dexSell: Dexes;
-
-  @ManyToOne(() => Markets, (markets) => markets.arbEvals, {
-    onDelete: "RESTRICT",
+  @Column("numeric", {
+    name: "spread_pct",
+    nullable: true,
+    precision: 12,
+    scale: 6,
   })
-  @JoinColumn([{ name: "market_id", referencedColumnName: "marketId" }])
-  market: Markets;
+  spreadPct: string | null;
+
+  @Column("boolean", {
+    name: "should_trade",
+    nullable: true,
+    default: () => "false",
+  })
+  shouldTrade: boolean | null;
+
+  @Column("timestamp with time zone", {
+    name: "created_ts",
+    nullable: true,
+    default: () => "now()",
+  })
+  createdTs: Date | null;
 }

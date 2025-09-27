@@ -7,7 +7,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { ArbEvals } from "./ArbEvals";
 import { DexPools } from "./DexPools";
 import { Tokens } from "./Tokens";
 import { Quotes } from "./Quotes";
@@ -31,9 +30,6 @@ export class Markets {
 
   @Column("bigint", { name: "quote_token_id", unique: true })
   quoteTokenId: string;
-
-  @OneToMany(() => ArbEvals, (arbEvals) => arbEvals.market)
-  arbEvals: ArbEvals[];
 
   @OneToMany(() => DexPools, (dexPools) => dexPools.market)
   dexPools: DexPools[];

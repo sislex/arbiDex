@@ -5,7 +5,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { ArbEvals } from "./ArbEvals";
 import { DexPools } from "./DexPools";
 import { Quotes } from "./Quotes";
 
@@ -39,12 +38,6 @@ export class Dexes {
 
   @Column("text", { name: "factory_addr", nullable: true })
   factoryAddr: string | null;
-
-  @OneToMany(() => ArbEvals, (arbEvals) => arbEvals.dexBuy)
-  arbEvals: ArbEvals[];
-
-  @OneToMany(() => ArbEvals, (arbEvals) => arbEvals.dexSell)
-  arbEvals2: ArbEvals[];
 
   @OneToMany(() => DexPools, (dexPools) => dexPools.dex)
   dexPools: DexPools[];

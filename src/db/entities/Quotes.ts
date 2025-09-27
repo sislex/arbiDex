@@ -13,6 +13,11 @@ import { Markets } from "./Markets";
   unique: true,
 })
 @Index("quotes_dex_ts_idx", ["dexId", "ts"], {})
+@Index(
+  "quotes_market_dex_side_kind_ts_idx",
+  ["dexId", "kind", "marketId", "side", "ts"],
+  {}
+)
 @Index("quotes_pkey", ["id"], { unique: true })
 @Index("quotes_mkt_ts_idx", ["marketId", "ts"], {})
 @Index("quotes_ok_idx", ["ok"], {})
