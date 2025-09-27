@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Quotes } from '../../entities/Quotes';
+import { util } from 'prettier';
 
 type Side = 'BUY_BASE' | 'SELL_BASE';
 type Kind = 'EXACT_IN' | 'EXACT_OUT';
@@ -50,20 +51,34 @@ export class QuotesService {
     return this.repo.save(row);
   }
 
-  async getLastQuotesByMarketId(marketId: string): Promise<Quotes[]> {
-    return this.repo.query(
-      `
-    SELECT DISTINCT ON (dex_id, side, kind) *
-    FROM quotes
-    WHERE market_id = $1
-      AND ok = true
-      AND (
-           (side = 'SELL_BASE' AND kind = 'EXACT_IN')
-        OR (side = 'BUY_BASE'  AND kind = 'EXACT_OUT')
-      )
-    ORDER BY dex_id, side, kind, ts DESC
-  `,
-      [marketId],
-    );
+  async getLastQuotesByMarketId(marketId: string) {
+    return this.repo
+      .createQueryBuilder('q')
+      .select([
+        'q.id AS id',
+        'q.snapshot_id AS "snapshotId"',
+        'q.ts AS ts',
+        'q.chain_id AS "chainId"',
+        'q.dex_id AS "dexId"',
+        'q.market_id AS "marketId"',
+        'q.side AS side',
+        'q.kind AS kind',
+        'q.fee_tier AS "feeTier"',
+        'q.amount_base AS "amountBase"',
+        'q.amount_quote AS "amountQuote"',
+        'q.ok AS ok',
+        'q.error_message AS "errorMessage"',
+        'q.latency_ms AS "latencyMs"',
+        'q.gas_quote AS "gasQuote"',
+        'q.block_number AS "blockNumber"',
+      ])
+      .where('q.market_id = :marketId', { marketId })
+      .andWhere('q.ok = true')
+      .distinctOn(['q.dex_id', 'q.side', 'q.kind'])
+      .orderBy('q.dex_id')
+      .addOrderBy('q.side')
+      .addOrderBy('q.kind')
+      .addOrderBy('q.ts', 'DESC')
+      .getRawMany<Quotes>();
   }
 }

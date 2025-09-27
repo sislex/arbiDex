@@ -78,8 +78,9 @@ export class Runner {
         );
 
         // обработка результата
-        this.logger.warn(buy);
-        this.logger.log(sell);
+        this.logger.warn('11111111111111111111111111111111111111111111111111111111111111111111');
+        // this.logger.warn(buy);
+        // this.logger.log(sell);
 
         // тут можно записывать в БД/шину/очередь и т.д.
 
@@ -107,7 +108,8 @@ export class Runner {
           latencyMs: sell.latencyMs,
           // error?: string | null;
         };
-        await this.mapAndSaveQuote(swap, sellResult, 'EXACT_IN');
+        const quote = await this.mapAndSaveQuote(swap, sellResult, 'EXACT_IN');
+        console.log(quote.id);
 
 
         // сразу идём на следующий круг (без общей задержки)

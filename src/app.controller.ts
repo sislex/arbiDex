@@ -1,5 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Header, Param } from '@nestjs/common';
 import { TokensService } from './db/services/tokens/tokens.service';
 import { Tokens } from './db/entities/Tokens';
 import { Dexes } from './db/entities/Dexes';
@@ -7,24 +6,13 @@ import { DexesService } from './db/services/dexes/dexes.service';
 import { QuotesService } from './db/services/quotes/quotes.service';
 import { Quotes } from './db/entities/Quotes';
 
-@Controller()
+@Controller('api')
 export class AppController {
   constructor(
-    private readonly appService: AppService,
     private readonly tokensService: TokensService,
     private readonly dexesService: DexesService,
     private readonly quotesService: QuotesService,
   ) {}
-
-  @Get()
-  start(): string {
-    return this.appService.getHello();
-  }
-
-  @Get('endpoints')
-  endpoints(): string {
-    return this.appService.getHello();
-  }
 
   @Get('getAllTokens')
   async getAllTokens(): Promise<Tokens[]> {
@@ -44,10 +32,5 @@ export class AppController {
   @Get('getAllWithExistPools')
   async getAllWithExistPools(): Promise<Dexes[]> {
     return this.dexesService.getAllWithExistPools();
-  }
-
-  @Get('getLastQuotesByMarketId')
-  async getLastQuotesByMarketId(): Promise<Quotes[]> {
-    return await this.quotesService.getLastQuotesByMarketId('1');
   }
 }

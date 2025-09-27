@@ -15,6 +15,8 @@ import { TokensService } from './db/services/tokens/tokens.service';
 import { DexPools } from './db/entities/DexPools';
 import { DexesService } from './db/services/dexes/dexes.service';
 import { QuotesService } from './db/services/quotes/quotes.service';
+import { DiscoveryModule } from './modules/discovery/discovery.module';
+import { QuotesModule } from './modules/quotes/quotes.module';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { QuotesService } from './db/services/quotes/quotes.service';
       DexPools,
     ]),
     DexQuoteModule,
+    DiscoveryModule,
+    QuotesModule,
   ],
   controllers: [AppController],
   providers: [AppService, Runner, TokensService, DexesService, QuotesService],
