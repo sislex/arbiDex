@@ -21,13 +21,17 @@ export class SushiV2QuoteProvider implements DexQuoteProvider {
 
   async getSellQuote(input: QuoteInput): Promise<QuoteResult> {
     const { base, quote, amountBase, baseDecimals } = input;
-    const amountIn = ethers.parseUnits(amountBase, baseDecimals);
+    const amountIn = BigInt(amountBase);
 
     try {
+      const start = Date.now();
       const [, out] = await this.router().getAmountsOut(amountIn, [
         base,
         quote,
       ]);
+      const latencyMs = Date.now() - start;
+      const blockNumber = await this.provider.getBlockNumber();
+
       return {
         ok: true,
         dex: this.name,
@@ -35,8 +39,11 @@ export class SushiV2QuoteProvider implements DexQuoteProvider {
         feeTier: 3000,
         amountBaseAtomic: amountIn,
         amountQuoteAtomic: out as bigint,
+        blockNumber,
+        latencyMs,
       };
     } catch (e: any) {
+      const blockNumber = await this.provider.getBlockNumber();
       return {
         ok: false,
         dex: this.name,
@@ -44,18 +51,26 @@ export class SushiV2QuoteProvider implements DexQuoteProvider {
         amountBaseAtomic: amountIn,
         amountQuoteAtomic: 0n,
         err: e?.message ?? 'ROUTER_REVERT',
+        blockNumber,
       };
     }
   }
 
   async getBuyQuote(input: QuoteInput): Promise<QuoteResult> {
     const { base, quote, amountBase, baseDecimals } = input;
-    const outBase = ethers.parseUnits(amountBase, baseDecimals);
+    const outBase = BigInt(amountBase);
     try {
+      const start = Date.now();
+
       const [inQuote] = await this.router().getAmountsIn(outBase, [
         quote,
         base,
       ]);
+
+      const latencyMs = Date.now() - start;
+
+      const blockNumber = await this.provider.getBlockNumber();
+
       return {
         ok: true,
         dex: this.name,
@@ -63,8 +78,11 @@ export class SushiV2QuoteProvider implements DexQuoteProvider {
         feeTier: 3000,
         amountBaseAtomic: outBase,
         amountQuoteAtomic: inQuote as bigint,
+        blockNumber,
+        latencyMs,
       };
     } catch (e: any) {
+      const blockNumber = await this.provider.getBlockNumber();
       return {
         ok: false,
         dex: this.name,
@@ -72,6 +90,7 @@ export class SushiV2QuoteProvider implements DexQuoteProvider {
         amountBaseAtomic: outBase,
         amountQuoteAtomic: 0n,
         err: e?.message ?? 'ROUTER_REVERT',
+        blockNumber,
       };
     }
   }

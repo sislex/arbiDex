@@ -4,70 +4,24 @@ import { DexFactoryService } from './dex-quote/dex-factory.service';
 import { DexesService } from './db/services/dexes/dexes.service';
 import { DexQuoteProvider } from './dex-quote/dex-quote.provider';
 import { Dexes } from './db/entities/Dexes';
+import { FeeTier } from './dex-quote/types';
+import { QuotesService } from './db/services/quotes/quotes.service';
+import { DexSwapModel } from './models/dexSwap.model';
 
-export class DexSwapModel {
-  readonly poolId: string;
-  readonly dexId: string;
-  readonly dexName: string;
-  readonly dexQuoteProvider: DexQuoteProvider;
-  readonly feeTier: number;
-  readonly baseTokenAddress: string;
-  readonly quoteTokenAddress: string;
-  readonly baseDecimals: number;
-  readonly quoteDecimals: number;
-  readonly amountInBase: string;
+type QuoteResult = {
+  ok: boolean;
+  dex: 'SushiV2' | 'UniswapV3';
+  side: 'BUY_BASE' | 'SELL_BASE';
+  feeTier?: number;
+  amountBaseAtomic: bigint;
+  amountQuoteAtomic: bigint;
+  latencyMs?: number;
+  blockNumber?: number;
+  error?: string | null;
+};
 
-  constructor(config: {
-    poolId: string;
-    dexId: string;
-    dexName: string;
-    dexQuoteProvider: DexQuoteProvider;
-    feeTier: number;
-    baseTokenAddress: string;
-    quoteTokenAddress: string;
-    baseDecimals: number;
-    quoteDecimals: number;
-    amountInBase: string;
-  }) {
-    this.poolId = config.poolId;
-    this.dexId = config.dexId;
-    this.dexName = config.dexName;
-    this.dexQuoteProvider = config.dexQuoteProvider;
-    this.feeTier = config.feeTier;
-    this.baseTokenAddress = config.baseTokenAddress;
-    this.quoteTokenAddress = config.quoteTokenAddress;
-    this.baseDecimals = config.baseDecimals;
-    this.quoteDecimals = config.quoteDecimals;
-    this.amountInBase = config.amountInBase;
-  }
-
-  getQuotes() {
-    return Promise.all([this.getBuyQuote(), this.getSellQuote()]);
-  }
-
-  getBuyQuote() {
-    return this.dexQuoteProvider.getBuyQuote({
-      chainId: 42161,
-      base: this.baseTokenAddress,
-      quote: this.quoteTokenAddress,
-      amountBase: this.amountInBase,
-      baseDecimals: this.baseDecimals,
-      quoteDecimals: this.quoteDecimals,
-      candidateFees: [3000],
-    });
-  }
-
-  getSellQuote() {
-    return this.dexQuoteProvider.getSellQuote({
-      chainId: 42161,
-      base: this.baseTokenAddress,
-      quote: this.quoteTokenAddress,
-      amountBase: this.amountInBase,
-      baseDecimals: this.baseDecimals,
-      quoteDecimals: this.quoteDecimals,
-      candidateFees: [3000],
-    });
-  }
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 @Injectable()
@@ -79,10 +33,14 @@ export class Runner {
 
   private swapList: DexSwapModel[];
 
+  private running = true;
+  private readonly REQUEST_TIMEOUT_MS = 10_000; // таймаут одного опроса
+
   constructor(
     private cfg: ConfigService,
     private readonly dexFactory: DexFactoryService,
     private readonly dexesService: DexesService,
+    private readonly quotesService: QuotesService,
   ) {
     this.RPC_URL = this.cfg.get<string>('RPC_URL') ?? '';
     this.AMOUNT_IN_WETH = this.cfg.get<string>('AMOUNT_IN_WETH') ?? '0.05';
@@ -94,8 +52,99 @@ export class Runner {
   async init() {
     this.swapList = await this.setDexSwapModelList();
     console.log(this.swapList);
-    const quotes = await this.swapList[1].getQuotes();
-    console.log(quotes);
+
+    // Запускаем независимый цикл на каждый swap
+    for (let i = 0; i < this.swapList.length; i++) {
+      const swap = this.swapList[i];
+      void this.spawnPoller(swap, i);
+    }
+  }
+
+  private async spawnPoller(swap: DexSwapModel, index: number) {
+    const withTimeout = <T>(p: Promise<T>, ms: number) =>
+      Promise.race<T>([
+        p,
+        new Promise<T>((_, rej) =>
+          setTimeout(() => rej(new Error('REQUEST_TIMEOUT')), ms),
+        ),
+      ]);
+
+    while (this.running) {
+      try {
+        // основной опрос (два котирования внутри уже параллелятся в getQuotes)
+        const [buy, sell] = await withTimeout(
+          swap.getQuotes(),
+          this.REQUEST_TIMEOUT_MS,
+        );
+
+        // обработка результата
+        this.logger.warn(buy);
+        this.logger.log(sell);
+
+        // тут можно записывать в БД/шину/очередь и т.д.
+
+        const buyResult: QuoteResult = {
+          ok: true,
+          dex: buy.dex as 'SushiV2' | 'UniswapV3',
+          side: buy.side,
+          feeTier: buy.feeTier as FeeTier,
+          amountBaseAtomic: buy.amountBaseAtomic,
+          amountQuoteAtomic: buy.amountQuoteAtomic,
+          blockNumber: buy.blockNumber,
+          latencyMs: buy.latencyMs,
+          // error?: string | null;
+        };
+        await this.mapAndSaveQuote(swap, buyResult, 'EXACT_OUT');
+
+        const sellResult: QuoteResult = {
+          ok: true,
+          dex: sell.dex as 'SushiV2' | 'UniswapV3',
+          side: sell.side,
+          feeTier: sell.feeTier as FeeTier,
+          amountBaseAtomic: sell.amountBaseAtomic,
+          amountQuoteAtomic: sell.amountQuoteAtomic,
+          blockNumber: sell.blockNumber,
+          latencyMs: sell.latencyMs,
+          // error?: string | null;
+        };
+        await this.mapAndSaveQuote(swap, sellResult, 'EXACT_IN');
+
+
+        // сразу идём на следующий круг (без общей задержки)
+        // при желании можно добавить микропаузу, чтобы не «забивать» RPC:
+        await sleep(5000);
+      } catch (err: any) {
+        this.logger.warn(
+          `[${index}] ${swap.dexName} pool=${swap.poolId} error: ${err?.message ?? err}`,
+        );
+      }
+    }
+
+    this.logger.log(`[${index}] ${swap.dexName} poller stopped`);
+  }
+
+  private mapAndSaveQuote(
+    swap: DexSwapModel,
+    res: QuoteResult,
+    kind: 'EXACT_IN' | 'EXACT_OUT',
+  ) {
+    const config = {
+      chainId: 42161,
+      dexId: swap.dexId,
+      marketId: swap.marketId,
+      side: res.side,
+      kind,
+      feeTier: res.feeTier ?? null,
+      amountBaseAtomic: res.amountBaseAtomic,
+      amountQuoteAtomic: res.amountQuoteAtomic,
+      ok: res.ok,
+      errorMessage: res.ok ? null : (res.error ?? null),
+      latencyMs: res.latencyMs ?? null,
+      gasQuoteAtomic: null, // если посчитаешь газ — подставь сюда
+      blockNumber: res.blockNumber ?? null,
+    };
+
+    return this.quotesService.save(config);
   }
 
   async setDexSwapModelList(): Promise<DexSwapModel[]> {
@@ -103,7 +152,6 @@ export class Runner {
     const baseDecimals = 18;
     const quoteDecimals = 6;
     const dexes = await this.dexesService.getAllWithExistPools();
-    console.log(dexes);
     dexes.forEach((dex: Dexes) => {
       const dexId = dex.dexId;
       const dexName = dex.name;
@@ -128,18 +176,17 @@ export class Runner {
       dex.dexPools.forEach((dexPool) => {
         const config = {
           poolId: dexPool.poolId,
+          marketId: dexPool.marketId,
           dexId,
           dexName,
           dexQuoteProvider,
-          feeTier: dexPool.feeTier as number,
+          feeTier: dexPool.feeTier as FeeTier,
           baseTokenAddress: dexPool.market.baseToken.address,
           quoteTokenAddress: dexPool.market.quoteToken.address,
           baseDecimals,
           quoteDecimals,
-          amountInBase: this.AMOUNT_IN_WETH,
+          amountInBase: dexPool.amountBase as string,
         };
-
-        console.log(config);
 
         swapList.push(new DexSwapModel(config));
       });

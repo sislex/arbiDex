@@ -49,13 +49,14 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
       candidateFees = FEES_DEFAULT,
     } = input;
 
-    const amountIn = ethers.parseUnits(amountBase, baseDecimals);
+    const amountIn = BigInt(amountBase);
 
     const factory = this.factory();
     const quoter = this.quoter();
 
     let best: { fee: FeeTier; out: bigint } | null = null;
 
+    const start = Date.now();
     for (const fee of candidateFees) {
       const pool = await factory.getPool(base, quote, fee);
       if (pool === ethers.ZeroAddress) continue;
@@ -66,6 +67,9 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           best = { fee, out: amountOut };
       } catch {}
     }
+    const latencyMs = Date.now() - start;
+
+    const blockNumber = await this.provider.getBlockNumber();
 
     return best
       ? {
@@ -75,6 +79,8 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           feeTier: best.fee,
           amountBaseAtomic: amountIn,
           amountQuoteAtomic: best.out,
+          blockNumber,
+          latencyMs,
         }
       : {
           ok: false,
@@ -83,6 +89,7 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           amountBaseAtomic: amountIn,
           amountQuoteAtomic: 0n,
           err: 'NO_POOL_OR_REVERT',
+          blockNumber,
         };
   }
 
@@ -94,13 +101,14 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
       baseDecimals,
       candidateFees = FEES_DEFAULT,
     } = input;
-    const amountOutBase = ethers.parseUnits(amountBase, baseDecimals);
+    const amountOutBase = BigInt(amountBase);
 
     const factory = this.factory();
     const quoter = this.quoter();
 
     let best: { fee: FeeTier; in: bigint } | null = null;
 
+    const start = Date.now();
     for (const fee of candidateFees) {
       const pool = await factory.getPool(quote, base, fee);
       if (pool === ethers.ZeroAddress) continue;
@@ -114,6 +122,9 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           best = { fee, in: amountInQuote };
       } catch {}
     }
+    const latencyMs = Date.now() - start;
+
+    const blockNumber = await this.provider.getBlockNumber();
 
     return best
       ? {
@@ -123,6 +134,8 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           feeTier: best.fee,
           amountBaseAtomic: amountOutBase,
           amountQuoteAtomic: best.in,
+          blockNumber,
+          latencyMs,
         }
       : {
           ok: false,
@@ -131,6 +144,7 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           amountBaseAtomic: amountOutBase,
           amountQuoteAtomic: 0n,
           err: 'NO_POOL_OR_REVERT',
+          blockNumber,
         };
   }
 }

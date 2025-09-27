@@ -1,0 +1,69 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Quotes } from '../../entities/Quotes';
+
+type Side = 'BUY_BASE' | 'SELL_BASE';
+type Kind = 'EXACT_IN' | 'EXACT_OUT';
+
+export interface SaveQuoteInput {
+  chainId: number; // 42161
+  dexId: string; // из DexSwapModel
+  marketId: string; // из DexSwapModel
+  side: Side; // BUY_BASE | SELL_BASE
+  kind: Kind; // если котируем по amountIn — EXACT_IN
+  feeTier?: number | null; // для V3
+  amountBaseAtomic: bigint; // как пришло из кворера
+  amountQuoteAtomic: bigint; // как пришло из кворера
+  ok: boolean; // true/false
+  errorMessage?: string | null; // текст ошибки, если ok=false
+  latencyMs?: number | null; // измерь вокруг вызова
+  gasQuoteAtomic?: bigint | null; // если считаешь газ в quote-деноминации
+  blockNumber?: number | null; // если доступен
+}
+
+@Injectable()
+export class QuotesService {
+  constructor(
+    @InjectRepository(Quotes)
+    private readonly repo: Repository<Quotes>,
+  ) {}
+
+  async save(input: SaveQuoteInput) {
+    const row = this.repo.create({
+      chainId: input.chainId,
+      dexId: input.dexId,
+      marketId: input.marketId,
+      side: input.side,
+      kind: input.kind,
+      feeTier: input.feeTier ?? null,
+      amountBase: input.amountBaseAtomic.toString(),
+      amountQuote: input.amountQuoteAtomic.toString(),
+      ok: input.ok,
+      errorMessage: input.errorMessage ?? null,
+      latencyMs: input.latencyMs ?? null,
+      gasQuote: input.gasQuoteAtomic ? input.gasQuoteAtomic.toString() : null,
+      blockNumber: input.blockNumber ? input.blockNumber.toString() : null,
+      // ts и snapshot_id проставятся дефолтами БД
+    });
+
+    return this.repo.save(row);
+  }
+
+  async getLastQuotesByMarketId(marketId: string): Promise<Quotes[]> {
+    return this.repo.query(
+      `
+    SELECT DISTINCT ON (dex_id, side, kind) *
+    FROM quotes
+    WHERE market_id = $1
+      AND ok = true
+      AND (
+           (side = 'SELL_BASE' AND kind = 'EXACT_IN')
+        OR (side = 'BUY_BASE'  AND kind = 'EXACT_OUT')
+      )
+    ORDER BY dex_id, side, kind, ts DESC
+  `,
+      [marketId],
+    );
+  }
+}

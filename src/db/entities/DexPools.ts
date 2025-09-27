@@ -74,6 +74,13 @@ export class DexPools {
   })
   tvlUsd: string | null;
 
+  @Column("numeric", {
+    name: "amount_base",
+    nullable: true,
+    default: () => "0",
+  })
+  amountBase: string | null;
+
   @ManyToOne(() => Dexes, (dexes) => dexes.dexPools, { onDelete: "CASCADE" })
   @JoinColumn([{ name: "dex_id", referencedColumnName: "dexId" }])
   dex: Dexes;

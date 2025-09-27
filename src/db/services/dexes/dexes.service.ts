@@ -40,13 +40,12 @@ export class DexesService {
   async getAllWithExistPools(): Promise<Dexes[]> {
     return this.dexesRepo
       .createQueryBuilder('dex')
-      .innerJoin('dex.dexPools', 'dp') // оставит только dex с хотя бы одним пулом
-      .leftJoinAndSelect('dex.dexPools', 'dexPools')
+      .innerJoin('dex.dexPools', 'dp', 'dp.isActive = true') // ← фильтр сразу при join
+      .leftJoinAndSelect('dex.dexPools', 'dexPools', 'dexPools.isActive = true') // ← подгружаем только активные
       .leftJoinAndSelect('dexPools.market', 'market')
       .leftJoinAndSelect('market.baseToken', 'baseToken')
       .leftJoinAndSelect('market.quoteToken', 'quoteToken')
-      .distinct(true) // во избежание дублей dex при множестве пулов
+      .distinct(true)
       .getMany();
-
   }
 }

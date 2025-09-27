@@ -20,6 +20,8 @@ export interface QuoteResult {
   amountBaseAtomic: bigint; // в минималках BASE
   amountQuoteAtomic: bigint; // в минималках QUOTE
   err?: string;
+  blockNumber: number;
+  latencyMs?: number;
 }
 
 export type CreateUniOpts = {
