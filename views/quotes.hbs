@@ -37,7 +37,7 @@
   </tr>
   </thead>
   <tbody>
-  {{#each rows}}
+  {{#each quotes}}
     <tr>
       <td>{{id}}</td>
       <td>{{ts}}</td>
@@ -55,5 +55,39 @@
   {{/each}}
   </tbody>
 </table>
+
+<!-- Таблица ArbEvals -->
+<h2>Arbitrage Evaluation</h2>
+<table>
+  <thead>
+  <tr>
+    <th>Quote ID</th>
+    <th>Best Buy</th>
+    <th>Best Sell</th>
+    <th>DEX Buy</th>
+    <th>DEX Sell</th>
+    <th>Gross Quote</th>
+    <th>Gas Cost</th>
+    <th>Net Profit</th>
+    <th>Spread %</th>
+    <th>Should Trade</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>{{arbEvals.quoteId}}</td>
+    <td>{{arbEvals.bestBuy}}</td>
+    <td>{{arbEvals.bestSell}}</td>
+    <td>{{arbEvals.dexIdBuy}}</td>
+    <td>{{arbEvals.dexIdSell}}</td>
+    <td>{{arbEvals.grossQuote}}</td>
+    <td>{{arbEvals.gasCost}}</td>
+    <td>{{arbEvals.netProfit}}</td>
+    <td>{{arbEvals.spreadPct}}</td>
+    <td>{{arbEvals.shouldTrade}}</td>
+  </tr>
+  </tbody>
+</table>
+
 </body>
 </html>

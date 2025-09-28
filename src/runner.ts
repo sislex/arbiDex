@@ -7,6 +7,7 @@ import { Dexes } from './db/entities/Dexes';
 import { FeeTier } from './dex-quote/types';
 import { QuotesService } from './db/services/quotes/quotes.service';
 import { DexSwapModel } from './models/dexSwap.model';
+import { Quotes } from './db/entities/Quotes';
 
 type QuoteResult = {
   ok: boolean;
@@ -21,7 +22,7 @@ type QuoteResult = {
 };
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 @Injectable()
@@ -107,12 +108,21 @@ export class Runner {
           // error?: string | null;
         };
         const quote = await this.mapAndSaveQuote(swap, sellResult, 'EXACT_IN');
+
+        const quotes: Quotes[] =
+          await this.quotesService.getLastQuotesByMarketIdAndQuoteId(
+            quote.marketId,
+            quote.id,
+          );
         console.log(quote.id, quote.marketId);
 
+        // this.logger.log(
+        //   quotes
+        // );
 
         // сразу идём на следующий круг (без общей задержки)
         // при желании можно добавить микропаузу, чтобы не «забивать» RPC:
-        await sleep(2500);
+        await sleep(4500);
       } catch (err: any) {
         this.logger.warn(
           `[${index}] ${swap.dexName} pool=${swap.poolId} error: ${err?.message ?? err}`,

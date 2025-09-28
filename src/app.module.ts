@@ -17,6 +17,8 @@ import { DexesService } from './db/services/dexes/dexes.service';
 import { QuotesService } from './db/services/quotes/quotes.service';
 import { DiscoveryModule } from './modules/discovery/discovery.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
+import { ArbEvalsService } from './db/services/arbEvals/arb-evals.service';
+import { ArbEvalsModule } from './modules/arb-evals/arb-evals.module';
 
 @Module({
   imports: [
@@ -52,8 +54,16 @@ import { QuotesModule } from './modules/quotes/quotes.module';
     DexQuoteModule,
     DiscoveryModule,
     QuotesModule,
+    ArbEvalsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, Runner, TokensService, DexesService, QuotesService],
+  providers: [
+    AppService,
+    Runner,
+    TokensService,
+    DexesService,
+    QuotesService,
+    ArbEvalsService,
+  ],
 })
 export class AppModule {}

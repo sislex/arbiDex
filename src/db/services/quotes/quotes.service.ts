@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Quotes } from '../../entities/Quotes';
-import { util } from 'prettier';
 
 type Side = 'BUY_BASE' | 'SELL_BASE';
 type Kind = 'EXACT_IN' | 'EXACT_OUT';
@@ -82,8 +81,8 @@ export class QuotesService {
       .getRawMany<Quotes>();
   }
 
-  async getLastQuotesByMarketIdAndQuoteId(marketId: string, quoteId: string) {
-    return this.repo
+  async getLastQuotesByMarketIdAndQuoteId(marketId: string, quoteId?: string) {
+    const qb = this.repo
       .createQueryBuilder('q')
       .select([
         'q.id AS id',
@@ -104,8 +103,13 @@ export class QuotesService {
         'q.block_number AS "blockNumber"',
       ])
       .where('q.market_id = :marketId', { marketId })
-      .andWhere('q.id <= :quoteId', { quoteId })
-      .andWhere('q.ok = true')
+      .andWhere('q.ok = true');
+
+    if (quoteId && quoteId !== '') {
+      qb.andWhere('q.id <= :quoteId', { quoteId });
+    }
+
+    return qb
       .distinctOn(['q.dex_id', 'q.side', 'q.kind'])
       .orderBy('q.dex_id')
       .addOrderBy('q.side')
