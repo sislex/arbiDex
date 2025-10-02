@@ -1,12 +1,13 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
 
 @Index("arb_evals_pkey", ["id"], { unique: true })
+@Index("arb_evals_quote_id_uq", ["quoteId"], { unique: true })
 @Entity("arb_evals", { schema: "public" })
 export class ArbEvals {
   @PrimaryGeneratedColumn({ type: "bigint", name: "id" })
   id: string;
 
-  @Column("bigint", { name: "quote_id" })
+  @Column("bigint", { name: "quote_id", unique: true })
   quoteId: string;
 
   @Column("numeric", { name: "best_buy", precision: 38, scale: 0 })

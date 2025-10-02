@@ -9,15 +9,15 @@ import {
 import { Dexes } from "./Dexes";
 import { Markets } from "./Markets";
 
-@Index("quotes_snapshot_id_dex_id_side_key", ["dexId", "side", "snapshotId"], {
-  unique: true,
-})
-@Index("quotes_dex_ts_idx", ["dexId", "ts"], {})
 @Index(
   "quotes_market_dex_side_kind_ts_idx",
   ["dexId", "kind", "marketId", "side", "ts"],
   {}
 )
+@Index("quotes_dex_ts_idx", ["dexId", "ts"], {})
+@Index("quotes_snapshot_id_dex_id_side_key", ["dexId", "side", "snapshotId"], {
+  unique: true,
+})
 @Index("quotes_pkey", ["id"], { unique: true })
 @Index("quotes_mkt_ts_idx", ["marketId", "ts"], {})
 @Index("quotes_ok_idx", ["ok"], {})

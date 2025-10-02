@@ -1,25 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DexFactoryService } from './dex-quote/dex-factory.service';
-import { DexesService } from './db/services/dexes/dexes.service';
-import { DexQuoteProvider } from './dex-quote/dex-quote.provider';
-import { Dexes } from './db/entities/Dexes';
-import { FeeTier } from './dex-quote/types';
-import { QuotesService } from './db/services/quotes/quotes.service';
-import { DexSwapModel } from './models/dexSwap.model';
-import { Quotes } from './db/entities/Quotes';
-
-type QuoteResult = {
-  ok: boolean;
-  dex: 'SushiV2' | 'UniswapV3';
-  side: 'BUY_BASE' | 'SELL_BASE';
-  feeTier?: number;
-  amountBaseAtomic: bigint;
-  amountQuoteAtomic: bigint;
-  latencyMs?: number;
-  blockNumber?: number;
-  error?: string | null;
-};
+import { DexFactoryService } from '../dex-quote/dex-factory.service';
+import { DexesService } from '../db/services/dexes/dexes.service';
+import { DexQuoteProvider } from '../dex-quote/dex-quote.provider';
+import { Dexes } from '../db/entities/Dexes';
+import { FeeTier, QuoteResult } from '../dex-quote/types';
+import { QuotesService, SaveQuoteInput } from '../db/services/quotes/quotes.service';
+import { DexSwapModel } from '../models/dexSwap.model';
+import { Quotes } from '../db/entities/Quotes';
+import { ArbEvalsService } from '../db/services/arbEvals/arb-evals.service';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,7 +19,6 @@ export class Runner {
   private readonly logger = new Logger(Runner.name);
 
   private readonly RPC_URL: string;
-  private readonly AMOUNT_IN_WETH: string;
 
   private swapList: DexSwapModel[];
 
@@ -42,12 +30,11 @@ export class Runner {
     private readonly dexFactory: DexFactoryService,
     private readonly dexesService: DexesService,
     private readonly quotesService: QuotesService,
+    private readonly arbEvalsService: ArbEvalsService,
   ) {
     this.RPC_URL = this.cfg.get<string>('RPC_URL') ?? '';
-    this.AMOUNT_IN_WETH = this.cfg.get<string>('AMOUNT_IN_WETH') ?? '0.05';
 
     void this.init();
-    // void this.demo();
   }
 
   async init() {
@@ -83,45 +70,25 @@ export class Runner {
 
         // тут можно записывать в БД/шину/очередь и т.д.
 
-        const buyResult: QuoteResult = {
-          ok: true,
-          dex: buy.dex as 'SushiV2' | 'UniswapV3',
-          side: buy.side,
-          feeTier: buy.feeTier as FeeTier,
-          amountBaseAtomic: buy.amountBaseAtomic,
-          amountQuoteAtomic: buy.amountQuoteAtomic,
-          blockNumber: buy.blockNumber,
-          latencyMs: buy.latencyMs,
-          // error?: string | null;
-        };
-        await this.mapAndSaveQuote(swap, buyResult, 'EXACT_OUT');
+        // await this.mapAndSaveQuote(swap, buy as QuoteResult);
+        const quoteList = await this.mapAndSaveQuote(swap, [buy, sell]);
 
-        const sellResult: QuoteResult = {
-          ok: true,
-          dex: sell.dex as 'SushiV2' | 'UniswapV3',
-          side: sell.side,
-          feeTier: sell.feeTier as FeeTier,
-          amountBaseAtomic: sell.amountBaseAtomic,
-          amountQuoteAtomic: sell.amountQuoteAtomic,
-          blockNumber: sell.blockNumber,
-          latencyMs: sell.latencyMs,
-          // error?: string | null;
-        };
-        const quote = await this.mapAndSaveQuote(swap, sellResult, 'EXACT_IN');
-
-        const quotes: Quotes[] =
-          await this.quotesService.getLastQuotesByMarketIdAndQuoteId(
-            quote.marketId,
-            quote.id,
-          );
-        console.log(quote.id, quote.marketId);
+        // const quotes: Quotes[] =
+        //   await this.quotesService.getLastQuotesByMarketIdAndQuoteId(
+        //     quoteList[1].marketId,
+        //     quoteList[1].id,
+        //   );
+        // console.log(quoteList[1].marketId, quoteList[1].id);
+        //
+        // const arbEvals = this.arbEvalsService.getArbEvalFromQuotes(quotes);
+        // const savedEval = await this.arbEvalsService.saveEvaluation(arbEvals);
+        // console.log('Saved arb eval:', savedEval);
 
         // this.logger.log(
         //   quotes
         // );
 
-        // сразу идём на следующий круг (без общей задержки)
-        // при желании можно добавить микропаузу, чтобы не «забивать» RPC:
+        // пауза между циклами (чтобы не спамить слишком часто)
         await sleep(4500);
       } catch (err: any) {
         this.logger.warn(
@@ -133,28 +100,28 @@ export class Runner {
     this.logger.log(`[${index}] ${swap.dexName} poller stopped`);
   }
 
-  private mapAndSaveQuote(
-    swap: DexSwapModel,
-    res: QuoteResult,
-    kind: 'EXACT_IN' | 'EXACT_OUT',
-  ) {
-    const config = {
-      chainId: 42161,
-      dexId: swap.dexId,
-      marketId: swap.marketId,
-      side: res.side,
-      kind,
-      feeTier: res.feeTier ?? null,
-      amountBaseAtomic: res.amountBaseAtomic,
-      amountQuoteAtomic: res.amountQuoteAtomic,
-      ok: res.ok,
-      errorMessage: res.ok ? null : (res.error ?? null),
-      latencyMs: res.latencyMs ?? null,
-      gasQuoteAtomic: null, // если посчитаешь газ — подставь сюда
-      blockNumber: res.blockNumber ?? null,
-    };
+  private mapAndSaveQuote(swap: DexSwapModel, responseList: QuoteResult[]) {
+    const arbEvals: SaveQuoteInput[] = [];
+    responseList.forEach((response: QuoteResult) => {
+      const arbEval = {
+        chainId: 42161,
+        dexId: swap.dexId,
+        marketId: swap.marketId,
+        side: response.side,
+        kind: response.kind,
+        feeTier: response.feeTier ?? null,
+        amountBaseAtomic: response.amountBaseAtomic,
+        amountQuoteAtomic: response.amountQuoteAtomic,
+        ok: response.ok,
+        errorMessage: response.ok ? null : (response.error ?? null),
+        latencyMs: response.latencyMs ?? null,
+        gasQuoteAtomic: null, // если посчитаешь газ — подставь сюда
+        blockNumber: response.blockNumber ?? null,
+      };
+      arbEvals.push(arbEval);
+    });
 
-    return this.quotesService.save(config);
+    return this.quotesService.saveList(arbEvals);
   }
 
   async setDexSwapModelList(): Promise<DexSwapModel[]> {

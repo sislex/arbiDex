@@ -76,6 +76,7 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           ok: true,
           dex: this.name,
           side: 'SELL_BASE',
+          kind: 'EXACT_IN',
           feeTier: best.fee,
           amountBaseAtomic: amountIn,
           amountQuoteAtomic: best.out,
@@ -86,9 +87,10 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           ok: false,
           dex: this.name,
           side: 'SELL_BASE',
+          kind: 'EXACT_IN',
           amountBaseAtomic: amountIn,
           amountQuoteAtomic: 0n,
-          err: 'NO_POOL_OR_REVERT',
+        error: 'NO_POOL_OR_REVERT',
           blockNumber,
         };
   }
@@ -131,6 +133,7 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           ok: true,
           dex: this.name,
           side: 'BUY_BASE',
+          kind: 'EXACT_OUT',
           feeTier: best.fee,
           amountBaseAtomic: amountOutBase,
           amountQuoteAtomic: best.in,
@@ -141,9 +144,10 @@ export class UniswapV3QuoteProvider implements DexQuoteProvider {
           ok: false,
           dex: this.name,
           side: 'BUY_BASE',
+          kind: 'EXACT_OUT',
           amountBaseAtomic: amountOutBase,
           amountQuoteAtomic: 0n,
-          err: 'NO_POOL_OR_REVERT',
+        error: 'NO_POOL_OR_REVERT',
           blockNumber,
         };
   }

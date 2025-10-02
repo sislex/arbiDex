@@ -36,6 +36,7 @@ export class SushiV2QuoteProvider implements DexQuoteProvider {
         ok: true,
         dex: this.name,
         side: 'SELL_BASE',
+        kind: 'EXACT_IN',
         feeTier: 3000,
         amountBaseAtomic: amountIn,
         amountQuoteAtomic: out as bigint,
@@ -48,9 +49,10 @@ export class SushiV2QuoteProvider implements DexQuoteProvider {
         ok: false,
         dex: this.name,
         side: 'SELL_BASE',
+        kind: 'EXACT_IN',
         amountBaseAtomic: amountIn,
         amountQuoteAtomic: 0n,
-        err: e?.message ?? 'ROUTER_REVERT',
+        error: e?.message ?? 'ROUTER_REVERT',
         blockNumber,
       };
     }
@@ -75,6 +77,7 @@ export class SushiV2QuoteProvider implements DexQuoteProvider {
         ok: true,
         dex: this.name,
         side: 'BUY_BASE',
+        kind: 'EXACT_OUT',
         feeTier: 3000,
         amountBaseAtomic: outBase,
         amountQuoteAtomic: inQuote as bigint,
@@ -87,9 +90,10 @@ export class SushiV2QuoteProvider implements DexQuoteProvider {
         ok: false,
         dex: this.name,
         side: 'BUY_BASE',
+        kind: 'EXACT_OUT',
         amountBaseAtomic: outBase,
         amountQuoteAtomic: 0n,
-        err: e?.message ?? 'ROUTER_REVERT',
+        error: e?.message ?? 'ROUTER_REVERT',
         blockNumber,
       };
     }

@@ -9,10 +9,10 @@ import {
 import { Dexes } from "./Dexes";
 import { Markets } from "./Markets";
 
-@Index("idx_dex_pools_dex", ["dexId"], {})
 @Index("dex_pools_unique", ["dexId", "feeTier", "marketId", "poolAddress"], {
   unique: true,
 })
+@Index("idx_dex_pools_dex", ["dexId"], {})
 @Index("idx_dex_pools_active", ["isActive"], {})
 @Index("idx_dex_pools_last_seen", ["lastSeenTs"], {})
 @Index("idx_dex_pools_market", ["marketId"], {})

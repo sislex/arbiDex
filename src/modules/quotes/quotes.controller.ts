@@ -4,6 +4,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Quotes } from '../../db/entities/Quotes';
 import { QuotesService } from '../../db/services/quotes/quotes.service';
 import { ArbEvalsService } from '../../db/services/arbEvals/arb-evals.service';
+import { ArbEvals } from '../../db/entities/ArbEvals';
 
 @ApiTags('quotes')
 @Controller('api/quotes')
@@ -64,15 +65,20 @@ export class QuotesController {
     } else {
       quotes = await this.quotesService.getLastQuotesByMarketId(marketId);
     }
-
-    const arbEvals = this.arbEvalsService.getArbEvalFromQuotes(quotes);
+    let arbEval: Partial<ArbEvals> | null = null;
+    try {
+      arbEval = this.arbEvalsService.getArbEvalFromQuotes(quotes);
+      // console.log('Saved arb eval:', savedEval);
+    } catch (e) {
+      // console.error('Error in getArbEvalFromQuotes:', e);
+    }
 
     return {
-      title: `Last Quotes (Market ${marketId}) from Quote ID ${quoteId}`,
+      title: `Last Quotes (Market ${marketId}) from Quote ID ${quoteId ?? 'last'}`,
       marketId,
       chainId: quotes[0]?.chainId ?? '',
       quotes: quotes,
-      arbEvals,
+      arbEval,
     };
   }
 }

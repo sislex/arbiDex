@@ -50,6 +50,41 @@ export class QuotesService {
     return this.repo.save(row);
   }
 
+  /**
+   * Батч-вставка котировок одной INSERT-операцией.
+   * Возвращает вставленные строки с id/ts/snapshot_id от БД.
+   */
+  async saveList(input: SaveQuoteInput[]) {
+    if (!input?.length) return [];
+
+    const values = input.map((q) => ({
+      chainId: q.chainId,
+      dexId: q.dexId, // bigint в БД — строка ок
+      marketId: q.marketId,
+      side: q.side,
+      kind: q.kind,
+      feeTier: q.feeTier ?? null,
+      amountBase: q.amountBaseAtomic.toString(),
+      amountQuote: q.amountQuoteAtomic.toString(),
+      ok: q.ok,
+      errorMessage: q.errorMessage ?? null,
+      latencyMs: q.latencyMs ?? null,
+      gasQuote: q.gasQuoteAtomic != null ? q.gasQuoteAtomic.toString() : null,
+      blockNumber: q.blockNumber != null ? q.blockNumber.toString() : null,
+      // ts и snapshot_id проставятся дефолтами БД
+    }));
+
+    const { raw } = await this.repo
+      .createQueryBuilder()
+      .insert()
+      .into(Quotes)
+      .values(values)
+      .returning('*') // PG вернёт все вставленные строки
+      .execute();
+
+    return raw as Quotes[];
+  }
+
   async getLastQuotesByMarketId(marketId: string) {
     return this.repo
       .createQueryBuilder('q')

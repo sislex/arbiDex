@@ -16,12 +16,13 @@ export interface QuoteResult {
   ok: boolean;
   dex: string; // 'UniswapV3' | 'SushiV2' | ...
   side: 'SELL_BASE' | 'BUY_BASE';
+  kind: 'EXACT_IN' | 'EXACT_OUT';
   feeTier?: FeeTier | null; // null для v2
   amountBaseAtomic: bigint; // в минималках BASE
   amountQuoteAtomic: bigint; // в минималках QUOTE
-  err?: string;
-  blockNumber: number;
   latencyMs?: number;
+  blockNumber: number;
+  error?: string | null;
 }
 
 export type CreateUniOpts = {

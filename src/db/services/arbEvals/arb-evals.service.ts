@@ -16,8 +16,43 @@ export class ArbEvalsService {
     return this.evalsRepo.find();
   }
 
+  // Сохранить новую оценку арбитража
+  async saveEvaluation(entity: Partial<ArbEvals>): Promise<ArbEvals> {
+    const evalEntity = this.evalsRepo.create(entity);
+    return this.evalsRepo.save(evalEntity);
+  }
+
+  async saveEvaluations(evals: Partial<ArbEvals>[]) {
+    if (!evals.length) return [];
+
+    // upsert по quote_id (чтобы не было дублей)
+    await this.evalsRepo
+      .createQueryBuilder()
+      .insert()
+      .into(ArbEvals)
+      .values(evals)
+      .orUpdate(
+        [
+          'quote_id',
+          'best_buy',
+          'best_sell',
+          'dex_id_buy',
+          'dex_id_sell',
+          'gross_quote',
+          'gas_cost',
+          'net_profit',
+          'spread_pct',
+          'should_trade',
+        ],
+        ['quote_id'],
+      )
+      .execute();
+
+    return evals;
+  }
+
   /**
-   * Сохраняет оценку арбитража по набору последних котировок одного рынка.
+   * Отдает оценку арбитража по набору последних котировок одного рынка.
    * @param quotes — массив котировок (должен содержать BUY_BASE и SELL_BASE с разных DEX)
    * @param gasCostAtomic — стоимость газа в атомарных единицах QUOTE (строка). По умолчанию "0".
    */
