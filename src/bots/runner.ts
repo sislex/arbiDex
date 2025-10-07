@@ -34,7 +34,7 @@ export class Runner {
   ) {
     this.RPC_URL = this.cfg.get<string>('RPC_URL') ?? '';
 
-    void this.init();
+    // void this.init();
   }
 
   async init() {

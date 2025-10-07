@@ -13,6 +13,12 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - /Users/alexeyrozhnov/PhpstormProjects/arbiDex/backups:/backups
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U arbiuser -d arbi_analytics" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   pgadmin:
     image: dpage/pgadmin4:8
@@ -26,5 +32,20 @@ services:
     depends_on:
       - postgres
 
+  backend:
+    build:
+      context: ./
+      dockerfile: ./docker/DockerfileBackend
+    container_name: arbi-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+
 volumes:
   pg_data:
+    name: arbidex_pg_data
+    external: true
