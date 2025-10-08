@@ -35,18 +35,18 @@ services:
       - ./pgadmin_storage:/var/lib/pgadmin
       - ./pgadmin4/servers.json:/pgadmin4/servers.json:ro
 
-#  arbi-backend:
-#    build:
-#      context: ./
-#      dockerfile: ./docker/DockerfileBackend
-#    container_name: arbi-backend
-#    restart: unless-stopped
-#    ports:
-#      - "3000:3000"
-#    depends_on:
-#      - arbi-postgres
-#    env_file:
-#      - .env
+  arbi-backend:
+    build:
+      context: ./
+      dockerfile: ./docker/DockerfileBackend
+    container_name: arbi-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - arbi-postgres
+    env_file:
+      - .env
 
 volumes:
   pg_data:
