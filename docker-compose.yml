@@ -42,7 +42,7 @@ services:
     container_name: arbi-backend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "8002:3000"
     depends_on:
       - arbi-postgres
     env_file:
