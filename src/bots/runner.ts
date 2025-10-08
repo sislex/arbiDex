@@ -5,9 +5,11 @@ import { DexesService } from '../db/services/dexes/dexes.service';
 import { DexQuoteProvider } from '../dex-quote/dex-quote.provider';
 import { Dexes } from '../db/entities/Dexes';
 import { FeeTier, QuoteResult } from '../dex-quote/types';
-import { QuotesService, SaveQuoteInput } from '../db/services/quotes/quotes.service';
+import {
+  QuotesService,
+  SaveQuoteInput,
+} from '../db/services/quotes/quotes.service';
 import { DexSwapModel } from '../models/dexSwap.model';
-import { Quotes } from '../db/entities/Quotes';
 import { ArbEvalsService } from '../db/services/arbEvals/arb-evals.service';
 
 function sleep(ms: number) {
@@ -34,7 +36,7 @@ export class Runner {
   ) {
     this.RPC_URL = this.cfg.get<string>('RPC_URL') ?? '';
 
-    // void this.init();
+    void this.init();
   }
 
   async init() {
