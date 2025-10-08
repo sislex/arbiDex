@@ -10,8 +10,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-#      - pg_data:/var/lib/postgresql/data
-      - /Users/alexeyrozhnov/PhpstormProjects/arbiDex/backups:/backups
+      - pg_data:/var/lib/postgresql/data          # ← ОБЯЗАТЕЛЬНО: постоянное хранилище БД
+      - ./backups:/backups                        # ← папка на СЕРВЕРЕ: /root/arbiDex/backups
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U arbiuser -d arbi_analytics" ]
       interval: 5s
@@ -48,7 +48,7 @@ services:
 #    env_file:
 #      - .env
 
-#volumes:
-#  pg_data:
-#    name: arbidex_pg_data
-#    external: true
+volumes:
+  pg_data:
+    name: arbidex_pg_data
+    external: true
