@@ -1,9 +1,7 @@
-version: "3.8"
-
 services:
-  postgres:
+  arbi-postgres:
     image: postgres:16
-    container_name: pg-arbi
+    container_name: arbi-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: arbiuser
@@ -20,9 +18,9 @@ services:
       timeout: 3s
       retries: 20
 
-  pgadmin:
+  arbi-pgadmin:
     image: dpage/pgadmin4:8
-    container_name: pgadmin-arbi
+    container_name: arbi-pgadmin
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
@@ -30,9 +28,9 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - postgres
+      - arbi-postgres
 
-  backend:
+  arbi-backend:
     build:
       context: ./
       dockerfile: ./docker/DockerfileBackend
@@ -41,7 +39,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - postgres
+      - arbi-postgres
     env_file:
       - .env
 
