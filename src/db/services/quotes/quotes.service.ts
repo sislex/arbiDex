@@ -57,7 +57,7 @@ export class QuotesService {
   async saveList(input: SaveQuoteInput[]) {
     if (!input?.length) return [];
 
-    const values = input.map((q) => ({
+    const entities = input.map((q) => ({
       chainId: q.chainId,
       dexId: q.dexId, // bigint в БД — строка ок
       marketId: q.marketId,
@@ -73,16 +73,18 @@ export class QuotesService {
       blockNumber: q.blockNumber != null ? q.blockNumber.toString() : null,
       // ts и snapshot_id проставятся дефолтами БД
     }));
+    return this.repo.save(entities, { chunk: 100 });
 
-    const { raw } = await this.repo
-      .createQueryBuilder()
-      .insert()
-      .into(Quotes)
-      .values(values)
-      .returning('*') // PG вернёт все вставленные строки
-      .execute();
-
-    return raw as Quotes[];
+      // // TODO: remove it if works fine
+    // const { raw } = await this.repo
+    //   .createQueryBuilder()
+    //   .insert()
+    //   .into(Quotes)
+    //   .values(values)
+    //   .returning('*') // PG вернёт все вставленные строки
+    //   .execute();
+    //
+    // return raw as Quotes[];
   }
 
   async getLastQuotesByMarketId(marketId: string) {

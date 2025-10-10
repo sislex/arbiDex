@@ -11,6 +11,7 @@ import {
 } from '../db/services/quotes/quotes.service';
 import { DexSwapModel } from '../models/dexSwap.model';
 import { ArbEvalsService } from '../db/services/arbEvals/arb-evals.service';
+import { Quotes } from '../db/entities/Quotes';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -70,10 +71,10 @@ export class Runner {
         // this.logger.warn(buy);
         // this.logger.log(sell);
 
-        // тут можно записывать в БД/шину/очередь и т.д.
 
-        // await this.mapAndSaveQuote(swap, buy as QuoteResult);
-        const quoteList = await this.mapAndSaveQuote(swap, [buy, sell]);
+        const quoteList: Quotes[] = await this.mapAndSaveQuote(swap, [buy, sell]);
+
+        console.log(quoteList[0].id, quoteList[0].dexId, quoteList[0].amountQuote);
 
         // const quotes: Quotes[] =
         //   await this.quotesService.getLastQuotesByMarketIdAndQuoteId(
