@@ -74,22 +74,17 @@ export class Runner {
 
         const quoteList: Quotes[] = await this.mapAndSaveQuote(swap, [buy, sell]);
 
-        console.log(quoteList[0].id, quoteList[0].dexId, quoteList[0].amountQuote);
 
-        // const quotes: Quotes[] =
-        //   await this.quotesService.getLastQuotesByMarketIdAndQuoteId(
-        //     quoteList[1].marketId,
-        //     quoteList[1].id,
-        //   );
+        const quotes: Quotes[] =
+          await this.quotesService.getLastQuotesByMarketIdAndQuoteId(
+            quoteList[1].marketId,
+            quoteList[1].id,
+          );
         // console.log(quoteList[1].marketId, quoteList[1].id);
-        //
-        // const arbEvals = this.arbEvalsService.getArbEvalFromQuotes(quotes);
-        // const savedEval = await this.arbEvalsService.saveEvaluation(arbEvals);
-        // console.log('Saved arb eval:', savedEval);
 
-        // this.logger.log(
-        //   quotes
-        // );
+        const arbEvals = this.arbEvalsService.getArbEvalFromQuotes(quotes);
+        const savedEval = await this.arbEvalsService.saveEvaluation(arbEvals);
+        console.log('Saved arb eval:', savedEval);
 
         // пауза между циклами (чтобы не спамить слишком часто)
         await sleep(4500);
