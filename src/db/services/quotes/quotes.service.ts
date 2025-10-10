@@ -73,18 +73,8 @@ export class QuotesService {
       blockNumber: q.blockNumber != null ? q.blockNumber.toString() : null,
       // ts и snapshot_id проставятся дефолтами БД
     }));
-    return this.repo.save(entities, { chunk: 100 });
 
-      // // TODO: remove it if works fine
-    // const { raw } = await this.repo
-    //   .createQueryBuilder()
-    //   .insert()
-    //   .into(Quotes)
-    //   .values(values)
-    //   .returning('*') // PG вернёт все вставленные строки
-    //   .execute();
-    //
-    // return raw as Quotes[];
+    return this.repo.save(entities, { chunk: 100 });
   }
 
   async getLastQuotesByMarketId(marketId: string) {
