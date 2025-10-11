@@ -105,8 +105,9 @@ export class ArbEvalsService {
     const spreadPct =
       bestBuyAmt > 0n
         ? String(
-            Number(((bestSellAmt - bestBuyAmt) * 1_000_000n) / bestBuyAmt) /
-              1_000_000,
+            (Number(((bestSellAmt - bestBuyAmt) * 1_000_000n) / bestBuyAmt) /
+              1_000_000) *
+              100,
           )
         : '0';
 
