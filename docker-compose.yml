@@ -37,14 +37,11 @@ services:
 
   arbi-backend:
     build:
-      context: ./
+      context: .
       dockerfile: ./docker/DockerfileBackend
     container_name: arbi-backend
-    restart: unless-stopped
     ports:
       - "8002:3000"
-    depends_on:
-      - arbi-postgres
     env_file:
       - .env
 

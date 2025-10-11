@@ -42,7 +42,7 @@ export class Runner {
 
   async init() {
     this.swapList = await this.setDexSwapModelList();
-    // console.log(this.swapList);
+    console.log(this.swapList);
 
     // Запускаем независимый цикл на каждый swap
     for (let i = 0; i < this.swapList.length; i++) {
@@ -80,11 +80,11 @@ export class Runner {
             quoteList[1].marketId,
             quoteList[1].id,
           );
-        console.log(quoteList[1].marketId, quoteList[1].id);
+        console.log('--+++--', quoteList[1].marketId, quoteList[1].id);
 
         const arbEvals = this.arbEvalsService.getArbEvalFromQuotes(quotes);
         const savedEval = await this.arbEvalsService.saveEvaluation(arbEvals);
-        console.log('Saved arb eval:', savedEval.id, savedEval.spreadPct);
+        // console.log('Saved arb eval:', savedEval.id, savedEval.spreadPct);
 
         // пауза между циклами (чтобы не спамить слишком часто)
         await sleep(4500);
