@@ -87,7 +87,7 @@ export class Runner {
         // console.log('Saved arb eval:', savedEval.id, savedEval.spreadPct);
 
         // пауза между циклами (чтобы не спамить слишком часто)
-        await sleep(4500);
+        await sleep(500);
       } catch (err: any) {
         this.logger.warn(
           `[${index}] ${swap.dexName} pool=${swap.poolId} error: ${err?.message ?? err}`,
