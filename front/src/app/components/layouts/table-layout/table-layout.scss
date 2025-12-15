@@ -1,0 +1,15 @@
+:host {
+  display: flex;
+  flex: 1;
+}
+
+.title-content-layout {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  .content {
+    height: 100%;
+  }
+}

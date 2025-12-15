@@ -1,0 +1,59 @@
+<div class="container">
+  <div
+    class="panel"
+    [class.panel-open]="isSidebarOpen"
+    [class.panel-closed]="!isSidebarOpen"
+  >
+    @if (isSidebarOpen) {
+      <div class="panel-content-open">
+        <div class="button-group">
+          <div class="header">
+            <span class="title">{{ sidebarTitle | uppercase }}</span>
+            <button
+              mat-icon-button
+              (click)="togglePanel()"
+              class="toggle-button side-button"
+            >
+              <mat-icon>arrow_left</mat-icon>
+            </button>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="content">
+            <mat-button-toggle-group
+              class="custom-toggle-group"
+              [value]="activeItem"
+              (change)="setActiveItem($event.value)"
+            >
+              @for (item of list; track item) {
+                <mat-button-toggle [value]="item">
+                  {{ item | titlecase }}
+                </mat-button-toggle>
+              }
+            </mat-button-toggle-group>
+          </div>
+        </div>
+        <div class="footer">
+          <ng-content select="[footerSidebarOpen]"></ng-content>
+        </div>
+      </div>
+    } @else {
+      <div class="panel-content-closed">
+        <div class="closed-content">
+          <button mat-icon-button (click)="togglePanel()" class="toggle-button">
+            <mat-icon>arrow_right</mat-icon>
+          </button>
+        </div>
+
+        <div class="footer">
+          <ng-content select="[footerSidebarClose]"></ng-content>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="main-content">
+    <ng-content select="[main]"></ng-content>
+  </div>
+</div>

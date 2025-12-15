@@ -1,0 +1,24 @@
+<mat-toolbar class="toolbar">
+  <mat-icon>logo_dev</mat-icon>
+  <span class="example-spacer"></span>
+  <span>{{ header | uppercase }}</span>
+  <span class="example-spacer"></span>
+  @if (menuItemList.length > 0) {
+    <button
+      matIconButton
+      class="example-icon"
+      aria-label="Example icon-button with menu icon"
+      [matMenuTriggerFor]="menu"
+
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+  }
+</mat-toolbar>
+  <mat-menu #menu="matMenu">
+    @for (item of menuItemList; track item) {
+      <button mat-menu-item (click)="menuClick(item.url)" > {{item.title}} </button>
+    }
+  </mat-menu>
+
+

@@ -3,49 +3,38 @@ services:
     image: postgres:16
     container_name: arbi-postgres
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: arbiuser
-      POSTGRES_PASSWORD: arbipass
-      POSTGRES_DB: arbi_analytics
+    env_file:
+      .env
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     volumes:
-      - pg_data:/var/lib/postgresql/data          # ← ОБЯЗАТЕЛЬНО: постоянное хранилище БД
-      - ./backups:/backups                        # ← папка на СЕРВЕРЕ: /root/arbiDex/backups
+      - pg_data:/var/lib/postgresql/data
+      - ./backups:/backups
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U arbiuser -d arbi_analytics" ]
-      interval: 5s
-      timeout: 3s
-      retries: 20
+      test: [ "CMD-SHELL", "pg_isready -U user_secret -d db_5444 -h localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   arbi-pgadmin:
     image: dpage/pgadmin4:8
     container_name: arbi-pgadmin
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: adminpass
-      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+      PGADMIN_SERVER_JSON_FILE: /db/pgadmin4/servers.json
     ports:
       - "8081:80"
     depends_on:
       arbi-postgres:
         condition: service_healthy
     volumes:
-      - ./pgadmin_storage:/var/lib/pgadmin
-      - ./pgadmin4/servers.json:/pgadmin4/servers.json:ro
-
-  arbi-backend:
-    build:
-      context: .
-      dockerfile: ./docker/DockerfileBackend
-    container_name: arbi-backend
-    ports:
-      - "8002:3000"
-    env_file:
-      - .env
+      - ./db/pgadmin_storage:/var/lib/pgadmin
+      - ./db/pgadmin4/servers.json:/pgadmin4/servers.json:ro
 
 volumes:
   pg_data:
     name: arbidex_pg_data
-    external: true

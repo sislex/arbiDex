@@ -1,0 +1,37 @@
+.loader {
+  height: 100%;
+  margin-left: auto;
+  align-items: center;
+
+  .overlay-background {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(128, 128, 128, 0.5);
+    z-index: 600;
+  }
+
+  .custom-icon {
+    width: 100px;
+    height: auto;
+    font-size: 100px;
+    line-height: 100px;
+    animation: speen 2s linear infinite;
+    z-index: 1001;
+    background: var(--toolbar-gradient);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes speen {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

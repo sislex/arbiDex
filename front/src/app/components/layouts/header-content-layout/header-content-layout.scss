@@ -1,0 +1,16 @@
+.main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+
+  .header {
+    height: 36px;
+  }
+
+  .content {
+    display: flex;
+    flex: 1;
+  }
+}

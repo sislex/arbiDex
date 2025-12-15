@@ -1,0 +1,8 @@
+<button class="custom-icon-button"
+        [class.cib-start]="type === 'green'"
+        [class.cib-stop]="type === 'red'"
+        matMiniFab
+        (click)="click()"
+>
+  <mat-icon>{{ icon }}</mat-icon>
+</button>

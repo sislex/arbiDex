@@ -1,0 +1,79 @@
+@use '@angular/material' as mat;
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+@import 'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap';
+@import 'https://fonts.googleapis.com/icon?family=Material+Icons';
+
+$true-color: #4caf50;
+$error-color: #f44336;
+$warn-color: #FFA500FF;
+$none-color: #000000;
+$neutral-color: #808080FF;
+$white-color: #fff;
+$main-back: linear-gradient(to right, #D2B585, #FFFFFF);
+$toolbar-gradient: linear-gradient(to right, #8E2D23, #DC5229);
+
+:root {
+  --true-color:#{$true-color};
+  --error-color: #{$error-color};
+  --warn-color: #{$warn-color};
+  --none-color: #{$none-color};
+  --neutral-color: #{$neutral-color};
+  --white-color: #{$white-color};
+  --main-back: #{$main-back};
+  --toolbar-gradient: #{$toolbar-gradient};
+}
+
+
+:root {
+  @include mat.toolbar-overrides((
+    standard-height: 36px,
+    title-text-size: 16px,
+    container-background-color: var(--toolbar-gradient),
+    container-text-color: #ffff,
+  ));
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+app-root {
+  display: block;
+  height: 100%;
+  min-width: 1200px;
+  min-height: 800px;
+}
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body, .toolbar, .panel, mat-button-toggle, mat-toolbar {
+  font-family: Roboto, sans-serif !important;
+}
+
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+//ag-grid styles
+.align-left .ag-header-cell-label {
+  justify-content: flex-start;
+}
+
+.align-center .ag-header-cell-label {
+  justify-content: center;
+}
+
+.align-right .ag-header-cell-label {
+  justify-content: flex-end;
+}
+
