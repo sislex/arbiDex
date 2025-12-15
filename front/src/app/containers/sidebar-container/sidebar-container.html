@@ -1,8 +1,19 @@
 <app-sidebar
+  [isSidebarOpen]="(isSidebarOpen$ | async)!"
+  [sidebarTitle]="(featureName$ | async)!"
   [list]="list"
   (emitter)="events($event)"
 >
-  <div main>
-    <router-outlet></router-outlet>
-  </div>
+  <app-header-content-layout main>
+    <app-main-title-page header [title]="'item'"></app-main-title-page>
+    <app-header-content-layout content="">
+      <app-title-table-button
+        header
+        [title]="'item' + ' table'"
+        [icon]="'add'"
+      ></app-title-table-button>
+      <router-outlet content></router-outlet>
+    </app-header-content-layout>
+
+  </app-header-content-layout>
 </app-sidebar>

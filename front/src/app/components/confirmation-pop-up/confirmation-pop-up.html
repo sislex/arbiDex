@@ -1,0 +1,26 @@
+<div class="container">
+  <mat-toolbar>
+    @if (title) {
+      <span>{{title}}</span>
+    }
+    <span class="example-spacer"></span>
+    <button matIconButton class="example-icon" (click)="event('close')">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-toolbar>
+  <div class="main-message">
+  <ng-content select="[popupContent]"></ng-content>
+  </div>
+  @if (buttons.length) {
+    <div class="footer">
+      <mat-toolbar>
+        <span class="example-spacer"></span>
+        <div class="footer-buttons">
+          @for (button of buttons; track button) {
+            <button matButton="outlined" (click)="event(button)">{{ button | uppercase }}</button>
+          }
+        </div>
+      </mat-toolbar>
+    </div>
+  }
+</div>

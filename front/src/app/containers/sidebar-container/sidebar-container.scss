@@ -5,11 +5,12 @@
 
   app-sidebar {
     display: flex;
-    height: 100%;
-    width: 100%;
+    flex: 1;
 
-    app-tabs-container {
+    app-header-content-layout {
       height: 100%;
+      display: flex;
+
     }
   }
 }

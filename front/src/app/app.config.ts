@@ -9,6 +9,8 @@ import {DB_CONFIG_FEATURE_KEY, dbConfigReducer} from './+state/db-config/db-conf
 import {DbConfigEffects} from './+state/db-config/db-config.effects';
 import {provideHttpClient} from '@angular/common/http';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { VIEW_FEATURE_KEY, viewReducer } from './+state/view/view.reducer';
+import { ViewEffects } from './+state/view/view.effects';
 
 
 export const appConfig: ApplicationConfig = {
@@ -16,11 +18,12 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     provideStore(),
     provideState(DB_CONFIG_FEATURE_KEY, dbConfigReducer),
-    provideEffects(DbConfigEffects),
+    provideState(VIEW_FEATURE_KEY, viewReducer),
+    provideEffects(DbConfigEffects, ViewEffects),
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
     provideRouterStore(),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })
-]
+  ]
 };

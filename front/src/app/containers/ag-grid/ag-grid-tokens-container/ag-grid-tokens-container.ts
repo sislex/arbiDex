@@ -5,6 +5,9 @@ import {setTokensData} from '../../../+state/db-config/db-config.actions';
 import {getTokensDataResponse} from '../../../+state/db-config/db-config.selectors';
 import {AsyncPipe} from '@angular/common';
 import {Store} from '@ngrx/store';
+import { ActionsContainer } from '../../actions-container/actions-container';
+import { ConfirmationPopUpContainer } from '../../confirmation-pop-up-container/confirmation-pop-up-container';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-ag-grid-tokens-container',
@@ -17,6 +20,7 @@ import {Store} from '@ngrx/store';
 })
 export class AgGridTokensContainer implements OnInit {
   private store = inject(Store);
+  readonly dialog = inject(MatDialog);
 
   tokensDataResponse$ = this.store.select(getTokensDataResponse);
 
@@ -39,7 +43,7 @@ export class AgGridTokensContainer implements OnInit {
       headerName: 'Token ID',
     },
     {
-      field: "chainId",
+      field: "chain",
       headerName: 'Chain ID',
     },
     {
@@ -54,6 +58,14 @@ export class AgGridTokensContainer implements OnInit {
       field: "decimals",
       headerName: 'Decimals',
     },
+    {
+      headerName: 'Delete',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
+    },
   ];
 
   defaultColDef: ColDef = {
@@ -62,5 +74,39 @@ export class AgGridTokensContainer implements OnInit {
     suppressMovable: true,
     flex: 1
   };
+
+  onAction($event: any, row: any) {
+    console.log(row, $event)
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if ($event.actionType === 'delete') {
+        this.openDeleteDialog(row);
+      }
+    } else if ($event.event === 'Toggle:TOGGLE_CLICKED') {
+      // this.store.dispatch(isSendData({isSendData: $event.newValue, id: row.id}))
+    }
+  }
+
+  openDeleteDialog(rowData: any) {
+    const dialogRef = this.dialog.open(ConfirmationPopUpContainer, {
+      width: '400px',
+      height: '300px',
+      data: {
+        title: 'Delete bot',
+        message: `Are you sure you want to delete "${rowData?.address}"?`,
+        buttons: ['yes', 'no']
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (result.data === 'yes') {
+          // this.store.dispatch(deletingBot({id: rowData.id}))
+        } else {
+        }
+      } else {
+        console.log('Deletion cancelled');
+      }
+    });
+  }
 
 }

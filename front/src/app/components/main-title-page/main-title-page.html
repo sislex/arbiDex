@@ -1,0 +1,11 @@
+<div class="title-row">
+  <div class="title-content-start">
+    <ng-content  select="[title-start]"></ng-content>
+  </div>
+
+  <h2 class="title">{{ title | uppercase }}</h2>
+
+  <div class="title-content-end">
+    <ng-content  select="[title-end]"></ng-content>
+  </div>
+</div>
