@@ -24,7 +24,7 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setTokensData),
       switchMap(() =>
-        this.apiService.getTokensData().pipe(
+        this.apiService.getTokens().pipe(
           map(response =>
             DbConfigActions.setTokensDataSuccess({ response })
           ),
@@ -103,7 +103,7 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setPoolsData),
       switchMap(() =>
-        this.apiService.getPoolsData().pipe(
+        this.apiService.getPools().pipe(
           map(response =>
             DbConfigActions.setPoolsDataSuccess({ response })
           ),
@@ -123,7 +123,7 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setMarketsData),
       switchMap(() =>
-        this.apiService.getMarketsData().pipe(
+        this.apiService.getMarkets().pipe(
           map(response =>
             DbConfigActions.setMarketsDataSuccess({ response })
           ),
@@ -143,7 +143,7 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setDexesData),
       switchMap(() =>
-        this.apiService.getDexesData().pipe(
+        this.apiService.getDexes().pipe(
           map(response =>
             DbConfigActions.setDexesDataSuccess({ response })
           ),
