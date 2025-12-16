@@ -48,7 +48,23 @@ export interface IPools {
   version: string;
 }
 
+export interface IPoolsCreate {
+  poolId: number;
+  chainId: number;
+  baseTokenId: number;
+  quoteTokenId: number;
+  fee: number;
+  dexId: number;
+  version: string;
+}
+
 export interface IMarkets {
+  marketId: number;
+  poolId: number;
+  amount: string;
+}
+
+export interface IMarketsCreate {
   marketId: number;
   poolId: number;
   amount: string;
@@ -59,7 +75,17 @@ export interface IDexes {
   name: string;
 }
 
+export interface IDexesCreate {
+  dexId: number;
+  name: string;
+}
+
 export interface IChains {
+  chainId: number;
+  name: string;
+}
+
+export interface IChainsCreate {
   chainId: number;
   name: string;
 }

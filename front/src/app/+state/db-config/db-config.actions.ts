@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { ITokensCreate } from '../../models/db-config';
+import { IChainsCreate, IDexesCreate, IMarketsCreate, IPoolsCreate, ITokensCreate } from '../../models/db-config';
 
 export const setServerList = createAction('[DbConfig] setServerList');
 
@@ -42,6 +42,18 @@ export const setPoolsDataFailure = createAction(
   '[DbConfig] setPoolsDataFailure',
   props<{ error: string }>()
 );
+export const createPools = createAction(
+  '[DbConfig] createPools',
+  props<{ data: IPoolsCreate }>()
+);
+export const editPools = createAction(
+  '[DbConfig] editPools',
+  props<{ data: IPoolsCreate }>()
+);
+export const deletingPools = createAction(
+  '[DbConfig] deletingPools',
+  props<{ tokenId: number }>()
+);
 
 //====================================================================================================================
 //                                                   Markets
@@ -55,6 +67,18 @@ export const setMarketsDataSuccess = createAction(
 export const setMarketsDataFailure = createAction(
   '[DbConfig] setMarketsDataFailure',
   props<{ error: string }>()
+);
+export const createMarkets = createAction(
+  '[DbConfig] createMarkets',
+  props<{ data: IMarketsCreate }>()
+);
+export const editMarkets = createAction(
+  '[DbConfig] editMarkets',
+  props<{ data: IMarketsCreate }>()
+);
+export const deletingMarkets = createAction(
+  '[DbConfig] deletingMarkets',
+  props<{ tokenId: number }>()
 );
 
 //====================================================================================================================
@@ -70,6 +94,18 @@ export const setDexesDataFailure = createAction(
   '[DbConfig] setDexesDataFailure',
   props<{ error: string }>()
 );
+export const createDexes = createAction(
+  '[DbConfig] createDexes',
+  props<{ data: IDexesCreate }>()
+);
+export const editDexes = createAction(
+  '[DbConfig] editDexes',
+  props<{ data: IDexesCreate }>()
+);
+export const deletingDexes = createAction(
+  '[DbConfig] deletingDexes',
+  props<{ tokenId: number }>()
+);
 
 //====================================================================================================================
 //                                                   Chains
@@ -83,4 +119,16 @@ export const setChainsDataSuccess = createAction(
 export const setChainsDataFailure = createAction(
   '[DbConfig] setChainsDataFailure',
   props<{ error: string }>()
+);
+export const createChains = createAction(
+  '[DbConfig] createChains',
+  props<{ data: IChainsCreate }>()
+);
+export const editChains = createAction(
+  '[DbConfig] editChains',
+  props<{ data: IChainsCreate }>()
+);
+export const deletingChains = createAction(
+  '[DbConfig] deletingChains',
+  props<{ tokenId: number }>()
 );
