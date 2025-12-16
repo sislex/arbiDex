@@ -1,0 +1,12 @@
+<app-confirmation-pop-up
+  [title]="data.title"
+  [buttons]="data.buttons"
+  (emitter)="eventClose($event)"
+>
+  <app-token-form
+    [formData]="data.form"
+    [list]="data.list"
+    (emitter)="eventsForm($event)"
+    popupContent
+  ></app-token-form>
+</app-confirmation-pop-up>
