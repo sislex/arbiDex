@@ -52,7 +52,7 @@ export class TokenDialogService {
       height: '300px',
       data: {
         title: 'Delete token',
-        message: `Are you sure you want to delete "${row?.address}"?`,
+        message: `Are you sure you want to delete "${row?.tokenName}"?`,
         buttons: ['yes', 'no']
       }
     }).afterClosed();

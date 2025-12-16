@@ -26,7 +26,6 @@ export class AgGridTokensContainer implements OnInit {
   private store = inject(Store);
   readonly tokenDialog = inject(TokenDialogService);
 
-
   tokensDataResponse$ = this.store.select(getTokensDataResponse);
   list$ = this.store.select(getChainsDataResponse).pipe(
     map(chains =>
@@ -110,11 +109,11 @@ export class AgGridTokensContainer implements OnInit {
 
   actions($event: any, note: any) {
     if (note === 'add' ) {
-      this.openCreateTokenDialog();
+      this.openCreateDialog();
     }
   }
 
-  openCreateTokenDialog() {
+  openCreateDialog() {
     this.tokenDialog.openCreate(this.list$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createToken({ data: result.formData }));
