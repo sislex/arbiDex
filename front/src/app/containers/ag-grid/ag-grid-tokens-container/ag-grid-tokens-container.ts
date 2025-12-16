@@ -6,12 +6,10 @@ import { getChainsDataResponse, getTokensDataResponse } from '../../../+state/db
 import {AsyncPipe} from '@angular/common';
 import {Store} from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
-import { ConfirmationPopUpContainer } from '../../confirmation-pop-up-container/confirmation-pop-up-container';
-import { MatDialog } from '@angular/material/dialog';
-import { TokenFormContainer } from '../../forms/token-form-container/token-form-container';
 import { map } from 'rxjs';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
+import { TokenDialogService } from '../../../services/token-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-tokens-container',
@@ -26,7 +24,8 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
 })
 export class AgGridTokensContainer implements OnInit {
   private store = inject(Store);
-  readonly dialog = inject(MatDialog);
+  readonly tokenDialog = inject(TokenDialogService);
+
 
   tokensDataResponse$ = this.store.select(getTokensDataResponse);
   list$ = this.store.select(getChainsDataResponse).pipe(
@@ -116,89 +115,26 @@ export class AgGridTokensContainer implements OnInit {
   }
 
   openCreateTokenDialog() {
-    const dialogRef = this.dialog.open(TokenFormContainer, {
-      width: '90%',
-      height: '90%',
-      maxWidth: '100%',
-      maxHeight: '100%',
-      panelClass: 'custom-dialog-container',
-
-      data: {
-        title: 'Add new token',
-        buttons: ['add', 'cancel'],
-        list: this.list$,
-        form: {
-          tokenId: null,
-          chainId: null,
-          address: '',
-          symbol: '',
-          tokenName: '',
-          decimals: null,
-        }
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        if (result.data === 'add') {
-          this.store.dispatch(createToken({data: result.formData}))
-        } else {
-        }
-      } else {
-        console.log('Deletion cancelled');
+    this.tokenDialog.openCreate(this.list$).subscribe(result => {
+      if (result?.data === 'add') {
+        this.store.dispatch(createToken({ data: result.formData }));
       }
     });
   }
 
   openEditDialog(row: any) {
-    const dialogRef = this.dialog.open(TokenFormContainer, {
-      width: '90%',
-      height: '90%',
-      maxWidth: '100%',
-      maxHeight: '100%',
-      panelClass: 'custom-dialog-container',
-      data: {
-        title: 'Edit token',
-        buttons: ['edit', 'cancel'],
-        list: this.list$,
-        form: { ...row },
-      },
-
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        if (result.data === 'edit') {
-          this.store.dispatch(editToken({data: result.formData}))
-        } else {
-        }
-      } else {
-        console.log('Deletion cancelled');
+    this.tokenDialog.openEdit(row, this.list$).subscribe(result => {
+      if (result?.data === 'edit') {
+        this.store.dispatch(editToken({ data: result.formData }));
       }
     });
   }
 
-  openDeleteDialog(rowData: any) {
-    const dialogRef = this.dialog.open(ConfirmationPopUpContainer, {
-      width: '400px',
-      height: '300px',
-      data: {
-        title: 'Delete bot',
-        message: `Are you sure you want to delete "${rowData?.address}"?`,
-        buttons: ['yes', 'no']
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        if (result.data === 'yes') {
-          this.store.dispatch(deletingToken({tokenId: rowData.tokenId}))
-        } else {
-        }
-      } else {
-        console.log('Deletion cancelled');
+  openDeleteDialog(row: any) {
+    this.tokenDialog.openDelete(row).subscribe(result => {
+      if (result?.data === 'yes') {
+        this.store.dispatch(deletingToken({ tokenId: row.tokenId }));
       }
     });
   }
-
 }
