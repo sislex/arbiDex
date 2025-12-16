@@ -18,23 +18,28 @@ export const routes: Routes = [
     children: [
       {
         path: 'chains',
-        component: AgGridChainsContainer
+        component: AgGridChainsContainer,
+        data: { feature: 'chains' },
       },
       {
         path: 'dexes',
-        component: AgGridDexesContainer
+        component: AgGridDexesContainer,
+        data: { feature: 'dexes' },
       },
       {
         path: 'markets',
-        component: AgGridMarketsContainer
+        component: AgGridMarketsContainer,
+        data: { feature: 'markets' },
       },
       {
         path: 'pools',
-        component: AgGridPoolsContainer
+        component: AgGridPoolsContainer,
+        data: { feature: 'pools' },
       },
       {
         path: 'tokens',
-        component: AgGridTokensContainer
+        component: AgGridTokensContainer,
+        data: { feature: 'tokens' },
       },
     ]
   }

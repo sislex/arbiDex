@@ -2,6 +2,7 @@
   [isSidebarOpen]="(isSidebarOpen$ | async)!"
   [sidebarTitle]="(featureName$ | async)!"
   [list]="(sidebarList$ | async)!"
+  [activeItem]="(activeSidebarItem$ | async)! | titlecase"
   (emitter)="events($event)"
 >
   <app-header-content-layout main>

@@ -2,9 +2,9 @@ import {Component, inject, OnInit} from '@angular/core';
 import {Sidebar} from '../../components/sidebar/sidebar';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
-import { toggleSidebar } from '../../+state/view/view.actions';
-import { getIsSidebarOpen, getSidebarList } from '../../+state/view/view.selectors';
-import { AsyncPipe } from '@angular/common';
+import { setActiveSidebarItem, toggleSidebar } from '../../+state/view/view.actions';
+import { getActiveSidebarItem, getIsSidebarOpen, getSidebarList } from '../../+state/view/view.selectors';
+import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import { getChainsDataResponse, getFeatureName } from '../../+state/db-config/db-config.selectors';
 import { HeaderContentLayout } from '../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../components/title-table-button/title-table-button';
@@ -13,6 +13,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { TokenFormContainer } from '../forms/token-form-container/token-form-container';
 import { createToken } from '../../+state/db-config/db-config.actions';
 import { map } from 'rxjs';
+import { NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-sidebar-container',
@@ -23,6 +25,7 @@ import { map } from 'rxjs';
     HeaderContentLayout,
     TitleTableButton,
     MainTitlePage,
+    TitleCasePipe,
   ],
   standalone: true,
   templateUrl: './sidebar-container.html',
@@ -37,6 +40,7 @@ export class SidebarContainer implements OnInit {
   isSidebarOpen$ = this.store.select(getIsSidebarOpen);
   featureName$ = this.store.select(getFeatureName);
   sidebarList$ = this.store.select(getSidebarList);
+  activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
   list$ = this.store.select(getChainsDataResponse).pipe(
     map(chains =>
@@ -48,18 +52,19 @@ export class SidebarContainer implements OnInit {
   );
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      const table = this.route.snapshot.routeConfig?.path;
-      console.log(this.route.snapshot.routeConfig?.path);
+    const logFeature = () => {
+      let route = this.route;
+      while (route.firstChild) {
+        route = route.firstChild;
+      }
+      this.store.dispatch(setActiveSidebarItem({item: route.snapshot.data['feature']}))
+    };
 
+    logFeature();
 
-      // if (ipPort && tabId !== null) {
-      //   const [ip, port] = ipPort.split(':');
-      //   this.store.dispatch(setActiveTab({ tab: tabId }));
-      //   this.store.dispatch(clearActiveElementData());
-      //   this.store.dispatch(setActiveServer({ ip, port }));
-      // }
-    });
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => logFeature());
   }
 
   events($event: any) {
@@ -69,13 +74,6 @@ export class SidebarContainer implements OnInit {
       let address = $event.data;
       if (address) {
         this.router.navigate([`/data-view/${address}`]);
-
-        // this.activeTab$.pipe(take(1)).subscribe(activeTab => {
-        //   if (activeTab) {
-        //     this.router.navigate([`/data-view/${address}`]);
-        //
-        //   }
-        // });
       }
     }
   }

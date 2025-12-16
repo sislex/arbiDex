@@ -11,3 +11,7 @@ export const getSidebarList = createSelector(
   selectFeature,
   (state: ViewState) => state.sidebarList
 );
+export const getActiveSidebarItem = createSelector(
+  selectFeature,
+  (state: ViewState) => state.activeSidebarItem
+);

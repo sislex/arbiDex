@@ -6,6 +6,7 @@ export const VIEW_FEATURE_KEY = 'view';
 export interface ViewState {
   isSidebarOpen: boolean;
   sidebarList: string[];
+  activeSidebarItem: string;
 }
 
 export interface ViewPartialState {
@@ -21,6 +22,7 @@ export const initialState: ViewState = {
     'Dexes',
     'Chains',
   ],
+  activeSidebarItem: '',
 };
 
 export const viewReducer = createReducer(
@@ -28,5 +30,9 @@ export const viewReducer = createReducer(
   on(ViewActions.toggleSidebar, (state) => ({
     ...state,
     isSidebarOpen: !state.isSidebarOpen
+  })),
+  on(ViewActions.setActiveSidebarItem, (state, {item}) => ({
+    ...state,
+    activeSidebarItem: item
   })),
 );
