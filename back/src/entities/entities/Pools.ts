@@ -24,6 +24,9 @@ export class Pools {
   @Column("character varying", { name: "version", nullable: true, length: 2 })
   version: string | null;
 
+  @Column("character varying", { name: "pool_address", nullable: true })
+  poolAddress: string | null;
+
   @OneToMany(() => Markets, (markets) => markets.pool)
   markets: Markets[];
 
