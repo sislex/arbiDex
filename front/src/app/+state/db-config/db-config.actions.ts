@@ -13,7 +13,11 @@ export const setTokensDataFailure = createAction(
 );
 export const createToken = createAction(
   '[DbConfig] createToken',
-  props<{ data: { selected: string, address: string } }>()
+  props<{ data: { chainId: string, address: string, symbol: string, decimals: number } }>()
+);
+export const deletingToken = createAction(
+  '[DbConfig] deletingToken',
+  props<{ tokenId: number }>()
 );
 
 export const setPoolsData = createAction('[DbConfig] setPoolsData');

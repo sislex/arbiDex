@@ -9,4 +9,6 @@ export class TokenDto {
 export class CreateTokenDto {
   address: string;
   chainId: number;
+  symbol: string;
+  decimals: number;
 }

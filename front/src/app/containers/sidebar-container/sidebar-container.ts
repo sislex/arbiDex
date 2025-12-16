@@ -103,8 +103,10 @@ export class SidebarContainer implements OnInit {
         buttons: ['add', 'cancel'],
         form: {
           list: this.chainNames$,
-          selected: '4444_test',
+          selected: '',
           address: '',
+          symbol: '',
+          decimals: null,
         }
       }
     });

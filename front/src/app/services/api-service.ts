@@ -14,9 +14,11 @@ export class ApiService {
   getTokensData(): Observable<any> {
     return this.http.get(`${this.apiUrl}/tokens`);
   }
-
   createToken(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/tokens`, {...data});
+  }
+  deletingToken(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/tokens/${id}`);
   }
 
   getPoolsData(): Observable<any> {

@@ -5,6 +5,7 @@ import * as DbConfigActions from './db-config.actions';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
 import { getChainsDataResponse } from './db-config.selectors';
+import { setTokensData } from './db-config.actions';
 
 
 @Injectable()
@@ -12,6 +13,10 @@ export class DbConfigEffects {
   private actions$ = inject(Actions);
   private apiService = inject(ApiService);
   private store = inject(Store);
+
+  //====================================================================================================================
+  //                                                   Tokens
+  //====================================================================================================================
 
   setTokensData$ = createEffect(() =>
     this.actions$.pipe(
@@ -34,7 +39,7 @@ export class DbConfigEffects {
         ofType(DbConfigActions.createToken),
         withLatestFrom(this.store.select(getChainsDataResponse)),
         switchMap(([action, chains]) => {
-          const chain = chains.find(c => c.name === action.data.selected);
+          const chain = chains.find(c => c.name === action.data.chainId);
 
           if (!chain) {
             console.error('Chain not found');
@@ -44,8 +49,13 @@ export class DbConfigEffects {
           return this.apiService.createToken({
             chainId: chain.chainId,
             address: action.data.address,
+            symbol: action.data.symbol,
+            decimals: action.data.decimals,
           }).pipe(
-            tap(response => console.log('API success:', response)),
+            tap(response => {
+              this.store.dispatch(setTokensData());
+              console.log('API success:', response);
+            }),
             catchError(error => {
               console.error('API error:', error);
               return EMPTY;
@@ -56,8 +66,29 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
+  deletingToken = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingToken),
+        switchMap((action) => {
 
+          return this.apiService.deletingToken(action.tokenId).pipe(
+            tap(response => {
+              this.store.dispatch(setTokensData());
+              console.log('API success:', response);
+            }),
+            catchError(error => {
+              console.error('API error:', error);
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
 
+  //====================================================================================================================
+  //                                                   Pools
+  //====================================================================================================================
 
   setPoolsData$ = createEffect(() =>
     this.actions$.pipe(
@@ -75,6 +106,10 @@ export class DbConfigEffects {
     )
   );
 
+  //====================================================================================================================
+  //                                                   Markets
+  //====================================================================================================================
+
   setMarketsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setMarketsData),
@@ -91,6 +126,10 @@ export class DbConfigEffects {
     )
   );
 
+  //====================================================================================================================
+  //                                                   Dexes
+  //====================================================================================================================
+
   setDexesData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setDexesData),
@@ -106,6 +145,10 @@ export class DbConfigEffects {
       )
     )
   );
+
+  //====================================================================================================================
+  //                                                   Chains
+  //====================================================================================================================
 
   setChainsData$ = createEffect(() =>
     this.actions$.pipe(

@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
-import {setTokensData} from '../../../+state/db-config/db-config.actions';
+import { deletingToken, setTokensData } from '../../../+state/db-config/db-config.actions';
 import {getTokensDataResponse} from '../../../+state/db-config/db-config.selectors';
 import {AsyncPipe} from '@angular/common';
 import {Store} from '@ngrx/store';
@@ -43,7 +43,7 @@ export class AgGridTokensContainer implements OnInit {
       headerName: 'Token ID',
     },
     {
-      field: "chain",
+      field: "chainId",
       headerName: 'Chain ID',
     },
     {
@@ -72,6 +72,7 @@ export class AgGridTokensContainer implements OnInit {
     sortable: false,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
+    headerClass: 'align-center',
     flex: 1
   };
 
@@ -100,7 +101,7 @@ export class AgGridTokensContainer implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         if (result.data === 'yes') {
-          // this.store.dispatch(deletingBot({id: rowData.id}))
+          this.store.dispatch(deletingToken({tokenId: rowData.tokenId}))
         } else {
         }
       } else {

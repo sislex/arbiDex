@@ -35,6 +35,7 @@ export class AgGridChainsContainer {
     sortable: false,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
+    headerClass: 'align-center',
     flex: 1
   };
 }
