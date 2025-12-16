@@ -20,6 +20,8 @@ export class AgGridMarketsContainer {
   private store = inject(Store);
   readonly marketDialog = inject(MarketDialogService);
 
+  list$: any;
+
   colDefs: ColDef[] = [
     {
       field: "#",
@@ -59,10 +61,10 @@ export class AgGridMarketsContainer {
   }
 
   openCreateDialog() {
-    // this.marketDialog.openCreate(this.list$).subscribe(result => {
-    //   if (result?.data === 'add') {
-    //     this.store.dispatch(createMarket({ data: result.formData }));
-    //   }
-    // });
+    this.marketDialog.openCreate(this.list$).subscribe(result => {
+      if (result?.data === 'add') {
+        // this.store.dispatch(createMarket({ data: result.formData }));
+      }
+    });
   }
 }

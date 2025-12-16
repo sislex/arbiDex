@@ -20,6 +20,8 @@ export class AgGridDexesContainer {
   private store = inject(Store);
   readonly dexDialog = inject(DexDialogService);
 
+  list$: any;
+
   colDefs: ColDef[] = [
     {
       field: "#",
@@ -55,10 +57,10 @@ export class AgGridDexesContainer {
   }
 
   openCreateDialog() {
-    // this.dexDialog.openCreate(this.list$).subscribe(result => {
-    //   if (result?.data === 'add') {
-    //     this.store.dispatch(createDex({ data: result.formData }));
-    //   }
-    // });
+    this.dexDialog.openCreate(this.list$).subscribe(result => {
+      if (result?.data === 'add') {
+        // this.store.dispatch(createDex({ data: result.formData }));
+      }
+    });
   }
 }

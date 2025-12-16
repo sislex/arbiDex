@@ -20,6 +20,8 @@ export class AgGridPoolsContainer {
   private store = inject(Store);
   readonly poolDialog = inject(PoolDialogService);
 
+  list$: any;
+
   colDefs: ColDef[] = [
     {
       field: "#",
@@ -75,11 +77,11 @@ export class AgGridPoolsContainer {
   }
 
   openCreateDialog() {
-    // this.poolDialog.openCreate(this.list$).subscribe(result => {
-    //   if (result?.data === 'add') {
-    //     this.store.dispatch(createPool({ data: result.formData }));
-    //   }
-    // });
+    this.poolDialog.openCreate(this.list$).subscribe(result => {
+      if (result?.data === 'add') {
+        // this.store.dispatch(createPool({ data: result.formData }));
+      }
+    });
   }
 
 }
