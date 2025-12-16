@@ -26,15 +26,19 @@ export class AgGridPoolsContainer {
       },
     },
     {
-      field: "pool_id",
+      field: "poolId",
       headerName: 'Pool ID',
     },
     {
-      field: "chain_id",
+      field: "poolAddress",
+      headerName: 'Pool Address',
+    },
+    {
+      field: "chainId",
       headerName: 'Chain ID',
     },
     {
-      field: "dex_id",
+      field: "dexId",
       headerName: 'Dex ID',
     },
     {
@@ -42,11 +46,11 @@ export class AgGridPoolsContainer {
       headerName: 'Dex version',
     },
     {
-      field: "base_token_id",
+      field: "baseTokenId",
       headerName: 'Base token ID',
     },
     {
-      field: "quote_token_id",
+      field: "quoteTokenId",
       headerName: 'Quote token ID',
     },
   ];

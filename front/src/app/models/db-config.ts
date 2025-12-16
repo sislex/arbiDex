@@ -41,6 +41,7 @@ export interface ITokensCreate {
 export interface IPools {
   poolId: number;
   chainId: number;
+  poolAddress: number;
   baseTokenId: number;
   quoteTokenId: number;
   fee: number;
@@ -51,6 +52,7 @@ export interface IPools {
 export interface IPoolsCreate {
   poolId: number;
   chainId: number;
+  poolAddress: number;
   baseTokenId: number;
   quoteTokenId: number;
   fee: number;
