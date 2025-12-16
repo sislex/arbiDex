@@ -41,6 +41,7 @@ export class DbConfigEffects {
             chainId: action.data.chainId,
             address: action.data.address,
             symbol: action.data.symbol,
+            tokenName: action.data.tokenName,
             decimals: action.data.decimals,
           }).pipe(
             tap(response => {

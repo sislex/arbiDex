@@ -43,26 +43,32 @@ export class AgGridTokensContainer implements OnInit {
     {
       field: "tokenId",
       headerName: 'Token ID',
-    },
-    {
-      field: "chainId",
-      headerName: 'Chain ID',
-    },
-    {
-      field: "address",
-      headerName: 'Address',
-    },
-    {
-      field: "symbol",
-      headerName: 'Symbol',
-    },
-    {
-      field: "decimals",
-      headerName: 'Decimals',
+      flex: 1,
     },
     {
       field: "tokenName",
       headerName: 'Token Name',
+      flex: 1,
+    },
+    {
+      field: "chainId",
+      headerName: 'Chain ID',
+      flex: 1
+    },
+    {
+      field: "address",
+      headerName: 'Address',
+      flex: 1
+    },
+    {
+      field: "symbol",
+      headerName: 'Symbol',
+      flex: 1,
+    },
+    {
+      field: "decimals",
+      headerName: 'Decimals',
+      flex: 1,
     },
     {
       headerName: 'Delete',
@@ -79,7 +85,6 @@ export class AgGridTokensContainer implements OnInit {
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
-    flex: 1
   };
 
   onAction($event: any, row: any) {
