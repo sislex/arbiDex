@@ -8,9 +8,11 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-toolbar>
+
   <div class="main-message">
   <ng-content select="[popupContent]"></ng-content>
   </div>
+
   @if (buttons.length) {
     <div class="footer">
       <mat-toolbar>

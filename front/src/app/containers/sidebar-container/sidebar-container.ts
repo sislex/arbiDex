@@ -5,10 +5,14 @@ import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
 import { toggleSidebar } from '../../+state/view/view.actions';
 import { getIsSidebarOpen } from '../../+state/view/view.selectors';
 import { AsyncPipe } from '@angular/common';
-import { getFeatureName } from '../../+state/db-config/db-config.selectors';
+import { getChainsDataResponse, getFeatureName } from '../../+state/db-config/db-config.selectors';
 import { HeaderContentLayout } from '../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../components/title-table-button/title-table-button';
 import { MainTitlePage } from '../../components/main-title-page/main-title-page';
+import { MatDialog } from '@angular/material/dialog';
+import { TokenFormContainer } from '../forms/token-form-container/token-form-container';
+import { map } from 'rxjs';
+import { createToken } from '../../+state/db-config/db-config.actions';
 
 @Component({
   selector: 'app-sidebar-container',
@@ -28,9 +32,15 @@ export class SidebarContainer implements OnInit {
   private store = inject(Store);
   private router = inject(Router);
   private route=inject(ActivatedRoute);
+  readonly dialog = inject(MatDialog);
 
   isSidebarOpen$ = this.store.select(getIsSidebarOpen);
   featureName$ = this.store.select(getFeatureName);
+
+  getChainsData$ = this.store.select(getChainsDataResponse);
+  chainNames$ = this.getChainsData$.pipe(
+    map(chains => chains?.map(chain => chain.name) || [])
+  );
 
   list = [
     'Tokens',
@@ -56,6 +66,7 @@ export class SidebarContainer implements OnInit {
   }
 
   events($event: any) {
+    console.log($event)
     if ($event.event === 'Sidebar:TOGGLE_CLICKED') {
       this.store.dispatch(toggleSidebar())
     } else if ($event.event === 'Sidebar:SET_ACTIVE_ITEM_CLICKED') {
@@ -73,11 +84,40 @@ export class SidebarContainer implements OnInit {
     }
   }
 
-  // onAction($event: any, note: string) {
-  //   if ($event.event === 'Actions:ACTION_CLICKED') {
-  //     if (note === 'info' ) {
-  //       this.openEditDialog()
-  //     }
-  //   }
-  // }
+  onAction($event: any, note: string) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if (note === 'add' ) {
+        this.openEditDialog()
+      }
+    }
+  }
+
+  openEditDialog() {
+    const dialogRef = this.dialog.open(TokenFormContainer, {
+      width: '90%',
+      height: '90%',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      data: {
+        title: 'Add new token',
+        buttons: ['add', 'cancel'],
+        form: {
+          list: this.chainNames$,
+          selected: '4444_test',
+          address: '',
+        }
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (result.data === 'add') {
+          this.store.dispatch(createToken({data: result.formData}))
+        } else {
+        }
+      } else {
+        console.log('Deletion cancelled');
+      }
+    });
+  }
 }

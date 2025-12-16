@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import {ConfigModule, ConfigService} from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TokensModule } from './tokens/tokens.module';
 import { ChainsModule } from './chains/chains.module';
@@ -9,17 +9,17 @@ import { MarketsModule } from './markets/markets.module';
 import { PoolsModule } from './pools/pools.module';
 import { ServersModule } from './servers/servers.module';
 import { DexesModule } from './dexes/dexes.module';
-import {Tokens} from './entities/entities/Tokens';
-import {Pools} from './entities/entities/Pools';
-import {Chains} from './entities/entities/Chains';
-import {Markets} from './entities/entities/Markets';
-import {Dexes} from './entities/entities/Dexes';
-import {Servers} from './entities/entities/Servers';
+import { Tokens } from './entities/entities/Tokens';
+import { Pools } from './entities/entities/Pools';
+import { Chains } from './entities/entities/Chains';
+import { Markets } from './entities/entities/Markets';
+import { Dexes } from './entities/entities/Dexes';
+import { Servers } from './entities/entities/Servers';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -33,7 +33,10 @@ import {Servers} from './entities/entities/Servers';
         entities: [Tokens, Pools, Chains, Markets, Dexes, Servers],
         autoLoadEntities: true,
         synchronize: false,
-        ssl: cfg.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
+        ssl:
+          cfg.get<string>('DB_SSL') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
       }),
     }),
     TokensModule,
@@ -47,4 +50,3 @@ import {Servers} from './entities/entities/Servers';
   providers: [AppService],
 })
 export class AppModule {}
-

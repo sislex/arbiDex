@@ -11,6 +11,10 @@ export const setTokensDataFailure = createAction(
   '[DbConfig] setTokensDataFailure',
   props<{ error: string }>()
 );
+export const createToken = createAction(
+  '[DbConfig] createToken',
+  props<{ data: { selected: string, address: string } }>()
+);
 
 export const setPoolsData = createAction('[DbConfig] setPoolsData');
 export const setPoolsDataSuccess = createAction(

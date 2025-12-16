@@ -1,0 +1,23 @@
+<div class="input-component">
+  @if (title) {
+    <span class="title">{{ title }}</span>
+  }
+  <mat-form-field class="example-full-width">
+    @if (label) {
+      <mat-label>{{label}}</mat-label>
+    }
+    <input matInput
+           placeholder="{{ placeholder }}"
+           [(ngModel)]="inputValue"
+           (ngModelChange)="onInputChange($event)"
+           value="{{inputValue}}">
+
+    @if (inputValue) {
+      <button matSuffix matIconButton aria-label="Clear" (click)="clearInput()">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+
+  </mat-form-field>
+</div>
+

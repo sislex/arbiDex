@@ -1,14 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {catchError, map, of, switchMap} from 'rxjs';
+import { catchError, EMPTY, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
 import {ApiService} from '../../services/api-service';
+import { Store } from '@ngrx/store';
+import { getChainsDataResponse } from './db-config.selectors';
 
 
 @Injectable()
 export class DbConfigEffects {
   private actions$ = inject(Actions);
   private apiService = inject(ApiService);
+  private store = inject(Store);
 
   setTokensData$ = createEffect(() =>
     this.actions$.pipe(
@@ -25,6 +28,36 @@ export class DbConfigEffects {
       )
     )
   );
+
+  createToken = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createToken),
+        withLatestFrom(this.store.select(getChainsDataResponse)),
+        switchMap(([action, chains]) => {
+          const chain = chains.find(c => c.name === action.data.selected);
+
+          if (!chain) {
+            console.error('Chain not found');
+            return EMPTY;
+          }
+
+          return this.apiService.createToken({
+            chainId: chain.chainId,
+            address: action.data.address,
+          }).pipe(
+            tap(response => console.log('API success:', response)),
+            catchError(error => {
+              console.error('API error:', error);
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+
+
 
   setPoolsData$ = createEffect(() =>
     this.actions$.pipe(

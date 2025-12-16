@@ -11,6 +11,7 @@
         header
         [title]="'item' + ' table'"
         [icon]="'add'"
+        (emitter)="onAction($event, 'add')"
       ></app-title-table-button>
       <router-outlet content></router-outlet>
     </app-header-content-layout>

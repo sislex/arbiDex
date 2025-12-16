@@ -1,15 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { ChainDto } from '../dtos/chains-dto/chain.dto';
 import { UpdateChainDto } from '../dtos/chains-dto/update-chain.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Chains } from '../entities/entities/Chains';
 
 @Injectable()
 export class ChainsService {
+  constructor(
+    @InjectRepository(Chains)
+    private chainsRepository: Repository<Chains>,
+  ) {}
   create(createChainDto: ChainDto) {
     return 'This action adds a new chain';
   }
 
-  findAll() {
-    return `This action returns all chains`;
+  async findAll() {
+    return await this.chainsRepository.find();
   }
 
   findOne(id: number) {

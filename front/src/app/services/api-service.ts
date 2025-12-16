@@ -15,6 +15,10 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/tokens`);
   }
 
+  createToken(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/tokens`, {...data});
+  }
+
   getPoolsData(): Observable<any> {
     return this.http.get(`${this.apiUrl}/pools`);
   }
