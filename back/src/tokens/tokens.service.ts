@@ -42,15 +42,33 @@ export class TokensService {
     });
   }
 
-  //
-  // findOne(id: number) {
-  //   return `This action returns a #${id} token`;
-  // }
-  //
-  // update(id: number, updateTokenDto: UpdateTokenDto) {
-  //   return `This action updates a #${id} token`;
-  // }
-  //
+  async update(id: number, tokenDto: CreateTokenDto) {
+    const token = await this.tokensRepository.findOne({
+      where: { tokenId: id },
+      relations: ['chain'],
+    });
+
+    if (!token) {
+      throw new Error(`Token с id ${id} не найден`);
+    }
+
+    const chain = await this.chainsRepository.findOne({
+      where: { chainId: tokenDto.chainId },
+    });
+
+    if (!chain) {
+      throw new Error(`Chain с id ${tokenDto.chainId} не найден`);
+    }
+
+    token.address = tokenDto.address;
+    token.symbol = tokenDto.symbol;
+    token.tokenName = tokenDto.tokenName;
+    token.decimals = tokenDto.decimals;
+    token.chain = chain;
+
+    return await this.tokensRepository.save(token);
+  }
+
   async remove(id: number) {
     return await this.tokensRepository.delete(id);
   }

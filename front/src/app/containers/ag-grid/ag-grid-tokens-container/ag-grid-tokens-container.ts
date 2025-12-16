@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
-import { deletingToken, setTokensData } from '../../../+state/db-config/db-config.actions';
+import { deletingToken, editToken, setTokensData } from '../../../+state/db-config/db-config.actions';
 import { getChainsDataResponse, getTokensDataResponse } from '../../../+state/db-config/db-config.selectors';
 import {AsyncPipe} from '@angular/common';
 import {Store} from '@ngrx/store';
@@ -9,6 +9,7 @@ import { ActionsContainer } from '../../actions-container/actions-container';
 import { ConfirmationPopUpContainer } from '../../confirmation-pop-up-container/confirmation-pop-up-container';
 import { MatDialog } from '@angular/material/dialog';
 import { TokenFormContainer } from '../../forms/token-form-container/token-form-container';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-ag-grid-tokens-container',
@@ -24,7 +25,14 @@ export class AgGridTokensContainer implements OnInit {
   readonly dialog = inject(MatDialog);
 
   tokensDataResponse$ = this.store.select(getTokensDataResponse);
-  getChainsData$ = this.store.select(getChainsDataResponse);
+  list$ = this.store.select(getChainsDataResponse).pipe(
+    map(chains =>
+      chains.map(chain => ({
+        id: String(chain.chainId),
+        name: chain.name,
+      }))
+    )
+  );
 
   ngOnInit() {
     this.store.dispatch(setTokensData());
@@ -98,7 +106,6 @@ export class AgGridTokensContainer implements OnInit {
   }
 
   openEditDialog(row: any) {
-    console.log('row', row)
     const dialogRef = this.dialog.open(TokenFormContainer, {
       width: '90%',
       height: '90%',
@@ -106,24 +113,18 @@ export class AgGridTokensContainer implements OnInit {
       maxHeight: '100%',
       panelClass: 'custom-dialog-container',
       data: {
-        title: 'Add new token',
+        title: 'Edit token',
         buttons: ['edit', 'cancel'],
-        form: {
-          list: this.getChainsData$,
-          selected: row.chainId,
-          address: row.address,
-          symbol: row.symbol,
-          tokenName: row.tokenName,
-          decimals: row.decimals,
-        }
+        list: this.list$,
+        form: { ...row },
       },
+
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         if (result.data === 'edit') {
-          console.log('edit', result)
-          // this.store.dispatch(editToken({data: result.formData}))
+          this.store.dispatch(editToken({data: result.formData}))
         } else {
         }
       } else {

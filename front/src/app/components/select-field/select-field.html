@@ -1,8 +1,8 @@
 <mat-form-field>
   <mat-label>{{ title }}</mat-label>
   <mat-select [(value)]="selected">
-    @for (item of list; track item) {
-      <mat-option (click)="click(item.chainId)" [value]="item.chainId">{{item.name}}</mat-option>
+    @for (item of list; track item.id) {
+      <mat-option (click)="click(item.id)" [value]="item.id">{{item.name}}</mat-option>
     }
   </mat-select>
 </mat-form-field>

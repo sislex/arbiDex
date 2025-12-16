@@ -21,12 +21,12 @@ export interface IChainsAPI extends API {
 }
 
 export interface ITokens {
-  tokenId: number;
-  chainId: number;
+  tokenId: number | null;
+  chainId: number | null;
   address: string;
   symbol: string;
   tokenName: string;
-  decimals: number;
+  decimals: number | null;
 }
 
 export interface IPools {
@@ -48,10 +48,14 @@ export interface IMarkets {
 export interface IDexes {
   dexId: number;
   name: string;
-
 }
 
 export interface IChains {
   chainId: number;
+  name: string;
+}
+
+export interface ISelectMenu {
+  id: string;
   name: string;
 }

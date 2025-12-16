@@ -4,14 +4,14 @@
   }
   <mat-form-field class="example-full-width">
     @if (label) {
-      <mat-label>{{label}}</mat-label>
+      <mat-label>{{ label }}</mat-label>
     }
     <input matInput
-           type="{{type}}"
+           type="{{ type }}"
            placeholder="{{ placeholder }}"
            [(ngModel)]="inputValue"
            (ngModelChange)="onInputChange($event)"
-           value="{{inputValue}}"
+           value="{{ inputValue }}"
     >
 
     @if (inputValue) {

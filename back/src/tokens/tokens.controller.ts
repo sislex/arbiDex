@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Delete, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Param, Put } from '@nestjs/common';
 import { TokensService } from './tokens.service';
 import { CreateTokenDto } from '../dtos/token-dto/token.dto';
 
@@ -30,17 +30,11 @@ export class TokensController {
     }));
   }
 
-  //
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.tokensService.findOne(+id);
-  // }
-  //
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateTokenDto: UpdateTokenDto) {
-  //   return this.tokensService.update(+id, updateTokenDto);
-  // }
-  //
+  @Put(':id')
+  update(@Param('id') id: string, @Body() tokenDto: CreateTokenDto) {
+    return this.tokensService.update(+id, tokenDto);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: number) {
     return this.tokensService.remove(id);

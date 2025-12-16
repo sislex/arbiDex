@@ -33,7 +33,7 @@ export class DbConfigEffects {
     )
   );
 
-  createToken = createEffect(() =>
+  createToken$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.createToken),
         switchMap((action) => {
@@ -58,7 +58,27 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
-  deletingToken = createEffect(() =>
+  editToken$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editToken),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editToken(data.tokenId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setTokensData());
+              console.log('API success:', response);
+            }),
+            catchError(error => {
+              console.error('API error:', error);
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  deletingToken$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.deletingToken),
         switchMap((action) => {
