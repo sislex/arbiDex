@@ -61,6 +61,10 @@ export class AgGridTokensContainer implements OnInit {
       headerName: 'Decimals',
     },
     {
+      field: "tokenName",
+      headerName: 'Token Name',
+    },
+    {
       headerName: 'Delete',
       width: 125,
       cellRenderer: ActionsContainer,
@@ -104,6 +108,7 @@ export class AgGridTokensContainer implements OnInit {
           selected: row.chainId,
           address: row.address,
           symbol: row.symbol,
+          tokenName: row.tokenName,
           decimals: row.decimals,
         }
       },

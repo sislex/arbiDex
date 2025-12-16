@@ -12,6 +12,7 @@ export class TokensController {
       chainId: tokenDto.chainId,
       address: tokenDto.address,
       symbol: tokenDto.symbol,
+      tokenName: tokenDto.tokenName,
       decimals: +tokenDto.decimals,
     });
   }
@@ -23,6 +24,7 @@ export class TokensController {
       tokenId: t.tokenId,
       address: t.address,
       symbol: t.symbol,
+      tokenName: t.tokenName,
       decimals: t.decimals,
       chainId: t.chain?.chainId,
     }));

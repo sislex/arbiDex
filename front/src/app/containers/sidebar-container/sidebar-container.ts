@@ -103,6 +103,7 @@ export class SidebarContainer implements OnInit {
           selected: 0,
           address: '',
           symbol: '',
+          tokenName: '',
           decimals: 0,
         }
       },

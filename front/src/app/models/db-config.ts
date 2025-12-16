@@ -25,6 +25,7 @@ export interface ITokens {
   chainId: number;
   address: string;
   symbol: string;
+  tokenName: string;
   decimals: number;
 }
 

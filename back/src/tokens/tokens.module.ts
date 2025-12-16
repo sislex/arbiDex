@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TokensService } from './tokens.service';
 import { TokensController } from './tokens.controller';
 import { Tokens } from '../entities/entities/Tokens';
-import {Chains} from '../entities/entities/Chains';
+import { Chains } from '../entities/entities/Chains';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Tokens, Chains])],

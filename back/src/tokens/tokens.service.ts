@@ -23,6 +23,7 @@ export class TokensService {
     const token = this.tokensRepository.create({
       address: tokenDto.address,
       symbol: tokenDto.symbol,
+      tokenName: tokenDto.tokenName,
       decimals: tokenDto.decimals,
       chain,
     });
@@ -31,6 +32,11 @@ export class TokensService {
   }
 
   async findAll() {
+    console.log(
+      await this.tokensRepository.find({
+        relations: ['chain'],
+      }),
+    );
     return await this.tokensRepository.find({
       relations: ['chain'],
     });
