@@ -29,6 +29,15 @@ export interface ITokens {
   decimals: number | null;
 }
 
+export interface ITokensCreate {
+  tokenId: number;
+  chainId: number;
+  address: string;
+  symbol: string;
+  tokenName: string;
+  decimals: number;
+}
+
 export interface IPools {
   poolId: number;
   chainId: number;

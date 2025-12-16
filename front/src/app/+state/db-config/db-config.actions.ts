@@ -1,4 +1,5 @@
 import { createAction, props } from '@ngrx/store';
+import { ITokensCreate } from '../../models/db-config';
 
 export const setServerList = createAction('[DbConfig] setServerList');
 
@@ -17,11 +18,11 @@ export const setTokensDataFailure = createAction(
 );
 export const createToken = createAction(
   '[DbConfig] createToken',
-  props<{ data: { tokenId: number, chainId: number, address: string, symbol: string, decimals: number, tokenName: string } }>()
+  props<{ data: ITokensCreate }>()
 );
 export const editToken = createAction(
   '[DbConfig] editToken',
-  props<{ data: { tokenId: number, chainId: number, address: string, symbol: string, decimals: number, tokenName: string } }>()
+  props<{ data: ITokensCreate }>()
 );
 export const deletingToken = createAction(
   '[DbConfig] deletingToken',
