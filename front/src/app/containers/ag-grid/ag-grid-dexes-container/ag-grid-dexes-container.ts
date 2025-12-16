@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
+import { Store } from '@ngrx/store';
+import { DexDialogService } from '../../../services/dex-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-dexes-container',
@@ -15,7 +17,8 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
   styleUrl: './ag-grid-dexes-container.scss',
 })
 export class AgGridDexesContainer {
-
+  private store = inject(Store);
+  readonly dexDialog = inject(DexDialogService);
 
   colDefs: ColDef[] = [
     {
@@ -47,6 +50,15 @@ export class AgGridDexesContainer {
 
   actions($event: any, note: any) {
     if (note === 'add' ) {
+      this.openCreateDialog();
     }
+  }
+
+  openCreateDialog() {
+    // this.dexDialog.openCreate(this.list$).subscribe(result => {
+    //   if (result?.data === 'add') {
+    //     this.store.dispatch(createDex({ data: result.formData }));
+    //   }
+    // });
   }
 }

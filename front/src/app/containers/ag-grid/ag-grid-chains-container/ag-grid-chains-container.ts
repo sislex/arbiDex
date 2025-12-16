@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
+import { Store } from '@ngrx/store';
+import { ChainDialogService } from '../../../services/chain-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-chains-container',
@@ -15,6 +17,9 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
   styleUrl: './ag-grid-chains-container.scss',
 })
 export class AgGridChainsContainer {
+  private store = inject(Store);
+  readonly chainDialog = inject(ChainDialogService);
+
   colDefs: ColDef[] = [
     {
       field: "#",
@@ -45,6 +50,15 @@ export class AgGridChainsContainer {
 
   actions($event: any, note: any) {
     if (note === 'add' ) {
+      this.openCreateDialog();
     }
+  }
+
+  openCreateDialog() {
+    // this.chainDialog.openCreate(this.list$).subscribe(result => {
+    //   if (result?.data === 'add') {
+    //     this.store.dispatch(createChain({ data: result.formData }));
+    //   }
+    // });
   }
 }

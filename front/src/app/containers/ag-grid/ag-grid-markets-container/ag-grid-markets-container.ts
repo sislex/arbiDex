@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
+import { Store } from '@ngrx/store';
+import { MarketDialogService } from '../../../services/market-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-markets-container',
@@ -15,6 +17,9 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
   styleUrl: './ag-grid-markets-container.scss',
 })
 export class AgGridMarketsContainer {
+  private store = inject(Store);
+  readonly marketDialog = inject(MarketDialogService);
+
   colDefs: ColDef[] = [
     {
       field: "#",
@@ -49,6 +54,15 @@ export class AgGridMarketsContainer {
 
   actions($event: any, note: any) {
     if (note === 'add' ) {
+      this.openCreateDialog();
     }
+  }
+
+  openCreateDialog() {
+    // this.marketDialog.openCreate(this.list$).subscribe(result => {
+    //   if (result?.data === 'add') {
+    //     this.store.dispatch(createMarket({ data: result.formData }));
+    //   }
+    // });
   }
 }

@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
+import { Store } from '@ngrx/store';
+import { PoolDialogService } from '../../../services/pool-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-pools-container',
@@ -15,6 +17,9 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
   styleUrl: './ag-grid-pools-container.scss',
 })
 export class AgGridPoolsContainer {
+  private store = inject(Store);
+  readonly poolDialog = inject(PoolDialogService);
+
   colDefs: ColDef[] = [
     {
       field: "#",
@@ -65,7 +70,16 @@ export class AgGridPoolsContainer {
 
   actions($event: any, note: any) {
     if (note === 'add' ) {
+      this.openCreateDialog();
     }
+  }
+
+  openCreateDialog() {
+    // this.poolDialog.openCreate(this.list$).subscribe(result => {
+    //   if (result?.data === 'add') {
+    //     this.store.dispatch(createPool({ data: result.formData }));
+    //   }
+    // });
   }
 
 }
