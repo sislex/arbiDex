@@ -1,1 +1,7 @@
-<p>pool-form-container works!</p>
+<app-confirmation-pop-up
+  [title]="data.title"
+  [buttons]="data.buttons"
+  (emitter)="eventClose($event)"
+>
+  <app-pool-form></app-pool-form>
+</app-confirmation-pop-up>

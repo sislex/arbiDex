@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
-import { deletingToken, editToken, setTokensData } from '../../../+state/db-config/db-config.actions';
+import { createToken, deletingToken, editToken, setTokensData } from '../../../+state/db-config/db-config.actions';
 import { getChainsDataResponse, getTokensDataResponse } from '../../../+state/db-config/db-config.selectors';
 import {AsyncPipe} from '@angular/common';
 import {Store} from '@ngrx/store';
@@ -10,12 +10,16 @@ import { ConfirmationPopUpContainer } from '../../confirmation-pop-up-container/
 import { MatDialog } from '@angular/material/dialog';
 import { TokenFormContainer } from '../../forms/token-form-container/token-form-container';
 import { map } from 'rxjs';
+import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
+import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 
 @Component({
   selector: 'app-ag-grid-tokens-container',
   imports: [
     AgGrid,
-    AsyncPipe
+    AsyncPipe,
+    HeaderContentLayout,
+    TitleTableButton,
   ],
   templateUrl: './ag-grid-tokens-container.html',
   styleUrl: './ag-grid-tokens-container.scss',
@@ -103,6 +107,47 @@ export class AgGridTokensContainer implements OnInit {
         this.openEditDialog(row);
       }
     }
+  }
+
+  actions($event: any, note: any) {
+    if (note === 'add' ) {
+      this.openCreateTokenDialog();
+    }
+  }
+
+  openCreateTokenDialog() {
+    const dialogRef = this.dialog.open(TokenFormContainer, {
+      width: '90%',
+      height: '90%',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      panelClass: 'custom-dialog-container',
+
+      data: {
+        title: 'Add new token',
+        buttons: ['add', 'cancel'],
+        list: this.list$,
+        form: {
+          tokenId: null,
+          chainId: null,
+          address: '',
+          symbol: '',
+          tokenName: '',
+          decimals: null,
+        }
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (result.data === 'add') {
+          this.store.dispatch(createToken({data: result.formData}))
+        } else {
+        }
+      } else {
+        console.log('Deletion cancelled');
+      }
+    });
   }
 
   openEditDialog(row: any) {

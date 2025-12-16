@@ -7,15 +7,6 @@
 >
   <app-header-content-layout main>
     <app-main-title-page header [title]="'item'"></app-main-title-page>
-    <app-header-content-layout content="">
-      <app-title-table-button
-        header
-        [title]="'item' + ' table'"
-        [icon]="'add'"
-        (emitter)="onAction($event, 'add')"
-      ></app-title-table-button>
-      <router-outlet content></router-outlet>
-    </app-header-content-layout>
-
+    <router-outlet content></router-outlet>
   </app-header-content-layout>
 </app-sidebar>

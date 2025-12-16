@@ -1,1 +1,7 @@
-<p>market-form-container works!</p>
+<app-confirmation-pop-up
+  [title]="data.title"
+  [buttons]="data.buttons"
+  (emitter)="eventClose($event)"
+>
+  <app-market-form></app-market-form>
+</app-confirmation-pop-up>

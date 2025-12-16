@@ -10,8 +10,6 @@ import { HeaderContentLayout } from '../../components/layouts/header-content-lay
 import { TitleTableButton } from '../../components/title-table-button/title-table-button';
 import { MainTitlePage } from '../../components/main-title-page/main-title-page';
 import { MatDialog } from '@angular/material/dialog';
-import { TokenFormContainer } from '../forms/token-form-container/token-form-container';
-import { createToken } from '../../+state/db-config/db-config.actions';
 import { map } from 'rxjs';
 import { NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -76,48 +74,5 @@ export class SidebarContainer implements OnInit {
         this.router.navigate([`/data-view/${address}`]);
       }
     }
-  }
-
-  onAction($event: any, note: string) {
-    if ($event.event === 'Actions:ACTION_CLICKED') {
-      if (note === 'add' ) {
-        this.openCreateTokenDialog();
-      }
-    }
-  }
-
-  openCreateTokenDialog() {
-    const dialogRef = this.dialog.open(TokenFormContainer, {
-      width: '90%',
-      height: '90%',
-      maxWidth: '100%',
-      maxHeight: '100%',
-      panelClass: 'custom-dialog-container',
-
-      data: {
-        title: 'Add new token',
-        buttons: ['add', 'cancel'],
-        list: this.list$,
-        form: {
-          tokenId: null,
-          chainId: null,
-          address: '',
-          symbol: '',
-          tokenName: '',
-          decimals: null,
-        }
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        if (result.data === 'add') {
-          this.store.dispatch(createToken({data: result.formData}))
-        } else {
-        }
-      } else {
-        console.log('Deletion cancelled');
-      }
-    });
   }
 }

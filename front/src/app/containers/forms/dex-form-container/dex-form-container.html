@@ -1,1 +1,7 @@
-<p>dex-form-container works!</p>
+<app-confirmation-pop-up
+  [title]="data.title"
+  [buttons]="data.buttons"
+  (emitter)="eventClose($event)"
+>
+  <app-dex-form></app-dex-form>
+</app-confirmation-pop-up>

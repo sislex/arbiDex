@@ -1,1 +1,7 @@
-<p>chain-form-container works!</p>
+<app-confirmation-pop-up
+  [title]="data.title"
+  [buttons]="data.buttons"
+  (emitter)="eventClose($event)"
+>
+  <app-chain-form></app-chain-form>
+</app-confirmation-pop-up>
