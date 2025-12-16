@@ -5,6 +5,7 @@ import * as DbConfigActions from './db-config.actions';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
 import { setTokensData } from './db-config.actions';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Injectable()
@@ -12,6 +13,8 @@ export class DbConfigEffects {
   private actions$ = inject(Actions);
   private apiService = inject(ApiService);
   private store = inject(Store);
+  private _snackBar = inject(MatSnackBar);
+
 
   //====================================================================================================================
   //                                                   Tokens
@@ -36,24 +39,18 @@ export class DbConfigEffects {
   createToken$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.createToken),
-        switchMap((action) => {
-          return this.apiService.createToken({
-            chainId: action.data.chainId,
-            address: action.data.address,
-            symbol: action.data.symbol,
-            tokenName: action.data.tokenName,
-            decimals: action.data.decimals,
-          }).pipe(
+        switchMap(action =>
+          this.apiService.createToken({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setTokensData());
-              console.log('API success:', response);
+              this._snackBar.open(`Token is created: ${action.data.tokenName}`, '', { duration: 5000 });
             }),
             catchError(error => {
-              console.error('API error:', error);
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
               return EMPTY;
             })
-          );
-        })
+          )
+        )
       ),
     { dispatch: false }
   );
@@ -66,10 +63,10 @@ export class DbConfigEffects {
           return this.apiService.editToken(data.tokenId, data).pipe(
             tap(response => {
               this.store.dispatch(setTokensData());
-              console.log('API success:', response);
+              this._snackBar.open(`Token is update: ${action.data.tokenName}`, '', { duration: 5000 });
             }),
             catchError(error => {
-              console.error('API error:', error);
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
               return EMPTY;
             })
           );
@@ -86,10 +83,10 @@ export class DbConfigEffects {
           return this.apiService.deletingToken(action.tokenId).pipe(
             tap(response => {
               this.store.dispatch(setTokensData());
-              console.log('API success:', response);
+              this._snackBar.open(`Token is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
-              console.error('API error:', error);
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
               return EMPTY;
             })
           );

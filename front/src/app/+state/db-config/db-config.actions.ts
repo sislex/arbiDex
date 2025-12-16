@@ -2,6 +2,10 @@ import { createAction, props } from '@ngrx/store';
 
 export const setServerList = createAction('[DbConfig] setServerList');
 
+//====================================================================================================================
+//                                                   Tokens
+//====================================================================================================================
+
 export const setTokensData = createAction('[DbConfig] setTokensData');
 export const setTokensDataSuccess = createAction(
   '[DbConfig] setTokensDataSuccess',
@@ -24,6 +28,10 @@ export const deletingToken = createAction(
   props<{ tokenId: number }>()
 );
 
+//====================================================================================================================
+//                                                   Pools
+//====================================================================================================================
+
 export const setPoolsData = createAction('[DbConfig] setPoolsData');
 export const setPoolsDataSuccess = createAction(
   '[DbConfig] setPoolsDataSuccess',
@@ -33,6 +41,10 @@ export const setPoolsDataFailure = createAction(
   '[DbConfig] setPoolsDataFailure',
   props<{ error: string }>()
 );
+
+//====================================================================================================================
+//                                                   Markets
+//====================================================================================================================
 
 export const setMarketsData = createAction('[DbConfig] setMarketsData');
 export const setMarketsDataSuccess = createAction(
@@ -44,6 +56,10 @@ export const setMarketsDataFailure = createAction(
   props<{ error: string }>()
 );
 
+//====================================================================================================================
+//                                                   Dexes
+//====================================================================================================================
+
 export const setDexesData = createAction('[DbConfig] setDexesData');
 export const setDexesDataSuccess = createAction(
   '[DbConfig] setDexesDataSuccess',
@@ -53,6 +69,10 @@ export const setDexesDataFailure = createAction(
   '[DbConfig] setDexesDataFailure',
   props<{ error: string }>()
 );
+
+//====================================================================================================================
+//                                                   Chains
+//====================================================================================================================
 
 export const setChainsData = createAction('[DbConfig] setChainsData');
 export const setChainsDataSuccess = createAction(
