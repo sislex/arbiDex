@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
+import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
+import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 
 @Component({
   selector: 'app-ag-grid-pools-container',
   imports: [
-    AgGrid
+    AgGrid,
+    HeaderContentLayout,
+    TitleTableButton,
   ],
   templateUrl: './ag-grid-pools-container.html',
   styleUrl: './ag-grid-pools-container.scss',
@@ -54,5 +58,10 @@ export class AgGridPoolsContainer {
     headerClass: 'align-center',
     flex: 1
   };
+
+  actions($event: any, note: any) {
+    if (note === 'add' ) {
+    }
+  }
 
 }

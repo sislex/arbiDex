@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
+import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
+import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 
 @Component({
   selector: 'app-ag-grid-dexes-container',
   imports: [
-    AgGrid
+    AgGrid,
+    HeaderContentLayout,
+    TitleTableButton,
   ],
   templateUrl: './ag-grid-dexes-container.html',
   styleUrl: './ag-grid-dexes-container.scss',
@@ -41,4 +45,8 @@ export class AgGridDexesContainer {
     flex: 1
   };
 
+  actions($event: any, note: any) {
+    if (note === 'add' ) {
+    }
+  }
 }

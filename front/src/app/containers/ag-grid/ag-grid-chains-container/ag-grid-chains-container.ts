@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
+import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
+import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 
 @Component({
   selector: 'app-ag-grid-chains-container',
   imports: [
     AgGrid,
+    HeaderContentLayout,
+    TitleTableButton,
   ],
   templateUrl: './ag-grid-chains-container.html',
   styleUrl: './ag-grid-chains-container.scss',
@@ -38,4 +42,9 @@ export class AgGridChainsContainer {
     headerClass: 'align-center',
     flex: 1
   };
+
+  actions($event: any, note: any) {
+    if (note === 'add' ) {
+    }
+  }
 }

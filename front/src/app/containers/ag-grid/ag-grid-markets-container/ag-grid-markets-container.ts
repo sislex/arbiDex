@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
+import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
+import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 
 @Component({
   selector: 'app-ag-grid-markets-container',
   imports: [
-    AgGrid
+    AgGrid,
+    HeaderContentLayout,
+    TitleTableButton,
   ],
   templateUrl: './ag-grid-markets-container.html',
   styleUrl: './ag-grid-markets-container.scss',
@@ -43,4 +47,8 @@ export class AgGridMarketsContainer {
     flex: 1
   };
 
+  actions($event: any, note: any) {
+    if (note === 'add' ) {
+    }
+  }
 }

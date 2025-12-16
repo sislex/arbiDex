@@ -1,5 +1,15 @@
-<app-ag-grid
-  [rowData]="[]"
-  [colDefs]="colDefs"
-  [defaultColDef]="defaultColDef"
-></app-ag-grid>
+<app-header-content-layout>
+  <app-title-table-button
+    header
+    [title]="'Markets table'"
+    [icon]="'add'"
+    (emitter)="actions($event, 'add')"
+  ></app-title-table-button>
+  <app-ag-grid
+    content
+    [rowData]="[]"
+    [colDefs]="colDefs"
+    [defaultColDef]="defaultColDef"
+  ></app-ag-grid>
+</app-header-content-layout>
+

@@ -7,7 +7,6 @@ import { getActiveSidebarItem, getIsSidebarOpen, getSidebarList } from '../../+s
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import { getChainsDataResponse, getFeatureName } from '../../+state/db-config/db-config.selectors';
 import { HeaderContentLayout } from '../../components/layouts/header-content-layout/header-content-layout';
-import { TitleTableButton } from '../../components/title-table-button/title-table-button';
 import { MainTitlePage } from '../../components/main-title-page/main-title-page';
 import { MatDialog } from '@angular/material/dialog';
 import { map } from 'rxjs';
@@ -21,7 +20,6 @@ import { filter } from 'rxjs/operators';
     RouterOutlet,
     AsyncPipe,
     HeaderContentLayout,
-    TitleTableButton,
     MainTitlePage,
     TitleCasePipe,
   ],
