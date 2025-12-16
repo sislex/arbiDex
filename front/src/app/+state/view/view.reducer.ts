@@ -5,6 +5,7 @@ export const VIEW_FEATURE_KEY = 'view';
 
 export interface ViewState {
   isSidebarOpen: boolean;
+  sidebarList: string[];
 }
 
 export interface ViewPartialState {
@@ -13,6 +14,13 @@ export interface ViewPartialState {
 
 export const initialState: ViewState = {
   isSidebarOpen: true,
+  sidebarList: [
+    'Tokens',
+    'Pools',
+    'Markets',
+    'Dexes',
+    'Chains',
+  ],
 };
 
 export const viewReducer = createReducer(

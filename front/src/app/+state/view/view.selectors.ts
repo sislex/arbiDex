@@ -7,3 +7,7 @@ export const getIsSidebarOpen = createSelector(
   selectFeature,
   (state: ViewState) => state.isSidebarOpen
 );
+export const getSidebarList = createSelector(
+  selectFeature,
+  (state: ViewState) => state.sidebarList
+);

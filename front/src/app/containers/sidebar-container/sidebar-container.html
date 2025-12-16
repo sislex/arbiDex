@@ -1,7 +1,7 @@
 <app-sidebar
   [isSidebarOpen]="(isSidebarOpen$ | async)!"
   [sidebarTitle]="(featureName$ | async)!"
-  [list]="list"
+  [list]="(sidebarList$ | async)!"
   (emitter)="events($event)"
 >
   <app-header-content-layout main>

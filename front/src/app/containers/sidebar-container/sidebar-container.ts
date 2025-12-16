@@ -3,7 +3,7 @@ import {Sidebar} from '../../components/sidebar/sidebar';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
 import { toggleSidebar } from '../../+state/view/view.actions';
-import { getIsSidebarOpen } from '../../+state/view/view.selectors';
+import { getIsSidebarOpen, getSidebarList } from '../../+state/view/view.selectors';
 import { AsyncPipe } from '@angular/common';
 import { getChainsDataResponse, getFeatureName } from '../../+state/db-config/db-config.selectors';
 import { HeaderContentLayout } from '../../components/layouts/header-content-layout/header-content-layout';
@@ -36,6 +36,7 @@ export class SidebarContainer implements OnInit {
 
   isSidebarOpen$ = this.store.select(getIsSidebarOpen);
   featureName$ = this.store.select(getFeatureName);
+  sidebarList$ = this.store.select(getSidebarList);
 
   list$ = this.store.select(getChainsDataResponse).pipe(
     map(chains =>
@@ -45,14 +46,6 @@ export class SidebarContainer implements OnInit {
       }))
     )
   );
-
-  list = [
-    'Tokens',
-    'Pools',
-    'Markets',
-    'Dexes',
-    'Chains'
-  ];
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {

@@ -10,7 +10,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'data-view'
+    redirectTo: 'data-view/tokens'
   },
   {
     path: 'data-view',
