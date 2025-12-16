@@ -8,7 +8,10 @@ export const getFeatureName = createSelector(
   (state: DbConfigState) => state.featureName
 );
 
-// Tokens
+//====================================================================================================================
+//                                                   Tokens
+//====================================================================================================================
+
 export const getTokensDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.tokens.response
@@ -30,7 +33,10 @@ export const getTokensDataIsLoaded = createSelector(
   (state: DbConfigState) => state.tokens.isLoaded
 );
 
-// Pools
+//====================================================================================================================
+//                                                   Pools
+//====================================================================================================================
+
 export const getPoolsDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.pools.response
@@ -52,7 +58,10 @@ export const getPoolsDataIsLoaded = createSelector(
   (state: DbConfigState) => state.pools.isLoaded
 );
 
-// Markets
+//====================================================================================================================
+//                                                   Markets
+//====================================================================================================================
+
 export const getMarketsDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.markets.response
@@ -74,7 +83,10 @@ export const getMarketsDataIsLoaded = createSelector(
   (state: DbConfigState) => state.markets.isLoaded
 );
 
-// Dexes
+//====================================================================================================================
+//                                                   Dexes
+//====================================================================================================================
+
 export const getDexesDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.dexes.response
@@ -96,7 +108,10 @@ export const getDexesDataIsLoaded = createSelector(
   (state: DbConfigState) => state.dexes.isLoaded
 );
 
-// Chains
+//====================================================================================================================
+//                                                   Chains
+//====================================================================================================================
+
 export const getChainsDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.chains.response
