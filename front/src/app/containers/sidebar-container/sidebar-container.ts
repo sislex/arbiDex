@@ -11,7 +11,6 @@ import { TitleTableButton } from '../../components/title-table-button/title-tabl
 import { MainTitlePage } from '../../components/main-title-page/main-title-page';
 import { MatDialog } from '@angular/material/dialog';
 import { TokenFormContainer } from '../forms/token-form-container/token-form-container';
-import { map } from 'rxjs';
 import { createToken } from '../../+state/db-config/db-config.actions';
 
 @Component({
@@ -38,9 +37,6 @@ export class SidebarContainer implements OnInit {
   featureName$ = this.store.select(getFeatureName);
 
   getChainsData$ = this.store.select(getChainsDataResponse);
-  chainNames$ = this.getChainsData$.pipe(
-    map(chains => chains?.map(chain => chain.name) || [])
-  );
 
   list = [
     'Tokens',
@@ -98,17 +94,18 @@ export class SidebarContainer implements OnInit {
       height: '90%',
       maxWidth: '100%',
       maxHeight: '100%',
+      panelClass: 'custom-dialog-container',
       data: {
         title: 'Add new token',
         buttons: ['add', 'cancel'],
         form: {
-          list: this.chainNames$,
-          selected: '',
+          list: this.getChainsData$,
+          selected: 0,
           address: '',
           symbol: '',
-          decimals: null,
+          decimals: 0,
         }
-      }
+      },
     });
 
     dialogRef.afterClosed().subscribe((result) => {

@@ -14,9 +14,10 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class InputField {
   @Input() label: string = '';
-  @Input() placeholder: string = ''
-  @Input() inputValue: string = ''
-  @Input() title: string = ''
+  @Input() placeholder: string = '';
+  @Input() inputValue: string = '';
+  @Input() title: string = '';
+  @Input() type: 'number' | 'text' = 'text';
 
   @Output() emitter = new EventEmitter();
 

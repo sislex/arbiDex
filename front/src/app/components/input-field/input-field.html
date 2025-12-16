@@ -7,10 +7,12 @@
       <mat-label>{{label}}</mat-label>
     }
     <input matInput
+           type="{{type}}"
            placeholder="{{ placeholder }}"
            [(ngModel)]="inputValue"
            (ngModelChange)="onInputChange($event)"
-           value="{{inputValue}}">
+           value="{{inputValue}}"
+    >
 
     @if (inputValue) {
       <button matSuffix matIconButton aria-label="Clear" (click)="clearInput()">

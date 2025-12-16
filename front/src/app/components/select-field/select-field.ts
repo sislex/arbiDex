@@ -12,7 +12,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 })
 export class SelectField {
   @Input() title: string = '';
-  @Input() list: string[] = [];
+  @Input() list: any = [];
   @Input() selected: any;
 
   @Output() emitter = new EventEmitter();

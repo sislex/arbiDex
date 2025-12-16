@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import { catchError, EMPTY, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
+import { catchError, EMPTY, map, of, switchMap, tap } from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
-import { getChainsDataResponse } from './db-config.selectors';
 import { setTokensData } from './db-config.actions';
 
 
@@ -37,17 +36,9 @@ export class DbConfigEffects {
   createToken = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.createToken),
-        withLatestFrom(this.store.select(getChainsDataResponse)),
-        switchMap(([action, chains]) => {
-          const chain = chains.find(c => c.name === action.data.chainId);
-
-          if (!chain) {
-            console.error('Chain not found');
-            return EMPTY;
-          }
-
+        switchMap((action) => {
           return this.apiService.createToken({
-            chainId: chain.chainId,
+            chainId: action.data.chainId,
             address: action.data.address,
             symbol: action.data.symbol,
             decimals: action.data.decimals,

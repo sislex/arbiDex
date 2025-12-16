@@ -77,3 +77,22 @@ body, .toolbar, .panel, mat-button-toggle, mat-toolbar {
   justify-content: flex-end;
 }
 
+
+//reset global styles from angular-material
+.mat-mdc-tab-body-wrapper {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-direction: column;
+}
+
+// dialog API - info
+.custom-dialog-container {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+
+  .mdc-dialog__surface {
+    border-radius: 0 !important;
+  }
+
+}
+
