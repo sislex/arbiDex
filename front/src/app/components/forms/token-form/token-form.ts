@@ -10,6 +10,8 @@ import { Store } from '@ngrx/store';
 import { setChainsData } from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { ITokens } from '../../../models/db-config';
+import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
+import { FieldTitle } from '../../field-title/field-title';
 
 @Component({
   selector: 'app-token-form',
@@ -21,7 +23,9 @@ import { ITokens } from '../../../models/db-config';
     MatIconModule,
     InputField,
     SelectField,
-    AsyncPipe
+    AsyncPipe,
+    HeaderContentLayout,
+    FieldTitle,
   ],
   templateUrl: './token-form.html',
   styleUrl: './token-form.scss',

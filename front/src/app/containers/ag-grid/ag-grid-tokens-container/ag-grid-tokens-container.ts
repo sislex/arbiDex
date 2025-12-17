@@ -2,7 +2,11 @@ import {Component, inject, OnInit} from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { createToken, deletingToken, editToken, setTokensData } from '../../../+state/db-config/db-config.actions';
-import { getChainsDataResponse, getTokensDataResponse } from '../../../+state/db-config/db-config.selectors';
+import {
+  getChainsDataResponse, getTokensDataIsLoaded,
+  getTokensDataIsLoading,
+  getTokensDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
 import {AsyncPipe} from '@angular/common';
 import {Store} from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
@@ -10,6 +14,7 @@ import { map } from 'rxjs';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { TokenDialogService } from '../../../services/token-dialog-service';
+import { Loader } from '../../../components/loader/loader';
 
 @Component({
   selector: 'app-ag-grid-tokens-container',
@@ -18,6 +23,7 @@ import { TokenDialogService } from '../../../services/token-dialog-service';
     AsyncPipe,
     HeaderContentLayout,
     TitleTableButton,
+    Loader,
   ],
   templateUrl: './ag-grid-tokens-container.html',
   styleUrl: './ag-grid-tokens-container.scss',
@@ -27,6 +33,9 @@ export class AgGridTokensContainer implements OnInit {
   readonly tokenDialog = inject(TokenDialogService);
 
   tokensDataResponse$ = this.store.select(getTokensDataResponse);
+  getTokensDataIsLoading$ = this.store.select(getTokensDataIsLoading);
+  getTokensDataIsLoaded$ = this.store.select(getTokensDataIsLoaded);
+
   list$ = this.store.select(getChainsDataResponse).pipe(
     map(chains =>
       chains.map(chain => ({

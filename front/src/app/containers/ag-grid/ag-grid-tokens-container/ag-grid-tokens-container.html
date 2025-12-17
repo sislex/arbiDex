@@ -1,14 +1,20 @@
 <app-header-content-layout>
-  <app-title-table-button
-    header
-    [title]="'Tokens table'"
-    [icon]="'add'"
-    (emitter)="actions($event, 'add')"
-  ></app-title-table-button>
-  <app-ag-grid
-    content
-    [rowData]="(tokensDataResponse$ | async)!"
-    [colDefs]="colDefs"
-    [defaultColDef]="defaultColDef"
-  ></app-ag-grid>
+  @if ((getTokensDataIsLoaded$ | async) && !(getTokensDataIsLoading$ | async)) {
+    <app-title-table-button
+      [title]="'Tokens table'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+      header
+    ></app-title-table-button>
+  }
+  @if ((getTokensDataIsLoaded$ | async) && !(getTokensDataIsLoading$ | async)) {
+    <app-ag-grid
+      [rowData]="(tokensDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      content
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
 </app-header-content-layout>

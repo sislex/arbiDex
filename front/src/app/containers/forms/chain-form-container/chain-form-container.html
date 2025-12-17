@@ -3,7 +3,8 @@
   [buttons]="data.buttons"
   (emitter)="eventClose($event)"
 >
-  <app-chain-form
-    popupContent
-  ></app-chain-form>
+  <div class="scroll" popupContent>
+    <app-chain-form
+    ></app-chain-form>
+  </div>
 </app-confirmation-pop-up>

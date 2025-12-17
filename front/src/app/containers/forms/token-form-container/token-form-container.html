@@ -3,10 +3,12 @@
   [buttons]="data.buttons"
   (emitter)="eventClose($event)"
 >
-  <app-token-form
-    [formData]="data.form"
-    [list]="data.list"
-    (emitter)="eventsForm($event)"
-    popupContent
-  ></app-token-form>
+  <div class="scroll" popupContent>
+    <app-token-form
+      [formData]="data.form"
+      [list]="data.list"
+      (emitter)="eventsForm($event)"
+    >
+    </app-token-form>
+  </div>
 </app-confirmation-pop-up>

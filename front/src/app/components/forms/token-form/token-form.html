@@ -1,41 +1,54 @@
-<div>Chain</div>
-<app-select-field
-  [title]="'Chain name'"
-  [list]="list | async"
-  [selected]="formData.chainId?.toString()"
-  (emitter)="events($event, 'chainId')"
-></app-select-field>
+<app-header-content-layout>
+  <app-field-title header [title]="'Select chain'"></app-field-title>
+  <app-select-field
+    [title]="'Chain name'"
+    [list]="list | async"
+    [selected]="formData.chainId?.toString()"
+    (emitter)="events($event, 'chainId')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
 
-<div>address</div>
-<app-input-field
-  [inputValue]="formData.address"
-  (emitter)="events($event, 'address')"
-></app-input-field>
+<app-header-content-layout>
+  <app-field-title header [title]="'Address'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.address"
+    (emitter)="events($event, 'address')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
 
-<div>symbol</div>
-<app-input-field
-  [inputValue]="formData.symbol"
-  (emitter)="events($event, 'symbol')"
-></app-input-field>
+<app-header-content-layout>
+  <app-field-title header [title]="'Symbol'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.symbol"
+    (emitter)="events($event, 'symbol')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
 
-<div>tokenName</div>
-<app-input-field
-  [inputValue]="formData.tokenName"
-  (emitter)="events($event, 'tokenName')"
-></app-input-field>
+<app-header-content-layout>
+  <app-field-title header [title]="'Token Name'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.tokenName"
+    (emitter)="events($event, 'tokenName')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
 
-<div>decimals</div>
-<app-input-field
-  [inputValue]="formData.decimals || 0"
-  type="number"
-  (emitter)="events($event, 'decimals')"
-></app-input-field>
+<app-header-content-layout>
+  <app-field-title header [title]="'Decimals'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.decimals || 0"
+    type="number"
+    (emitter)="events($event, 'decimals')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
 
-<div>ПО задачам:</div>
+<!--<div>ПО задачам:</div>-->
 
-<div>Реализовать изменение токена</div>
-<div>Стилизовать нормально форму</div>
-<div>Добавить в форму валидацию</div>
-<div>Добавить в форму лодеры</div>
-<div>Добавить на страницу лодеры</div>
-<div>Подвязать зависимость списка в сайдбаре и активного элемента</div>
+<!--<div>Стилизовать нормально форму</div>-->
+<!--<div>Добавить в форму валидацию</div>-->
+<!--<div>Добавить в форму лодеры</div>-->
+<!--<div>Добавить на страницу лодеры</div>-->
