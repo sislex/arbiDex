@@ -20,8 +20,6 @@ export class AgGridChainsContainer {
   private store = inject(Store);
   readonly chainDialog = inject(ChainDialogService);
 
-  list$: any;
-
   colDefs: ColDef[] = [
     {
       field: "#",
@@ -57,7 +55,7 @@ export class AgGridChainsContainer {
   }
 
   openCreateDialog() {
-    this.chainDialog.openCreate(this.list$).subscribe(result => {
+    this.chainDialog.openCreate().subscribe(result => {
       if (result?.data === 'add') {
         // this.store.dispatch(createChain({ data: result.formData }));
       }
