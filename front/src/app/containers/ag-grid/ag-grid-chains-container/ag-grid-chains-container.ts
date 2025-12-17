@@ -5,7 +5,7 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import { ChainDialogService } from '../../../services/chain-dialog-service';
-import { setChainsData } from '../../../+state/db-config/db-config.actions';
+import { createChain, setChainsData } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { Loader } from '../../../components/loader/loader';
 import {
@@ -48,10 +48,12 @@ export class AgGridChainsContainer implements OnInit {
     {
       field: "chainId",
       headerName: 'ID',
+      flex: 1,
     },
     {
       field: "name",
       headerName: 'Name',
+      flex: 1,
     },
     {
       headerName: 'Actions',
@@ -68,7 +70,6 @@ export class AgGridChainsContainer implements OnInit {
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
-    flex: 1
   };
 
   ngOnInit() {
@@ -88,7 +89,7 @@ export class AgGridChainsContainer implements OnInit {
   openCreateDialog() {
     this.chainDialog.openCreate().subscribe(result => {
       if (result?.data === 'add') {
-        // this.store.dispatch(createChain({ data: result.formData }));
+        this.store.dispatch(createChain({ data: result.formData }));
       }
     });
   }

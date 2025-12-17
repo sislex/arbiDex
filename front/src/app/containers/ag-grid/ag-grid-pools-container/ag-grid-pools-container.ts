@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -6,12 +6,16 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
 import { Store } from '@ngrx/store';
 import { PoolDialogService } from '../../../services/pool-dialog-service';
 import {
+  getChainsDataResponse, getDexesDataResponse,
   getPoolsDataIsLoaded,
   getPoolsDataIsLoading,
-  getPoolsDataResponse,
+  getPoolsDataResponse, getTokensDataResponse, getVersionList,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
+import { createPool, setPoolsData } from '../../../+state/db-config/db-config.actions';
+import { map } from 'rxjs';
+import { ActionsContainer } from '../../actions-container/actions-container';
 
 @Component({
   selector: 'app-ag-grid-pools-container',
@@ -25,11 +29,46 @@ import { Loader } from '../../../components/loader/loader';
   templateUrl: './ag-grid-pools-container.html',
   styleUrl: './ag-grid-pools-container.scss',
 })
-export class AgGridPoolsContainer {
+export class AgGridPoolsContainer implements OnInit {
   private store = inject(Store);
   readonly poolDialog = inject(PoolDialogService);
 
-  list$: any;
+  chainsList$ = this.store.select(getChainsDataResponse).pipe(
+    map(item =>
+      item.map(item => ({
+        id: String(item.chainId),
+        name: item.name,
+      }))
+    )
+  );
+
+  tokensList$ = this.store.select(getTokensDataResponse).pipe(
+    map(item =>
+      item.map(item => ({
+        id: String(item.tokenId),
+        name: item.tokenName,
+      }))
+    )
+  );
+
+  dexesList$ = this.store.select(getDexesDataResponse).pipe(
+    map(item =>
+      item.map(item => ({
+        id: String(item.dexId),
+        name: item.name,
+      }))
+    )
+  );
+
+  versionList$ = this.store.select(getVersionList).pipe(
+    map(item =>
+      item.map(item => ({
+        id: item,
+        name: item,
+      }))
+    )
+  );
+
   poolsDataResponse$ = this.store.select(getPoolsDataResponse);
   poolsDataIsLoading$ = this.store.select(getPoolsDataIsLoading);
   poolsDataIsLoaded$ = this.store.select(getPoolsDataIsLoaded);
@@ -47,30 +86,45 @@ export class AgGridPoolsContainer {
     {
       field: "poolId",
       headerName: 'Pool ID',
+      flex: 1,
     },
     {
       field: "poolAddress",
       headerName: 'Pool Address',
+      flex: 1,
     },
     {
       field: "chainId",
       headerName: 'Chain ID',
+      flex: 1,
     },
     {
       field: "dexId",
       headerName: 'Dex ID',
+      flex: 1,
     },
     {
       field: "version",
       headerName: 'Dex version',
+      flex: 1,
     },
     {
       field: "baseTokenId",
       headerName: 'Base token ID',
+      flex: 1,
     },
     {
       field: "quoteTokenId",
       headerName: 'Quote token ID',
+      flex: 1,
+    },
+    {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
     },
   ];
 
@@ -79,9 +133,15 @@ export class AgGridPoolsContainer {
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
-    flex: 1
   };
 
+  ngOnInit() {
+    this.store.dispatch(setPoolsData());
+  };
+
+  onAction() {
+
+  }
   actions($event: any, note: any) {
     if (note === 'add' ) {
       this.openCreateDialog();
@@ -89,9 +149,9 @@ export class AgGridPoolsContainer {
   }
 
   openCreateDialog() {
-    this.poolDialog.openCreate(this.list$).subscribe(result => {
+    this.poolDialog.openCreate(this.chainsList$, this.tokensList$, this.dexesList$, this.versionList$).subscribe(result => {
       if (result?.data === 'add') {
-        // this.store.dispatch(createPool({ data: result.formData }));
+        this.store.dispatch(createPool({ data: result.formData }));
       }
     });
   }

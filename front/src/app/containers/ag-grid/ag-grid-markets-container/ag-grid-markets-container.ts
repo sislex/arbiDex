@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -9,9 +9,13 @@ import {
   getMarketsDataIsLoaded,
   getMarketsDataIsLoading,
   getMarketsDataResponse,
+  getPoolsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
+import { createMarket, setMarketsData } from '../../../+state/db-config/db-config.actions';
+import { map } from 'rxjs';
+import { ActionsContainer } from '../../actions-container/actions-container';
 
 @Component({
   selector: 'app-ag-grid-markets-container',
@@ -25,15 +29,22 @@ import { Loader } from '../../../components/loader/loader';
   templateUrl: './ag-grid-markets-container.html',
   styleUrl: './ag-grid-markets-container.scss',
 })
-export class AgGridMarketsContainer {
+export class AgGridMarketsContainer implements OnInit {
   private store = inject(Store);
   readonly marketDialog = inject(MarketDialogService);
 
-  list$: any;
   marketsDataResponse$ = this.store.select(getMarketsDataResponse);
   marketsDataIsLoading$ = this.store.select(getMarketsDataIsLoading);
   marketsDataIsLoaded$ = this.store.select(getMarketsDataIsLoaded);
 
+  list$ = this.store.select(getPoolsDataResponse).pipe(
+    map(item =>
+      item.map(item => ({
+        id: String(item.poolId),
+        name: item.poolAddress,
+      }))
+    )
+  );
 
   colDefs: ColDef[] = [
     {
@@ -46,16 +57,27 @@ export class AgGridMarketsContainer {
       },
     },
     {
-      field: "market_id",
+      field: "marketId",
       headerName: 'Market ID',
+      flex: 1,
     },
     {
-      field: "pool_id",
+      field: "poolId",
       headerName: 'Pool ID',
+      flex: 1,
     },
     {
       field: "amount",
       headerName: 'Amount',
+      flex: 1,
+    },
+    {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
     },
   ];
 
@@ -64,7 +86,14 @@ export class AgGridMarketsContainer {
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
-    flex: 1
+  };
+
+  ngOnInit() {
+    this.store.dispatch((setMarketsData()));
+  };
+
+  onAction() {
+
   };
 
   actions($event: any, note: any) {
@@ -76,7 +105,7 @@ export class AgGridMarketsContainer {
   openCreateDialog() {
     this.marketDialog.openCreate(this.list$).subscribe(result => {
       if (result?.data === 'add') {
-        // this.store.dispatch(createMarket({ data: result.formData }));
+        this.store.dispatch(createMarket({ data: result.formData }));
       }
     });
   }

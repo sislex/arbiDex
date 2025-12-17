@@ -1,1 +1,4 @@
-export class MarketDto {}
+export class MarketDto {
+  poolId: number;
+  amount: string;
+}

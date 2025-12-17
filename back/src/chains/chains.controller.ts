@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { ChainsService } from './chains.service';
 import { ChainDto } from '../dtos/chains-dto/chain.dto';
-import { UpdateChainDto } from '../dtos/chains-dto/update-chain.dto';
 
 @Controller('chains')
 export class ChainsController {
@@ -17,13 +16,8 @@ export class ChainsController {
     return this.chainsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.chainsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChainDto: UpdateChainDto) {
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateChainDto: ChainDto) {
     return this.chainsService.update(+id, updateChainDto);
   }
 

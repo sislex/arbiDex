@@ -7,6 +7,10 @@ export const getFeatureName = createSelector(
   selectFeature,
   (state: DbConfigState) => state.featureName
 );
+export const getVersionList = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.versions
+);
 
 //====================================================================================================================
 //                                                   Tokens

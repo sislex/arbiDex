@@ -12,6 +12,7 @@ export interface DbConfigState {
   markets: IMarketsAPI;
   dexes: IDexesAPI;
   chains: IChainsAPI;
+  versions: string[];
 }
 
 export interface DbConfigPartialState {
@@ -25,6 +26,7 @@ export const initialState: DbConfigState = {
   markets: emptyAsyncResponse([]),
   dexes: emptyAsyncResponse([]),
   chains: emptyAsyncResponse([]),
+  versions: ['v2', 'v3', 'v4'],
 }
 
 export const dbConfigReducer = createReducer(

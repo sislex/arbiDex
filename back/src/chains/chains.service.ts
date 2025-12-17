@@ -11,23 +11,24 @@ export class ChainsService {
     @InjectRepository(Chains)
     private chainsRepository: Repository<Chains>,
   ) {}
-  create(createChainDto: ChainDto) {
-    return 'This action adds a new chain';
+  async create(chainDto: ChainDto) {
+    const chain = this.chainsRepository.create({
+      chainId: chainDto.chainId,
+      name: chainDto.name,
+    });
+
+    return await this.chainsRepository.save(chain);
   }
 
   async findAll() {
     return await this.chainsRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} chain`;
-  }
-
   update(id: number, updateChainDto: UpdateChainDto) {
     return `This action updates a #${id} chain`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} chain`;
+  async remove(id: number) {
+    return await this.chainsRepository.delete(id);
   }
 }

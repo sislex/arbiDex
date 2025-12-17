@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TokenForm } from '../../../components/forms/token-form/token-form';
+import { Store } from '@ngrx/store';
+import { setChainsData } from '../../../+state/db-config/db-config.actions';
 
 @Component({
   selector: 'app-token-form-container',
@@ -12,13 +14,19 @@ import { TokenForm } from '../../../components/forms/token-form/token-form';
   templateUrl: './token-form-container.html',
   styleUrl: './token-form-container.scss',
 })
-export class TokenFormContainer {
+export class TokenFormContainer implements OnInit {
   private dialogRef = inject(MatDialogRef<TokenFormContainer>);
   public data = inject(MAT_DIALOG_DATA);
 
   formData = {
     ...this.data.form
   }
+
+  private store = inject(Store);
+
+  ngOnInit() {
+    this.store.dispatch(setChainsData());
+  };
 
   eventsForm($event: any) {
     this.formData = { ...$event };

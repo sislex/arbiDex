@@ -1,26 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { DexDto } from '../dtos/dexes-dto/dex.dto';
 import { UpdateDexDto } from '../dtos/dexes-dto/update-dex.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Dexes } from '../entities/entities/Dexes';
 
 @Injectable()
 export class DexesService {
-  create(createDexDto: DexDto) {
-    return 'This action adds a new dex';
+  constructor(
+    @InjectRepository(Dexes)
+    private dexesRepository: Repository<Dexes>,
+  ) {}
+
+  async create(dexDto: DexDto) {
+    const chain = this.dexesRepository.create({
+      dexId: dexDto.dexId,
+      name: dexDto.name,
+    });
+
+    return await this.dexesRepository.save(chain);
   }
 
-  findAll() {
-    return `This action returns all dexes`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} dex`;
+  async findAll() {
+    return await this.dexesRepository.find();
   }
 
   update(id: number, updateDexDto: UpdateDexDto) {
     return `This action updates a #${id} dex`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} dex`;
+  async remove(id: number) {
+    return await this.dexesRepository.delete(id);
   }
 }

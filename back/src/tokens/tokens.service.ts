@@ -32,11 +32,6 @@ export class TokensService {
   }
 
   async findAll() {
-    console.log(
-      await this.tokensRepository.find({
-        relations: ['chain'],
-      }),
-    );
     return await this.tokensRepository.find({
       relations: ['chain'],
     });

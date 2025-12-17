@@ -42,12 +42,12 @@ export const setPoolsDataFailure = createAction(
   '[DbConfig] setPoolsDataFailure',
   props<{ error: string }>()
 );
-export const createPools = createAction(
-  '[DbConfig] createPools',
+export const createPool = createAction(
+  '[DbConfig] createPool',
   props<{ data: IPoolsCreate }>()
 );
-export const editPools = createAction(
-  '[DbConfig] editPools',
+export const editPool = createAction(
+  '[DbConfig] editPool',
   props<{ data: IPoolsCreate }>()
 );
 export const deletingPools = createAction(
@@ -68,16 +68,16 @@ export const setMarketsDataFailure = createAction(
   '[DbConfig] setMarketsDataFailure',
   props<{ error: string }>()
 );
-export const createMarkets = createAction(
-  '[DbConfig] createMarkets',
+export const createMarket = createAction(
+  '[DbConfig] createMarket',
   props<{ data: IMarketsCreate }>()
 );
-export const editMarkets = createAction(
-  '[DbConfig] editMarkets',
+export const editMarket = createAction(
+  '[DbConfig] editMarket',
   props<{ data: IMarketsCreate }>()
 );
-export const deletingMarkets = createAction(
-  '[DbConfig] deletingMarkets',
+export const deletingMarket = createAction(
+  '[DbConfig] deletingMarket',
   props<{ tokenId: number }>()
 );
 
@@ -94,16 +94,16 @@ export const setDexesDataFailure = createAction(
   '[DbConfig] setDexesDataFailure',
   props<{ error: string }>()
 );
-export const createDexes = createAction(
-  '[DbConfig] createDexes',
+export const createDex = createAction(
+  '[DbConfig] createDex',
   props<{ data: IDexesCreate }>()
 );
-export const editDexes = createAction(
-  '[DbConfig] editDexes',
+export const editDex = createAction(
+  '[DbConfig] editDex',
   props<{ data: IDexesCreate }>()
 );
-export const deletingDexes = createAction(
-  '[DbConfig] deletingDexes',
+export const deletingDex = createAction(
+  '[DbConfig] deletingDex',
   props<{ tokenId: number }>()
 );
 
@@ -120,15 +120,15 @@ export const setChainsDataFailure = createAction(
   '[DbConfig] setChainsDataFailure',
   props<{ error: string }>()
 );
-export const createChains = createAction(
-  '[DbConfig] createChains',
+export const createChain = createAction(
+  '[DbConfig] createChain',
   props<{ data: IChainsCreate }>()
 );
-export const editChains = createAction(
-  '[DbConfig] editChains',
+export const editChain = createAction(
+  '[DbConfig] editChain',
   props<{ data: IChainsCreate }>()
 );
-export const deletingChains = createAction(
-  '[DbConfig] deletingChains',
+export const deletingChain = createAction(
+  '[DbConfig] deletingChain',
   props<{ tokenId: number }>()
 );

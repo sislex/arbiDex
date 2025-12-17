@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
 import { DexesService } from './dexes.service';
 import { DexDto } from '../dtos/dexes-dto/dex.dto';
 import { UpdateDexDto } from '../dtos/dexes-dto/update-dex.dto';
@@ -17,12 +17,7 @@ export class DexesController {
     return this.dexesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.dexesService.findOne(+id);
-  }
-
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateDexDto: UpdateDexDto) {
     return this.dexesService.update(+id, updateDexDto);
   }

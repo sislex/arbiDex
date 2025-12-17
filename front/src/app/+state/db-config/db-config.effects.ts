@@ -4,7 +4,7 @@ import { catchError, EMPTY, map, of, switchMap, tap } from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
-import { setTokensData } from './db-config.actions';
+import { setChainsData, setDexesData, setMarketsData, setPoolsData, setTokensData } from './db-config.actions';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 
@@ -115,6 +115,25 @@ export class DbConfigEffects {
     )
   );
 
+  createPool$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createPool),
+        switchMap(action =>
+          this.apiService.createPool({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(setPoolsData());
+              this._snackBar.open(`Token is created: ${response}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
   //====================================================================================================================
   //                                                   Markets
   //====================================================================================================================
@@ -133,6 +152,27 @@ export class DbConfigEffects {
         )
       )
     )
+  );
+
+
+
+  createMarket$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createMarket),
+        switchMap(action =>
+          this.apiService.createMarket({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(setMarketsData());
+              this._snackBar.open(`Token is created: ${action.data.marketId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
   );
 
   //====================================================================================================================
@@ -155,6 +195,25 @@ export class DbConfigEffects {
     )
   );
 
+  createDex$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createDex),
+        switchMap(action =>
+          this.apiService.createDex({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(setDexesData());
+              this._snackBar.open(`Token is created: ${action.data.name}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
   //====================================================================================================================
   //                                                   Chains
   //====================================================================================================================
@@ -173,6 +232,25 @@ export class DbConfigEffects {
         )
       )
     )
+  );
+
+  createChain$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createChain),
+        switchMap(action =>
+          this.apiService.createChain({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(setChainsData());
+              this._snackBar.open(`Token is created: ${action.data.name}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
   );
 
 }

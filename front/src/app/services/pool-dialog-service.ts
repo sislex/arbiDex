@@ -8,7 +8,12 @@ import { PoolFormContainer } from '../containers/forms/pool-form-container/pool-
 })
 export class PoolDialogService {
   private dialog = inject(MatDialog);
-  openCreate(list$: Observable<any>) {
+  openCreate(
+    chainsList$: Observable<any>,
+    tokensList$: Observable<any>,
+    dexesList$: Observable<any>,
+    versionsList$: Observable<any>,
+  ) {
     return this.dialog.open(PoolFormContainer, {
       width: '90%',
       maxWidth: '100%',
@@ -19,10 +24,10 @@ export class PoolDialogService {
       data: {
         title: 'Add new pool',
         buttons: ['add', 'cancel'],
-        chainsList: list$,
-        tokensList: list$,
-        dexesList: list$,
-        versionsList: list$,
+        chainsList: chainsList$,
+        tokensList: tokensList$,
+        dexesList: dexesList$,
+        versionsList: versionsList$,
         form: {
           fee: null,
           poolAddress: '',

@@ -35,13 +35,13 @@ export class ApiService {
   getPools(): Observable<any> {
     return this.http.get(`${this.apiUrl}/pools`);
   }
-  createPools(data: any): Observable<any> {
+  createPool(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/pools`, {...data});
   }
-  editPools(id: number, data: any): Observable<any> {
+  editPool(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/pools/${id}`, data);
   }
-  deletingPools(id: number): Observable<any> {
+  deletingPool(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/pools/${id}`);
   }
 
@@ -53,13 +53,13 @@ export class ApiService {
   getMarkets(): Observable<any> {
     return this.http.get(`${this.apiUrl}/markets`);
   }
-  createMarkets(data: any): Observable<any> {
+  createMarket(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/markets`, {...data});
   }
-  editMarkets(id: number, data: any): Observable<any> {
+  editMarket(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/markets/${id}`, data);
   }
-  deletingMarkets(id: number): Observable<any> {
+  deletingMarket(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/markets/${id}`);
   }
 
@@ -70,13 +70,13 @@ export class ApiService {
   getDexes(): Observable<any> {
     return this.http.get(`${this.apiUrl}/dexes`);
   }
-  createDexes(data: any): Observable<any> {
+  createDex(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/dexes`, {...data});
   }
-  editDexes(id: number, data: any): Observable<any> {
+  editDex(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/dexes/${id}`, data);
   }
-  deletingDexes(id: number): Observable<any> {
+  deletingDex(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/dexes/${id}`);
   }
 
@@ -87,13 +87,13 @@ export class ApiService {
   getChainsData(): Observable<any> {
     return this.http.get(`${this.apiUrl}/chains`);
   }
-  createChains(data: any): Observable<any> {
+  createChain(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/chains`, {...data});
   }
-  editChains(id: number, data: any): Observable<any> {
+  editChain(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/chains/${id}`, data);
   }
-  deletingChains(id: number): Observable<any> {
+  deletingChain(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/chains/${id}`);
   }
 
@@ -104,13 +104,13 @@ export class ApiService {
   getServers(): Observable<any> {
     return this.http.get(`${this.apiUrl}/servers`);
   }
-  createServers(data: any): Observable<any> {
+  createServer(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/servers`, {...data});
   }
-  editServers(id: number, data: any): Observable<any> {
+  editServer(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/servers/${id}`, data);
   }
-  deletingServers(id: number): Observable<any> {
+  deletingServer(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/servers/${id}`);
   }
 }

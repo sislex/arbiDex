@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -12,6 +12,8 @@ import {
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
+import { createDex, setDexesData } from '../../../+state/db-config/db-config.actions';
+import { ActionsContainer } from '../../actions-container/actions-container';
 
 @Component({
   selector: 'app-ag-grid-dexes-container',
@@ -25,7 +27,7 @@ import { Loader } from '../../../components/loader/loader';
   templateUrl: './ag-grid-dexes-container.html',
   styleUrl: './ag-grid-dexes-container.scss',
 })
-export class AgGridDexesContainer {
+export class AgGridDexesContainer implements OnInit {
   private store = inject(Store);
   readonly dexDialog = inject(DexDialogService);
 
@@ -46,12 +48,22 @@ export class AgGridDexesContainer {
       },
     },
     {
-      field: "dexes_id",
+      field: "dexId",
       headerName: 'ID',
+      flex: 1,
     },
     {
       field: "name",
       headerName: 'Name',
+      flex: 1,
+    },
+    {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
     },
   ];
 
@@ -60,7 +72,14 @@ export class AgGridDexesContainer {
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
-    flex: 1
+  };
+
+  ngOnInit() {
+    this.store.dispatch(setDexesData());
+  };
+
+  onAction() {
+
   };
 
   actions($event: any, note: any) {
@@ -72,7 +91,7 @@ export class AgGridDexesContainer {
   openCreateDialog() {
     this.dexDialog.openCreate(this.list$).subscribe(result => {
       if (result?.data === 'add') {
-        // this.store.dispatch(createDex({ data: result.formData }));
+        this.store.dispatch(createDex({ data: result.formData }));
       }
     });
   }

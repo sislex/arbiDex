@@ -6,7 +6,7 @@
   (emitter)="events($event)"
 >
   <app-header-content-layout main>
-    <app-main-title-page header [title]="'item'"></app-main-title-page>
+    <app-main-title-page header [title]="(activeSidebarItem$ | async)!"></app-main-title-page>
     <router-outlet content></router-outlet>
   </app-header-content-layout>
 </app-sidebar>

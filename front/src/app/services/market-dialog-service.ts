@@ -21,6 +21,7 @@ export class MarketDialogService {
         buttons: ['add', 'cancel'],
         list: list$,
         form: {
+          poolId: '',
           amount: '',
         }
       }

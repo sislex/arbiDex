@@ -1,32 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
 import { MarketsService } from './markets.service';
+import { MarketDto } from '../dtos/markets-dto/market.dto';
 
 @Controller('markets')
 export class MarketsController {
   constructor(private readonly marketsService: MarketsService) {}
-//
-//   @Post()
-//   create(@Body() createMarketDto: CreateMarketDto) {
-//     return this.marketsService.create(createMarketDto);
-//   }
-//
-//   @Get()
-//   findAll() {
-//     return this.marketsService.findAll();
-//   }
-//
-//   @Get(':id')
-//   findOne(@Param('id') id: string) {
-//     return this.marketsService.findOne(+id);
-//   }
-//
-//   @Patch(':id')
-//   update(@Param('id') id: string, @Body() updateMarketDto: UpdateMarketDto) {
-//     return this.marketsService.update(+id, updateMarketDto);
-//   }
-//
-//   @Delete(':id')
-//   remove(@Param('id') id: string) {
-//     return this.marketsService.remove(+id);
-//   }
+  @Post()
+  create(@Body() marketDto: MarketDto) {
+    return this.marketsService.create(marketDto);
+  }
+
+  @Get()
+  async findAll() {
+    const markets = await this.marketsService.findAll();
+    return markets.map((m) => ({
+      poolId: m.pool.poolId,
+      amount: m.amount,
+      marketId: m.marketId,
+    }));
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() marketDto: MarketDto) {
+    return '123';
+    // return this.marketsService.update(+id, marketDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.marketsService.remove(+id);
+  }
 }
