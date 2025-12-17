@@ -13,9 +13,14 @@ import {
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
-import { createMarket, setMarketsData } from '../../../+state/db-config/db-config.actions';
+import {
+  createMarket,
+  deletingMarket,
+  setMarketsData,
+} from '../../../+state/db-config/db-config.actions';
 import { map } from 'rxjs';
 import { ActionsContainer } from '../../actions-container/actions-container';
+import { DeleteDialogService } from '../../../services/delete-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-markets-container',
@@ -32,6 +37,7 @@ import { ActionsContainer } from '../../actions-container/actions-container';
 export class AgGridMarketsContainer implements OnInit {
   private store = inject(Store);
   readonly marketDialog = inject(MarketDialogService);
+  readonly deleteDialog = inject(DeleteDialogService);
 
   marketsDataResponse$ = this.store.select(getMarketsDataResponse);
   marketsDataIsLoading$ = this.store.select(getMarketsDataIsLoading);
@@ -92,9 +98,15 @@ export class AgGridMarketsContainer implements OnInit {
     this.store.dispatch((setMarketsData()));
   };
 
-  onAction() {
-
-  };
+  onAction($event: any, row: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if ($event.actionType === 'delete') {
+        this.openDeleteDialog(row);
+      } else if ($event.actionType === 'edit') {
+        // this.openEditDialog(row);
+      }
+    }
+  }
 
   actions($event: any, note: any) {
     if (note === 'add' ) {
@@ -106,6 +118,14 @@ export class AgGridMarketsContainer implements OnInit {
     this.marketDialog.openCreate(this.list$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createMarket({ data: result.formData }));
+      }
+    });
+  }
+
+  openDeleteDialog(row: any) {
+    this.deleteDialog.openDelete(row, 'market').subscribe(result => {
+      if (result?.data === 'yes') {
+        this.store.dispatch(deletingMarket({ marketId: row.marketId }));
       }
     });
   }

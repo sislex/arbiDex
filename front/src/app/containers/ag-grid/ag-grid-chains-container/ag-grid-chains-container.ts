@@ -5,7 +5,7 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import { ChainDialogService } from '../../../services/chain-dialog-service';
-import { createChain, setChainsData } from '../../../+state/db-config/db-config.actions';
+import { createChain, deletingChain, setChainsData } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { Loader } from '../../../components/loader/loader';
 import {
@@ -14,6 +14,7 @@ import {
   getChainsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
+import { DeleteDialogService } from '../../../services/delete-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-chains-container',
@@ -30,6 +31,7 @@ import { AsyncPipe } from '@angular/common';
 export class AgGridChainsContainer implements OnInit {
   private store = inject(Store);
   readonly chainDialog = inject(ChainDialogService);
+  readonly deleteDialog = inject(DeleteDialogService);
 
   chainsDataResponse$ = this.store.select(getChainsDataResponse);
   chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
@@ -76,9 +78,15 @@ export class AgGridChainsContainer implements OnInit {
     this.store.dispatch(setChainsData());
   };
 
-  onAction() {
-
-  };
+  onAction($event: any, row: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if ($event.actionType === 'delete') {
+        this.openDeleteDialog(row);
+      } else if ($event.actionType === 'edit') {
+        // this.openEditDialog(row);
+      }
+    }
+  }
 
   actions($event: any, note: any) {
     if (note === 'add' ) {
@@ -90,6 +98,14 @@ export class AgGridChainsContainer implements OnInit {
     this.chainDialog.openCreate().subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createChain({ data: result.formData }));
+      }
+    });
+  }
+
+  openDeleteDialog(row: any) {
+    this.deleteDialog.openDelete(row, 'chain').subscribe(result => {
+      if (result?.data === 'yes') {
+        this.store.dispatch(deletingChain({ chainId: row.chainId }));
       }
     });
   }

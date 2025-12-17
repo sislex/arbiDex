@@ -12,8 +12,9 @@ import {
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
-import { createDex, setDexesData } from '../../../+state/db-config/db-config.actions';
+import { createDex, deletingDex, setDexesData } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
+import { DeleteDialogService } from '../../../services/delete-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-dexes-container',
@@ -30,6 +31,7 @@ import { ActionsContainer } from '../../actions-container/actions-container';
 export class AgGridDexesContainer implements OnInit {
   private store = inject(Store);
   readonly dexDialog = inject(DexDialogService);
+  readonly deleteDialog = inject(DeleteDialogService);
 
   list$: any;
   dexesDataResponse$ = this.store.select(getDexesDataResponse);
@@ -78,9 +80,15 @@ export class AgGridDexesContainer implements OnInit {
     this.store.dispatch(setDexesData());
   };
 
-  onAction() {
-
-  };
+  onAction($event: any, row: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if ($event.actionType === 'delete') {
+        this.openDeleteDialog(row);
+      } else if ($event.actionType === 'edit') {
+        // this.openEditDialog(row);
+      }
+    }
+  }
 
   actions($event: any, note: any) {
     if (note === 'add' ) {
@@ -92,6 +100,14 @@ export class AgGridDexesContainer implements OnInit {
     this.dexDialog.openCreate(this.list$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createDex({ data: result.formData }));
+      }
+    });
+  }
+
+  openDeleteDialog(row: any) {
+    this.deleteDialog.openDelete(row, 'dex').subscribe(result => {
+      if (result?.data === 'yes') {
+        this.store.dispatch(deletingDex({ dexId: row.dexId }));
       }
     });
   }

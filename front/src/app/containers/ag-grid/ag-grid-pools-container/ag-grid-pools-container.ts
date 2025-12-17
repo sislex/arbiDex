@@ -13,9 +13,10 @@ import {
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
-import { createPool, setPoolsData } from '../../../+state/db-config/db-config.actions';
+import { createPool, deletingPools, setPoolsData } from '../../../+state/db-config/db-config.actions';
 import { map } from 'rxjs';
 import { ActionsContainer } from '../../actions-container/actions-container';
+import { DeleteDialogService } from '../../../services/delete-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-pools-container',
@@ -32,6 +33,7 @@ import { ActionsContainer } from '../../actions-container/actions-container';
 export class AgGridPoolsContainer implements OnInit {
   private store = inject(Store);
   readonly poolDialog = inject(PoolDialogService);
+  readonly deleteDialog = inject(DeleteDialogService);
 
   chainsList$ = this.store.select(getChainsDataResponse).pipe(
     map(item =>
@@ -139,9 +141,16 @@ export class AgGridPoolsContainer implements OnInit {
     this.store.dispatch(setPoolsData());
   };
 
-  onAction() {
-
+  onAction($event: any, row: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if ($event.actionType === 'delete') {
+        this.openDeleteDialog(row);
+      } else if ($event.actionType === 'edit') {
+        // this.openEditDialog(row);
+      }
+    }
   }
+
   actions($event: any, note: any) {
     if (note === 'add' ) {
       this.openCreateDialog();
@@ -156,4 +165,11 @@ export class AgGridPoolsContainer implements OnInit {
     });
   }
 
+  openDeleteDialog(row: any) {
+    this.deleteDialog.openDelete(row, 'pool').subscribe(result => {
+      if (result?.data === 'yes') {
+        this.store.dispatch(deletingPools({ poolId: row.poolId }));
+      }
+    });
+  }
 }

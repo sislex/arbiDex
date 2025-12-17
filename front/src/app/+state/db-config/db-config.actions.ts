@@ -52,7 +52,7 @@ export const editPool = createAction(
 );
 export const deletingPools = createAction(
   '[DbConfig] deletingPools',
-  props<{ tokenId: number }>()
+  props<{ poolId: number }>()
 );
 
 //====================================================================================================================
@@ -78,7 +78,7 @@ export const editMarket = createAction(
 );
 export const deletingMarket = createAction(
   '[DbConfig] deletingMarket',
-  props<{ tokenId: number }>()
+  props<{ marketId: number }>()
 );
 
 //====================================================================================================================
@@ -104,7 +104,7 @@ export const editDex = createAction(
 );
 export const deletingDex = createAction(
   '[DbConfig] deletingDex',
-  props<{ tokenId: number }>()
+  props<{ dexId: number }>()
 );
 
 //====================================================================================================================
@@ -130,5 +130,5 @@ export const editChain = createAction(
 );
 export const deletingChain = createAction(
   '[DbConfig] deletingChain',
-  props<{ tokenId: number }>()
+  props<{ chainId: number }>()
 );

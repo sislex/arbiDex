@@ -134,6 +134,26 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
+  deletingPool$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingPools),
+        switchMap((action) => {
+
+          return this.apiService.deletingPool(action.poolId).pipe(
+            tap(response => {
+              this.store.dispatch(setPoolsData());
+              this._snackBar.open(`Pool is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
   //====================================================================================================================
   //                                                   Markets
   //====================================================================================================================
@@ -154,8 +174,6 @@ export class DbConfigEffects {
     )
   );
 
-
-
   createMarket$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.createMarket),
@@ -171,6 +189,26 @@ export class DbConfigEffects {
             })
           )
         )
+      ),
+    { dispatch: false }
+  );
+
+  deletingMarket$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingMarket),
+        switchMap((action) => {
+
+          return this.apiService.deletingMarket(action.marketId).pipe(
+            tap(response => {
+              this.store.dispatch(setMarketsData());
+              this._snackBar.open(`Market is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
       ),
     { dispatch: false }
   );
@@ -214,6 +252,26 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
+  deletingDex$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingDex),
+        switchMap((action) => {
+
+          return this.apiService.deletingDex(action.dexId).pipe(
+            tap(response => {
+              this.store.dispatch(setDexesData());
+              this._snackBar.open(`Dex is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
   //====================================================================================================================
   //                                                   Chains
   //====================================================================================================================
@@ -249,6 +307,26 @@ export class DbConfigEffects {
             })
           )
         )
+      ),
+    { dispatch: false }
+  );
+
+  deletingChain$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingChain),
+        switchMap((action) => {
+
+          return this.apiService.deletingChain(action.chainId).pipe(
+            tap(response => {
+              this.store.dispatch(setChainsData());
+              this._snackBar.open(`Chain is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
       ),
     { dispatch: false }
   );

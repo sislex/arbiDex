@@ -15,6 +15,7 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { TokenDialogService } from '../../../services/token-dialog-service';
 import { Loader } from '../../../components/loader/loader';
+import { DeleteDialogService } from '../../../services/delete-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-tokens-container',
@@ -31,6 +32,7 @@ import { Loader } from '../../../components/loader/loader';
 export class AgGridTokensContainer implements OnInit {
   private store = inject(Store);
   readonly tokenDialog = inject(TokenDialogService);
+  readonly deleteDialog = inject(DeleteDialogService);
 
   tokensDataResponse$ = this.store.select(getTokensDataResponse);
   getTokensDataIsLoading$ = this.store.select(getTokensDataIsLoading);
@@ -139,7 +141,7 @@ export class AgGridTokensContainer implements OnInit {
   }
 
   openDeleteDialog(row: any) {
-    this.tokenDialog.openDelete(row).subscribe(result => {
+    this.deleteDialog.openDelete(row, 'token').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingToken({ tokenId: row.tokenId }));
       }
