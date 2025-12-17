@@ -12,9 +12,10 @@ export class TokenDialogService {
   openCreate(list$: Observable<any>) {
     return this.dialog.open(TokenFormContainer, {
       width: '90%',
-      // height: '90%',
       maxWidth: '100%',
       maxHeight: '600px',
+      minHeight: '400px',
+      minWidth: '600px',
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Add new token',

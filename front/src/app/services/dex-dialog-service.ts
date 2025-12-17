@@ -11,20 +11,18 @@ export class DexDialogService {
   openCreate(list$: Observable<any>) {
     return this.dialog.open(DexFormContainer, {
       width: '90%',
-      height: '90%',
       maxWidth: '100%',
+      maxHeight: '600px',
+      minHeight: '400px',
+      minWidth: '600px',
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Add new dex',
         buttons: ['add', 'cancel'],
         list: list$,
         form: {
-          tokenId: null,
-          chainId: null,
-          address: '',
-          symbol: '',
-          tokenName: '',
-          decimals: null,
+          dexId: null,
+          name: '',
         }
       }
     }).afterClosed();

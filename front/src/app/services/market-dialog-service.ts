@@ -11,20 +11,17 @@ export class MarketDialogService {
   openCreate(list$: Observable<any>) {
     return this.dialog.open(MarketFormContainer, {
       width: '90%',
-      height: '90%',
       maxWidth: '100%',
+      maxHeight: '600px',
+      minHeight: '400px',
+      minWidth: '600px',
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Add new market',
         buttons: ['add', 'cancel'],
         list: list$,
         form: {
-          tokenId: null,
-          chainId: null,
-          address: '',
-          symbol: '',
-          tokenName: '',
-          decimals: null,
+          amount: '',
         }
       }
     }).afterClosed();

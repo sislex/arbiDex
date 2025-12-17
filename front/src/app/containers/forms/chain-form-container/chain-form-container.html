@@ -5,6 +5,8 @@
 >
   <div class="scroll" popupContent>
     <app-chain-form
+      [formData]="data.form"
+      (emitter)="eventsForm($event)"
     ></app-chain-form>
   </div>
 </app-confirmation-pop-up>

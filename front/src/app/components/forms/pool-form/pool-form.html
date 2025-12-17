@@ -1,1 +1,74 @@
-<p>pool-form works!</p>
+<app-header-content-layout>
+  <app-field-title header [title]="'Select chain'"></app-field-title>
+  <app-select-field
+    [title]="'Chain name'"
+    [list]="chainsList | async"
+    [selected]="formData.chainId?.toString()"
+    (emitter)="events($event, 'chainId')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Select Base Token Id'"></app-field-title>
+  <app-select-field
+    [title]="'Base Token Id'"
+    [list]="tokensList | async"
+    [selected]="formData.baseTokenId?.toString()"
+    (emitter)="events($event, 'baseTokenId')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Select Quote Token Id'"></app-field-title>
+  <app-select-field
+    [title]="'Quote Token Id'"
+    [list]="tokensList | async"
+    [selected]="formData.quoteTokenId?.toString()"
+    (emitter)="events($event, 'quoteTokenId')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Select Dex Id'"></app-field-title>
+  <app-select-field
+    [title]="'Dex Id'"
+    [list]="dexesList | async"
+    [selected]="formData.dexId?.toString()"
+    (emitter)="events($event, 'dexId')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Select Dex Version'"></app-field-title>
+  <app-select-field
+    [title]="'Dex Version'"
+    [list]="versionsList | async"
+    [selected]="formData.version?.toString()"
+    (emitter)="events($event, 'version')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Fee'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.fee"
+    (emitter)="events($event, 'fee')"
+    [type]="'number'"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Pool Address'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.poolAddress"
+    (emitter)="events($event, 'poolAddress')"
+    [type]="'number'"
+    content
+  ></app-input-field>
+</app-header-content-layout>

@@ -5,6 +5,12 @@
 >
   <div class="scroll" popupContent>
   <app-pool-form
+    [formData]="data.form"
+    [chainsList]="data.chainsList"
+    [tokensList]="data.tokensList"
+    [dexesList]="data.dexesList"
+    [versionsList]="data.versionsList"
+    (emitter)="eventsForm($event)"
   ></app-pool-form>
   </div>
 </app-confirmation-pop-up>

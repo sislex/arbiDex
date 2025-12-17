@@ -11,20 +11,21 @@ export class PoolDialogService {
   openCreate(list$: Observable<any>) {
     return this.dialog.open(PoolFormContainer, {
       width: '90%',
-      height: '90%',
       maxWidth: '100%',
+      maxHeight: '600px',
+      minHeight: '400px',
+      minWidth: '600px',
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Add new pool',
         buttons: ['add', 'cancel'],
-        list: list$,
+        chainsList: list$,
+        tokensList: list$,
+        dexesList: list$,
+        versionsList: list$,
         form: {
-          tokenId: null,
-          chainId: null,
-          address: '',
-          symbol: '',
-          tokenName: '',
-          decimals: null,
+          fee: null,
+          poolAddress: '',
         }
       }
     }).afterClosed();

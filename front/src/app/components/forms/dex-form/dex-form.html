@@ -1,1 +1,17 @@
-<p>dex-form works!</p>
+<app-header-content-layout>
+  <app-field-title header [title]="'Dex ID'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.dexId"
+    (emitter)="events($event, 'dexId')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Dex Name'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.name"
+    (emitter)="events($event, 'name')"
+    content
+  ></app-input-field>
+</app-header-content-layout>

@@ -1,1 +1,17 @@
-<p>chain-form works!</p>
+<app-header-content-layout>
+  <app-field-title header [title]="'Chain ID'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.chainId"
+    (emitter)="events($event, 'chainId')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Chain Name'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.name"
+    (emitter)="events($event, 'name')"
+    content
+  ></app-input-field>
+</app-header-content-layout>

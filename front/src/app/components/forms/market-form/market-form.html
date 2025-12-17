@@ -1,1 +1,20 @@
-<p>market-form works!</p>
+<app-header-content-layout>
+  <app-field-title header [title]="'Select Pool ID'"></app-field-title>
+  <app-select-field
+    [title]="'Pool ID'"
+    [list]="list | async"
+    [selected]="formData.poolId?.toString()"
+    (emitter)="events($event, 'poolId')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Amount'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.amount"
+    [placeholder]="'СЮДА ДОБАВИТЬ ПРОВЕРКУ ТОЛЬКО НА ЧИСЛА!!! BIG INT И СМЕНИТЬ PLACEHOLSER во всех формах Input'"
+    (emitter)="events($event, 'amount')"
+    content
+  ></app-input-field>
+</app-header-content-layout>

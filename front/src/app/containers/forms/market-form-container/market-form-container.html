@@ -5,6 +5,9 @@
 >
   <div class="scroll" popupContent>
   <app-market-form
+    [formData]="data.form"
+    [list]="data.list"
+    (emitter)="eventsForm($event)"
   ></app-market-form>
   </div>
 </app-confirmation-pop-up>

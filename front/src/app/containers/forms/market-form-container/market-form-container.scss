@@ -1,8 +1,9 @@
 app-confirmation-pop-up {
-  height: 100%;
   overflow: hidden;
+  flex: 1;
 
   .scroll {
     overflow: auto;
+    padding: 20px 20px 0 20px;
   }
 }
