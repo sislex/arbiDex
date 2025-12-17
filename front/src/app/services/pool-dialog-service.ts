@@ -35,4 +35,28 @@ export class PoolDialogService {
       }
     }).afterClosed();
   }
+
+  openEdit(
+    row: any,
+    chainsList$: Observable<any>,
+    tokensList$: Observable<any>,
+    dexesList$: Observable<any>,
+    versionsList$: Observable<any>,
+  ) {
+    return this.dialog.open(PoolFormContainer, {
+      width: '90%',
+      height: '90%',
+      maxWidth: '100%',
+      panelClass: 'custom-dialog-container',
+      data: {
+        title: 'Edit pool',
+        buttons: ['edit', 'cancel'],
+        chainsList: chainsList$,
+        tokensList: tokensList$,
+        dexesList: dexesList$,
+        versionsList: versionsList$,
+        form: { ...row }
+      }
+    }).afterClosed();
+  }
 }

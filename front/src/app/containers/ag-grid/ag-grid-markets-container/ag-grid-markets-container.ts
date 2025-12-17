@@ -15,7 +15,7 @@ import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 import {
   createMarket,
-  deletingMarket,
+  deletingMarket, editMarket,
   setMarketsData,
 } from '../../../+state/db-config/db-config.actions';
 import { map } from 'rxjs';
@@ -46,7 +46,7 @@ export class AgGridMarketsContainer implements OnInit {
   list$ = this.store.select(getPoolsDataResponse).pipe(
     map(item =>
       item.map(item => ({
-        id: String(item.poolId),
+        id: item.poolId,
         name: item.poolAddress,
       }))
     )
@@ -103,7 +103,7 @@ export class AgGridMarketsContainer implements OnInit {
       if ($event.actionType === 'delete') {
         this.openDeleteDialog(row);
       } else if ($event.actionType === 'edit') {
-        // this.openEditDialog(row);
+        this.openEditDialog(row);
       }
     }
   }
@@ -118,6 +118,14 @@ export class AgGridMarketsContainer implements OnInit {
     this.marketDialog.openCreate(this.list$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createMarket({ data: result.formData }));
+      }
+    });
+  }
+
+  openEditDialog(row: any) {
+    this.marketDialog.openEdit(row, this.list$).subscribe(result => {
+      if (result?.data === 'edit') {
+        this.store.dispatch(editMarket({ data: result.formData }));
       }
     });
   }

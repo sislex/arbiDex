@@ -5,7 +5,7 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import { ChainDialogService } from '../../../services/chain-dialog-service';
-import { createChain, deletingChain, setChainsData } from '../../../+state/db-config/db-config.actions';
+import { createChain, deletingChain, editChain, setChainsData } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { Loader } from '../../../components/loader/loader';
 import {
@@ -83,7 +83,7 @@ export class AgGridChainsContainer implements OnInit {
       if ($event.actionType === 'delete') {
         this.openDeleteDialog(row);
       } else if ($event.actionType === 'edit') {
-        // this.openEditDialog(row);
+        this.openEditDialog(row);
       }
     }
   }
@@ -98,6 +98,14 @@ export class AgGridChainsContainer implements OnInit {
     this.chainDialog.openCreate().subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createChain({ data: result.formData }));
+      }
+    });
+  }
+
+  openEditDialog(row: any) {
+    this.chainDialog.openEdit(row).subscribe(result => {
+      if (result?.data === 'edit') {
+        this.store.dispatch(editChain({ data: result.formData }));
       }
     });
   }

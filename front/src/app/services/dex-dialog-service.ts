@@ -27,4 +27,19 @@ export class DexDialogService {
       }
     }).afterClosed();
   }
+
+  openEdit(row: any, list$: Observable<any>) {
+    return this.dialog.open(DexFormContainer, {
+      width: '90%',
+      height: '90%',
+      maxWidth: '100%',
+      panelClass: 'custom-dialog-container',
+      data: {
+        title: 'Edit dex',
+        buttons: ['edit', 'cancel'],
+        list: list$,
+        form: { ...row }
+      }
+    }).afterClosed();
+  }
 }

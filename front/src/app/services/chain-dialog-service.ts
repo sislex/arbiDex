@@ -25,4 +25,18 @@ export class ChainDialogService {
       }
     }).afterClosed();
   }
+
+  openEdit(row: any) {
+    return this.dialog.open(ChainFormContainer, {
+      width: '90%',
+      height: '90%',
+      maxWidth: '100%',
+      panelClass: 'custom-dialog-container',
+      data: {
+        title: 'Edit chain',
+        buttons: ['edit', 'cancel'],
+        form: { ...row }
+      }
+    }).afterClosed();
+  }
 }

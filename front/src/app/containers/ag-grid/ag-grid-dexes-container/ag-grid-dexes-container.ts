@@ -12,7 +12,7 @@ import {
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
-import { createDex, deletingDex, setDexesData } from '../../../+state/db-config/db-config.actions';
+import { createDex, deletingDex, editDex, setDexesData } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 
@@ -85,7 +85,7 @@ export class AgGridDexesContainer implements OnInit {
       if ($event.actionType === 'delete') {
         this.openDeleteDialog(row);
       } else if ($event.actionType === 'edit') {
-        // this.openEditDialog(row);
+        this.openEditDialog(row);
       }
     }
   }
@@ -100,6 +100,14 @@ export class AgGridDexesContainer implements OnInit {
     this.dexDialog.openCreate(this.list$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createDex({ data: result.formData }));
+      }
+    });
+  }
+
+  openEditDialog(row: any) {
+    this.dexDialog.openEdit(row, this.list$).subscribe(result => {
+      if (result?.data === 'edit') {
+        this.store.dispatch(editDex({ data: result.formData }));
       }
     });
   }

@@ -13,7 +13,7 @@ import {
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
-import { createPool, deletingPools, setPoolsData } from '../../../+state/db-config/db-config.actions';
+import { createPool, deletingPools, editPool, setPoolsData } from '../../../+state/db-config/db-config.actions';
 import { map } from 'rxjs';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
@@ -38,7 +38,7 @@ export class AgGridPoolsContainer implements OnInit {
   chainsList$ = this.store.select(getChainsDataResponse).pipe(
     map(item =>
       item.map(item => ({
-        id: String(item.chainId),
+        id: item.chainId,
         name: item.name,
       }))
     )
@@ -47,7 +47,7 @@ export class AgGridPoolsContainer implements OnInit {
   tokensList$ = this.store.select(getTokensDataResponse).pipe(
     map(item =>
       item.map(item => ({
-        id: String(item.tokenId),
+        id: item.tokenId,
         name: item.tokenName,
       }))
     )
@@ -56,7 +56,7 @@ export class AgGridPoolsContainer implements OnInit {
   dexesList$ = this.store.select(getDexesDataResponse).pipe(
     map(item =>
       item.map(item => ({
-        id: String(item.dexId),
+        id: item.dexId,
         name: item.name,
       }))
     )
@@ -146,7 +146,7 @@ export class AgGridPoolsContainer implements OnInit {
       if ($event.actionType === 'delete') {
         this.openDeleteDialog(row);
       } else if ($event.actionType === 'edit') {
-        // this.openEditDialog(row);
+        this.openEditDialog(row);
       }
     }
   }
@@ -161,6 +161,14 @@ export class AgGridPoolsContainer implements OnInit {
     this.poolDialog.openCreate(this.chainsList$, this.tokensList$, this.dexesList$, this.versionList$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createPool({ data: result.formData }));
+      }
+    });
+  }
+
+  openEditDialog(row: any) {
+    this.poolDialog.openEdit(row, this.chainsList$, this.tokensList$, this.dexesList$, this.versionList$).subscribe(result => {
+      if (result?.data === 'edit') {
+        this.store.dispatch(editPool({ data: result.formData }));
       }
     });
   }
