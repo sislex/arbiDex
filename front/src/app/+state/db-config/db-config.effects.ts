@@ -134,6 +134,26 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
+  editPool$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editPool),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editPool(data.poolId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setPoolsData());
+              this._snackBar.open(`Pool is update: ${action.data.poolId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
   deletingPool$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.deletingPools),
@@ -189,6 +209,26 @@ export class DbConfigEffects {
             })
           )
         )
+      ),
+    { dispatch: false }
+  );
+
+  editMarket$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editMarket),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editMarket(data.marketId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setMarketsData());
+              this._snackBar.open(`Market is update: ${action.data.marketId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
       ),
     { dispatch: false }
   );
@@ -252,6 +292,26 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
+  editDex$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editDex),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editDex(data.dexId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setDexesData());
+              this._snackBar.open(`Dex is update: ${action.data.dexId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
   deletingDex$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.deletingDex),
@@ -307,6 +367,26 @@ export class DbConfigEffects {
             })
           )
         )
+      ),
+    { dispatch: false }
+  );
+
+  editChain$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editChain),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editChain(data.chainId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setChainsData());
+              this._snackBar.open(`Chain is update: ${action.data.chainId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
       ),
     { dispatch: false }
   );
