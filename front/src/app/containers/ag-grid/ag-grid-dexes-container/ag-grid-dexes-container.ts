@@ -5,6 +5,13 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import { DexDialogService } from '../../../services/dex-dialog-service';
+import {
+  getDexesDataIsLoaded,
+  getDexesDataIsLoading,
+  getDexesDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
+import { AsyncPipe } from '@angular/common';
+import { Loader } from '../../../components/loader/loader';
 
 @Component({
   selector: 'app-ag-grid-dexes-container',
@@ -12,6 +19,8 @@ import { DexDialogService } from '../../../services/dex-dialog-service';
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
+    AsyncPipe,
+    Loader,
   ],
   templateUrl: './ag-grid-dexes-container.html',
   styleUrl: './ag-grid-dexes-container.scss',
@@ -21,6 +30,10 @@ export class AgGridDexesContainer {
   readonly dexDialog = inject(DexDialogService);
 
   list$: any;
+  dexesDataResponse$ = this.store.select(getDexesDataResponse);
+  dexesDataIsLoading$ = this.store.select(getDexesDataIsLoading);
+  dexesDataIsLoaded$ = this.store.select(getDexesDataIsLoaded);
+
 
   colDefs: ColDef[] = [
     {

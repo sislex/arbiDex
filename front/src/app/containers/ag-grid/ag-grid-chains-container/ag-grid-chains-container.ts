@@ -1,10 +1,19 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import { ChainDialogService } from '../../../services/chain-dialog-service';
+import { setChainsData } from '../../../+state/db-config/db-config.actions';
+import { ActionsContainer } from '../../actions-container/actions-container';
+import { Loader } from '../../../components/loader/loader';
+import {
+  getChainsDataIsLoaded,
+  getChainsDataIsLoading,
+  getChainsDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-ag-grid-chains-container',
@@ -12,13 +21,19 @@ import { ChainDialogService } from '../../../services/chain-dialog-service';
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
+    Loader,
+    AsyncPipe,
   ],
   templateUrl: './ag-grid-chains-container.html',
   styleUrl: './ag-grid-chains-container.scss',
 })
-export class AgGridChainsContainer {
+export class AgGridChainsContainer implements OnInit {
   private store = inject(Store);
   readonly chainDialog = inject(ChainDialogService);
+
+  chainsDataResponse$ = this.store.select(getChainsDataResponse);
+  chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
+  chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
 
   colDefs: ColDef[] = [
     {
@@ -31,12 +46,20 @@ export class AgGridChainsContainer {
       },
     },
     {
-      field: "chain_id",
+      field: "chainId",
       headerName: 'ID',
     },
     {
       field: "name",
       headerName: 'Name',
+    },
+    {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
     },
   ];
 
@@ -46,6 +69,14 @@ export class AgGridChainsContainer {
     suppressMovable: true,
     headerClass: 'align-center',
     flex: 1
+  };
+
+  ngOnInit() {
+    this.store.dispatch(setChainsData());
+  };
+
+  onAction() {
+
   };
 
   actions($event: any, note: any) {

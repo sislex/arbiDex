@@ -5,6 +5,13 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import { MarketDialogService } from '../../../services/market-dialog-service';
+import {
+  getMarketsDataIsLoaded,
+  getMarketsDataIsLoading,
+  getMarketsDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
+import { AsyncPipe } from '@angular/common';
+import { Loader } from '../../../components/loader/loader';
 
 @Component({
   selector: 'app-ag-grid-markets-container',
@@ -12,6 +19,8 @@ import { MarketDialogService } from '../../../services/market-dialog-service';
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
+    AsyncPipe,
+    Loader,
   ],
   templateUrl: './ag-grid-markets-container.html',
   styleUrl: './ag-grid-markets-container.scss',
@@ -21,6 +30,10 @@ export class AgGridMarketsContainer {
   readonly marketDialog = inject(MarketDialogService);
 
   list$: any;
+  marketsDataResponse$ = this.store.select(getMarketsDataResponse);
+  marketsDataIsLoading$ = this.store.select(getMarketsDataIsLoading);
+  marketsDataIsLoaded$ = this.store.select(getMarketsDataIsLoaded);
+
 
   colDefs: ColDef[] = [
     {

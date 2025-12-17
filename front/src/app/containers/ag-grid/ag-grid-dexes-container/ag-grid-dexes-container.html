@@ -1,15 +1,21 @@
 <app-header-content-layout>
-  <app-title-table-button
-    header
-    [title]="'Dexes table'"
-    [icon]="'add'"
-    (emitter)="actions($event, 'add')"
-  ></app-title-table-button>
-  <app-ag-grid
-    content
-    [rowData]="[]"
-    [colDefs]="colDefs"
-    [defaultColDef]="defaultColDef"
-  ></app-ag-grid>
+  @if ((dexesDataIsLoaded$ | async) && !(dexesDataIsLoading$ | async)) {
+    <app-title-table-button
+      header
+      [title]="'Dexes table'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+    ></app-title-table-button>
+  }
+  @if ((dexesDataIsLoaded$ | async) && !(dexesDataIsLoading$ | async)) {
+    <app-ag-grid
+      content
+      [rowData]="(dexesDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
 </app-header-content-layout>
 

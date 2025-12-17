@@ -2,14 +2,12 @@ import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MarketForm } from '../../../components/forms/market-form/market-form';
 import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
-import { TokenForm } from '../../../components/forms/token-form/token-form';
 
 @Component({
   selector: 'app-market-form-container',
   imports: [
     ConfirmationPopUp,
     MarketForm,
-    TokenForm,
   ],
   templateUrl: './market-form-container.html',
   styleUrl: './market-form-container.scss',

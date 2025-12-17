@@ -3,7 +3,7 @@
   <app-select-field
     [title]="'Chain name'"
     [list]="chainsList | async"
-    [selected]="formData.chainId?.toString()"
+    [selected]="formData.chainId"
     (emitter)="events($event, 'chainId')"
     content
   ></app-select-field>
@@ -14,7 +14,7 @@
   <app-select-field
     [title]="'Base Token Id'"
     [list]="tokensList | async"
-    [selected]="formData.baseTokenId?.toString()"
+    [selected]="formData.baseTokenId"
     (emitter)="events($event, 'baseTokenId')"
     content
   ></app-select-field>
@@ -25,7 +25,7 @@
   <app-select-field
     [title]="'Quote Token Id'"
     [list]="tokensList | async"
-    [selected]="formData.quoteTokenId?.toString()"
+    [selected]="formData.quoteTokenId"
     (emitter)="events($event, 'quoteTokenId')"
     content
   ></app-select-field>
@@ -36,7 +36,7 @@
   <app-select-field
     [title]="'Dex Id'"
     [list]="dexesList | async"
-    [selected]="formData.dexId?.toString()"
+    [selected]="formData.dexId"
     (emitter)="events($event, 'dexId')"
     content
   ></app-select-field>
@@ -47,7 +47,7 @@
   <app-select-field
     [title]="'Dex Version'"
     [list]="versionsList | async"
-    [selected]="formData.version?.toString()"
+    [selected]="formData.version"
     (emitter)="events($event, 'version')"
     content
   ></app-select-field>

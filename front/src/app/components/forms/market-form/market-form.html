@@ -3,7 +3,7 @@
   <app-select-field
     [title]="'Pool ID'"
     [list]="list | async"
-    [selected]="formData.poolId?.toString()"
+    [selected]="formData.poolId"
     (emitter)="events($event, 'poolId')"
     content
   ></app-select-field>

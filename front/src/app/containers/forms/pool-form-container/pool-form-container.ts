@@ -2,14 +2,12 @@ import { Component, inject } from '@angular/core';
 import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
 import { PoolForm } from '../../../components/forms/pool-form/pool-form';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TokenForm } from '../../../components/forms/token-form/token-form';
 
 @Component({
   selector: 'app-pool-form-container',
   imports: [
     ConfirmationPopUp,
     PoolForm,
-    TokenForm,
   ],
   templateUrl: './pool-form-container.html',
   styleUrl: './pool-form-container.scss',

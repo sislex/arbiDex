@@ -1,15 +1,21 @@
 <app-header-content-layout>
-  <app-title-table-button
-    header
-    [title]="'Pools table'"
-    [icon]="'add'"
-    (emitter)="actions($event, 'add')"
-  ></app-title-table-button>
-  <app-ag-grid
-    content
-    [rowData]="[]"
-    [colDefs]="colDefs"
-    [defaultColDef]="defaultColDef"
-  ></app-ag-grid>
+  @if ((poolsDataIsLoaded$ | async) && !(poolsDataIsLoading$ | async)) {
+    <app-title-table-button
+      header
+      [title]="'Pools table'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+    ></app-title-table-button>
+  }
+  @if ((poolsDataIsLoaded$ | async) && !(poolsDataIsLoading$ | async)) {
+    <app-ag-grid
+      content
+      [rowData]="(poolsDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
 </app-header-content-layout>
 

@@ -90,7 +90,7 @@ export class AgGridTokensContainer implements OnInit {
       flex: 1,
     },
     {
-      headerName: 'Delete',
+      headerName: 'Actions',
       width: 125,
       cellRenderer: ActionsContainer,
       cellRendererParams: {

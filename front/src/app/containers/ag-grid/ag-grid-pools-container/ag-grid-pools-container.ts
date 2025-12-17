@@ -5,6 +5,13 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import { PoolDialogService } from '../../../services/pool-dialog-service';
+import {
+  getPoolsDataIsLoaded,
+  getPoolsDataIsLoading,
+  getPoolsDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
+import { AsyncPipe } from '@angular/common';
+import { Loader } from '../../../components/loader/loader';
 
 @Component({
   selector: 'app-ag-grid-pools-container',
@@ -12,6 +19,8 @@ import { PoolDialogService } from '../../../services/pool-dialog-service';
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
+    AsyncPipe,
+    Loader,
   ],
   templateUrl: './ag-grid-pools-container.html',
   styleUrl: './ag-grid-pools-container.scss',
@@ -21,6 +30,9 @@ export class AgGridPoolsContainer {
   readonly poolDialog = inject(PoolDialogService);
 
   list$: any;
+  poolsDataResponse$ = this.store.select(getPoolsDataResponse);
+  poolsDataIsLoading$ = this.store.select(getPoolsDataIsLoading);
+  poolsDataIsLoaded$ = this.store.select(getPoolsDataIsLoaded);
 
   colDefs: ColDef[] = [
     {
