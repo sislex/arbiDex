@@ -1,4 +1,5 @@
 export class PoolDto {
+  poolId: number;
   chainId: number;
   baseTokenId: number;
   quoteTokenId: number;

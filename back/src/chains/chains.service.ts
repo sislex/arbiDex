@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ChainDto } from '../dtos/chains-dto/chain.dto';
-import { UpdateChainDto } from '../dtos/chains-dto/update-chain.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Chains } from '../entities/entities/Chains';
@@ -21,11 +20,25 @@ export class ChainsService {
   }
 
   async findAll() {
-    return await this.chainsRepository.find();
+    return await this.chainsRepository.find({
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 
-  update(id: number, updateChainDto: UpdateChainDto) {
-    return `This action updates a #${id} chain`;
+  async update(id: number, updateChainDto: ChainDto) {
+    const chain = await this.chainsRepository.findOne({
+      where: { chainId: id },
+    });
+    if (!chain) {
+      throw new Error(`Chain с id ${updateChainDto.chainId} не найден`);
+    }
+
+    chain.chainId = updateChainDto.chainId;
+    chain.name = updateChainDto.name;
+
+    return await this.chainsRepository.save(chain);
   }
 
   async remove(id: number) {

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { MarketsService } from './markets.service';
 import { MarketDto } from '../dtos/markets-dto/market.dto';
 
@@ -22,8 +30,7 @@ export class MarketsController {
 
   @Put(':id')
   update(@Param('id') id: string, @Body() marketDto: MarketDto) {
-    return '123';
-    // return this.marketsService.update(+id, marketDto);
+    return this.marketsService.update(+id, marketDto);
   }
 
   @Delete(':id')

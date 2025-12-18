@@ -1,7 +1,14 @@
-import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { DexesService } from './dexes.service';
 import { DexDto } from '../dtos/dexes-dto/dex.dto';
-import { UpdateDexDto } from '../dtos/dexes-dto/update-dex.dto';
 
 @Controller('dexes')
 export class DexesController {
@@ -18,7 +25,7 @@ export class DexesController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateDexDto: UpdateDexDto) {
+  update(@Param('id') id: string, @Body() updateDexDto: DexDto) {
     return this.dexesService.update(+id, updateDexDto);
   }
 

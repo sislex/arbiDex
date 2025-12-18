@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { DexDto } from '../dtos/dexes-dto/dex.dto';
-import { UpdateDexDto } from '../dtos/dexes-dto/update-dex.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Dexes } from '../entities/entities/Dexes';
@@ -22,11 +21,25 @@ export class DexesService {
   }
 
   async findAll() {
-    return await this.dexesRepository.find();
+    return await this.dexesRepository.find({
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 
-  update(id: number, updateDexDto: UpdateDexDto) {
-    return `This action updates a #${id} dex`;
+  async update(id: number, updateDexDto: DexDto) {
+    const dex = await this.dexesRepository.findOne({
+      where: { dexId: id },
+    });
+    if (!dex) {
+      throw new Error(`Chain с id ${updateDexDto.dexId} не найден`);
+    }
+
+    dex.dexId = updateDexDto.dexId;
+    dex.name = updateDexDto.name;
+
+    return await this.dexesRepository.save(dex);
   }
 
   async remove(id: number) {
