@@ -170,7 +170,7 @@ export class AgGridPoolsContainer implements OnInit {
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'pool').subscribe(result => {
+    this.deleteDialog.openDelete(row.poolAddress, 'pool').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingPools({ poolId: row.poolId }));
       }

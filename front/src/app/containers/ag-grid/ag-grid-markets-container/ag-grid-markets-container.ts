@@ -122,7 +122,7 @@ export class AgGridMarketsContainer implements OnInit {
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'market').subscribe(result => {
+    this.deleteDialog.openDelete(row.marketId, 'market').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingMarket({ marketId: row.marketId }));
       }

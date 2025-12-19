@@ -104,7 +104,7 @@ export class AgGridDexesContainer implements OnInit {
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'dex').subscribe(result => {
+    this.deleteDialog.openDelete(row.name, 'dex').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingDex({ dexId: row.dexId }));
       }

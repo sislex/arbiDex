@@ -8,13 +8,14 @@ import { MatDialog } from '@angular/material/dialog';
 export class DeleteDialogService {
   private dialog = inject(MatDialog);
 
-  openDelete(row: any, title: string) {
+  openDelete(name: any, title: string) {
     return this.dialog.open(ConfirmationPopUpContainer, {
       width: '400px',
       height: '300px',
       data: {
         title: `Delete ${title}`,
-        message: `Are you sure you want to delete "${row?.tokenName}"?`,
+        message: `Are you sure you want to delete`,
+        boldMessage: ` "${name}"?`,
         buttons: ['yes', 'no']
       }
     }).afterClosed();

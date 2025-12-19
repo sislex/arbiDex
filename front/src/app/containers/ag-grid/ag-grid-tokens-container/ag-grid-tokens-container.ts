@@ -132,7 +132,7 @@ export class AgGridTokensContainer implements OnInit {
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'token').subscribe(result => {
+    this.deleteDialog.openDelete(row.tokenName, 'token').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingToken({ tokenId: row.tokenId }));
       }

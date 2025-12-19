@@ -102,7 +102,7 @@ export class AgGridChainsContainer implements OnInit {
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'chain').subscribe(result => {
+    this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingChain({ chainId: row.chainId }));
       }
