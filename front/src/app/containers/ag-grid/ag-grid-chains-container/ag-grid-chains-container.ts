@@ -104,7 +104,7 @@ export class AgGridChainsContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.chainDialog.openEdit(row).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editChain({ data: result.formData }));
       }
     });

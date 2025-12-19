@@ -124,7 +124,7 @@ export class AgGridMarketsContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.marketDialog.openEdit(row, this.list$).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editMarket({ data: result.formData }));
       }
     });

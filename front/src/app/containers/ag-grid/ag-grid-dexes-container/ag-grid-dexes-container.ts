@@ -106,7 +106,7 @@ export class AgGridDexesContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.dexDialog.openEdit(row, this.list$).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editDex({ data: result.formData }));
       }
     });

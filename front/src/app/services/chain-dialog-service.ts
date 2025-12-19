@@ -34,7 +34,7 @@ export class ChainDialogService {
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Edit chain',
-        buttons: ['edit', 'cancel'],
+        buttons: ['save', 'cancel'],
         form: { ...row }
       }
     }).afterClosed();

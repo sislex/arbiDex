@@ -41,7 +41,7 @@ export class TokenDialogService {
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Edit token',
-        buttons: ['edit', 'cancel'],
+        buttons: ['save', 'cancel'],
         list: list$,
         form: { ...row }
       }

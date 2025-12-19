@@ -172,7 +172,7 @@ export class AgGridPoolsContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.poolDialog.openEdit(row, this.chainsList$, this.tokensList$, this.dexesList$, this.versionList$).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editPool({ data: result.formData }));
       }
     });

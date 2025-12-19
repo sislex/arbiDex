@@ -36,7 +36,7 @@ export class MarketDialogService {
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Edit market',
-        buttons: ['edit', 'cancel'],
+        buttons: ['save', 'cancel'],
         list: list$,
         form: { ...row }
       }

@@ -134,7 +134,7 @@ export class AgGridTokensContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.tokenDialog.openEdit(row, this.list$).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editToken({ data: result.formData }));
       }
     });
