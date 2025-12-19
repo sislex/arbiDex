@@ -77,15 +77,6 @@ export class AgGridPoolsContainer implements OnInit {
 
   colDefs: ColDef[] = [
     {
-      field: "#",
-      headerName: '#',
-      width: 50,
-      valueGetter: params => {
-        if (!params.node || params.node.rowIndex == null) return '';
-        return params.node.rowIndex + 1;
-      },
-    },
-    {
       field: "poolId",
       headerName: 'Pool ID',
       flex: 1,

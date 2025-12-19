@@ -41,22 +41,13 @@ export class AgGridDexesContainer implements OnInit {
 
   colDefs: ColDef[] = [
     {
-      field: "#",
-      headerName: '#',
-      width: 50,
-      valueGetter: params => {
-        if (!params.node || params.node.rowIndex == null) return '';
-        return params.node.rowIndex + 1;
-      },
-    },
-    {
       field: "dexId",
-      headerName: 'ID',
+      headerName: 'Dex ID',
       flex: 1,
     },
     {
       field: "name",
-      headerName: 'Name',
+      headerName: 'Dex Name',
       flex: 1,
     },
     {
