@@ -14,8 +14,8 @@
   <app-select-field
     [title]="'Base Token Id'"
     [list]="tokensList | async"
-    [selected]="formData.baseTokenId"
-    (emitter)="events($event, 'baseTokenId')"
+    [selected]="formData.token"
+    (emitter)="events($event, 'token')"
     content
   ></app-select-field>
 </app-header-content-layout>
@@ -25,8 +25,8 @@
   <app-select-field
     [title]="'Quote Token Id'"
     [list]="tokensList | async"
-    [selected]="formData.quoteTokenId"
-    (emitter)="events($event, 'quoteTokenId')"
+    [selected]="formData.token_2"
+    (emitter)="events($event, 'token_2')"
     content
   ></app-select-field>
 </app-header-content-layout>

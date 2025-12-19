@@ -1,8 +1,8 @@
 export class PoolDto {
   poolId: number;
   chainId: number;
-  baseTokenId: number;
-  quoteTokenId: number;
+  token: number;
+  token_2: number;
   dexId: number;
   version: 'v2' | 'v3' | 'v4';
   fee: number;
