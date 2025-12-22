@@ -4,6 +4,7 @@ import { Tokens } from '../entities/entities/Tokens';
 import { Repository } from 'typeorm';
 import { CreateTokenDto } from '../dtos/token-dto/token.dto';
 import { Chains } from '../entities/entities/Chains';
+import { ChainsService } from '../chains/chains.service';
 
 @Injectable()
 export class TokensService {
@@ -12,12 +13,14 @@ export class TokensService {
     private tokensRepository: Repository<Tokens>,
     @InjectRepository(Chains)
     private chainsRepository: Repository<Chains>,
+    private chainService: ChainsService,
   ) {}
 
   async create(tokenDto: CreateTokenDto) {
     const chain = await this.chainsRepository.findOne({
       where: { chainId: tokenDto.chainId },
     });
+
     if (!chain) throw new Error(`Chain с id ${tokenDto.chainId} не найден`);
 
     const token = this.tokensRepository.create({
@@ -40,7 +43,7 @@ export class TokensService {
     });
   }
 
-  async update(id: number, tokenDto: CreateTokenDto) {
+  async findOne(id: number) {
     const token = await this.tokensRepository.findOne({
       where: { tokenId: id },
       relations: ['chain'],
@@ -49,14 +52,12 @@ export class TokensService {
     if (!token) {
       throw new Error(`Token с id ${id} не найден`);
     }
+    return token;
+  }
 
-    const chain = await this.chainsRepository.findOne({
-      where: { chainId: tokenDto.chainId },
-    });
-
-    if (!chain) {
-      throw new Error(`Chain с id ${tokenDto.chainId} не найден`);
-    }
+  async update(id: number, tokenDto: CreateTokenDto) {
+    const token = await this.findOne(id);
+    const chain = await this.chainService.findOne(tokenDto.chainId);
 
     token.address = tokenDto.address;
     token.symbol = tokenDto.symbol;

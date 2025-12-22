@@ -15,6 +15,10 @@ import { Chains } from './entities/entities/Chains';
 import { Markets } from './entities/entities/Markets';
 import { Dexes } from './entities/entities/Dexes';
 import { Servers } from './entities/entities/Servers';
+import { JobsModule } from './jobs/jobs.module';
+import { BotsModule } from './bots/bots.module';
+import { JobBotRelationsModule } from './job-bot-relations/job-bot-relations.module';
+import { MarketJobRelationsModule } from './market-job-relations/market-job-relations.module';
 
 @Module({
   imports: [
@@ -45,6 +49,10 @@ import { Servers } from './entities/entities/Servers';
     PoolsModule,
     ServersModule,
     DexesModule,
+    JobsModule,
+    BotsModule,
+    JobBotRelationsModule,
+    MarketJobRelationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -12,7 +12,7 @@ import { MarketJobRelations } from './MarketJobRelations';
 @Entity('jobs', { schema: 'public' })
 export class Jobs {
   @PrimaryGeneratedColumn({ type: 'bigint', name: 'job_id' })
-  jobId: string;
+  jobId: number;
 
   @Column('character varying', {
     name: 'job_type',

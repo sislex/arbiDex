@@ -1,26 +1,54 @@
 import { Injectable } from '@nestjs/common';
-import { CreateServerDto } from './dto/create-server.dto';
-import { UpdateServerDto } from './dto/update-server.dto';
+import { ServerDto } from '../dtos/servers-dto/server.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Servers } from '../entities/entities/Servers';
 
 @Injectable()
 export class ServersService {
-  create(createServerDto: CreateServerDto) {
-    return 'This action adds a new server';
+  constructor(
+    @InjectRepository(Servers)
+    private serverRepository: Repository<Servers>,
+  ) {}
+
+  async create(createServerDto: ServerDto) {
+    const server = this.serverRepository.create({
+      ip: createServerDto.ip,
+      port: createServerDto.port,
+      serverName: createServerDto.serverName,
+    });
+    return await this.serverRepository.save(server);
   }
 
-  findAll() {
-    return `This action returns all servers`;
+  async findAll() {
+    return await this.serverRepository.find({
+      order: {
+        serverId: 'DESC',
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} server`;
+  async findOne(id: number) {
+    const server = await this.serverRepository.findOne({
+      where: { serverId: id.toString() },
+    });
+    if (!server) {
+      throw new Error(`Job с id ${id} не найден`);
+    }
+    return server;
   }
 
-  update(id: number, updateServerDto: UpdateServerDto) {
-    return `This action updates a #${id} server`;
+  async update(id: number, updateServerDto: ServerDto) {
+    const server = await this.findOne(id);
+
+    server.ip = updateServerDto.ip;
+    server.port = updateServerDto.port;
+    server.serverName = updateServerDto.serverName;
+
+    return await this.serverRepository.save(server);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} server`;
+  async remove(id: number) {
+    return await this.serverRepository.delete(id);
   }
 }
