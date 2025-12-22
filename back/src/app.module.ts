@@ -18,7 +18,12 @@ import { Servers } from './entities/entities/Servers';
 import { JobsModule } from './jobs/jobs.module';
 import { BotsModule } from './bots/bots.module';
 import { JobBotRelationsModule } from './job-bot-relations/job-bot-relations.module';
-import { MarketJobRelationsModule } from './market-job-relations/market-job-relations.module';
+import { Jobs } from './entities/entities/Jobs';
+import { Bots } from './entities/entities/Bots';
+import { Quotes } from './entities/entities/Quotes';
+import { QuoteJobRelations } from './entities/entities/QuoteJobRelations';
+import { Pairs } from './entities/entities/Pairs';
+import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
 
 @Module({
   imports: [
@@ -34,7 +39,21 @@ import { MarketJobRelationsModule } from './market-job-relations/market-job-rela
         username: cfg.get<string>('POSTGRES_USER'),
         password: cfg.get<string>('POSTGRES_PASSWORD'),
         database: cfg.get<string>('POSTGRES_DB'),
-        entities: [Tokens, Pools, Chains, Markets, Dexes, Servers],
+        entities: [
+          Tokens,
+          Pools,
+          Chains,
+          Markets,
+          Dexes,
+          Servers,
+          Jobs,
+          Bots,
+          Quotes,
+          QuoteJobRelations,
+          JobBotRelationsModule,
+          Pairs,
+          PairQuoteRelations,
+        ],
         autoLoadEntities: true,
         synchronize: false,
         ssl:
@@ -52,7 +71,6 @@ import { MarketJobRelationsModule } from './market-job-relations/market-job-rela
     JobsModule,
     BotsModule,
     JobBotRelationsModule,
-    MarketJobRelationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

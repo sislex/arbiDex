@@ -31,10 +31,10 @@ export class PoolsService {
     });
     if (!token) throw new Error(`Chain с id ${poolDto.token} не найден`);
 
-    const token_2 = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.token_2 },
+    const token2 = await this.tokensRepository.findOne({
+      where: { tokenId: poolDto.token2 },
     });
-    if (!token_2) throw new Error(`Chain с id ${poolDto.token_2} не найден`);
+    if (!token2) throw new Error(`Chain с id ${poolDto.token2} не найден`);
 
     const dex = await this.dexesRepository.findOne({
       where: { dexId: poolDto.dexId },
@@ -44,7 +44,7 @@ export class PoolsService {
     const market = this.poolRepository.create({
       chain,
       token,
-      token_2,
+      token2,
       dex,
       version: poolDto.version,
       fee: poolDto.fee,
@@ -56,7 +56,7 @@ export class PoolsService {
 
   async findAll() {
     return await this.poolRepository.find({
-      relations: ['chain', 'token', 'token_2', 'dex'],
+      relations: ['chain', 'token', 'token2', 'dex'],
       order: {
         poolId: 'DESC',
       },
@@ -66,7 +66,7 @@ export class PoolsService {
   async update(id: number, poolDto: PoolDto) {
     const pool = await this.poolRepository.findOne({
       where: { poolId: id },
-      relations: ['token', 'token_2', 'chain', 'dex'],
+      relations: ['token', 'token2', 'chain', 'dex'],
     });
     if (!pool) {
       throw new Error(`Chain с id ${poolDto.poolId} не найден`);
@@ -82,10 +82,10 @@ export class PoolsService {
     });
     if (!token) throw new Error(`Chain с id ${poolDto.token} не найден`);
 
-    const token_2 = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.token_2 },
+    const token2 = await this.tokensRepository.findOne({
+      where: { tokenId: poolDto.token2 },
     });
-    if (!token_2) throw new Error(`Chain с id ${poolDto.token_2} не найден`);
+    if (!token2) throw new Error(`Chain с id ${poolDto.token2} не найден`);
 
     const dex = await this.dexesRepository.findOne({
       where: { dexId: poolDto.dexId },
@@ -98,7 +98,7 @@ export class PoolsService {
     pool.version = poolDto.version;
     pool.chain = chain;
     pool.token = token;
-    pool.token = token_2;
+    pool.token = token2;
     pool.dex = dex;
 
     return await this.poolRepository.save(pool);

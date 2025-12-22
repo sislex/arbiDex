@@ -31,7 +31,7 @@ export class Tokens {
   @OneToMany(() => Pools, (pools) => pools.token)
   pools: Pools[];
 
-  @OneToMany(() => Pools, (pools) => pools.token_2)
+  @OneToMany(() => Pools, (pools) => pools.token2)
   pools2: Pools[];
 
   @ManyToOne(() => Chains, (chains) => chains.tokens, { onDelete: 'RESTRICT' })

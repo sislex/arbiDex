@@ -28,7 +28,7 @@ export class JobsService {
 
   async findOne(id: number) {
     const job = await this.jobRepository.findOne({
-      where: { jobId: id },
+      where: { jobId: id.toString() },
     });
     if (!job) {
       throw new Error(`Job с id ${id} не найден`);

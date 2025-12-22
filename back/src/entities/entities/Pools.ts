@@ -39,10 +39,10 @@ export class Pools {
   dex: Dexes;
 
   @ManyToOne(() => Tokens, (tokens) => tokens.pools, { onDelete: 'RESTRICT' })
-  @JoinColumn([{ name: 'token_1', referencedColumnName: 'tokenId' }])
+  @JoinColumn([{ name: 'token0', referencedColumnName: 'tokenId' }])
   token: Tokens;
 
   @ManyToOne(() => Tokens, (tokens) => tokens.pools2, { onDelete: 'RESTRICT' })
-  @JoinColumn([{ name: 'token_2', referencedColumnName: 'tokenId' }])
-  token_2: Tokens;
+  @JoinColumn([{ name: 'token1', referencedColumnName: 'tokenId' }])
+  token2: Tokens;
 }
