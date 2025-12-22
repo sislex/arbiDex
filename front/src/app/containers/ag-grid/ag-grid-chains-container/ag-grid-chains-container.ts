@@ -39,22 +39,13 @@ export class AgGridChainsContainer implements OnInit {
 
   colDefs: ColDef[] = [
     {
-      field: "#",
-      headerName: '#',
-      width: 50,
-      valueGetter: params => {
-        if (!params.node || params.node.rowIndex == null) return '';
-        return params.node.rowIndex + 1;
-      },
-    },
-    {
       field: "chainId",
-      headerName: 'ID',
+      headerName: 'Chain ID',
       flex: 1,
     },
     {
       field: "name",
-      headerName: 'Name',
+      headerName: 'Chain Name',
       flex: 1,
     },
     {
@@ -104,14 +95,14 @@ export class AgGridChainsContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.chainDialog.openEdit(row).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editChain({ data: result.formData }));
       }
     });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'chain').subscribe(result => {
+    this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingChain({ chainId: row.chainId }));
       }

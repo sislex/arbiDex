@@ -19,6 +19,7 @@ export class ConfirmationPopUpContainer {
   public data = inject(MAT_DIALOG_DATA) as {
     title: string;
     message: string;
+    boldMessage: string;
     buttons: string[];
   };
 

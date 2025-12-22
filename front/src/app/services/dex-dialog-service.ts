@@ -36,7 +36,7 @@ export class DexDialogService {
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Edit dex',
-        buttons: ['edit', 'cancel'],
+        buttons: ['save', 'cancel'],
         list: list$,
         form: { ...row }
       }

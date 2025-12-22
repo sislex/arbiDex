@@ -9,5 +9,5 @@ import {Component, Input} from '@angular/core';
 })
 export class MessageText {
   @Input() message: string = '';
-
+  @Input() boldMessage: string = '';
 }

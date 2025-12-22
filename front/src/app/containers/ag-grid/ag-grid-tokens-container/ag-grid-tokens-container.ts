@@ -53,15 +53,6 @@ export class AgGridTokensContainer implements OnInit {
 
   colDefs: ColDef[] = [
     {
-      field: "#",
-      headerName: '#',
-      width: 50,
-      valueGetter: params => {
-        if (!params.node || params.node.rowIndex == null) return '';
-        return params.node.rowIndex + 1;
-      },
-    },
-    {
       field: "tokenId",
       headerName: 'Token ID',
       flex: 1,
@@ -134,14 +125,14 @@ export class AgGridTokensContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.tokenDialog.openEdit(row, this.list$).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editToken({ data: result.formData }));
       }
     });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'token').subscribe(result => {
+    this.deleteDialog.openDelete(row.tokenName, 'token').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingToken({ tokenId: row.tokenId }));
       }

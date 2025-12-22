@@ -50,7 +50,7 @@ export class PoolDialogService {
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Edit pool',
-        buttons: ['edit', 'cancel'],
+        buttons: ['save', 'cancel'],
         chainsList: chainsList$,
         tokensList: tokensList$,
         dexesList: dexesList$,

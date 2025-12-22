@@ -54,15 +54,6 @@ export class AgGridMarketsContainer implements OnInit {
 
   colDefs: ColDef[] = [
     {
-      field: "#",
-      headerName: '#',
-      width: 50,
-      valueGetter: params => {
-        if (!params.node || params.node.rowIndex == null) return '';
-        return params.node.rowIndex + 1;
-      },
-    },
-    {
       field: "marketId",
       headerName: 'Market ID',
       flex: 1,
@@ -124,14 +115,14 @@ export class AgGridMarketsContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.marketDialog.openEdit(row, this.list$).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editMarket({ data: result.formData }));
       }
     });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'market').subscribe(result => {
+    this.deleteDialog.openDelete(row.marketId, 'market').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingMarket({ marketId: row.marketId }));
       }

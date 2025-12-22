@@ -77,15 +77,6 @@ export class AgGridPoolsContainer implements OnInit {
 
   colDefs: ColDef[] = [
     {
-      field: "#",
-      headerName: '#',
-      width: 50,
-      valueGetter: params => {
-        if (!params.node || params.node.rowIndex == null) return '';
-        return params.node.rowIndex + 1;
-      },
-    },
-    {
       field: "poolId",
       headerName: 'Pool ID',
       flex: 1,
@@ -172,14 +163,14 @@ export class AgGridPoolsContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.poolDialog.openEdit(row, this.chainsList$, this.tokensList$, this.dexesList$, this.versionList$).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editPool({ data: result.formData }));
       }
     });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'pool').subscribe(result => {
+    this.deleteDialog.openDelete(row.poolAddress, 'pool').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingPools({ poolId: row.poolId }));
       }

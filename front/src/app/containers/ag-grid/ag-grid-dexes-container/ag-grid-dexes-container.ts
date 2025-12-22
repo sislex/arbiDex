@@ -41,22 +41,13 @@ export class AgGridDexesContainer implements OnInit {
 
   colDefs: ColDef[] = [
     {
-      field: "#",
-      headerName: '#',
-      width: 50,
-      valueGetter: params => {
-        if (!params.node || params.node.rowIndex == null) return '';
-        return params.node.rowIndex + 1;
-      },
-    },
-    {
       field: "dexId",
-      headerName: 'ID',
+      headerName: 'Dex ID',
       flex: 1,
     },
     {
       field: "name",
-      headerName: 'Name',
+      headerName: 'Dex Name',
       flex: 1,
     },
     {
@@ -106,14 +97,14 @@ export class AgGridDexesContainer implements OnInit {
 
   openEditDialog(row: any) {
     this.dexDialog.openEdit(row, this.list$).subscribe(result => {
-      if (result?.data === 'edit') {
+      if (result?.data === 'save') {
         this.store.dispatch(editDex({ data: result.formData }));
       }
     });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row, 'dex').subscribe(result => {
+    this.deleteDialog.openDelete(row.name, 'dex').subscribe(result => {
       if (result?.data === 'yes') {
         this.store.dispatch(deletingDex({ dexId: row.dexId }));
       }
