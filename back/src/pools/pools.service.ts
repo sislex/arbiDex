@@ -26,17 +26,15 @@ export class PoolsService {
     });
     if (!chain) throw new Error(`Chain с id ${poolDto.chainId} не найден`);
 
-    const baseToken = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.baseTokenId },
+    const token = await this.tokensRepository.findOne({
+      where: { tokenId: poolDto.token },
     });
-    if (!baseToken)
-      throw new Error(`Chain с id ${poolDto.baseTokenId} не найден`);
+    if (!token) throw new Error(`Chain с id ${poolDto.token} не найден`);
 
-    const quoteToken = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.quoteTokenId },
+    const token_2 = await this.tokensRepository.findOne({
+      where: { tokenId: poolDto.token_2 },
     });
-    if (!quoteToken)
-      throw new Error(`Chain с id ${poolDto.quoteTokenId} не найден`);
+    if (!token_2) throw new Error(`Chain с id ${poolDto.token_2} не найден`);
 
     const dex = await this.dexesRepository.findOne({
       where: { dexId: poolDto.dexId },
@@ -45,8 +43,8 @@ export class PoolsService {
 
     const market = this.poolRepository.create({
       chain,
-      baseToken,
-      quoteToken,
+      token,
+      token_2,
       dex,
       version: poolDto.version,
       fee: poolDto.fee,
@@ -58,7 +56,7 @@ export class PoolsService {
 
   async findAll() {
     return await this.poolRepository.find({
-      relations: ['chain', 'baseToken', 'quoteToken', 'dex'],
+      relations: ['chain', 'token', 'token_2', 'dex'],
       order: {
         poolId: 'DESC',
       },
@@ -68,7 +66,7 @@ export class PoolsService {
   async update(id: number, poolDto: PoolDto) {
     const pool = await this.poolRepository.findOne({
       where: { poolId: id },
-      relations: ['baseToken', 'quoteToken', 'chain', 'dex'],
+      relations: ['token', 'token_2', 'chain', 'dex'],
     });
     if (!pool) {
       throw new Error(`Chain с id ${poolDto.poolId} не найден`);
@@ -79,17 +77,15 @@ export class PoolsService {
     });
     if (!chain) throw new Error(`Chain с id ${poolDto.chainId} не найден`);
 
-    const baseToken = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.baseTokenId },
+    const token = await this.tokensRepository.findOne({
+      where: { tokenId: poolDto.token },
     });
-    if (!baseToken)
-      throw new Error(`Chain с id ${poolDto.baseTokenId} не найден`);
+    if (!token) throw new Error(`Chain с id ${poolDto.token} не найден`);
 
-    const quoteToken = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.quoteTokenId },
+    const token_2 = await this.tokensRepository.findOne({
+      where: { tokenId: poolDto.token_2 },
     });
-    if (!quoteToken)
-      throw new Error(`Chain с id ${poolDto.quoteTokenId} не найден`);
+    if (!token_2) throw new Error(`Chain с id ${poolDto.token_2} не найден`);
 
     const dex = await this.dexesRepository.findOne({
       where: { dexId: poolDto.dexId },
@@ -101,8 +97,8 @@ export class PoolsService {
     pool.fee = poolDto.fee;
     pool.version = poolDto.version;
     pool.chain = chain;
-    pool.baseToken = baseToken;
-    pool.quoteToken = quoteToken;
+    pool.token = token;
+    pool.token = token_2;
     pool.dex = dex;
 
     return await this.poolRepository.save(pool);

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { PoolsService } from './pools.service';
 import { PoolDto } from '../dtos/pools-dto/pool.dto';
 
@@ -17,8 +25,8 @@ export class PoolsController {
     return pools.map((p) => ({
       poolId: p.poolId,
       chainId: p.chain.chainId,
-      baseTokenId: p.baseToken.tokenId,
-      quoteTokenId: p.quoteToken.tokenId,
+      token: p.token.tokenId,
+      token_2: p.token_2.tokenId,
       dexId: p.dex.dexId,
       version: p.version,
       fee: p.fee,

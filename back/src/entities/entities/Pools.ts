@@ -8,9 +8,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Markets } from './Markets';
-import { Tokens } from './Tokens';
 import { Chains } from './Chains';
 import { Dexes } from './Dexes';
+import { Tokens } from './Tokens';
 
 @Index('pools_pkey', ['poolId'], { unique: true })
 @Entity('pools', { schema: 'public' })
@@ -30,10 +30,6 @@ export class Pools {
   @OneToMany(() => Markets, (markets) => markets.pool)
   markets: Markets[];
 
-  @ManyToOne(() => Tokens, (tokens) => tokens.pools, { onDelete: 'RESTRICT' })
-  @JoinColumn([{ name: 'base_token_id', referencedColumnName: 'tokenId' }])
-  baseToken: Tokens;
-
   @ManyToOne(() => Chains, (chains) => chains.pools, { onDelete: 'RESTRICT' })
   @JoinColumn([{ name: 'chain_id', referencedColumnName: 'chainId' }])
   chain: Chains;
@@ -42,7 +38,11 @@ export class Pools {
   @JoinColumn([{ name: 'dex_id', referencedColumnName: 'dexId' }])
   dex: Dexes;
 
+  @ManyToOne(() => Tokens, (tokens) => tokens.pools, { onDelete: 'RESTRICT' })
+  @JoinColumn([{ name: 'token_1', referencedColumnName: 'tokenId' }])
+  token: Tokens;
+
   @ManyToOne(() => Tokens, (tokens) => tokens.pools2, { onDelete: 'RESTRICT' })
-  @JoinColumn([{ name: 'quote_token_id', referencedColumnName: 'tokenId' }])
-  quoteToken: Tokens;
+  @JoinColumn([{ name: 'token_2', referencedColumnName: 'tokenId' }])
+  token_2: Tokens;
 }

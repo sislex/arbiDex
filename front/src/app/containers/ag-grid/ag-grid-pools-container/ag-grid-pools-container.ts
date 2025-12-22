@@ -116,13 +116,13 @@ export class AgGridPoolsContainer implements OnInit {
       flex: 1,
     },
     {
-      field: "baseTokenId",
-      headerName: 'Base token ID',
+      field: "token",
+      headerName: 'Token 1',
       flex: 1,
     },
     {
-      field: "quoteTokenId",
-      headerName: 'Quote token ID',
+      field: "token_2",
+      headerName: 'Token 2',
       flex: 1,
     },
     {

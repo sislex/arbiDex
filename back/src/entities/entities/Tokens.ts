@@ -6,35 +6,35 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-} from "typeorm";
-import { Pools } from "./Pools";
-import { Chains } from "./Chains";
+} from 'typeorm';
+import { Pools } from './Pools';
+import { Chains } from './Chains';
 
-@Index("tokens_pkey", ["tokenId"], { unique: true })
-@Entity("tokens", { schema: "public" })
+@Index('tokens_pkey', ['tokenId'], { unique: true })
+@Entity('tokens', { schema: 'public' })
 export class Tokens {
-  @PrimaryGeneratedColumn({ type: "integer", name: "token_id" })
+  @PrimaryGeneratedColumn({ type: 'integer', name: 'token_id' })
   tokenId: number;
 
-  @Column("character varying", { name: "address", length: 255 })
+  @Column('character varying', { name: 'address', length: 255 })
   address: string;
 
-  @Column("character varying", { name: "symbol", length: 50 })
+  @Column('character varying', { name: 'symbol', length: 50 })
   symbol: string;
 
-  @Column("integer", { name: "decimals" })
+  @Column('integer', { name: 'decimals' })
   decimals: number;
 
-  @Column("character varying", { name: "token_name", nullable: true })
+  @Column('character varying', { name: 'token_name', nullable: true })
   tokenName: string | null;
 
-  @OneToMany(() => Pools, (pools) => pools.baseToken)
+  @OneToMany(() => Pools, (pools) => pools.token)
   pools: Pools[];
 
-  @OneToMany(() => Pools, (pools) => pools.quoteToken)
+  @OneToMany(() => Pools, (pools) => pools.token_2)
   pools2: Pools[];
 
-  @ManyToOne(() => Chains, (chains) => chains.tokens, { onDelete: "RESTRICT" })
-  @JoinColumn([{ name: "chain_id", referencedColumnName: "chainId" }])
+  @ManyToOne(() => Chains, (chains) => chains.tokens, { onDelete: 'RESTRICT' })
+  @JoinColumn([{ name: 'chain_id', referencedColumnName: 'chainId' }])
   chain: Chains;
 }
