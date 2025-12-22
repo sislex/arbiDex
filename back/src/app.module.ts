@@ -24,6 +24,10 @@ import { Quotes } from './entities/entities/Quotes';
 import { QuoteJobRelations } from './entities/entities/QuoteJobRelations';
 import { Pairs } from './entities/entities/Pairs';
 import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
+import { PairsModule } from './pairs/pairs.module';
+import { QuotesModule } from './quotes/quotes.module';
+import { PairQuoteRelationsModule } from './pair-quote-relations/pair-quote-relations.module';
+import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relations.module';
 
 @Module({
   imports: [
@@ -71,6 +75,10 @@ import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
     JobsModule,
     BotsModule,
     JobBotRelationsModule,
+    PairsModule,
+    QuotesModule,
+    PairQuoteRelationsModule,
+    QuoteJobRelationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
