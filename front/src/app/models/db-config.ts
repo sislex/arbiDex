@@ -3,23 +3,6 @@ import {API} from './api';
 export interface ITokensAPI extends API {
   response: ITokens[];
 }
-
-export interface IPoolsAPI extends API {
-  response: IPools[];
-}
-
-export interface IMarketsAPI extends API {
-  response: IMarkets[];
-}
-
-export interface IDexesAPI extends API {
-  response: IDexes[];
-}
-
-export interface IChainsAPI extends API {
-  response: IChains[];
-}
-
 export interface ITokens {
   tokenId: number | null;
   chainId: number | null;
@@ -28,7 +11,6 @@ export interface ITokens {
   tokenName: string;
   decimals: number | null;
 }
-
 export interface ITokensCreate {
   tokenId: number;
   chainId: number;
@@ -38,6 +20,9 @@ export interface ITokensCreate {
   decimals: number;
 }
 
+export interface IPoolsAPI extends API {
+  response: IPools[];
+}
 export interface IPools {
   poolId: number;
   chainId: number;
@@ -48,7 +33,6 @@ export interface IPools {
   dexId: number;
   version: string;
 }
-
 export interface IPoolsCreate {
   poolId: number;
   chainId: number;
@@ -60,33 +44,39 @@ export interface IPoolsCreate {
   version: string;
 }
 
+export interface IMarketsAPI extends API {
+  response: IMarkets[];
+}
 export interface IMarkets {
   marketId: number;
   poolId: number;
   amount: string;
 }
-
 export interface IMarketsCreate {
   marketId: number;
   poolId: number;
   amount: string;
 }
 
+export interface IDexesAPI extends API {
+  response: IDexes[];
+}
 export interface IDexes {
   dexId: number;
   name: string;
 }
-
 export interface IDexesCreate {
   dexId: number;
   name: string;
 }
 
+export interface IChainsAPI extends API {
+  response: IChains[];
+}
 export interface IChains {
   chainId: number;
   name: string;
 }
-
 export interface IChainsCreate {
   chainId: number;
   name: string;
@@ -95,4 +85,82 @@ export interface IChainsCreate {
 export interface ISelectMenu {
   id: string;
   name: string;
+}
+
+export interface IPairsAPI extends API {
+  response: IPairs[];
+}
+export interface IPairs {
+  pairId: number;
+  poolId: number;
+  tokenIn: number;
+  tokenOut: number;
+}
+export interface IPairsCreate {
+  pairId: number;
+  poolId: number;
+  tokenIn: number;
+  tokenOut: number;
+}
+
+export interface IQuotesAPI extends API {
+  response: IQuotes[];
+}
+export interface IQuotes {
+  quoteId: number;
+  amount: number;
+  side: string;
+  blockTag: string;
+  quoteSource: string;
+}
+export interface IQuotesCreate {
+  quoteId: number;
+  amount: number;
+  side: string;
+  blockTag: string;
+  quoteSource: string;
+}
+
+export interface IJobsAPI extends API {
+  response: IJobs[];
+}
+export interface IJobs {
+  jobId: number;
+  jobType: string;
+}
+export interface IJobsCreate {
+  jobId: number;
+  jobType: string;
+}
+
+export interface IBotsAPI extends API {
+  response: IBots[];
+}
+export interface IBots {
+  botId: number;
+  botName: string;
+  description: string;
+  serverId: number;
+}
+export interface IBotsCreate {
+  botId: number;
+  botName: string;
+  description: string;
+  serverId: number;
+}
+
+export interface IServersAPI extends API {
+  response: IServers[];
+}
+export interface IServers {
+  serverId: number;
+  ip: string;
+  port: string;
+  serverName: string;
+}
+export interface IServersCreate {
+  serverId: number;
+  ip: string;
+  port: string;
+  serverName: string;
 }
