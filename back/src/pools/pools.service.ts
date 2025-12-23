@@ -3,9 +3,6 @@ import { PoolDto } from '../dtos/pools-dto/pool.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Pools } from '../entities/entities/Pools';
-import { Chains } from '../entities/entities/Chains';
-import { Tokens } from '../entities/entities/Tokens';
-import { Dexes } from '../entities/entities/Dexes';
 import { TokensService } from '../tokens/tokens.service';
 import { ChainsService } from '../chains/chains.service';
 import { DexesService } from '../dexes/dexes.service';
@@ -15,37 +12,16 @@ export class PoolsService {
   constructor(
     @InjectRepository(Pools)
     private poolRepository: Repository<Pools>,
-    @InjectRepository(Chains)
-    private chainRepository: Repository<Chains>,
-    @InjectRepository(Tokens)
-    private tokensRepository: Repository<Tokens>,
-    @InjectRepository(Dexes)
-    private dexesRepository: Repository<Dexes>,
     private tokensService: TokensService,
     private chainsService: ChainsService,
     private dexesService: DexesService,
   ) {}
 
   async create(poolDto: PoolDto) {
-    const chain = await this.chainRepository.findOne({
-      where: { chainId: poolDto.chainId },
-    });
-    if (!chain) throw new Error(`Chain с id ${poolDto.chainId} не найден`);
-
-    const token = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.token },
-    });
-    if (!token) throw new Error(`Chain с id ${poolDto.token} не найден`);
-
-    const token2 = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.token2 },
-    });
-    if (!token2) throw new Error(`Chain с id ${poolDto.token2} не найден`);
-
-    const dex = await this.dexesRepository.findOne({
-      where: { dexId: poolDto.dexId },
-    });
-    if (!dex) throw new Error(`Chain с id ${poolDto.dexId} не найден`);
+    const chain = await this.chainsService.findOne(poolDto.chainId);
+    const token = await this.tokensService.findOne(poolDto.token);
+    const token2 = await this.tokensService.findOne(poolDto.token2);
+    const dex = await this.dexesService.findOne(poolDto.dexId);
 
     const market = this.poolRepository.create({
       chain,
