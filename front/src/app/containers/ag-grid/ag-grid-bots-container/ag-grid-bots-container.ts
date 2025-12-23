@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
@@ -21,7 +21,7 @@ import { ActionsContainer } from '../../actions-container/actions-container';
   templateUrl: './ag-grid-bots-container.html',
   styleUrl: './ag-grid-bots-container.scss',
 })
-export class AgGridBotsContainer implements OnInit {
+export class AgGridBotsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
@@ -29,48 +29,48 @@ export class AgGridBotsContainer implements OnInit {
   // chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
   // chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
 
-  colDefs: ColDef[] = [
-      {
-        field: "botId",
-        headerName: 'Bot ID',
-        flex: 1,
+  readonly colDefs: ColDef[] = [
+    {
+      field: "botId",
+      headerName: 'Bot ID',
+      flex: 1,
+    },
+    {
+      field: "botName",
+      headerName: 'Bot Name',
+      flex: 1,
+    },
+    {
+      field: "description",
+      headerName: 'Description',
+      flex: 1,
+    },
+    {
+      field: "serverId",
+      headerName: 'Server',
+      flex: 1,
+    },
+    {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
       },
-      {
-        field: "botName",
-        headerName: 'Bot Name',
-        flex: 1,
-      },
-      {
-        field: "description",
-        headerName: 'Description',
-        flex: 1,
-      },
-      {
-        field: "serverId",
-        headerName: 'Server',
-        flex: 1,
-      },
-      {
-        headerName: 'Actions',
-        width: 125,
-        cellRenderer: ActionsContainer,
-        cellRendererParams: {
-          onAction: this.onAction.bind(this),
-        },
-      },
+    },
   ];
 
-  defaultColDef: ColDef = {
-      sortable: false,
-      cellStyle: { textAlign: 'center'},
-      suppressMovable: true,
-      headerClass: 'align-center',
+  readonly defaultColDef: ColDef = {
+    sortable: false,
+    cellStyle: { textAlign: 'center'},
+    suppressMovable: true,
+    headerClass: 'align-center',
   };
 
-  ngOnInit() {
+  constructor() {
     //   this.store.dispatch(setChainsData());
-  };
-  //
+  }
+
   onAction($event: any, row: any) {
     if ($event.event === 'Actions:ACTION_CLICKED') {
       if ($event.actionType === 'delete') {
@@ -88,19 +88,19 @@ export class AgGridBotsContainer implements OnInit {
   }
 
   openCreateDialog() {
-      // this.chainDialog.openCreate().subscribe(result => {
-      //   if (result?.data === 'add') {
-      //     this.store.dispatch(createChain({ data: result.formData }));
-      //   }
-      // });
+    // this.chainDialog.openCreate().subscribe(result => {
+    //   if (result?.data === 'add') {
+    //     this.store.dispatch(createChain({ data: result.formData }));
+    //   }
+    // });
   }
 
   openEditDialog(row: any) {
-  //   this.chainDialog.openEdit(row).subscribe(result => {
-  //     if (result?.data === 'save') {
-  //       this.store.dispatch(editChain({ data: result.formData }));
-  //     }
-  //   });
+    //   this.chainDialog.openEdit(row).subscribe(result => {
+    //     if (result?.data === 'save') {
+    //       this.store.dispatch(editChain({ data: result.formData }));
+    //     }
+    //   });
   }
 
   openDeleteDialog(row: any) {

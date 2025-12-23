@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
@@ -17,7 +17,7 @@ import { ActionsContainer } from '../../actions-container/actions-container';
   templateUrl: './ag-grid-quotes-container.html',
   styleUrl: './ag-grid-quotes-container.scss',
 })
-export class AgGridQuotesContainer  implements OnInit {
+export class AgGridQuotesContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
@@ -25,7 +25,7 @@ export class AgGridQuotesContainer  implements OnInit {
   // chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
   // chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
 
-  colDefs: ColDef[] = [
+  readonly colDefs: ColDef[] = [
     {
       field: "quoteId",
       headerName: 'Quote ID',
@@ -61,16 +61,16 @@ export class AgGridQuotesContainer  implements OnInit {
     },
   ];
 
-  defaultColDef: ColDef = {
+  readonly defaultColDef: ColDef = {
     sortable: false,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
   };
 
-  ngOnInit() {
+  constructor() {
     //   this.store.dispatch(setChainsData());
-  };
+  }
 
   onAction($event: any, row: any) {
       if ($event.event === 'Actions:ACTION_CLICKED') {

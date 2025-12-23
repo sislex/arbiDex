@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -34,7 +34,7 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
   templateUrl: './ag-grid-markets-container.html',
   styleUrl: './ag-grid-markets-container.scss',
 })
-export class AgGridMarketsContainer implements OnInit {
+export class AgGridMarketsContainer {
   private store = inject(Store);
   readonly marketDialog = inject(MarketDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
@@ -52,7 +52,7 @@ export class AgGridMarketsContainer implements OnInit {
     )
   );
 
-  colDefs: ColDef[] = [
+  readonly colDefs: ColDef[] = [
     {
       field: "marketId",
       headerName: 'Market ID',
@@ -78,16 +78,16 @@ export class AgGridMarketsContainer implements OnInit {
     },
   ];
 
-  defaultColDef: ColDef = {
+  readonly defaultColDef: ColDef = {
     sortable: false,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
   };
 
-  ngOnInit() {
+  constructor() {
     this.store.dispatch((setMarketsData()));
-  };
+  }
 
   onAction($event: any, row: any) {
     if ($event.event === 'Actions:ACTION_CLICKED') {

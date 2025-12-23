@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
@@ -17,7 +17,7 @@ import { ActionsContainer } from '../../actions-container/actions-container';
   templateUrl: './ag-grid-jobs-container.html',
   styleUrl: './ag-grid-jobs-container.scss',
 })
-export class AgGridJobsContainer  implements OnInit {
+export class AgGridJobsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
@@ -25,7 +25,7 @@ export class AgGridJobsContainer  implements OnInit {
   // chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
   // chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
 
-  colDefs: ColDef[] = [
+  readonly colDefs: ColDef[] = [
     {
       field: "jobId",
       headerName: 'Job ID',
@@ -46,17 +46,16 @@ export class AgGridJobsContainer  implements OnInit {
     },
   ];
 
-  defaultColDef: ColDef = {
+  readonly  defaultColDef: ColDef = {
       sortable: false,
       cellStyle: { textAlign: 'center'},
       suppressMovable: true,
       headerClass: 'align-center',
   };
 
-  ngOnInit() {
+  constructor() {
     //   this.store.dispatch(setChainsData());
-  };
-
+  }
   onAction($event: any, row: any) {
       if ($event.event === 'Actions:ACTION_CLICKED') {
         if ($event.actionType === 'delete') {
