@@ -1,25 +1,67 @@
 import { Injectable } from '@nestjs/common';
 import { PairQuoteRelationDto } from '../dtos/pair-quote-relations-dto/pair-quote-relation.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PairQuoteRelations } from '../entities/entities/PairQuoteRelations';
+import { Repository } from 'typeorm';
+import { PairsService } from '../pairs/pairs.service';
+import { QuotesService } from '../quotes/quotes.service';
 
 @Injectable()
 export class PairQuoteRelationsService {
-  create(createPairQuoteRelationDto: PairQuoteRelationDto) {
-    return 'This action adds a new pairQuoteRelation';
+  constructor(
+    @InjectRepository(PairQuoteRelations)
+    private pairQuoteRelationsRepository: Repository<PairQuoteRelations>,
+    private pairsService: PairsService,
+    private quotesService: QuotesService,
+  ) {}
+  async create(pairQuoteRelationDto: PairQuoteRelationDto) {
+    const pair = await this.pairsService.findOne(pairQuoteRelationDto.pairId);
+    const quote = await this.quotesService.findOne(
+      pairQuoteRelationDto.quoteId,
+    );
+
+    const market = this.pairQuoteRelationsRepository.create({
+      pair,
+      quote,
+    });
+
+    return await this.pairQuoteRelationsRepository.save(market);
   }
 
-  findAll() {
-    return `This action returns all pairQuoteRelations`;
+  async findAll() {
+    return await this.pairQuoteRelationsRepository.find({
+      relations: ['pair', 'quote'],
+      order: {
+        pairQuoteRelationId: 'DESC',
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pairQuoteRelation`;
+  async findOne(id: number) {
+    const item = await this.pairQuoteRelationsRepository.findOne({
+      where: { pairQuoteRelationId: id.toString() },
+      relations: ['pair', 'quote'],
+    });
+    if (!item) {
+      throw new Error(`Pair-Quote Relation with id ${id} not found`);
+    }
+    return item;
   }
 
-  update(id: number, updatePairQuoteRelationDto: PairQuoteRelationDto) {
-    return `This action updates a #${id} pairQuoteRelation`;
+  async update(id: number, pairQuoteRelationDto: PairQuoteRelationDto) {
+    const pairQuoteRelations = await this.findOne(id);
+
+    pairQuoteRelations.pair = await this.pairsService.findOne(
+      pairQuoteRelationDto.pairId,
+    );
+    pairQuoteRelations.quote = await this.quotesService.findOne(
+      pairQuoteRelationDto.quoteId,
+    );
+
+    return await this.pairQuoteRelationsRepository.save(pairQuoteRelations);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pairQuoteRelation`;
+  async remove(id: number) {
+    return await this.pairQuoteRelationsRepository.delete(id);
   }
 }

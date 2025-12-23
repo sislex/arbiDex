@@ -10,5 +10,6 @@ import { PoolsModule } from '../pools/pools.module';
   imports: [TypeOrmModule.forFeature([Pairs, Pools]), PoolsModule],
   controllers: [PairsController],
   providers: [PairsService],
+  exports: [PairsService],
 })
 export class PairsModule {}
