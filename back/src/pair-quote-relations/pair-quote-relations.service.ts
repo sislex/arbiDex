@@ -20,12 +20,12 @@ export class PairQuoteRelationsService {
       pairQuoteRelationDto.quoteId,
     );
 
-    const market = this.pairQuoteRelationsRepository.create({
+    const pairQuoteRelation = this.pairQuoteRelationsRepository.create({
       pair,
       quote,
     });
 
-    return await this.pairQuoteRelationsRepository.save(market);
+    return await this.pairQuoteRelationsRepository.save(pairQuoteRelation);
   }
 
   async findAll() {

@@ -8,11 +8,11 @@ import {
 import { Jobs } from './Jobs';
 import { Quotes } from './Quotes';
 
-@Index('quote_job_relations_pkey', ['quoteJobRelarionId'], { unique: true })
+@Index('quote_job_relations_pkey', ['quoteJobRelationId'], { unique: true })
 @Entity('quote_job_relations', { schema: 'public' })
 export class QuoteJobRelations {
-  @PrimaryGeneratedColumn({ type: 'bigint', name: 'quote_job_relarion_id' })
-  quoteJobRelarionId: string;
+  @PrimaryGeneratedColumn({ type: 'bigint', name: 'quote_job_relation_id' })
+  quoteJobRelationId: string;
 
   @ManyToOne(() => Jobs, (jobs) => jobs.quoteJobRelations, {
     onDelete: 'RESTRICT',
