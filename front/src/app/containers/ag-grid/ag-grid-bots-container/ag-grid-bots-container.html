@@ -1,0 +1,21 @@
+<app-header-content-layout>
+<!--  @if ((marketsDataIsLoaded$ | async) && !(marketsDataIsLoading$ | async)) {-->
+    <app-title-table-button
+      header
+      [title]="'Markets table'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+    ></app-title-table-button>
+<!--  }-->
+<!--  @if ((marketsDataIsLoaded$ | async) && !(marketsDataIsLoading$ | async)) {-->
+    <app-ag-grid
+      content
+      [rowData]="[]"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+    ></app-ag-grid>
+<!--  } @else {-->
+<!--    <app-loader header></app-loader>-->
+<!--  }-->
+</app-header-content-layout>
+

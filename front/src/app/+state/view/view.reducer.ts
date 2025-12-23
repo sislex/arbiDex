@@ -21,6 +21,11 @@ export const initialState: ViewState = {
     'Markets',
     'Dexes',
     'Chains',
+    'Pairs',
+    'Quotes',
+    'Jobs',
+    'Bots',
+    'Servers',
   ],
   activeSidebarItem: '',
 };
