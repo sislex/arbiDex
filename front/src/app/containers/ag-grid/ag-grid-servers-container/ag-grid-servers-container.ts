@@ -5,6 +5,7 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
 import { ColDef } from 'ag-grid-community';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
+import { ActionsContainer } from '../../actions-container/actions-container';
 
 @Component({
   selector: 'app-ag-grid-servers-container',
@@ -19,52 +20,62 @@ import { Store } from '@ngrx/store';
 export class AgGridServersContainer  implements OnInit {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
-  //
+
   // chainsDataResponse$ = this.store.select(getChainsDataResponse);
   // chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
   // chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
-  //
+
   colDefs: ColDef[] = [
-    //   {
-    //     field: "chainId",
-    //     headerName: 'Chain ID',
-    //     flex: 1,
-    //   },
-    //   {
-    //     field: "name",
-    //     headerName: 'Chain Name',
-    //     flex: 1,
-    //   },
-    //   {
-    //     headerName: 'Actions',
-    //     width: 125,
-    //     cellRenderer: ActionsContainer,
-    //     cellRendererParams: {
-    //       onAction: this.onAction.bind(this),
-    //     },
-    //   },
+      {
+        field: "serverId",
+        headerName: 'Server ID',
+        flex: 1,
+      },
+      {
+        field: "ip",
+        headerName: 'IP',
+        flex: 1,
+      },
+      {
+        field: "port",
+        headerName: 'Port',
+        flex: 1,
+      },
+      {
+        field: "serverName",
+        headerName: 'Server Name',
+        flex: 1,
+      },
+      {
+        headerName: 'Actions',
+        width: 125,
+        cellRenderer: ActionsContainer,
+        cellRendererParams: {
+          onAction: this.onAction.bind(this),
+        },
+      },
   ];
 
   defaultColDef: ColDef = {
-    //   sortable: false,
-    //   cellStyle: { textAlign: 'center'},
-    //   suppressMovable: true,
-    //   headerClass: 'align-center',
+      sortable: false,
+      cellStyle: { textAlign: 'center'},
+      suppressMovable: true,
+      headerClass: 'align-center',
   };
 
   ngOnInit() {
     //   this.store.dispatch(setChainsData());
   };
-  //
-  // onAction($event: any, row: any) {
-  //   if ($event.event === 'Actions:ACTION_CLICKED') {
-  //     if ($event.actionType === 'delete') {
-  //       this.openDeleteDialog(row);
-  //     } else if ($event.actionType === 'edit') {
-  //       this.openEditDialog(row);
-  //     }
-  //   }
-  // }
+
+  onAction($event: any, row: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if ($event.actionType === 'delete') {
+        this.openDeleteDialog(row);
+      } else if ($event.actionType === 'edit') {
+        this.openEditDialog(row);
+      }
+    }
+  }
 
   actions($event: any, note: any) {
     if (note === 'add' ) {
@@ -80,14 +91,14 @@ export class AgGridServersContainer  implements OnInit {
     //   });
   }
 
-  // openEditDialog(row: any) {
+  openEditDialog(row: any) {
   //   this.chainDialog.openEdit(row).subscribe(result => {
   //     if (result?.data === 'save') {
   //       this.store.dispatch(editChain({ data: result.formData }));
   //     }
   //   });
-  // }
-  //
+  }
+
   openDeleteDialog(row: any) {
     this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
       if (result?.data === 'yes') {
