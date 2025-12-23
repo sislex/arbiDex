@@ -31,7 +31,7 @@ export class JobsService {
       where: { jobId: id.toString() },
     });
     if (!job) {
-      throw new Error(`Job с id ${id} не найден`);
+      throw new Error(`Job with id ${id} not found`);
     }
     return job;
   }

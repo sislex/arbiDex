@@ -6,6 +6,9 @@ import { Pools } from '../entities/entities/Pools';
 import { Chains } from '../entities/entities/Chains';
 import { Tokens } from '../entities/entities/Tokens';
 import { Dexes } from '../entities/entities/Dexes';
+import { TokensService } from '../tokens/tokens.service';
+import { ChainsService } from '../chains/chains.service';
+import { DexesService } from '../dexes/dexes.service';
 
 @Injectable()
 export class PoolsService {
@@ -18,6 +21,9 @@ export class PoolsService {
     private tokensRepository: Repository<Tokens>,
     @InjectRepository(Dexes)
     private dexesRepository: Repository<Dexes>,
+    private tokensService: TokensService,
+    private chainsService: ChainsService,
+    private dexesService: DexesService,
   ) {}
 
   async create(poolDto: PoolDto) {
@@ -63,34 +69,23 @@ export class PoolsService {
     });
   }
 
-  async update(id: number, poolDto: PoolDto) {
-    const pool = await this.poolRepository.findOne({
+  async findOne(id: number) {
+    const item = await this.poolRepository.findOne({
       where: { poolId: id },
       relations: ['token', 'token2', 'chain', 'dex'],
     });
-    if (!pool) {
-      throw new Error(`Chain с id ${poolDto.poolId} не найден`);
+    if (!item) {
+      throw new Error(`Pool with id ${id} not found`);
     }
+    return item;
+  }
 
-    const chain = await this.chainRepository.findOne({
-      where: { chainId: poolDto.chainId },
-    });
-    if (!chain) throw new Error(`Chain с id ${poolDto.chainId} не найден`);
-
-    const token = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.token },
-    });
-    if (!token) throw new Error(`Chain с id ${poolDto.token} не найден`);
-
-    const token2 = await this.tokensRepository.findOne({
-      where: { tokenId: poolDto.token2 },
-    });
-    if (!token2) throw new Error(`Chain с id ${poolDto.token2} не найден`);
-
-    const dex = await this.dexesRepository.findOne({
-      where: { dexId: poolDto.dexId },
-    });
-    if (!dex) throw new Error(`Chain с id ${poolDto.dexId} не найден`);
+  async update(id: number, poolDto: PoolDto) {
+    const pool = await this.findOne(id);
+    const chain = await this.chainsService.findOne(poolDto.chainId);
+    const token = await this.tokensService.findOne(poolDto.token);
+    const token2 = await this.tokensService.findOne(poolDto.token2);
+    const dex = await this.dexesService.findOne(poolDto.dexId);
 
     pool.poolId = poolDto.poolId;
     pool.poolAddress = poolDto.poolAddress;

@@ -33,7 +33,7 @@ export class ChainsService {
     });
 
     if (!chain) {
-      throw new Error(`Chain с id ${id} не найден`);
+      throw new Error(`Chain with id ${id} not found`);
     }
 
     return chain;

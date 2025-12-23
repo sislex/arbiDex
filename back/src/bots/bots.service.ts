@@ -37,7 +37,7 @@ export class BotsService {
       where: { botId: id.toString() },
     });
     if (!bot) {
-      throw new Error(`Job с id ${id} не найден`);
+      throw new Error(`Bot with id ${id} not found`);
     }
     return bot;
   }

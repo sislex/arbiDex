@@ -33,7 +33,7 @@ export class ServersService {
       where: { serverId: id.toString() },
     });
     if (!server) {
-      throw new Error(`Job с id ${id} не найден`);
+      throw new Error(`Server with id ${id} not found`);
     }
     return server;
   }

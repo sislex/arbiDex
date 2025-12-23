@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Markets } from './Markets';
+import { Pairs } from './Pairs';
 import { Chains } from './Chains';
 import { Dexes } from './Dexes';
 import { Tokens } from './Tokens';
@@ -29,6 +30,9 @@ export class Pools {
 
   @OneToMany(() => Markets, (markets) => markets.pool)
   markets: Markets[];
+
+  @OneToMany(() => Pairs, (pairs) => pairs.pool)
+  pairs: Pairs[];
 
   @ManyToOne(() => Chains, (chains) => chains.pools, { onDelete: 'RESTRICT' })
   @JoinColumn([{ name: 'chain_id', referencedColumnName: 'chainId' }])

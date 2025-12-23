@@ -50,7 +50,7 @@ export class TokensService {
     });
 
     if (!token) {
-      throw new Error(`Token с id ${id} не найден`);
+      throw new Error(`Token with id ${id} not found`);
     }
     return token;
   }

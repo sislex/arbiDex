@@ -28,6 +28,15 @@ export class DexesService {
     });
   }
 
+  async findOne(id: number) {
+    const dex = await this.dexesRepository.findOne({
+      where: { dexId: id },
+    });
+    if (!dex) throw new Error(`Dex with id ${id} not found`);
+
+    return dex;
+  }
+
   async update(id: number, updateDexDto: DexDto) {
     const dex = await this.dexesRepository.findOne({
       where: { dexId: id },
