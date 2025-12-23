@@ -26,7 +26,7 @@ export class PoolsController {
       poolId: p.poolId,
       chainId: p.chain.chainId,
       token: p.token.tokenId,
-      token_2: p.token_2.tokenId,
+      token2: p.token2.tokenId,
       dexId: p.dex.dexId,
       version: p.version,
       fee: p.fee,

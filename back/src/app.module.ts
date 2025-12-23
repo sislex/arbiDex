@@ -15,6 +15,19 @@ import { Chains } from './entities/entities/Chains';
 import { Markets } from './entities/entities/Markets';
 import { Dexes } from './entities/entities/Dexes';
 import { Servers } from './entities/entities/Servers';
+import { JobsModule } from './jobs/jobs.module';
+import { BotsModule } from './bots/bots.module';
+import { JobBotRelationsModule } from './job-bot-relations/job-bot-relations.module';
+import { Jobs } from './entities/entities/Jobs';
+import { Bots } from './entities/entities/Bots';
+import { Quotes } from './entities/entities/Quotes';
+import { QuoteJobRelations } from './entities/entities/QuoteJobRelations';
+import { Pairs } from './entities/entities/Pairs';
+import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
+import { PairsModule } from './pairs/pairs.module';
+import { QuotesModule } from './quotes/quotes.module';
+import { PairQuoteRelationsModule } from './pair-quote-relations/pair-quote-relations.module';
+import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relations.module';
 
 @Module({
   imports: [
@@ -30,7 +43,21 @@ import { Servers } from './entities/entities/Servers';
         username: cfg.get<string>('POSTGRES_USER'),
         password: cfg.get<string>('POSTGRES_PASSWORD'),
         database: cfg.get<string>('POSTGRES_DB'),
-        entities: [Tokens, Pools, Chains, Markets, Dexes, Servers],
+        entities: [
+          Tokens,
+          Pools,
+          Chains,
+          Markets,
+          Dexes,
+          Servers,
+          Jobs,
+          Bots,
+          Quotes,
+          QuoteJobRelations,
+          JobBotRelationsModule,
+          Pairs,
+          PairQuoteRelations,
+        ],
         autoLoadEntities: true,
         synchronize: false,
         ssl:
@@ -45,6 +72,13 @@ import { Servers } from './entities/entities/Servers';
     PoolsModule,
     ServersModule,
     DexesModule,
+    JobsModule,
+    BotsModule,
+    JobBotRelationsModule,
+    PairsModule,
+    QuotesModule,
+    PairQuoteRelationsModule,
+    QuoteJobRelationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

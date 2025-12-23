@@ -27,7 +27,7 @@ export class PoolForm {
 
   @Output() emitter = new EventEmitter();
 
-  events(event: any, field: 'chainId' | 'token' | 'token_2' | 'fee' | 'dexId' | 'version' | 'poolAddress') {
+  events(event: any, field: 'chainId' | 'token' | 'token2' | 'fee' | 'dexId' | 'version' | 'poolAddress') {
     this.formData = {
       ...this.formData,
       [field]: event.data,

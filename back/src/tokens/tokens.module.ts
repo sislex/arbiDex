@@ -4,9 +4,10 @@ import { TokensService } from './tokens.service';
 import { TokensController } from './tokens.controller';
 import { Tokens } from '../entities/entities/Tokens';
 import { Chains } from '../entities/entities/Chains';
+import { ChainsModule } from '../chains/chains.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Tokens, Chains])],
+  imports: [TypeOrmModule.forFeature([Tokens, Chains]), ChainsModule],
   controllers: [TokensController],
   providers: [TokensService],
   exports: [TokensService],

@@ -43,7 +43,7 @@ export interface IPools {
   chainId: number;
   poolAddress: number;
   token: number;
-  token_2: number;
+  token2: number;
   fee: number;
   dexId: number;
   version: string;
@@ -54,7 +54,7 @@ export interface IPoolsCreate {
   chainId: number;
   poolAddress: number;
   token: number;
-  token_2: number;
+  token2: number;
   fee: number;
   dexId: number;
   version: string;

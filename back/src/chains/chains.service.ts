@@ -27,6 +27,18 @@ export class ChainsService {
     });
   }
 
+  async findOne(id: number) {
+    const chain = await this.chainsRepository.findOne({
+      where: { chainId: id },
+    });
+
+    if (!chain) {
+      throw new Error(`Chain with id ${id} not found`);
+    }
+
+    return chain;
+  }
+
   async update(id: number, updateChainDto: ChainDto) {
     const chain = await this.chainsRepository.findOne({
       where: { chainId: id },

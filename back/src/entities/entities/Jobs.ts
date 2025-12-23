@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { JobBotRelations } from './JobBotRelations';
-import { MarketJobRelations } from './MarketJobRelations';
+import { QuoteJobRelations } from './QuoteJobRelations';
 
 @Index('jobs_pkey', ['jobId'], { unique: true })
 @Entity('jobs', { schema: 'public' })
@@ -25,8 +25,8 @@ export class Jobs {
   jobBotRelations: JobBotRelations[];
 
   @OneToMany(
-    () => MarketJobRelations,
-    (marketJobRelations) => marketJobRelations.job,
+    () => QuoteJobRelations,
+    (quoteJobRelations) => quoteJobRelations.job,
   )
-  marketJobRelations: MarketJobRelations[];
+  quoteJobRelations: QuoteJobRelations[];
 }
