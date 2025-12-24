@@ -39,11 +39,6 @@ export const routes: Routes = [
         data: { feature: 'jobs' },
       },
       {
-        path: 'jobs/:id',
-        component: AgGridJobRelationsContainer,
-        data: { feature: ':id' },
-      },
-      {
         path: 'quotes',
         component: AgGridQuotesContainer,
         data: { feature: 'quotes' },
@@ -74,5 +69,10 @@ export const routes: Routes = [
         data: { feature: 'tokens' },
       },
     ]
-  }
+  },
+  {
+    path: 'data-view/jobs/:id',
+    component: AgGridJobRelationsContainer,
+    data: { feature: 'jobs/:id' },
+  },
 ];

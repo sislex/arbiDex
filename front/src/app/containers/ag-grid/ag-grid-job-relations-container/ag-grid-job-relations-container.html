@@ -1,1 +1,19 @@
-<p>ag-grid-job-relations-container works!</p>
+<app-header-content-layout>
+<!--  @if ((dexesDataIsLoaded$ | async) && !(dexesDataIsLoading$ | async)) {-->
+    <app-title-table-button
+      header
+      [title]="'Job-Bots relations table'"
+    ></app-title-table-button>
+<!--  }-->
+<!--  @if ((dexesDataIsLoaded$ | async) && !(dexesDataIsLoading$ | async)) {-->
+    <app-ag-grid
+      content
+      [rowData]="[{botName: '1'}]"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+    ></app-ag-grid>
+<!--  } @else {-->
+<!--    <app-loader header></app-loader>-->
+<!--  }-->
+</app-header-content-layout>
+
