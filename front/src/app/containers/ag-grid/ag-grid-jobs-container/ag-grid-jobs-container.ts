@@ -11,10 +11,11 @@ import {
   getJobsDataIsLoading,
   getJobsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { setJobsData } from '../../../+state/db-config/db-config.actions';
+import { createJob, deletingJob, editJob, setJobsData } from '../../../+state/db-config/db-config.actions';
 import { Loader } from '../../../components/loader/loader';
 import { AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { JobDialogService } from '../../../services/job-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-jobs-container',
@@ -31,6 +32,7 @@ import { Router } from '@angular/router';
 export class AgGridJobsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
+  readonly jobDialog = inject(JobDialogService);
   readonly router = inject(Router);
 
   jobsDataResponse$ = this.store.select(getJobsDataResponse);
@@ -93,25 +95,25 @@ export class AgGridJobsContainer {
   }
 
   openCreateDialog() {
-    //   this.chainDialog.openCreate().subscribe(result => {
-    //     if (result?.data === 'add') {
-    //       this.store.dispatch(createChain({ data: result.formData }));
-    //     }
-    //   });
+    this.jobDialog.openCreate().subscribe(result => {
+      if (result?.data === 'add') {
+        this.store.dispatch(createJob({ data: result.formData }));
+      }
+    });
   }
 
   openEditDialog(row: any) {
-    //   this.chainDialog.openEdit(row).subscribe(result => {
-    //     if (result?.data === 'save') {
-    //       this.store.dispatch(editChain({ data: result.formData }));
-    //     }
-    //   });
+    this.jobDialog.openEdit(row).subscribe(result => {
+      if (result?.data === 'save') {
+        this.store.dispatch(editJob({ data: result.formData }));
+      }
+    });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
+    this.deleteDialog.openDelete(row.jobId, 'job').subscribe(result => {
       if (result?.data === 'yes') {
-        // this.store.dispatch(deletingChain({ chainId: row.chainId }));
+        this.store.dispatch(deletingJob({ jobId: row.jobId }));
       }
     });
   }

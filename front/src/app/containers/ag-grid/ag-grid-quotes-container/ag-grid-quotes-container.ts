@@ -12,8 +12,9 @@ import {
   getQuotesDataIsLoading,
   getQuotesDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { setQuotesData } from '../../../+state/db-config/db-config.actions';
+import { createQuote, deletingQuote, editQuote, setQuotesData } from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
+import { QuoteDialogService } from '../../../services/quote-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-quotes-container',
@@ -30,6 +31,7 @@ import { AsyncPipe } from '@angular/common';
 export class AgGridQuotesContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
+  readonly quoteDialog = inject(QuoteDialogService);
 
   quotesDataResponse$ = this.store.select(getQuotesDataResponse);
   quotesDataIsLoading$ = this.store.select(getQuotesDataIsLoading);
@@ -99,25 +101,25 @@ export class AgGridQuotesContainer {
   }
 
   openCreateDialog() {
-    //   this.chainDialog.openCreate().subscribe(result => {
-    //     if (result?.data === 'add') {
-    //       this.store.dispatch(createChain({ data: result.formData }));
-    //     }
-    //   });
+      this.quoteDialog.openCreate().subscribe(result => {
+        if (result?.data === 'add') {
+          this.store.dispatch(createQuote({ data: result.formData }));
+        }
+      });
   }
 
   openEditDialog(row: any) {
-  //   this.chainDialog.openEdit(row).subscribe(result => {
-  //     if (result?.data === 'save') {
-  //       this.store.dispatch(editChain({ data: result.formData }));
-  //     }
-  //   });
+    this.quoteDialog.openEdit(row).subscribe(result => {
+      if (result?.data === 'save') {
+        this.store.dispatch(editQuote({ data: result.formData }));
+      }
+    });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
+    this.deleteDialog.openDelete(row.quoteId, 'quote').subscribe(result => {
       if (result?.data === 'yes') {
-        // this.store.dispatch(deletingChain({ chainId: row.chainId }));
+        this.store.dispatch(deletingQuote({ quoteId: row.quoteId }));
       }
     });
   }

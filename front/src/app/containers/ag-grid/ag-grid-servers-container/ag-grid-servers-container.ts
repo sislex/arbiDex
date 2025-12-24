@@ -11,9 +11,10 @@ import {
   getServersDataIsLoading,
   getServersDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { setServersData } from '../../../+state/db-config/db-config.actions';
+import { createServer, deletingServer, editServer, setServersData } from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
+import { ServerDialogService } from '../../../services/server-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-servers-container',
@@ -30,52 +31,53 @@ import { Loader } from '../../../components/loader/loader';
 export class AgGridServersContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
+  readonly serverDialog = inject(ServerDialogService);
 
   serversDataResponse$ = this.store.select(getServersDataResponse);
   serversDataIsLoading$ = this.store.select(getServersDataIsLoading);
   serversDataIsLoaded$ = this.store.select(getServersDataIsLoaded);
 
   readonly colDefs: ColDef[] = [
-      {
-        field: "serverId",
-        headerName: 'Server ID',
-        flex: 1,
+    {
+      field: "serverId",
+      headerName: 'Server ID',
+      flex: 1,
+    },
+    {
+      field: "ip",
+      headerName: 'IP',
+      flex: 1,
+    },
+    {
+      field: "port",
+      headerName: 'Port',
+      flex: 1,
+    },
+    {
+      field: "serverName",
+      headerName: 'Server Name',
+      flex: 1,
+    },
+    {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
       },
-      {
-        field: "ip",
-        headerName: 'IP',
-        flex: 1,
-      },
-      {
-        field: "port",
-        headerName: 'Port',
-        flex: 1,
-      },
-      {
-        field: "serverName",
-        headerName: 'Server Name',
-        flex: 1,
-      },
-      {
-        headerName: 'Actions',
-        width: 125,
-        cellRenderer: ActionsContainer,
-        cellRendererParams: {
-          onAction: this.onAction.bind(this),
-        },
-      },
+    },
   ];
 
   readonly defaultColDef: ColDef = {
-      sortable: false,
-      cellStyle: { textAlign: 'center'},
-      suppressMovable: true,
-      headerClass: 'align-center',
+    sortable: false,
+    cellStyle: { textAlign: 'center'},
+    suppressMovable: true,
+    headerClass: 'align-center',
   };
 
 
   constructor() {
-      this.store.dispatch(setServersData());
+    this.store.dispatch(setServersData());
   }
 
   onAction($event: any, row: any) {
@@ -95,25 +97,25 @@ export class AgGridServersContainer {
   }
 
   openCreateDialog() {
-    //   this.chainDialog.openCreate().subscribe(result => {
-    //     if (result?.data === 'add') {
-    //       this.store.dispatch(createChain({ data: result.formData }));
-    //     }
-    //   });
+    this.serverDialog.openCreate().subscribe(result => {
+      if (result?.data === 'add') {
+        this.store.dispatch(createServer({ data: result.formData }));
+      }
+    });
   }
 
   openEditDialog(row: any) {
-  //   this.chainDialog.openEdit(row).subscribe(result => {
-  //     if (result?.data === 'save') {
-  //       this.store.dispatch(editChain({ data: result.formData }));
-  //     }
-  //   });
+    this.serverDialog.openEdit(row).subscribe(result => {
+      if (result?.data === 'save') {
+        this.store.dispatch(editServer({ data: result.formData }));
+      }
+    });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
+    this.deleteDialog.openDelete(row.serverName, 'server').subscribe(result => {
       if (result?.data === 'yes') {
-        // this.store.dispatch(deletingChain({ chainId: row.chainId }));
+        this.store.dispatch(deletingServer({ serverId: row.serverId }));
       }
     });
   }

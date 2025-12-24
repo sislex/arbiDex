@@ -13,7 +13,8 @@ import {
   getBotsDataIsLoading,
   getBotsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { setBotsData } from '../../../+state/db-config/db-config.actions';
+import { createBot, deletingBot, editBot, setBotsData } from '../../../+state/db-config/db-config.actions';
+import { BotDialogService } from '../../../services/bot-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-bots-container',
@@ -30,6 +31,7 @@ import { setBotsData } from '../../../+state/db-config/db-config.actions';
 export class AgGridBotsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
+  readonly botDialog = inject(BotDialogService);
 
   botsDataResponse$ = this.store.select(getBotsDataResponse);
   botsDataIsLoading$ = this.store.select(getBotsDataIsLoading);
@@ -96,25 +98,25 @@ export class AgGridBotsContainer {
   }
 
   openCreateDialog() {
-    // this.chainDialog.openCreate().subscribe(result => {
-    //   if (result?.data === 'add') {
-    //     this.store.dispatch(createChain({ data: result.formData }));
-    //   }
-    // });
+    this.botDialog.openCreate().subscribe(result => {
+      if (result?.data === 'add') {
+        this.store.dispatch(createBot({ data: result.formData }));
+      }
+    });
   }
 
   openEditDialog(row: any) {
-    //   this.chainDialog.openEdit(row).subscribe(result => {
-    //     if (result?.data === 'save') {
-    //       this.store.dispatch(editChain({ data: result.formData }));
-    //     }
-    //   });
+      this.botDialog.openEdit(row).subscribe(result => {
+        if (result?.data === 'save') {
+          this.store.dispatch(editBot({ data: result.formData }));
+        }
+      });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
+    this.deleteDialog.openDelete(row.botId, 'bot').subscribe(result => {
       if (result?.data === 'yes') {
-        // this.store.dispatch(deletingChain({ chainId: row.chainId }));
+        this.store.dispatch(deletingBot({ botId: row.botId }));
       }
     });
   }

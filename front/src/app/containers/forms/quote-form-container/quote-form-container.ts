@@ -1,0 +1,35 @@
+import { Component, inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
+import { QuoteForm } from '../../../components/forms/quote-form/quote-form';
+
+@Component({
+  selector: 'app-quote-form-container',
+  imports: [
+    ConfirmationPopUp,
+    QuoteForm,
+  ],
+  templateUrl: './quote-form-container.html',
+  styleUrl: './quote-form-container.scss',
+})
+export class QuoteFormContainer {
+  private dialogRef = inject(MatDialogRef<QuoteFormContainer>);
+  public data = inject(MAT_DIALOG_DATA);
+
+  formData = {
+    ...this.data.form
+  }
+
+  eventsForm($event: any) {
+    this.formData = { ...$event };
+  }
+
+  eventClose($event: any) {
+    let data = {
+      ...$event,
+      formData: this.formData
+    }
+    this.dialogRef.close(data);
+  }
+
+}

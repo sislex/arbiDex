@@ -11,9 +11,10 @@ import {
   getPairsDataIsLoading,
   getPairsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { setPairsData } from '../../../+state/db-config/db-config.actions';
+import { createPair, deletingPair, editPair, setPairsData } from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
+import { PairDialogService } from '../../../services/pair-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-pairs-container',
@@ -30,6 +31,7 @@ import { Loader } from '../../../components/loader/loader';
 export class AgGridPairsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
+  readonly pairDialog = inject(PairDialogService);
 
   pairsDataResponse$ = this.store.select(getPairsDataResponse);
   pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
@@ -100,27 +102,25 @@ export class AgGridPairsContainer {
   }
 
   openCreateDialog() {
-    console.log('create');
-    //   this.chainDialog.openCreate().subscribe(result => {
-    //     if (result?.data === 'add') {
-    //       this.store.dispatch(createChain({ data: result.formData }));
-    //     }
-    //   });
+      this.pairDialog.openCreate().subscribe(result => {
+        if (result?.data === 'add') {
+          this.store.dispatch(createPair({ data: result.formData }));
+        }
+      });
   }
 
   openEditDialog(row: any) {
-    console.log('edit');
-    //   this.chainDialog.openEdit(row).subscribe(result => {
-    //     if (result?.data === 'save') {
-    //       this.store.dispatch(editChain({ data: result.formData }));
-    //     }
-    //   });
+      this.pairDialog.openEdit(row).subscribe(result => {
+        if (result?.data === 'save') {
+          this.store.dispatch(editPair({ data: result.formData }));
+        }
+      });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
+    this.deleteDialog.openDelete(row.pairId, 'pair').subscribe(result => {
       if (result?.data === 'yes') {
-        // this.store.dispatch(deletingChain({ chainId: row.chainId }));
+        this.store.dispatch(deletingPair({ pairId: row.pairId }));
       }
     });
   }
