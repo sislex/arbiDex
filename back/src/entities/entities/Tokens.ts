@@ -41,7 +41,10 @@ export class Tokens {
   @OneToMany(() => Pools, (pools) => pools.token2)
   pools2: Pools[];
 
-  @ManyToOne(() => Chains, (chains) => chains.tokens, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Chains, (chains) => chains.tokens, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'chain_id', referencedColumnName: 'chainId' }])
   chain: Chains;
 }

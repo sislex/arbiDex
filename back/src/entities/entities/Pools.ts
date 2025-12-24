@@ -30,7 +30,10 @@ export class Pools {
   @OneToMany(() => Pairs, (pairs) => pairs.pool)
   pairs: Pairs[];
 
-  @ManyToOne(() => Chains, (chains) => chains.pools, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Chains, (chains) => chains.pools, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'chain_id', referencedColumnName: 'chainId' }])
   chain: Chains;
 

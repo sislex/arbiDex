@@ -2,7 +2,7 @@
   <app-field-title header [title]="'Chain ID'"></app-field-title>
   <app-input-field
     [inputValue]="formData.chainId"
-    (emitter)="events($event, 'chainId')"
+    (emitter)="events($event, 'newChainId')"
     content
   ></app-input-field>
 </app-header-content-layout>

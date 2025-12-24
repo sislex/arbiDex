@@ -8,7 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { ChainsService } from './chains.service';
-import { ChainDto } from '../dtos/chains-dto/chain.dto';
+import { ChainDto, UpdateChainDto } from '../dtos/chains-dto/chain.dto';
 
 @Controller('chains')
 export class ChainsController {
@@ -25,7 +25,7 @@ export class ChainsController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateChainDto: ChainDto) {
+  update(@Param('id') id: string, @Body() updateChainDto: UpdateChainDto) {
     return this.chainsService.update(+id, updateChainDto);
   }
 
