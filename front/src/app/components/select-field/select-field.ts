@@ -14,6 +14,7 @@ export class SelectField {
   @Input() title: string = '';
   @Input() list: any = [];
   @Input() selected: any;
+  @Input() disabled: boolean = false;
 
   @Output() emitter = new EventEmitter();
 

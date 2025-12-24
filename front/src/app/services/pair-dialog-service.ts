@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PairFormContainer } from '../containers/forms/pair-form-container/pair-form-container';
 import { Observable } from 'rxjs';
-import { ISelectMenu } from '../models/db-config';
+import { IPools, ISelectMenu } from '../models/db-config';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +11,7 @@ export class PairDialogService {
   private dialog = inject(MatDialog);
   openCreate(
     poolList$: Observable<ISelectMenu[]>,
+    poolsListResponse$: Observable<IPools[]>,
   ) {
     return this.dialog.open(PairFormContainer, {
       width: '90%',
@@ -23,20 +24,12 @@ export class PairDialogService {
         title: 'Add new pair',
         buttons: ['add', 'cancel'],
         form: {
-          pairId: null,
-          pool: {
-            poolId: null,
-            token: null,
-            token2: null,
-          },
-          tokenIn: {
-            tokenId: null,
-          },
-          tokenOut: {
-            tokenId: null,
-          },
+          poolId: null,
+          tokenIn: null,
+          tokenOut: null
         },
-        poolList: poolList$
+        poolList: poolList$,
+        poolsListResponse: poolsListResponse$,
       }
     }).afterClosed();
   }
@@ -44,8 +37,8 @@ export class PairDialogService {
   openEdit(
     row: any,
     poolList$: Observable<ISelectMenu[]>,
+    poolsListResponse$: Observable<IPools[]>,
   ) {
-    console.log(row)
     return this.dialog.open(PairFormContainer, {
       width: '90%',
       height: '90%',
@@ -56,8 +49,14 @@ export class PairDialogService {
       data: {
         title: 'Edit pair',
         buttons: ['save', 'cancel'],
-        form: { ...row },
-        poolList: poolList$
+        form: {
+          pairId: row.pairId,
+          poolId: row.pool.poolId,
+          tokenIn: row.tokenIn.tokenId,
+          tokenOut: row.tokenOut.tokenId,
+        },
+        poolList: poolList$,
+        poolsListResponse: poolsListResponse$,
       }
     }).afterClosed();
   }

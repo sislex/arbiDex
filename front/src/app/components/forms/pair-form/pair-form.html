@@ -4,35 +4,47 @@
     <app-select-field
       [title]="'Pool Id'"
       [list]="poolList | async"
-      [selected]="formData.pool.poolId"
+      [selected]="formData.poolId"
       (emitter)="events($event, 'poolId')"
       content
     ></app-select-field>
   </app-header-content-layout>
 }
 
-@if (formData.pool) {
-  <app-header-content-layout>
-    <app-field-title header [title]="'Token In'"></app-field-title>
-    <app-select-field
-      [title]="'Token In'"
-      [list]="[{id: 11, name: 'ПРАВКИ PAIR-FORM'}, {id: 1, name: 'formData.pool.token2.tokenId'}]"
-      [selected]="formData.tokenIn.tokenId"
-      (emitter)="events($event, 'tokenIn')"
-      content
-    ></app-select-field>
-  </app-header-content-layout>
-}
+@if (formData.poolId && poolTokens.length > 0) {
+  <div class="row">
+    <app-header-content-layout>
+      <app-field-title header [title]="'Token In'"></app-field-title>
+      <app-select-field
+        [title]="'Token In'"
+        [list]="poolTokens"
+        [selected]="formData.tokenIn"
+        [disabled]="true"
+        (emitter)="events($event, 'tokenIn')"
+        content
+      ></app-select-field>
+    </app-header-content-layout>
 
-@if (formData.pool) {
-  <app-header-content-layout>
-    <app-field-title header [title]="'Token Out'"></app-field-title>
-    <app-select-field
-      [title]="'Token Out'"
-      [list]="[{id: 11, name: 'ПРАВКИ PAIR-FORM'}, {id: 1, name: 'formData.pool.token2.tokenId'}]"
-      [selected]="formData.tokenOut.tokenId"
-      (emitter)="events($event, 'tokenOut')"
-      content
-    ></app-select-field>
-  </app-header-content-layout>
+    <div>
+      <app-actions
+        [icon]="'swap_horiz'"
+        [type]="'default'"
+        (emitter)="swap()"
+      ></app-actions>
+    </div>
+
+    <app-header-content-layout>
+      <app-field-title header [title]="'Token Out'"></app-field-title>
+      <app-select-field
+        [title]="'Token Out'"
+        [list]="poolTokens"
+        [selected]="formData.tokenOut"
+        [disabled]="true"
+        (emitter)="events($event, 'tokenOut')"
+        content
+      ></app-select-field>
+    </app-header-content-layout>
+  </div>
+} @else if (formData.poolId && poolTokens.length < 0) {
+  <app-loader></app-loader>
 }

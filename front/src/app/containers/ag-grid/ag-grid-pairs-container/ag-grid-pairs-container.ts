@@ -37,6 +37,7 @@ export class AgGridPairsContainer {
   pairsDataResponse$ = this.store.select(getPairsDataResponse);
   pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
   pairsDataIsLoaded$ = this.store.select(getPairsDataIsLoaded);
+  poolsListResponse$ = this.store.select(getPoolsDataResponse)
 
   poolsList$ = this.store.select(getPoolsDataResponse).pipe(
       map(item =>
@@ -112,7 +113,7 @@ export class AgGridPairsContainer {
   }
 
   openCreateDialog() {
-      this.pairDialog.openCreate(this.poolsList$).subscribe(result => {
+      this.pairDialog.openCreate(this.poolsList$, this.poolsListResponse$).subscribe(result => {
         if (result?.data === 'add') {
           this.store.dispatch(createPair({ data: result.formData }));
         }
@@ -120,7 +121,7 @@ export class AgGridPairsContainer {
   }
 
   openEditDialog(row: any) {
-      this.pairDialog.openEdit(row, this.poolsList$).subscribe(result => {
+      this.pairDialog.openEdit(row, this.poolsList$, this.poolsListResponse$).subscribe(result => {
         if (result?.data === 'save') {
           this.store.dispatch(editPair({ data: result.formData }));
         }

@@ -62,42 +62,19 @@ export class AgGridJobRelationsContainer {
 
   onAction($event: any, row: any) {
     if ($event.event === 'Actions:ACTION_CLICKED') {
-      if ($event.actionType === 'delete') {
-        this.openDeleteDialog(row);
-      } else if ($event.actionType === 'edit') {
-        this.openEditDialog(row);
-      }
+      // if ($event.actionType === 'delete') {
+      //   this.openDeleteDialog(row);
+      // } else if ($event.actionType === 'edit') {
+      //   this.openEditDialog(row);
+      // }
     }
   }
 
-  actions($event: any, note: any) {
-    if (note === 'add' ) {
-      this.openCreateDialog();
-    }
+  createRelation() {
+  // this.store.dispatch(createChain({ data: result.formData }));
   }
 
-  openCreateDialog() {
-    // this.chainDialog.openCreate().subscribe(result => {
-    //   if (result?.data === 'add') {
-    //     this.store.dispatch(createChain({ data: result.formData }));
-    //   }
-    // });
+  deleteRelation() {
+    // this.store.dispatch(deletingChain({ chainId: row.chainId }));
   }
-
-  openEditDialog(row: any) {
-    //   this.chainDialog.openEdit(row).subscribe(result => {
-    //     if (result?.data === 'save') {
-    //       this.store.dispatch(editChain({ data: result.formData }));
-    //     }
-    //   });
-  }
-
-  openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
-      if (result?.data === 'yes') {
-        // this.store.dispatch(deletingChain({ chainId: row.chainId }));
-      }
-    });
-  }
-
 }

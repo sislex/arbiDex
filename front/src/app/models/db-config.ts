@@ -84,9 +84,9 @@ export interface IPairs {
 }
 export interface IPairsCreate {
   pairId: number;
-  pool: IPools;
-  tokenIn: ITokens;
-  tokenOut: ITokens;
+  poolId: number;
+  tokenIn: number;
+  tokenOut: number;
 }
 
 export interface IQuotesAPI extends API {
