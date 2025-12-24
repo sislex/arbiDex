@@ -62,9 +62,11 @@ export class AgGridTokensContainer {
       flex: 1,
     },
     {
-      field: "chainId",
       headerName: 'Chain ID',
-      flex: 1
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.chain?.chainId || '-';
+      },
     },
     {
       field: "address",

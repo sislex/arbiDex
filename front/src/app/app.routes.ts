@@ -3,7 +3,6 @@ import {Main} from './containers/main/main';
 import {AgGridChainsContainer} from './containers/ag-grid/ag-grid-chains-container/ag-grid-chains-container';
 import {AgGridTokensContainer} from './containers/ag-grid/ag-grid-tokens-container/ag-grid-tokens-container';
 import {AgGridPoolsContainer} from './containers/ag-grid/ag-grid-pools-container/ag-grid-pools-container';
-import {AgGridMarketsContainer} from './containers/ag-grid/ag-grid-markets-container/ag-grid-markets-container';
 import {AgGridDexesContainer} from './containers/ag-grid/ag-grid-dexes-container/ag-grid-dexes-container';
 import { AgGridPairsContainer } from './containers/ag-grid/ag-grid-pairs-container/ag-grid-pairs-container';
 import { AgGridJobsContainer } from './containers/ag-grid/ag-grid-jobs-container/ag-grid-jobs-container';
@@ -63,11 +62,6 @@ export const routes: Routes = [
         path: 'dexes',
         component: AgGridDexesContainer,
         data: { feature: 'dexes' },
-      },
-      {
-        path: 'markets',
-        component: AgGridMarketsContainer,
-        data: { feature: 'markets' },
       },
       {
         path: 'pools',

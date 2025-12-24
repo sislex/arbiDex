@@ -5,7 +5,6 @@ import {
   IChainsAPI,
   IDexesAPI,
   IJobsAPI,
-  IMarketsAPI,
   IQuotesAPI,
   IPoolsAPI,
   IServersAPI,
@@ -19,7 +18,6 @@ export interface DbConfigState {
   featureName: string;
   tokens: ITokensAPI;
   pools: IPoolsAPI;
-  markets: IMarketsAPI;
   dexes: IDexesAPI;
   chains: IChainsAPI;
   pairs: IPairsAPI;
@@ -39,7 +37,6 @@ export const initialState: DbConfigState = {
   featureName: 'database',
   tokens: emptyAsyncResponse([]),
   pools: emptyAsyncResponse([]),
-  markets: emptyAsyncResponse([]),
   dexes: emptyAsyncResponse([]),
   chains: emptyAsyncResponse([]),
   pairs: emptyAsyncResponse([]),
@@ -108,36 +105,6 @@ export const dbConfigReducer = createReducer(
     pools: {
       ...state.pools,
       loadingTime: Date.now() - state.pools.startTime!,
-      isLoading: false,
-      isLoaded: true,
-      error
-    }
-  })),
-
-  on(DbConfigActions.setMarketsData, (state) => ({
-    ...state,
-    markets: {
-      ...state.markets,
-      startTime:  Date.now(),
-      isLoading: true,
-      isLoaded: false,
-    }
-  })),
-  on(DbConfigActions.setMarketsDataSuccess, (state, {response}) => ({
-    ...state,
-    markets: {
-      ...state.markets,
-      loadingTime: Date.now() - state.markets.startTime!,
-      isLoading: false,
-      isLoaded: true,
-      response
-    }
-  })),
-  on(DbConfigActions.setMarketsDataFailure, (state, {error}) => ({
-    ...state,
-    markets: {
-      ...state.markets,
-      loadingTime: Date.now() - state.markets.startTime!,
       isLoading: false,
       isLoaded: true,
       error

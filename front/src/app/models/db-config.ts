@@ -25,37 +25,23 @@ export interface IPoolsAPI extends API {
 }
 export interface IPools {
   poolId: number;
-  chainId: number;
+  chain: IChains;
   poolAddress: number;
-  token: number;
-  token2: number;
+  token: ITokens;
+  token2: ITokens;
   fee: number;
-  dexId: number;
+  dex: IDexes;
   version: string;
 }
 export interface IPoolsCreate {
   poolId: number;
-  chainId: number;
+  chain: IChains;
   poolAddress: number;
-  token: number;
-  token2: number;
+  token: ITokens;
+  token2: ITokens;
   fee: number;
-  dexId: number;
+  dex: IDexes;
   version: string;
-}
-
-export interface IMarketsAPI extends API {
-  response: IMarkets[];
-}
-export interface IMarkets {
-  marketId: number;
-  poolId: number;
-  amount: string;
-}
-export interface IMarketsCreate {
-  marketId: number;
-  poolId: number;
-  amount: string;
 }
 
 export interface IDexesAPI extends API {

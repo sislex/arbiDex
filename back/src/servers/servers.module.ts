@@ -6,12 +6,9 @@ import { Servers } from '../entities/entities/Servers';
 import { Bots } from '../entities/entities/Bots';
 import { JobBotRelations } from '../entities/entities/JobBotRelations';
 import { Jobs } from '../entities/entities/Jobs';
-import { Markets } from '../entities/entities/Markets';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Servers, Bots, JobBotRelations, Jobs, Markets]),
-  ],
+  imports: [TypeOrmModule.forFeature([Servers, Bots, JobBotRelations, Jobs])],
   controllers: [ServersController],
   providers: [ServersService],
   exports: [ServersService],

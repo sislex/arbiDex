@@ -49,14 +49,18 @@ export class AgGridPairsContainer {
       },
     },
     {
-      field: "tokenIn",
       headerName: 'Token In',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.tokenIn?.tokenId || '-';
+      },
     },
     {
-      field: "tokenOut",
       headerName: 'Token Out',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.tokenOut?.tokenId || '-';
+      },
     },
     {
       headerName: 'Actions',
@@ -76,7 +80,7 @@ export class AgGridPairsContainer {
   };
 
   constructor() {
-      this.store.dispatch(setPairsData());
+    this.store.dispatch(setPairsData());
   }
 
   onAction($event: any, row: any) {

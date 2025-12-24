@@ -14,7 +14,6 @@ export class BotsService {
   ) {}
   async create(createBotDto: BotDto) {
     const server = await this.serverService.findOne(createBotDto.server);
-
     const bot = this.botRepository.create({
       botName: createBotDto.botName,
       description: createBotDto.description,

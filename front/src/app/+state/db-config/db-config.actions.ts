@@ -2,7 +2,6 @@ import { createAction, props } from '@ngrx/store';
 import {
   IChainsCreate,
   IDexesCreate,
-  IMarketsCreate,
   IJobsCreate,
   IPoolsCreate,
   IQuotesCreate,
@@ -64,32 +63,6 @@ export const editPool = createAction(
 export const deletingPools = createAction(
   '[DbConfig] deletingPools',
   props<{ poolId: number }>()
-);
-
-//====================================================================================================================
-//                                                   Markets
-//====================================================================================================================
-
-export const setMarketsData = createAction('[DbConfig] setMarketsData');
-export const setMarketsDataSuccess = createAction(
-  '[DbConfig] setMarketsDataSuccess',
-  props<{ response: any }>()
-);
-export const setMarketsDataFailure = createAction(
-  '[DbConfig] setMarketsDataFailure',
-  props<{ error: string }>()
-);
-export const createMarket = createAction(
-  '[DbConfig] createMarket',
-  props<{ data: IMarketsCreate }>()
-);
-export const editMarket = createAction(
-  '[DbConfig] editMarket',
-  props<{ data: IMarketsCreate }>()
-);
-export const deletingMarket = createAction(
-  '[DbConfig] deletingMarket',
-  props<{ marketId: number }>()
 );
 
 //====================================================================================================================

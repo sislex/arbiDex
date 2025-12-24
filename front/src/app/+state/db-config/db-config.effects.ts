@@ -7,10 +7,13 @@ import { Store } from '@ngrx/store';
 import {
   setChainsData,
   setDexesData,
-  setMarketsData,
   setQuotesData,
   setPoolsData,
-  setTokensData, setJobsData, setBotsData, setServersData, setPairsData,
+  setTokensData,
+  setJobsData,
+  setBotsData,
+  setServersData,
+  setPairsData,
 } from './db-config.actions';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -170,85 +173,6 @@ export class DbConfigEffects {
             tap(response => {
               this.store.dispatch(setPoolsData());
               this._snackBar.open(`Pool is delete`, '', { duration: 5000 });
-            }),
-            catchError(error => {
-              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
-              return EMPTY;
-            })
-          );
-        })
-      ),
-    { dispatch: false }
-  );
-
-  //====================================================================================================================
-  //                                                   Markets
-  //====================================================================================================================
-
-  setMarketsData$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(DbConfigActions.setMarketsData),
-      switchMap(() =>
-        this.apiService.getMarkets().pipe(
-          map(response =>
-            DbConfigActions.setMarketsDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setMarketsDataFailure({ error }))
-          )
-        )
-      )
-    )
-  );
-
-  createMarket$ = createEffect(() =>
-      this.actions$.pipe(
-        ofType(DbConfigActions.createMarket),
-        switchMap(action =>
-          this.apiService.createMarket({ ...action.data }).pipe(
-            tap(response => {
-              this.store.dispatch(setMarketsData());
-              this._snackBar.open(`Market is created: ${action.data.marketId}`, '', { duration: 5000 });
-            }),
-            catchError(error => {
-              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
-              return EMPTY;
-            })
-          )
-        )
-      ),
-    { dispatch: false }
-  );
-
-  editMarket$ = createEffect(() =>
-      this.actions$.pipe(
-        ofType(DbConfigActions.editMarket),
-        switchMap((action) => {
-          let data = {...action.data};
-          return this.apiService.editMarket(data.marketId, data).pipe(
-            tap(response => {
-              this.store.dispatch(setMarketsData());
-              this._snackBar.open(`Market is update: ${action.data.marketId}`, '', { duration: 5000 });
-            }),
-            catchError(error => {
-              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
-              return EMPTY;
-            })
-          );
-        })
-      ),
-    { dispatch: false }
-  );
-
-  deletingMarket$ = createEffect(() =>
-      this.actions$.pipe(
-        ofType(DbConfigActions.deletingMarket),
-        switchMap((action) => {
-
-          return this.apiService.deletingMarket(action.marketId).pipe(
-            tap(response => {
-              this.store.dispatch(setMarketsData());
-              this._snackBar.open(`Market is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });

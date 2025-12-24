@@ -45,24 +45,6 @@ export class ApiService {
     return this.http.delete(`${this.apiUrl}/pools/${id}`);
   }
 
-
-  //====================================================================================================================
-  //                                                   Markets
-  //====================================================================================================================
-
-  getMarkets(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/markets`);
-  }
-  createMarket(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/markets`, {...data});
-  }
-  editMarket(id: number, data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/markets/${id}`, data);
-  }
-  deletingMarket(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/markets/${id}`);
-  }
-
   //====================================================================================================================
   //                                                   Dexes
   //====================================================================================================================

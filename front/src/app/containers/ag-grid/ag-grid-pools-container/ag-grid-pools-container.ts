@@ -87,14 +87,18 @@ export class AgGridPoolsContainer {
       flex: 1,
     },
     {
-      field: "chainId",
       headerName: 'Chain ID',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.chain?.chainId || '-';
+      },
     },
     {
-      field: "dexId",
       headerName: 'Dex ID',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.dex?.dexId || '-';
+      },
     },
     {
       field: "version",
@@ -107,14 +111,19 @@ export class AgGridPoolsContainer {
       flex: 1,
     },
     {
-      field: "token",
       headerName: 'Token 1',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.token?.tokenId || '-';
+      },
     },
     {
       field: "token2",
       headerName: 'Token 2',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.token2?.tokenId || '-';
+      },
     },
     {
       headerName: 'Actions',

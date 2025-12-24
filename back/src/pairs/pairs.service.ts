@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Pairs } from '../entities/entities/Pairs';
 import { Repository } from 'typeorm';
 import { PoolsService } from '../pools/pools.service';
+import { TokensService } from '../tokens/tokens.service';
 
 @Injectable()
 export class PairsService {
@@ -11,14 +12,17 @@ export class PairsService {
     @InjectRepository(Pairs)
     private pairsRepository: Repository<Pairs>,
     private poolsService: PoolsService,
+    private tokensService: TokensService,
   ) {}
   async create(createPairDto: PairDto) {
     const pool = await this.poolsService.findOne(createPairDto.poolId);
+    const tokenIn = await this.tokensService.findOne(createPairDto.tokenIn);
+    const tokenOut = await this.tokensService.findOne(createPairDto.tokenOut);
 
     const pair = this.pairsRepository.create({
       pool,
-      tokenIn: createPairDto.tokenIn,
-      tokenOut: createPairDto.tokenOut,
+      tokenIn,
+      tokenOut,
     });
 
     return this.pairsRepository.save(pair);
@@ -26,7 +30,7 @@ export class PairsService {
 
   async findAll() {
     return await this.pairsRepository.find({
-      relations: ['pool'],
+      relations: ['pool', 'tokenIn', 'tokenOut'],
       order: {
         pairId: 'DESC',
       },
@@ -49,8 +53,8 @@ export class PairsService {
     const pair = await this.findOne(id);
 
     pair.pool = await this.poolsService.findOne(updatePairDto.poolId);
-    pair.tokenIn = updatePairDto.tokenIn;
-    pair.tokenOut = updatePairDto.tokenOut;
+    pair.tokenIn = await this.tokensService.findOne(updatePairDto.tokenIn);
+    pair.tokenOut = await this.tokensService.findOne(updatePairDto.tokenOut);
 
     return await this.pairsRepository.save(pair);
   }

@@ -63,31 +63,6 @@ export const getPoolsDataIsLoaded = createSelector(
 );
 
 //====================================================================================================================
-//                                                   Markets
-//====================================================================================================================
-
-export const getMarketsDataResponse = createSelector(
-  selectFeature,
-  (state: DbConfigState) => state.markets.response
-);
-export const getMarketsDataFailure = createSelector(
-  selectFeature,
-  (state: DbConfigState) => state.markets.error
-);
-export const getMarketsDataIsFailure = createSelector(
-  selectFeature,
-  (state: DbConfigState) => !!state.markets.error
-);
-export const getMarketsDataIsLoading = createSelector(
-  selectFeature,
-  (state: DbConfigState) => state.markets.isLoading
-);
-export const getMarketsDataIsLoaded = createSelector(
-  selectFeature,
-  (state: DbConfigState) => state.markets.isLoaded
-);
-
-//====================================================================================================================
 //                                                   Dexes
 //====================================================================================================================
 
