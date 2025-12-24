@@ -45,7 +45,14 @@ export class TokenDialogService {
         title: 'Edit token',
         buttons: ['save', 'cancel'],
         list: list$,
-        form: { ...row }
+        form: {
+          tokenId: row.tokenId,
+          chainId: row.chain.chainId,
+          address: row.address,
+          symbol: row.symbol,
+          tokenName: row.tokenName,
+          decimals: row.decimals,
+        }
       }
     }).afterClosed();
   }
