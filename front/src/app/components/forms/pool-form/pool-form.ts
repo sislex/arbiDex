@@ -32,7 +32,6 @@ export class PoolForm {
       ...this.formData,
       [field]: event.data,
     };
-    console.log(this.formData )
     this.emitter.emit(this.formData);
   };
 }

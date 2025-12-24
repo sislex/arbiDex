@@ -69,7 +69,7 @@ export class PoolsService {
     pool.version = poolDto.version;
     pool.chain = chain;
     pool.token = token;
-    pool.token = token2;
+    pool.token2 = token2;
     pool.dex = dex;
 
     return await this.poolRepository.save(pool);
