@@ -12,9 +12,11 @@ import {
   getBotsDataIsLoaded,
   getBotsDataIsLoading,
   getBotsDataResponse,
+  getServersDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { createBot, deletingBot, editBot, setBotsData } from '../../../+state/db-config/db-config.actions';
 import { BotDialogService } from '../../../services/bot-dialog-service';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-ag-grid-bots-container',
@@ -36,6 +38,15 @@ export class AgGridBotsContainer {
   botsDataResponse$ = this.store.select(getBotsDataResponse);
   botsDataIsLoading$ = this.store.select(getBotsDataIsLoading);
   botsDataIsLoaded$ = this.store.select(getBotsDataIsLoaded);
+
+  serversList$ = this.store.select(getServersDataResponse).pipe(
+    map(item =>
+      item.map(item => ({
+        id: item.serverId,
+        name: item.serverName,
+      }))
+    )
+  );
 
   readonly colDefs: ColDef[] = [
     {
@@ -98,7 +109,7 @@ export class AgGridBotsContainer {
   }
 
   openCreateDialog() {
-    this.botDialog.openCreate().subscribe(result => {
+    this.botDialog.openCreate(this.serversList$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createBot({ data: result.formData }));
       }
@@ -106,7 +117,7 @@ export class AgGridBotsContainer {
   }
 
   openEditDialog(row: any) {
-      this.botDialog.openEdit(row).subscribe(result => {
+      this.botDialog.openEdit(row, this.serversList$).subscribe(result => {
         if (result?.data === 'save') {
           this.store.dispatch(editBot({ data: result.formData }));
         }

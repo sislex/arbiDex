@@ -11,8 +11,8 @@ export class DexDialogService {
   openCreate(list$: Observable<any>) {
     return this.dialog.open(DexFormContainer, {
       width: '90%',
+      height: '90%',
       maxWidth: '100%',
-      maxHeight: '600px',
       minHeight: '400px',
       minWidth: '600px',
       panelClass: 'custom-dialog-container',
@@ -33,6 +33,8 @@ export class DexDialogService {
       width: '90%',
       height: '90%',
       maxWidth: '100%',
+      minHeight: '400px',
+      minWidth: '600px',
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Edit dex',

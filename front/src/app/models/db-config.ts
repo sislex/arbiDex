@@ -69,7 +69,7 @@ export interface IChainsCreate {
 }
 
 export interface ISelectMenu {
-  id: string;
+  id: number;
   name: string;
 }
 

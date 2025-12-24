@@ -1,17 +1,21 @@
 import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { BotFormContainer } from '../containers/forms/bot-form-container/bot-form-container';
+import { Observable } from 'rxjs';
+import { ISelectMenu } from '../models/db-config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BotDialogService {
   private dialog = inject(MatDialog);
-  openCreate() {
+  openCreate(
+    serversList$: Observable<ISelectMenu[]>,
+  ) {
     return this.dialog.open(BotFormContainer, {
       width: '90%',
+      height: '90%',
       maxWidth: '100%',
-      maxHeight: '600px',
       minHeight: '400px',
       minWidth: '600px',
       panelClass: 'custom-dialog-container',
@@ -19,23 +23,33 @@ export class BotDialogService {
         title: 'Add new bot',
         buttons: ['add', 'cancel'],
         form: {
-          chainId: null,
-          name: '',
-        }
+          server: {
+            serverId: null
+          },
+          botName: '',
+          description: '',
+        },
+        serversList: serversList$,
       }
     }).afterClosed();
   }
 
-  openEdit(row: any) {
+  openEdit(
+    row: any,
+    serversList$: Observable<ISelectMenu[]>,
+  ) {
     return this.dialog.open(BotFormContainer, {
       width: '90%',
       height: '90%',
       maxWidth: '100%',
+      minHeight: '400px',
+      minWidth: '600px',
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Edit bot',
         buttons: ['save', 'cancel'],
-        form: { ...row }
+        form: { ...row },
+        serversList: serversList$,
       }
     }).afterClosed();
   }

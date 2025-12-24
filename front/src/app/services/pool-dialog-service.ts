@@ -16,8 +16,8 @@ export class PoolDialogService {
   ) {
     return this.dialog.open(PoolFormContainer, {
       width: '90%',
+      height: '90%',
       maxWidth: '100%',
-      maxHeight: '600px',
       minHeight: '400px',
       minWidth: '600px',
       panelClass: 'custom-dialog-container',
@@ -29,6 +29,18 @@ export class PoolDialogService {
         dexesList: dexesList$,
         versionsList: versionsList$,
         form: {
+          chain: {
+            chainId: null,
+          },
+          version: {
+            versionId: null,
+          },
+          token: {
+            tokenId: null,
+          },
+          dex: {
+            dexId: null,
+          },
           fee: null,
           poolAddress: '',
         }
@@ -47,6 +59,8 @@ export class PoolDialogService {
       width: '90%',
       height: '90%',
       maxWidth: '100%',
+      minHeight: '400px',
+      minWidth: '600px',
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Edit pool',

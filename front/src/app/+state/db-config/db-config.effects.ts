@@ -53,7 +53,7 @@ export class DbConfigEffects {
           this.apiService.createToken({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setTokensData());
-              this._snackBar.open(`Token is created: ${action.data.tokenName}`, '', { duration: 5000 });
+              this._snackBar.open(`Token is created: ${response.tokenName}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -73,7 +73,7 @@ export class DbConfigEffects {
           return this.apiService.editToken(data.tokenId, data).pipe(
             tap(response => {
               this.store.dispatch(setTokensData());
-              this._snackBar.open(`Token is update: ${action.data.tokenName}`, '', { duration: 5000 });
+              this._snackBar.open(`Token is update: ${response.tokenName}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -152,7 +152,7 @@ export class DbConfigEffects {
           return this.apiService.editPool(data.poolId, data).pipe(
             tap(response => {
               this.store.dispatch(setPoolsData());
-              this._snackBar.open(`Pool is update: ${action.data.poolId}`, '', { duration: 5000 });
+              this._snackBar.open(`Pool is update: ${response.poolId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -211,7 +211,7 @@ export class DbConfigEffects {
           this.apiService.createDex({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setDexesData());
-              this._snackBar.open(`Dex is created: ${action.data.name}`, '', { duration: 5000 });
+              this._snackBar.open(`Dex is created: ${response.name}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -231,7 +231,7 @@ export class DbConfigEffects {
           return this.apiService.editDex(data.dexId, data).pipe(
             tap(response => {
               this.store.dispatch(setDexesData());
-              this._snackBar.open(`Dex is update: ${action.data.dexId}`, '', { duration: 5000 });
+              this._snackBar.open(`Dex is update: ${response.dexId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -290,7 +290,7 @@ export class DbConfigEffects {
           this.apiService.createChain({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setChainsData());
-              this._snackBar.open(`Chain is created: ${action.data.name}`, '', { duration: 5000 });
+              this._snackBar.open(`Chain is created: ${response.name}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -310,7 +310,7 @@ export class DbConfigEffects {
           return this.apiService.editChain(data.chainId, data).pipe(
             tap(response => {
               this.store.dispatch(setChainsData());
-              this._snackBar.open(`Chain is update: ${action.data.chainId}`, '', { duration: 5000 });
+              this._snackBar.open(`Chain is update: ${response.chainId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -372,7 +372,7 @@ export class DbConfigEffects {
           this.apiService.createPair({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setPairsData());
-              this._snackBar.open(`Pair is created: ${action.data.pairId}`, '', { duration: 5000 });
+              this._snackBar.open(`Pair is created: ${response.pairId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -392,7 +392,7 @@ export class DbConfigEffects {
           return this.apiService.editPair(data.pairId, data).pipe(
             tap(response => {
               this.store.dispatch(setPairsData());
-              this._snackBar.open(`Pair is update: ${action.data.pairId}`, '', { duration: 5000 });
+              this._snackBar.open(`Pair is update: ${response.pairId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -454,7 +454,7 @@ export class DbConfigEffects {
           this.apiService.createQuote({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setQuotesData());
-              this._snackBar.open(`Quote is created: ${action.data.quoteId}`, '', { duration: 5000 });
+              this._snackBar.open(`Quote is created: ${response.quoteId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -474,7 +474,7 @@ export class DbConfigEffects {
           return this.apiService.editQuote(data.quoteId, data).pipe(
             tap(response => {
               this.store.dispatch(setQuotesData());
-              this._snackBar.open(`Quote is update: ${action.data.quoteId}`, '', { duration: 5000 });
+              this._snackBar.open(`Quote is update: ${response.quoteId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -536,7 +536,7 @@ export class DbConfigEffects {
           this.apiService.createJob({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setJobsData());
-              this._snackBar.open(`Job is created: ${action.data.jobId}`, '', { duration: 5000 });
+              this._snackBar.open(`Job is created: ${response.jobId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -556,7 +556,7 @@ export class DbConfigEffects {
           return this.apiService.editJob(data.jobId, data).pipe(
             tap(response => {
               this.store.dispatch(setJobsData());
-              this._snackBar.open(`Job is update: ${action.data.jobId}`, '', { duration: 5000 });
+              this._snackBar.open(`Job is update: ${response.jobId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -619,7 +619,7 @@ export class DbConfigEffects {
           this.apiService.createBot({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setBotsData());
-              this._snackBar.open(`Bot is created: ${action.data.botId}`, '', { duration: 5000 });
+              this._snackBar.open(`Bot is created: ${response.botName}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -639,7 +639,7 @@ export class DbConfigEffects {
           return this.apiService.editBot(data.botId, data).pipe(
             tap(response => {
               this.store.dispatch(setBotsData());
-              this._snackBar.open(`Bot is update: ${action.data.botId}`, '', { duration: 5000 });
+              this._snackBar.open(`Bot is update: ${response.botId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -657,7 +657,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingBot(action.botId).pipe(
-            tap(response => {
+            tap(response => {console.log(response)
               this.store.dispatch(setBotsData());
               this._snackBar.open(`Bot is delete`, '', { duration: 5000 });
             }),
@@ -701,7 +701,7 @@ export class DbConfigEffects {
           this.apiService.createServer({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setServersData());
-              this._snackBar.open(`Server is created: ${action.data.serverId}`, '', { duration: 5000 });
+              this._snackBar.open(`Server is created: ${response.serverId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -721,7 +721,7 @@ export class DbConfigEffects {
           return this.apiService.editServer(data.serverId, data).pipe(
             tap(response => {
               this.store.dispatch(setServersData());
-              this._snackBar.open(`Server is update: ${action.data.serverId}`, '', { duration: 5000 });
+              this._snackBar.open(`Server is update: ${response.serverId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
