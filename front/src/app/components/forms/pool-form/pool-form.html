@@ -3,7 +3,7 @@
   <app-select-field
     [title]="'Chain name'"
     [list]="chainsList | async"
-    [selected]="formData.chain.chainId"
+    [selected]="formData.chainId"
     (emitter)="events($event, 'chainId')"
     content
   ></app-select-field>
@@ -36,7 +36,7 @@
   <app-select-field
     [title]="'Dex Id'"
     [list]="dexesList | async"
-    [selected]="formData.dex.dexId"
+    [selected]="formData.dexId"
     (emitter)="events($event, 'dexId')"
     content
   ></app-select-field>

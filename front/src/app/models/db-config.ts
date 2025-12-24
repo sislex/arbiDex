@@ -35,12 +35,12 @@ export interface IPools {
 }
 export interface IPoolsCreate {
   poolId: number;
-  chain: IChains;
+  chainId: number;
   poolAddress: number;
-  token: ITokens;
-  token2: ITokens;
+  token: number;
+  token2: number;
   fee: number;
-  dex: IDexes;
+  dexId: number;
   version: string;
 }
 
@@ -79,14 +79,14 @@ export interface IPairsAPI extends API {
 export interface IPairs {
   pairId: number;
   pool: IPools;
-  tokenIn: number;
-  tokenOut: number;
+  tokenIn: ITokens;
+  tokenOut: ITokens;
 }
 export interface IPairsCreate {
   pairId: number;
   pool: IPools;
-  tokenIn: number;
-  tokenOut: number;
+  tokenIn: ITokens;
+  tokenOut: ITokens;
 }
 
 export interface IQuotesAPI extends API {

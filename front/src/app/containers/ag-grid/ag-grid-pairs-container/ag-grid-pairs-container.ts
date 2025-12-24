@@ -9,12 +9,13 @@ import { ActionsContainer } from '../../actions-container/actions-container';
 import {
   getPairsDataIsLoaded,
   getPairsDataIsLoading,
-  getPairsDataResponse,
+  getPairsDataResponse, getPoolsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { createPair, deletingPair, editPair, setPairsData } from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 import { PairDialogService } from '../../../services/pair-dialog-service';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-ag-grid-pairs-container',
@@ -36,6 +37,15 @@ export class AgGridPairsContainer {
   pairsDataResponse$ = this.store.select(getPairsDataResponse);
   pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
   pairsDataIsLoaded$ = this.store.select(getPairsDataIsLoaded);
+
+  poolsList$ = this.store.select(getPoolsDataResponse).pipe(
+      map(item =>
+        item.map(item => ({
+          id: item.poolId,
+          name: item.poolAddress.toString(),
+        }))
+      )
+    );
 
   readonly colDefs: ColDef[] = [
     {
@@ -102,7 +112,7 @@ export class AgGridPairsContainer {
   }
 
   openCreateDialog() {
-      this.pairDialog.openCreate().subscribe(result => {
+      this.pairDialog.openCreate(this.poolsList$).subscribe(result => {
         if (result?.data === 'add') {
           this.store.dispatch(createPair({ data: result.formData }));
         }
@@ -110,7 +120,7 @@ export class AgGridPairsContainer {
   }
 
   openEditDialog(row: any) {
-      this.pairDialog.openEdit(row).subscribe(result => {
+      this.pairDialog.openEdit(row, this.poolsList$).subscribe(result => {
         if (result?.data === 'save') {
           this.store.dispatch(editPair({ data: result.formData }));
         }

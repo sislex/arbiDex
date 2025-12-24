@@ -29,18 +29,11 @@ export class PoolDialogService {
         dexesList: dexesList$,
         versionsList: versionsList$,
         form: {
-          chain: {
-            chainId: null,
-          },
-          version: {
-            versionId: null,
-          },
-          token: {
-            tokenId: null,
-          },
-          dex: {
-            dexId: null,
-          },
+          chainId: null,
+          versionId: null,
+          token: null,
+          token2: null,
+          dexId: null,
           fee: null,
           poolAddress: '',
         }
@@ -69,7 +62,16 @@ export class PoolDialogService {
         tokensList: tokensList$,
         dexesList: dexesList$,
         versionsList: versionsList$,
-        form: { ...row }
+        form: {
+          poolId: row.poolId,
+          chainId: row.chain.chainId,
+          version: row.version,
+          token: row.token.tokenId,
+          token2: row.token2.tokenId,
+          dexId: row.dex.dexId,
+          fee: row.fee,
+          poolAddress: row.poolAddress,
+        }
       }
     }).afterClosed();
   }

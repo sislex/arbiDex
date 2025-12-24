@@ -1,1 +1,38 @@
-<p>pair-form works!</p>
+@if (poolList) {
+  <app-header-content-layout>
+    <app-field-title header [title]="'Pool Id'"></app-field-title>
+    <app-select-field
+      [title]="'Pool Id'"
+      [list]="poolList | async"
+      [selected]="formData.pool.poolId"
+      (emitter)="events($event, 'poolId')"
+      content
+    ></app-select-field>
+  </app-header-content-layout>
+}
+
+@if (formData.pool) {
+  <app-header-content-layout>
+    <app-field-title header [title]="'Token In'"></app-field-title>
+    <app-select-field
+      [title]="'Token In'"
+      [list]="[{id: 11, name: 'ПРАВКИ PAIR-FORM'}, {id: 1, name: 'formData.pool.token2.tokenId'}]"
+      [selected]="formData.tokenIn.tokenId"
+      (emitter)="events($event, 'tokenIn')"
+      content
+    ></app-select-field>
+  </app-header-content-layout>
+}
+
+@if (formData.pool) {
+  <app-header-content-layout>
+    <app-field-title header [title]="'Token Out'"></app-field-title>
+    <app-select-field
+      [title]="'Token Out'"
+      [list]="[{id: 11, name: 'ПРАВКИ PAIR-FORM'}, {id: 1, name: 'formData.pool.token2.tokenId'}]"
+      [selected]="formData.tokenOut.tokenId"
+      (emitter)="events($event, 'tokenOut')"
+      content
+    ></app-select-field>
+  </app-header-content-layout>
+}

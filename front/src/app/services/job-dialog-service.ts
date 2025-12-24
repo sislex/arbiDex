@@ -19,8 +19,8 @@ export class JobDialogService {
         title: 'Add new job',
         buttons: ['add', 'cancel'],
         form: {
-          chainId: null,
-          name: '',
+          jobId: null,
+          jobType: ''
         }
       }
     }).afterClosed();

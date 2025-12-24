@@ -23,6 +23,7 @@ export class BotDialogService {
         title: 'Add new bot',
         buttons: ['add', 'cancel'],
         form: {
+          botId: null,
           server: {
             serverId: null
           },

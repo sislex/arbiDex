@@ -1,13 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PairFormContainer } from '../containers/forms/pair-form-container/pair-form-container';
+import { Observable } from 'rxjs';
+import { ISelectMenu } from '../models/db-config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PairDialogService {
   private dialog = inject(MatDialog);
-  openCreate() {
+  openCreate(
+    poolList$: Observable<ISelectMenu[]>,
+  ) {
     return this.dialog.open(PairFormContainer, {
       width: '90%',
       height: '90%',
@@ -19,14 +23,29 @@ export class PairDialogService {
         title: 'Add new pair',
         buttons: ['add', 'cancel'],
         form: {
-          chainId: null,
-          name: '',
-        }
+          pairId: null,
+          pool: {
+            poolId: null,
+            token: null,
+            token2: null,
+          },
+          tokenIn: {
+            tokenId: null,
+          },
+          tokenOut: {
+            tokenId: null,
+          },
+        },
+        poolList: poolList$
       }
     }).afterClosed();
   }
 
-  openEdit(row: any) {
+  openEdit(
+    row: any,
+    poolList$: Observable<ISelectMenu[]>,
+  ) {
+    console.log(row)
     return this.dialog.open(PairFormContainer, {
       width: '90%',
       height: '90%',
@@ -37,7 +56,8 @@ export class PairDialogService {
       data: {
         title: 'Edit pair',
         buttons: ['save', 'cancel'],
-        form: { ...row }
+        form: { ...row },
+        poolList: poolList$
       }
     }).afterClosed();
   }
