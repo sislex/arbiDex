@@ -19,8 +19,10 @@ export class QuoteDialogService {
         title: 'Add new quote',
         buttons: ['add', 'cancel'],
         form: {
-          chainId: null,
-          name: '',
+          amount: '',
+          side: 'exactIn',
+          blockTag: 'latest',
+          quoteSource: ''
         }
       }
     }).afterClosed();

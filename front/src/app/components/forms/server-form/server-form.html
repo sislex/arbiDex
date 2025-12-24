@@ -1,1 +1,26 @@
-<p>server-form works!</p>
+<app-header-content-layout>
+  <app-field-title header [title]="'Ip'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.ip"
+    (emitter)="events($event, 'ip')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Port'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.port"
+    (emitter)="events($event, 'port')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Server Name'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.serverName"
+    (emitter)="events($event, 'serverName')"
+    content
+  ></app-input-field>
+</app-header-content-layout>

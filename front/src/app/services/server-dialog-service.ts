@@ -19,8 +19,9 @@ export class ServerDialogService {
         title: 'Add new server',
         buttons: ['add', 'cancel'],
         form: {
-          chainId: null,
-          name: '',
+          ip: '',
+          port: '',
+          serverName: '',
         }
       }
     }).afterClosed();

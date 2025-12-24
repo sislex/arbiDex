@@ -1,1 +1,37 @@
-<p>quote-form works!</p>
+<app-header-content-layout>
+  <app-field-title header [title]="'Amount'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.amount"
+    (emitter)="events($event, 'amount')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Side'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.side"
+    (emitter)="events($event, 'side')"
+    [disabled]="true"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Block Tag'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.blockTag"
+    (emitter)="events($event, 'blockTag')"
+    [disabled]="true"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Quote Source'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.quoteSource"
+    (emitter)="events($event, 'quoteSource')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
