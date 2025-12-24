@@ -1,7 +1,7 @@
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import type { ColDef } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
-import {Component, Input} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -16,4 +16,13 @@ export class AgGrid {
   @Input() rowData: any[] = [];
   @Input() colDefs: ColDef[] = [];
   @Input() defaultColDef: ColDef = {};
+
+  @Output() emitter = new EventEmitter();
+
+  onRowDoubleClicked($event: any) {
+    this.emitter.emit({
+      event: 'AgGrid:DOUBLE_CLICKED_ROW',
+      row: $event
+    });
+  }
 }

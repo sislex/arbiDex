@@ -6,6 +6,14 @@ import { ColDef } from 'ag-grid-community';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
+import {
+  getPairsDataIsLoaded,
+  getPairsDataIsLoading,
+  getPairsDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
+import { setPairsData } from '../../../+state/db-config/db-config.actions';
+import { AsyncPipe } from '@angular/common';
+import { Loader } from '../../../components/loader/loader';
 
 @Component({
   selector: 'app-ag-grid-pairs-container',
@@ -13,6 +21,8 @@ import { ActionsContainer } from '../../actions-container/actions-container';
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
+    AsyncPipe,
+    Loader,
   ],
   templateUrl: './ag-grid-pairs-container.html',
   styleUrl: './ag-grid-pairs-container.scss',
@@ -21,9 +31,9 @@ export class AgGridPairsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  // chainsDataResponse$ = this.store.select(getChainsDataResponse);
-  // chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
-  // chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
+  pairsDataResponse$ = this.store.select(getPairsDataResponse);
+  pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
+  pairsDataIsLoaded$ = this.store.select(getPairsDataIsLoaded);
 
   readonly colDefs: ColDef[] = [
     {
@@ -32,9 +42,11 @@ export class AgGridPairsContainer {
       flex: 1,
     },
     {
-      field: "poolId",
       headerName: 'Pool ID',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.pool?.poolId || '-';
+      },
     },
     {
       field: "tokenIn",
@@ -64,7 +76,7 @@ export class AgGridPairsContainer {
   };
 
   constructor() {
-    //   this.store.dispatch(setChainsData());
+      this.store.dispatch(setPairsData());
   }
 
   onAction($event: any, row: any) {
@@ -84,6 +96,7 @@ export class AgGridPairsContainer {
   }
 
   openCreateDialog() {
+    console.log('create');
     //   this.chainDialog.openCreate().subscribe(result => {
     //     if (result?.data === 'add') {
     //       this.store.dispatch(createChain({ data: result.formData }));
@@ -92,6 +105,7 @@ export class AgGridPairsContainer {
   }
 
   openEditDialog(row: any) {
+    console.log('edit');
     //   this.chainDialog.openEdit(row).subscribe(result => {
     //     if (result?.data === 'save') {
     //       this.store.dispatch(editChain({ data: result.formData }));

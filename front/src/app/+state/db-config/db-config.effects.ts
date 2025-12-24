@@ -4,7 +4,14 @@ import { catchError, EMPTY, map, of, switchMap, tap } from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
-import { setChainsData, setDexesData, setMarketsData, setPoolsData, setTokensData } from './db-config.actions';
+import {
+  setChainsData,
+  setDexesData,
+  setMarketsData,
+  setQuotesData,
+  setPoolsData,
+  setTokensData, setJobsData, setBotsData, setServersData, setPairsData,
+} from './db-config.actions';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 
@@ -122,7 +129,7 @@ export class DbConfigEffects {
           this.apiService.createPool({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setPoolsData());
-              this._snackBar.open(`Token is created: ${response}`, '', { duration: 5000 });
+              this._snackBar.open(`Pool is created: ${response}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -201,7 +208,7 @@ export class DbConfigEffects {
           this.apiService.createMarket({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setMarketsData());
-              this._snackBar.open(`Token is created: ${action.data.marketId}`, '', { duration: 5000 });
+              this._snackBar.open(`Market is created: ${action.data.marketId}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -280,7 +287,7 @@ export class DbConfigEffects {
           this.apiService.createDex({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setDexesData());
-              this._snackBar.open(`Token is created: ${action.data.name}`, '', { duration: 5000 });
+              this._snackBar.open(`Dex is created: ${action.data.name}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -359,7 +366,7 @@ export class DbConfigEffects {
           this.apiService.createChain({ ...action.data }).pipe(
             tap(response => {
               this.store.dispatch(setChainsData());
-              this._snackBar.open(`Token is created: ${action.data.name}`, '', { duration: 5000 });
+              this._snackBar.open(`Chain is created: ${action.data.name}`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -411,4 +418,414 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
+//====================================================================================================================
+//                                                   Pairs
+//====================================================================================================================
+
+  setPairsData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setPairsData),
+      switchMap(() =>
+        this.apiService.getPairs().pipe(
+          // tap(response => {
+          //   console.log('Pairs response:', response);
+          // }),
+          map(response =>
+            DbConfigActions.setPairsDataSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setPairsDataFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
+  createPair$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createPair),
+        switchMap(action =>
+          this.apiService.createPair({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(setPairsData());
+              this._snackBar.open(`Pair is created: ${action.data.pairId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  editPair$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editPair),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editPair(data.pairId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setPairsData());
+              this._snackBar.open(`Pair is update: ${action.data.pairId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  deletingPair$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingPair),
+        switchMap((action) => {
+
+          return this.apiService.deletingPair(action.pairId).pipe(
+            tap(response => {
+              this.store.dispatch(setPairsData());
+              this._snackBar.open(`Pair is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  //====================================================================================================================
+  //                                                   Quotes
+  //====================================================================================================================
+
+  setQuotesData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setQuotesData),
+      switchMap(() =>
+        this.apiService.getQuotes().pipe(
+          // tap(response => {
+          //   console.log('Quotes response:', response);
+          // }),
+          map(response =>
+            DbConfigActions.setQuotesDataSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setQuotesDataFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
+  createQuote$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createQuote),
+        switchMap(action =>
+          this.apiService.createQuote({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(setQuotesData());
+              this._snackBar.open(`Quote is created: ${action.data.quoteId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  editQuote$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editQuote),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editQuote(data.quoteId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setQuotesData());
+              this._snackBar.open(`Quote is update: ${action.data.quoteId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  deletingQuote$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingQuote),
+        switchMap((action) => {
+
+          return this.apiService.deletingQuote(action.quoteId).pipe(
+            tap(response => {
+              this.store.dispatch(setQuotesData());
+              this._snackBar.open(`Quote is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+//====================================================================================================================
+//                                                   Jobs
+//====================================================================================================================
+
+  setJobsData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setJobsData),
+      switchMap(() =>
+        this.apiService.getJobs().pipe(
+          // tap(response => {
+          //   console.log('Jobs response:', response);
+          // }),
+          map(response =>
+            DbConfigActions.setJobsDataSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setJobsDataFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
+  createJob$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createJob),
+        switchMap(action =>
+          this.apiService.createJob({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(setJobsData());
+              this._snackBar.open(`Job is created: ${action.data.jobId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  editJob$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editJob),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editJob(data.jobId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setJobsData());
+              this._snackBar.open(`Job is update: ${action.data.jobId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  deletingJob$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingJob),
+        switchMap((action) => {
+
+          return this.apiService.deletingJob(action.jobId).pipe(
+            tap(response => {
+              this.store.dispatch(setJobsData());
+              this._snackBar.open(`Job is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+
+//====================================================================================================================
+//                                                   Bots
+//====================================================================================================================
+
+  setBotsData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setBotsData),
+      switchMap(() =>
+        this.apiService.getBots().pipe(
+          // tap(response => {
+          //   console.log('Bots response:', response);
+          // }),
+          map(response =>
+            DbConfigActions.setBotsDataSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setBotsDataFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
+  createBot$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createBot),
+        switchMap(action =>
+          this.apiService.createBot({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(setBotsData());
+              this._snackBar.open(`Bot is created: ${action.data.botId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  editBot$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editBot),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editBot(data.botId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setBotsData());
+              this._snackBar.open(`Bot is update: ${action.data.botId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  deletingBot$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingBot),
+        switchMap((action) => {
+
+          return this.apiService.deletingBot(action.botId).pipe(
+            tap(response => {
+              this.store.dispatch(setBotsData());
+              this._snackBar.open(`Bot is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+//====================================================================================================================
+//                                                   Servers
+//====================================================================================================================
+
+  setServersData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setServersData),
+      switchMap(() =>
+        this.apiService.getServers().pipe(
+          // tap(response => {
+          //   console.log('Servers response:', response);
+          // }),
+          map(response =>
+            DbConfigActions.setServersDataSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setServersDataFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
+  createServer$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createServer),
+        switchMap(action =>
+          this.apiService.createServer({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(setServersData());
+              this._snackBar.open(`Server is created: ${action.data.serverId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  editServer$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editServer),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editServer(data.serverId, data).pipe(
+            tap(response => {
+              this.store.dispatch(setServersData());
+              this._snackBar.open(`Server is update: ${action.data.serverId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  deletingServer$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingServer),
+        switchMap((action) => {
+
+          return this.apiService.deletingServer(action.serverId).pipe(
+            tap(response => {
+              this.store.dispatch(setServersData());
+              this._snackBar.open(`Server is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
 }

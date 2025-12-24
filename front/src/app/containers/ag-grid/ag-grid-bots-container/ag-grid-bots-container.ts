@@ -8,6 +8,12 @@ import { ColDef } from 'ag-grid-community';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
+import {
+  getBotsDataIsLoaded,
+  getBotsDataIsLoading,
+  getBotsDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
+import { setBotsData } from '../../../+state/db-config/db-config.actions';
 
 @Component({
   selector: 'app-ag-grid-bots-container',
@@ -25,9 +31,9 @@ export class AgGridBotsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  // chainsDataResponse$ = this.store.select(getChainsDataResponse);
-  // chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
-  // chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
+  botsDataResponse$ = this.store.select(getBotsDataResponse);
+  botsDataIsLoading$ = this.store.select(getBotsDataIsLoading);
+  botsDataIsLoaded$ = this.store.select(getBotsDataIsLoaded);
 
   readonly colDefs: ColDef[] = [
     {
@@ -46,9 +52,11 @@ export class AgGridBotsContainer {
       flex: 1,
     },
     {
-      field: "serverId",
       headerName: 'Server',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.server?.serverId || '-';
+      },
     },
     {
       headerName: 'Actions',
@@ -68,7 +76,7 @@ export class AgGridBotsContainer {
   };
 
   constructor() {
-    //   this.store.dispatch(setChainsData());
+      this.store.dispatch(setBotsData());
   }
 
   onAction($event: any, row: any) {

@@ -6,6 +6,14 @@ import { ColDef } from 'ag-grid-community';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { ActionsContainer } from '../../actions-container/actions-container';
+import { Loader } from '../../../components/loader/loader';
+import {
+  getQuotesDataIsLoaded,
+  getQuotesDataIsLoading,
+  getQuotesDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
+import { setQuotesData } from '../../../+state/db-config/db-config.actions';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-ag-grid-quotes-container',
@@ -13,6 +21,8 @@ import { ActionsContainer } from '../../actions-container/actions-container';
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
+    Loader,
+    AsyncPipe,
   ],
   templateUrl: './ag-grid-quotes-container.html',
   styleUrl: './ag-grid-quotes-container.scss',
@@ -21,9 +31,9 @@ export class AgGridQuotesContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  // chainsDataResponse$ = this.store.select(getChainsDataResponse);
-  // chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
-  // chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
+  quotesDataResponse$ = this.store.select(getQuotesDataResponse);
+  quotesDataIsLoading$ = this.store.select(getQuotesDataIsLoading);
+  quotesDataIsLoaded$ = this.store.select(getQuotesDataIsLoaded);
 
   readonly colDefs: ColDef[] = [
     {
@@ -69,7 +79,7 @@ export class AgGridQuotesContainer {
   };
 
   constructor() {
-    //   this.store.dispatch(setChainsData());
+      this.store.dispatch(setQuotesData());
   }
 
   onAction($event: any, row: any) {

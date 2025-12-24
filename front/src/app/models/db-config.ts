@@ -92,13 +92,13 @@ export interface IPairsAPI extends API {
 }
 export interface IPairs {
   pairId: number;
-  poolId: number;
+  pool: IPools;
   tokenIn: number;
   tokenOut: number;
 }
 export interface IPairsCreate {
   pairId: number;
-  poolId: number;
+  pool: IPools;
   tokenIn: number;
   tokenOut: number;
 }
@@ -140,13 +140,13 @@ export interface IBots {
   botId: number;
   botName: string;
   description: string;
-  serverId: number;
+  server: IServers;
 }
 export interface IBotsCreate {
   botId: number;
   botName: string;
   description: string;
-  serverId: number;
+  server: IServers;
 }
 
 export interface IServersAPI extends API {

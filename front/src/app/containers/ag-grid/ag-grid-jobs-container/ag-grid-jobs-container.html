@@ -1,21 +1,22 @@
 <app-header-content-layout>
-  <!--  @if ((marketsDataIsLoaded$ | async) && !(marketsDataIsLoading$ | async)) {-->
-  <app-title-table-button
-    header
-    [title]="'Jobs table'"
-    [icon]="'add'"
-    (emitter)="actions($event, 'add')"
-  ></app-title-table-button>
-  <!--  }-->
-  <!--  @if ((marketsDataIsLoaded$ | async) && !(marketsDataIsLoading$ | async)) {-->
-  <app-ag-grid
-    content
-    [rowData]="[]"
-    [colDefs]="colDefs"
-    [defaultColDef]="defaultColDef"
-  ></app-ag-grid>
-  <!--  } @else {-->
-  <!--    <app-loader header></app-loader>-->
-  <!--  }-->
+  @if ((jobsDataIsLoaded$ | async) && !(jobsDataIsLoading$ | async)) {
+    <app-title-table-button
+      header
+      [title]="'Jobs table'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+    ></app-title-table-button>
+  }
+  @if ((jobsDataIsLoaded$ | async) && !(jobsDataIsLoading$ | async)) {
+    <app-ag-grid
+      content
+      [rowData]="(jobsDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      (emitter)="actions($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
 </app-header-content-layout>
 

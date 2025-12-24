@@ -6,6 +6,14 @@ import { ColDef } from 'ag-grid-community';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
+import {
+  getServersDataIsLoaded,
+  getServersDataIsLoading,
+  getServersDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
+import { setServersData } from '../../../+state/db-config/db-config.actions';
+import { AsyncPipe } from '@angular/common';
+import { Loader } from '../../../components/loader/loader';
 
 @Component({
   selector: 'app-ag-grid-servers-container',
@@ -13,6 +21,8 @@ import { ActionsContainer } from '../../actions-container/actions-container';
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
+    AsyncPipe,
+    Loader,
   ],
   templateUrl: './ag-grid-servers-container.html',
   styleUrl: './ag-grid-servers-container.scss',
@@ -21,9 +31,9 @@ export class AgGridServersContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  // chainsDataResponse$ = this.store.select(getChainsDataResponse);
-  // chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
-  // chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
+  serversDataResponse$ = this.store.select(getServersDataResponse);
+  serversDataIsLoading$ = this.store.select(getServersDataIsLoading);
+  serversDataIsLoaded$ = this.store.select(getServersDataIsLoaded);
 
   readonly colDefs: ColDef[] = [
       {
@@ -65,7 +75,7 @@ export class AgGridServersContainer {
 
 
   constructor() {
-    //   this.store.dispatch(setChainsData());
+      this.store.dispatch(setServersData());
   }
 
   onAction($event: any, row: any) {

@@ -6,6 +6,15 @@ import { ColDef } from 'ag-grid-community';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
+import {
+  getJobsDataIsLoaded,
+  getJobsDataIsLoading,
+  getJobsDataResponse,
+} from '../../../+state/db-config/db-config.selectors';
+import { setJobsData } from '../../../+state/db-config/db-config.actions';
+import { Loader } from '../../../components/loader/loader';
+import { AsyncPipe } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-ag-grid-jobs-container',
@@ -13,6 +22,8 @@ import { ActionsContainer } from '../../actions-container/actions-container';
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
+    Loader,
+    AsyncPipe,
   ],
   templateUrl: './ag-grid-jobs-container.html',
   styleUrl: './ag-grid-jobs-container.scss',
@@ -20,10 +31,11 @@ import { ActionsContainer } from '../../actions-container/actions-container';
 export class AgGridJobsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
+  readonly router = inject(Router);
 
-  // chainsDataResponse$ = this.store.select(getChainsDataResponse);
-  // chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
-  // chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
+  jobsDataResponse$ = this.store.select(getJobsDataResponse);
+  jobsDataIsLoading$ = this.store.select(getJobsDataIsLoading);
+  jobsDataIsLoaded$ = this.store.select(getJobsDataIsLoaded);
 
   readonly colDefs: ColDef[] = [
     {
@@ -46,29 +58,37 @@ export class AgGridJobsContainer {
     },
   ];
 
-  readonly  defaultColDef: ColDef = {
-      sortable: false,
-      cellStyle: { textAlign: 'center'},
-      suppressMovable: true,
-      headerClass: 'align-center',
+  readonly defaultColDef: ColDef = {
+    sortable: false,
+    suppressMovable: true,
+    headerClass: 'align-center',
+    cellStyle: {
+      textAlign: 'center',
+      cursor: 'pointer',
+    },
   };
 
   constructor() {
-    //   this.store.dispatch(setChainsData());
-  }
-  onAction($event: any, row: any) {
-      if ($event.event === 'Actions:ACTION_CLICKED') {
-        if ($event.actionType === 'delete') {
-          this.openDeleteDialog(row);
-        } else if ($event.actionType === 'edit') {
-          this.openEditDialog(row);
-        }
-      }
+    this.store.dispatch(setJobsData());
   }
 
-  actions($event: any, note: any) {
-    if (note === 'add' ) {
-      this.openCreateDialog();
+  onAction($event: any, row: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if ($event.actionType === 'delete') {
+        this.openDeleteDialog(row);
+      } else if ($event.actionType === 'edit') {
+        this.openEditDialog(row);
+      }
+    }
+  }
+
+  actions($event: any, note?: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if (note === 'add') {
+        this.openCreateDialog();
+      }
+    } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
+      this.router.navigate([`/data-view/jobs/${$event.row.data.jobId}`]);
     }
   }
 
@@ -81,11 +101,11 @@ export class AgGridJobsContainer {
   }
 
   openEditDialog(row: any) {
-  //   this.chainDialog.openEdit(row).subscribe(result => {
-  //     if (result?.data === 'save') {
-  //       this.store.dispatch(editChain({ data: result.formData }));
-  //     }
-  //   });
+    //   this.chainDialog.openEdit(row).subscribe(result => {
+    //     if (result?.data === 'save') {
+    //       this.store.dispatch(editChain({ data: result.formData }));
+    //     }
+    //   });
   }
 
   openDeleteDialog(row: any) {

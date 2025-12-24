@@ -10,6 +10,9 @@ import { AgGridJobsContainer } from './containers/ag-grid/ag-grid-jobs-container
 import { AgGridQuotesContainer } from './containers/ag-grid/ag-grid-quotes-container/ag-grid-quotes-container';
 import { AgGridBotsContainer } from './containers/ag-grid/ag-grid-bots-container/ag-grid-bots-container';
 import { AgGridServersContainer } from './containers/ag-grid/ag-grid-servers-container/ag-grid-servers-container';
+import {
+  AgGridJobRelationsContainer
+} from './containers/ag-grid/ag-grid-job-relations-container/ag-grid-job-relations-container';
 
 export const routes: Routes = [
   {
@@ -35,6 +38,11 @@ export const routes: Routes = [
         path: 'jobs',
         component: AgGridJobsContainer,
         data: { feature: 'jobs' },
+      },
+      {
+        path: 'jobs/:id',
+        component: AgGridJobRelationsContainer,
+        data: { feature: ':id' },
       },
       {
         path: 'quotes',
