@@ -2,6 +2,8 @@
   [rowData]="rowData"
   [columnDefs]="colDefs"
   [defaultColDef]="defaultColDef"
+  [rowSelection]="isRowSelection"
+  (selectionChanged)="onSelectionChanged($event)"
   (rowDoubleClicked)="onRowDoubleClicked($event)"
 >
 </ag-grid-angular>
