@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IJobs, IServers } from '../../../models/db-config';
+import { IBotsCreate, IJobs, IServers } from '../../../models/db-config';
 import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
 import { InputField } from '../../input-field/input-field';
@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
   styleUrl: './bot-form.scss',
 })
 export class BotForm {
-  @Input() formData!: any;
+  @Input() formData!: IBotsCreate;
   @Input() serversList?: Observable<IServers>;
   @Input() jobList?: Observable<IJobs>;
 

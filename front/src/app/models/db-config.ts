@@ -133,8 +133,8 @@ export interface IBotsCreate {
   botId: number;
   botName: string;
   description: string;
-  server: IServers;
-  job: IJobs;
+  serverId: number;
+  jobId: number;
 }
 
 export interface IServersAPI extends API {
