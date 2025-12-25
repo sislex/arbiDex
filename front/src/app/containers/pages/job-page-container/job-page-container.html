@@ -1,0 +1,14 @@
+<app-title-content-layout
+  [title]="'TITLE IM'"
+>
+  <app-actions
+    title-start
+    [icon]="'reply'"
+    [type]="'default'"
+    (emitter)="onAction($event, 'reply')"
+  >
+  </app-actions>
+
+  <app-ag-grid-job-relations-container content></app-ag-grid-job-relations-container>
+</app-title-content-layout>
+

@@ -13,6 +13,7 @@
       [rowData]="(pairsDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
+      (emitter)="actions($event)"
     ></app-ag-grid>
   } @else {
     <app-loader header></app-loader>

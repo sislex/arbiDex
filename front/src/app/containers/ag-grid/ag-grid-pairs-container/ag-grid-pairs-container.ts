@@ -16,6 +16,7 @@ import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 import { PairDialogService } from '../../../services/pair-dialog-service';
 import { map } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-ag-grid-pairs-container',
@@ -33,6 +34,7 @@ export class AgGridPairsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly pairDialog = inject(PairDialogService);
+  readonly router = inject(Router);
 
   pairsDataResponse$ = this.store.select(getPairsDataResponse);
   pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
@@ -40,13 +42,13 @@ export class AgGridPairsContainer {
   poolsListResponse$ = this.store.select(getPoolsDataResponse)
 
   poolsList$ = this.store.select(getPoolsDataResponse).pipe(
-      map(item =>
-        item.map(item => ({
-          id: item.poolId,
-          name: item.poolAddress.toString(),
-        }))
-      )
-    );
+    map(item =>
+      item.map(item => ({
+        id: item.poolId,
+        name: item.poolAddress.toString(),
+      }))
+    )
+  );
 
   readonly colDefs: ColDef[] = [
     {
@@ -87,9 +89,12 @@ export class AgGridPairsContainer {
 
   readonly defaultColDef: ColDef = {
     sortable: false,
-    cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
+    cellStyle: {
+      textAlign: 'center',
+      cursor: 'pointer',
+    },
   };
 
   constructor() {
@@ -106,26 +111,30 @@ export class AgGridPairsContainer {
     }
   }
 
-  actions($event: any, note: any) {
-    if (note === 'add' ) {
-      this.openCreateDialog();
+  actions($event: any, note?: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if (note === 'add') {
+        this.openCreateDialog();
+      }
+    } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
+      this.router.navigate([`/data-view/pairs/${$event.row.data.pairId}`]);
     }
   }
 
   openCreateDialog() {
-      this.pairDialog.openCreate(this.poolsList$, this.poolsListResponse$).subscribe(result => {
-        if (result?.data === 'add') {
-          this.store.dispatch(createPair({ data: result.formData }));
-        }
-      });
+    this.pairDialog.openCreate(this.poolsList$, this.poolsListResponse$).subscribe(result => {
+      if (result?.data === 'add') {
+        this.store.dispatch(createPair({ data: result.formData }));
+      }
+    });
   }
 
   openEditDialog(row: any) {
-      this.pairDialog.openEdit(row, this.poolsList$, this.poolsListResponse$).subscribe(result => {
-        if (result?.data === 'save') {
-          this.store.dispatch(editPair({ data: result.formData }));
-        }
-      });
+    this.pairDialog.openEdit(row, this.poolsList$, this.poolsListResponse$).subscribe(result => {
+      if (result?.data === 'save') {
+        this.store.dispatch(editPair({ data: result.formData }));
+      }
+    });
   }
 
   openDeleteDialog(row: any) {

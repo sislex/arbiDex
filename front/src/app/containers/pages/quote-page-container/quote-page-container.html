@@ -1,0 +1,21 @@
+<app-title-content-layout
+  [title]="'TITLE IM'"
+>
+  <app-actions
+    title-start
+    [icon]="'reply'"
+    [type]="'default'"
+    (emitter)="onAction($event, 'reply')"
+  >
+  </app-actions>
+
+  <mat-tab-group content>
+    <mat-tab label="Relations with Pairs">
+      <app-ag-grid-quote-pair-relations-container></app-ag-grid-quote-pair-relations-container>
+    </mat-tab>
+    <mat-tab label="Relations with Jobs">
+      <app-ag-grid-quote-job-relations-container></app-ag-grid-quote-job-relations-container>
+    </mat-tab>
+  </mat-tab-group>
+</app-title-content-layout>
+

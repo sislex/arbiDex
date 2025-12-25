@@ -1,21 +1,22 @@
 <app-header-content-layout>
-    @if ((quotesDataIsLoaded$ | async) && !(quotesDataIsLoading$ | async)) {
-  <app-title-table-button
-    header
-    [title]="'Quotes table'"
-    [icon]="'add'"
-    (emitter)="actions($event, 'add')"
-  ></app-title-table-button>
-    }
-    @if ((quotesDataIsLoaded$ | async) && !(quotesDataIsLoading$ | async)) {
-  <app-ag-grid
-    content
-    [rowData]="(quotesDataResponse$ | async)!"
-    [colDefs]="colDefs"
-    [defaultColDef]="defaultColDef"
-  ></app-ag-grid>
-    } @else {
-      <app-loader header></app-loader>
-    }
+  @if ((quotesDataIsLoaded$ | async) && !(quotesDataIsLoading$ | async)) {
+    <app-title-table-button
+      header
+      [title]="'Quotes table'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+    ></app-title-table-button>
+  }
+  @if ((quotesDataIsLoaded$ | async) && !(quotesDataIsLoading$ | async)) {
+    <app-ag-grid
+      content
+      [rowData]="(quotesDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      (emitter)="actions($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
 </app-header-content-layout>
 

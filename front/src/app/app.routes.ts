@@ -9,9 +9,9 @@ import { AgGridJobsContainer } from './containers/ag-grid/ag-grid-jobs-container
 import { AgGridQuotesContainer } from './containers/ag-grid/ag-grid-quotes-container/ag-grid-quotes-container';
 import { AgGridBotsContainer } from './containers/ag-grid/ag-grid-bots-container/ag-grid-bots-container';
 import { AgGridServersContainer } from './containers/ag-grid/ag-grid-servers-container/ag-grid-servers-container';
-import {
-  AgGridJobRelationsContainer
-} from './containers/ag-grid/ag-grid-job-relations-container/ag-grid-job-relations-container';
+import { QuotePageContainer } from './containers/pages/quote-page-container/quote-page-container';
+import { PairPageContainer } from './containers/pages/pair-page-container/pair-page-container';
+import { JobPageContainer } from './containers/pages/job-page-container/job-page-container';
 
 export const routes: Routes = [
   {
@@ -71,8 +71,18 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'data-view/pairs/:id',
+    component: PairPageContainer,
+    data: { feature: 'pairs/:id' },
+  },
+  {
+    path: 'data-view/quotes/:id',
+    component: QuotePageContainer,
+    data: { feature: 'quotes/:id' },
+  },
+  {
     path: 'data-view/jobs/:id',
-    component: AgGridJobRelationsContainer,
+    component: JobPageContainer,
     data: { feature: 'jobs/:id' },
   },
 ];

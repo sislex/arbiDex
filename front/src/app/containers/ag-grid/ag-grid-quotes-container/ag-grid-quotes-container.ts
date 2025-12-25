@@ -15,6 +15,7 @@ import {
 import { createQuote, deletingQuote, editQuote, setQuotesData } from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { QuoteDialogService } from '../../../services/quote-dialog-service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-ag-grid-quotes-container',
@@ -32,6 +33,7 @@ export class AgGridQuotesContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly quoteDialog = inject(QuoteDialogService);
+  readonly router = inject(Router);
 
   quotesDataResponse$ = this.store.select(getQuotesDataResponse);
   quotesDataIsLoading$ = this.store.select(getQuotesDataIsLoading);
@@ -75,37 +77,44 @@ export class AgGridQuotesContainer {
 
   readonly defaultColDef: ColDef = {
     sortable: false,
-    cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
+    cellStyle: {
+      textAlign: 'center',
+      cursor: 'pointer',
+    },
   };
 
   constructor() {
-      this.store.dispatch(setQuotesData());
+    this.store.dispatch(setQuotesData());
   }
 
   onAction($event: any, row: any) {
-      if ($event.event === 'Actions:ACTION_CLICKED') {
-        if ($event.actionType === 'delete') {
-          this.openDeleteDialog(row);
-        } else if ($event.actionType === 'edit') {
-          this.openEditDialog(row);
-        }
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if ($event.actionType === 'delete') {
+        this.openDeleteDialog(row);
+      } else if ($event.actionType === 'edit') {
+        this.openEditDialog(row);
       }
+    }
   }
 
-  actions($event: any, note: any) {
-    if (note === 'add' ) {
-      this.openCreateDialog();
+  actions($event: any, note?: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if (note === 'add') {
+        this.openCreateDialog();
+      }
+    } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
+      this.router.navigate([`/data-view/quotes/${$event.row.data.quoteId}`]);
     }
   }
 
   openCreateDialog() {
-      this.quoteDialog.openCreate().subscribe(result => {
-        if (result?.data === 'add') {
-          this.store.dispatch(createQuote({ data: result.formData }));
-        }
-      });
+    this.quoteDialog.openCreate().subscribe(result => {
+      if (result?.data === 'add') {
+        this.store.dispatch(createQuote({ data: result.formData }));
+      }
+    });
   }
 
   openEditDialog(row: any) {

@@ -12,7 +12,6 @@ import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Loader } from '../../../components/loader/loader';
-import { IsRelationActionContainer } from '../../is-relation-action-container/is-relation-action-container';
 
 @Component({
   selector: 'app-ag-grid-job-relations-container',
@@ -35,22 +34,28 @@ export class AgGridJobRelationsContainer {
 
   readonly colDefs: ColDef[] = [
     {
-      headerName: 'Is Related',
-      width: 125,
-      cellRenderer: IsRelationActionContainer,
-      cellRendererParams: {
-        onAction: this.onAction.bind(this),
-      },
-    },
-    {
       field: "botName",
       headerName: 'Bot Name',
       flex: 1,
+      filter: 'agTextColumnFilter',
+      filterParams: {
+        defaultToNothingSelected: true,
+      },
+    },
+    {
+      field: "botId",
+      headerName: 'Bot ID',
+      flex: 1,
+      filter: 'agTextColumnFilter',
+      filterParams: {
+        defaultToNothingSelected: true,
+      },
     },
   ];
 
   readonly defaultColDef: ColDef = {
-    sortable: false,
+    filter: true,
+    sortable: true,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
@@ -70,8 +75,12 @@ export class AgGridJobRelationsContainer {
     }
   }
 
+  events($event: any) {
+    console.log('$event:::', $event.row.selectedNodes.map((item: any) => item.data))
+  }
+
   createRelation() {
-  // this.store.dispatch(createChain({ data: result.formData }));
+    // this.store.dispatch(createChain({ data: result.formData }));
   }
 
   deleteRelation() {
