@@ -27,6 +27,9 @@ export class BotDialogService {
           server: {
             serverId: null
           },
+          job: {
+            jobId: null
+          },
           botName: '',
           description: '',
         },

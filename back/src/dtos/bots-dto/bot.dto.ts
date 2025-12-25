@@ -3,4 +3,5 @@ export class BotDto {
   botName: string;
   description: string;
   server: number;
+  job: number;
 }

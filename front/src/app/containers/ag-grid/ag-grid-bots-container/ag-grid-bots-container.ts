@@ -65,6 +65,13 @@ export class AgGridBotsContainer {
       flex: 1,
     },
     {
+      headerName: 'Job',
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.job?.jobType || '-';
+      },
+    },
+    {
       headerName: 'Server',
       flex: 1,
       valueGetter: (params) => {

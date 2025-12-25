@@ -127,12 +127,14 @@ export interface IBots {
   botName: string;
   description: string;
   server: IServers;
+  job: IJobs;
 }
 export interface IBotsCreate {
   botId: number;
   botName: string;
   description: string;
   server: IServers;
+  job: IJobs;
 }
 
 export interface IServersAPI extends API {

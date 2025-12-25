@@ -5,6 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Bots } from './Bots';
 import { JobBotRelations } from './JobBotRelations';
 import { QuoteJobRelations } from './QuoteJobRelations';
 
@@ -20,6 +21,9 @@ export class Jobs {
     length: 255,
   })
   jobType: string | null;
+
+  @OneToMany(() => Bots, (bots) => bots.job)
+  bots: Bots[];
 
   @OneToMany(() => JobBotRelations, (jobBotRelations) => jobBotRelations.job)
   jobBotRelations: JobBotRelations[];
