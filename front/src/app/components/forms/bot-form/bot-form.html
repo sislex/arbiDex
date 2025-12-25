@@ -16,13 +16,26 @@
   ></app-input-field>
 </app-header-content-layout>
 
+@if (jobList) {
+  <app-header-content-layout>
+    <app-field-title header [title]="'Job Id'"></app-field-title>
+    <app-select-field
+      [title]="'Job Id'"
+      [list]="jobList | async"
+      [selected]="formData.jobId"
+      (emitter)="events($event, 'job')"
+      content
+    ></app-select-field>
+  </app-header-content-layout>
+}
+
 @if (serversList) {
   <app-header-content-layout>
     <app-field-title header [title]="'Server Id'"></app-field-title>
     <app-select-field
       [title]="'Server Id'"
       [list]="serversList | async"
-      [selected]="formData.server.serverId"
+      [selected]="formData.serverId"
       (emitter)="events($event, 'server')"
       content
     ></app-select-field>

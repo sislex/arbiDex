@@ -11,6 +11,7 @@ export class BotDialogService {
   private dialog = inject(MatDialog);
   openCreate(
     serversList$: Observable<ISelectMenu[]>,
+    jobList$: Observable<ISelectMenu[]>,
   ) {
     return this.dialog.open(BotFormContainer, {
       width: '90%',
@@ -34,6 +35,7 @@ export class BotDialogService {
           description: '',
         },
         serversList: serversList$,
+        jobList: jobList$,
       }
     }).afterClosed();
   }
@@ -41,6 +43,7 @@ export class BotDialogService {
   openEdit(
     row: any,
     serversList$: Observable<ISelectMenu[]>,
+    jobList$: Observable<ISelectMenu[]>,
   ) {
     return this.dialog.open(BotFormContainer, {
       width: '90%',
@@ -52,8 +55,15 @@ export class BotDialogService {
       data: {
         title: 'Edit bot',
         buttons: ['save', 'cancel'],
-        form: { ...row },
+        form: {
+          botId: row.botId,
+          botName: row.botName,
+          description: row.description,
+          jobId: row.job.jobId,
+          serverId: row.server.serverId,
+        },
         serversList: serversList$,
+        jobList: jobList$,
       }
     }).afterClosed();
   }

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IBots, IServers } from '../../../models/db-config';
+import { IJobs, IServers } from '../../../models/db-config';
 import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
 import { InputField } from '../../input-field/input-field';
@@ -20,12 +20,13 @@ import { Observable } from 'rxjs';
   styleUrl: './bot-form.scss',
 })
 export class BotForm {
-  @Input() formData!: IBots;
+  @Input() formData!: any;
   @Input() serversList?: Observable<IServers>;
+  @Input() jobList?: Observable<IJobs>;
 
   @Output() emitter = new EventEmitter();
 
-  events(event: any, field: 'botName' | 'description' | 'server') {
+  events(event: any, field: 'botName' | 'description' | 'job' | 'server') {
     this.formData = {
       ...this.formData,
       [field]: event.data,

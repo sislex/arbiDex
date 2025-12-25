@@ -11,7 +11,7 @@ import { ActionsContainer } from '../../actions-container/actions-container';
 import {
   getBotsDataIsLoaded,
   getBotsDataIsLoading,
-  getBotsDataResponse,
+  getBotsDataResponse, getJobsDataResponse,
   getServersDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { createBot, deletingBot, editBot, setBotsData } from '../../../+state/db-config/db-config.actions';
@@ -44,6 +44,15 @@ export class AgGridBotsContainer {
       item.map(item => ({
         id: item.serverId,
         name: item.serverName,
+      }))
+    )
+  );
+
+  jobList$ = this.store.select(getJobsDataResponse).pipe(
+    map(item =>
+      item.map(item => ({
+        id: item.jobId,
+        name: item.jobType,
       }))
     )
   );
@@ -116,7 +125,7 @@ export class AgGridBotsContainer {
   }
 
   openCreateDialog() {
-    this.botDialog.openCreate(this.serversList$).subscribe(result => {
+    this.botDialog.openCreate(this.serversList$, this.jobList$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createBot({ data: result.formData }));
       }
@@ -124,7 +133,7 @@ export class AgGridBotsContainer {
   }
 
   openEditDialog(row: any) {
-      this.botDialog.openEdit(row, this.serversList$).subscribe(result => {
+      this.botDialog.openEdit(row, this.serversList$, this.jobList$).subscribe(result => {
         if (result?.data === 'save') {
           this.store.dispatch(editBot({ data: result.formData }));
         }
