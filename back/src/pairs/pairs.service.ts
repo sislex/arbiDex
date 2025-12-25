@@ -30,7 +30,16 @@ export class PairsService {
 
   async findAll() {
     return await this.pairsRepository.find({
-      relations: ['pool', 'tokenIn', 'tokenOut'],
+      relations: {
+        pool: {
+          dex: true,
+          chain: true,
+          token: true,
+          token2: true,
+        },
+        tokenIn: true,
+        tokenOut: true,
+      },
       order: {
         pairId: 'DESC',
       },

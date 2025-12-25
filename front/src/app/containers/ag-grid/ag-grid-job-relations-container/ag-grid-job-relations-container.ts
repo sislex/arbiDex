@@ -11,7 +11,6 @@ import { setBotsData } from '../../../+state/db-config/db-config.actions';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
-import { Loader } from '../../../components/loader/loader';
 
 @Component({
   selector: 'app-ag-grid-job-relations-container',
@@ -19,7 +18,6 @@ import { Loader } from '../../../components/loader/loader';
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
-    Loader,
   ],
   templateUrl: './ag-grid-job-relations-container.html',
   styleUrl: './ag-grid-job-relations-container.scss',

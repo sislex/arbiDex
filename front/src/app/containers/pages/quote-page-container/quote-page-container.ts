@@ -8,9 +8,6 @@ import {
 } from '../../ag-grid/ag-grid-quote-job-relations-container/ag-grid-quote-job-relations-container';
 import { Router } from '@angular/router';
 import { Actions } from '../../../components/actions/actions';
-import {
-  AgGridPairRelationsContainer
-} from '../../ag-grid/ag-grid-pair-relations-container/ag-grid-pair-relations-container';
 import { TitleContentLayout } from '../../../components/layouts/title-content-layout/title-content-layout';
 
 @Component({
@@ -20,7 +17,6 @@ import { TitleContentLayout } from '../../../components/layouts/title-content-la
     AgGridQuotePairRelationsContainer,
     AgGridQuoteJobRelationsContainer,
     Actions,
-    AgGridPairRelationsContainer,
     TitleContentLayout,
   ],
   templateUrl: './quote-page-container.html',
