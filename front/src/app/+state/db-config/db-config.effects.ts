@@ -4,17 +4,6 @@ import { catchError, EMPTY, map, of, switchMap, tap } from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
-import {
-  setChainsData,
-  setDexesData,
-  setQuotesData,
-  setPoolsData,
-  setTokensData,
-  setJobsData,
-  setBotsData,
-  setServersData,
-  setPairsData,
-} from './db-config.actions';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 
@@ -52,7 +41,7 @@ export class DbConfigEffects {
         switchMap(action =>
           this.apiService.createToken({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(setTokensData());
+              this.store.dispatch(DbConfigActions.setTokensData());
               this._snackBar.open(`Token is created: ${response.tokenName}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -72,7 +61,7 @@ export class DbConfigEffects {
           let data = {...action.data};
           return this.apiService.editToken(data.tokenId, data).pipe(
             tap(response => {
-              this.store.dispatch(setTokensData());
+              this.store.dispatch(DbConfigActions.setTokensData());
               this._snackBar.open(`Token is update: ${response.tokenName}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -92,7 +81,7 @@ export class DbConfigEffects {
 
           return this.apiService.deletingToken(action.tokenId).pipe(
             tap(response => {
-              this.store.dispatch(setTokensData());
+              this.store.dispatch(DbConfigActions.setTokensData());
               this._snackBar.open(`Token is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -131,7 +120,7 @@ export class DbConfigEffects {
         switchMap(action =>
           this.apiService.createPool({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(setPoolsData());
+              this.store.dispatch(DbConfigActions.setPoolsData());
               this._snackBar.open(`Pool is created: ${response}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -151,7 +140,7 @@ export class DbConfigEffects {
           let data = {...action.data};
           return this.apiService.editPool(data.poolId, data).pipe(
             tap(response => {
-              this.store.dispatch(setPoolsData());
+              this.store.dispatch(DbConfigActions.setPoolsData());
               this._snackBar.open(`Pool is update: ${response.poolId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -171,7 +160,7 @@ export class DbConfigEffects {
 
           return this.apiService.deletingPool(action.poolId).pipe(
             tap(response => {
-              this.store.dispatch(setPoolsData());
+              this.store.dispatch(DbConfigActions.setPoolsData());
               this._snackBar.open(`Pool is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -210,7 +199,7 @@ export class DbConfigEffects {
         switchMap(action =>
           this.apiService.createDex({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(setDexesData());
+              this.store.dispatch(DbConfigActions.setDexesData());
               this._snackBar.open(`Dex is created: ${response.name}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -230,7 +219,7 @@ export class DbConfigEffects {
           let data = {...action.data};
           return this.apiService.editDex(data.dexId, data).pipe(
             tap(response => {
-              this.store.dispatch(setDexesData());
+              this.store.dispatch(DbConfigActions.setDexesData());
               this._snackBar.open(`Dex is update: ${response.dexId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -250,7 +239,7 @@ export class DbConfigEffects {
 
           return this.apiService.deletingDex(action.dexId).pipe(
             tap(response => {
-              this.store.dispatch(setDexesData());
+              this.store.dispatch(DbConfigActions.setDexesData());
               this._snackBar.open(`Dex is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -289,7 +278,7 @@ export class DbConfigEffects {
         switchMap(action =>
           this.apiService.createChain({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(setChainsData());
+              this.store.dispatch(DbConfigActions.setChainsData());
               this._snackBar.open(`Chain is created: ${response.name}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -309,7 +298,7 @@ export class DbConfigEffects {
           let data = {...action.data};
           return this.apiService.editChain(data.chainId, data).pipe(
             tap(response => {
-              this.store.dispatch(setChainsData());
+              this.store.dispatch(DbConfigActions.setChainsData());
               this._snackBar.open(`Chain is update: ${response.chainId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -329,7 +318,7 @@ export class DbConfigEffects {
 
           return this.apiService.deletingChain(action.chainId).pipe(
             tap(response => {
-              this.store.dispatch(setChainsData());
+              this.store.dispatch(DbConfigActions.setChainsData());
               this._snackBar.open(`Chain is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -371,7 +360,7 @@ export class DbConfigEffects {
         switchMap(action =>
           this.apiService.createPair({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(setPairsData());
+              this.store.dispatch(DbConfigActions.setPairsData());
               this._snackBar.open(`Pair is created: ${response.pairId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -391,7 +380,7 @@ export class DbConfigEffects {
           let data = {...action.data};
           return this.apiService.editPair(data.pairId, data).pipe(
             tap(response => {
-              this.store.dispatch(setPairsData());
+              this.store.dispatch(DbConfigActions.setPairsData());
               this._snackBar.open(`Pair is update: ${response.pairId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -411,7 +400,7 @@ export class DbConfigEffects {
 
           return this.apiService.deletingPair(action.pairId).pipe(
             tap(response => {
-              this.store.dispatch(setPairsData());
+              this.store.dispatch(DbConfigActions.setPairsData());
               this._snackBar.open(`Pair is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -453,7 +442,7 @@ export class DbConfigEffects {
         switchMap(action =>
           this.apiService.createQuote({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(setQuotesData());
+              this.store.dispatch(DbConfigActions.setQuotesData());
               this._snackBar.open(`Quote is created: ${response.quoteId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -473,7 +462,7 @@ export class DbConfigEffects {
           let data = {...action.data};
           return this.apiService.editQuote(data.quoteId, data).pipe(
             tap(response => {
-              this.store.dispatch(setQuotesData());
+              this.store.dispatch(DbConfigActions.setQuotesData());
               this._snackBar.open(`Quote is update: ${response.quoteId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -493,7 +482,7 @@ export class DbConfigEffects {
 
           return this.apiService.deletingQuote(action.quoteId).pipe(
             tap(response => {
-              this.store.dispatch(setQuotesData());
+              this.store.dispatch(DbConfigActions.setQuotesData());
               this._snackBar.open(`Quote is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -535,7 +524,7 @@ export class DbConfigEffects {
         switchMap(action =>
           this.apiService.createJob({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(setJobsData());
+              this.store.dispatch(DbConfigActions.setJobsData());
               this._snackBar.open(`Job is created: ${response.jobId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -555,7 +544,7 @@ export class DbConfigEffects {
           let data = {...action.data};
           return this.apiService.editJob(data.jobId, data).pipe(
             tap(response => {
-              this.store.dispatch(setJobsData());
+              this.store.dispatch(DbConfigActions.setJobsData());
               this._snackBar.open(`Job is update: ${response.jobId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -575,7 +564,7 @@ export class DbConfigEffects {
 
           return this.apiService.deletingJob(action.jobId).pipe(
             tap(response => {
-              this.store.dispatch(setJobsData());
+              this.store.dispatch(DbConfigActions.setJobsData());
               this._snackBar.open(`Job is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -618,7 +607,7 @@ export class DbConfigEffects {
         switchMap(action =>
           this.apiService.createBot({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(setBotsData());
+              this.store.dispatch(DbConfigActions.setBotsData());
               this._snackBar.open(`Bot is created: ${response.botName}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -638,7 +627,7 @@ export class DbConfigEffects {
           let data = {...action.data};
           return this.apiService.editBot(data.botId, data).pipe(
             tap(response => {
-              this.store.dispatch(setBotsData());
+              this.store.dispatch(DbConfigActions.setBotsData());
               this._snackBar.open(`Bot is update: ${response.botId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -657,8 +646,8 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingBot(action.botId).pipe(
-            tap(response => {console.log(response)
-              this.store.dispatch(setBotsData());
+            tap(response => {
+              this.store.dispatch(DbConfigActions.setBotsData());
               this._snackBar.open(`Bot is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -700,7 +689,7 @@ export class DbConfigEffects {
         switchMap(action =>
           this.apiService.createServer({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(setServersData());
+              this.store.dispatch(DbConfigActions.setServersData());
               this._snackBar.open(`Server is created: ${response.serverId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -720,7 +709,7 @@ export class DbConfigEffects {
           let data = {...action.data};
           return this.apiService.editServer(data.serverId, data).pipe(
             tap(response => {
-              this.store.dispatch(setServersData());
+              this.store.dispatch(DbConfigActions.setServersData());
               this._snackBar.open(`Server is update: ${response.serverId}`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -740,7 +729,7 @@ export class DbConfigEffects {
 
           return this.apiService.deletingServer(action.serverId).pipe(
             tap(response => {
-              this.store.dispatch(setServersData());
+              this.store.dispatch(DbConfigActions.setServersData());
               this._snackBar.open(`Server is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -752,4 +741,5 @@ export class DbConfigEffects {
       ),
     { dispatch: false }
   );
+
 }
