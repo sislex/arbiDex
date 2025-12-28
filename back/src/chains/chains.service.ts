@@ -12,7 +12,7 @@ export class ChainsService {
   ) {}
   async create(chainDto: ChainDto) {
     const chain = this.chainsRepository.create({
-      chainId: chainDto.chainId,
+      chainId: chainDto.newChainId,
       name: chainDto.name,
     });
 

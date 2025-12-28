@@ -23,7 +23,7 @@
       [title]="'Job Id'"
       [list]="jobList | async"
       [selected]="formData.jobId"
-      (emitter)="events($event, 'job')"
+      (emitter)="events($event, 'jobId')"
       content
     ></app-select-field>
   </app-header-content-layout>
@@ -36,7 +36,7 @@
       [title]="'Server Id'"
       [list]="serversList | async"
       [selected]="formData.serverId"
-      (emitter)="events($event, 'server')"
+      (emitter)="events($event, 'serverId')"
       content
     ></app-select-field>
   </app-header-content-layout>

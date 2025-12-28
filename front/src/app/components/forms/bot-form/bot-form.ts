@@ -26,7 +26,7 @@ export class BotForm {
 
   @Output() emitter = new EventEmitter();
 
-  events(event: any, field: 'botName' | 'description' | 'job' | 'server') {
+  events(event: any, field: 'botName' | 'description' | 'jobId' | 'serverId') {
     this.formData = {
       ...this.formData,
       [field]: event.data,
