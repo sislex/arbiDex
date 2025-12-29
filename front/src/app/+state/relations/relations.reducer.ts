@@ -3,6 +3,7 @@ import {emptyAsyncResponse} from '../db-config/configs';
 import {
   IJobRelationsAPI, IQuoteRelationsAPI,
 } from '../../models/relations';
+import * as RelationsActions from './relations.actions';
 
 export const RELATIONS_FEATURE_KEY = 'relations';
 
@@ -22,4 +23,33 @@ export const initialState: RelationsState = {
 
 export const relationsReducer = createReducer(
   initialState,
+  on(RelationsActions.setQuoteRelationsDataList, (state) => ({
+    ...state,
+    quoteRelations: {
+      ...state.quoteRelations,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(RelationsActions.setQuoteRelationsDataListSuccess, (state, {response}) => ({
+    ...state,
+    quoteRelations: {
+      ...state.quoteRelations,
+      loadingTime: Date.now() - state.quoteRelations.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(RelationsActions.setQuoteRelationsDataListFailure, (state, {error}) => ({
+    ...state,
+    quoteRelations: {
+      ...state.quoteRelations,
+      loadingTime: Date.now() - state.quoteRelations.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
 )

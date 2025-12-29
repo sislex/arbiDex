@@ -83,19 +83,6 @@ export class PairQuoteRelationsService {
     return item;
   }
 
-  async update(id: string, pairQuoteRelationDto: PairQuoteRelationDto) {
-    const pairQuoteRelations = await this.findOne(id);
-
-    pairQuoteRelations.pair = await this.pairsService.findOne(
-      pairQuoteRelationDto.pairId,
-    );
-    pairQuoteRelations.quote = await this.quotesService.findOne(
-      pairQuoteRelationDto.quoteId,
-    );
-
-    return await this.pairQuoteRelationsRepository.save(pairQuoteRelations);
-  }
-
   async remove(id: string) {
     return await this.pairQuoteRelationsRepository.delete(id);
   }

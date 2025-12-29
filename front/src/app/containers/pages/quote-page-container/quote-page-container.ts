@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Actions } from '../../../components/actions/actions';
 import { TitleContentLayout } from '../../../components/layouts/title-content-layout/title-content-layout';
 import {
@@ -11,6 +11,8 @@ import { ButtonPanel } from '../../../components/button-panel/button-panel';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
 import { Store } from '@ngrx/store';
 import { AsyncPipe } from '@angular/common';
+import { setPairsData } from '../../../+state/db-config/db-config.actions';
+import { setQuoteRelationsDataList } from '../../../+state/relations/relations.actions';
 
 @Component({
   selector: 'app-quote-page-container',
@@ -28,10 +30,20 @@ import { AsyncPipe } from '@angular/common';
 })
 export class QuotePageContainer {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private store = inject(Store);
-  footerButtons = ['save', 'cancel'];
 
+  footerButtons = ['save', 'cancel'];
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
+
+  constructor() {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+
+    this.store.dispatch(setPairsData());
+    this.store.dispatch(
+      setQuoteRelationsDataList({ quoteId: id }),
+    );
+  }
 
   onAction($event: any, note: string) {
     if ($event.event === 'Actions:ACTION_CLICKED') {
@@ -39,5 +51,15 @@ export class QuotePageContainer {
         this.router.navigate([`data-view/quotes`]);
       }
     }
-  }
+  };
+
+  events($event: any) {
+    if ($event.event === 'ButtonPanel:BUTTON_CLICKED') {
+      if ($event.data === 'save') {
+        console.log('saveTO')
+      } else if ($event.data === 'cancel') {
+        console.log('cancelTO')
+      }
+    }
+  };
 }

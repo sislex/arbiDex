@@ -6,16 +6,16 @@ import { createAction, props } from '@ngrx/store';
 
 export const setQuoteRelationsDataList = createAction(
   '[Relations] setQuoteRelationsDataList',
-  props<{ pairId: number }>()
+  props<{ quoteId: number }>()
 );
 export const setQuoteRelationsDataListSuccess = createAction(
   '[Relations] setQuoteRelationsDataListSuccess',
   props<{ response: any }>()
 );
-// export const setServersDataFailure = createAction(
-//   '[DbConfig] setServersDataFailure',
-//   props<{ error: string }>()
-// );
+export const setQuoteRelationsDataListFailure = createAction(
+  '[DbConfig] setQuoteRelationsDataListFailure',
+  props<{ error: string }>()
+);
 // export const createServer = createAction(
 //   '[DbConfig] createServer',
 //   props<{ data: IServersCreate }>()

@@ -1,16 +1,19 @@
 import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
-import {
-  getBotsDataIsLoaded,
-  getBotsDataIsLoading,
-  getPairsDataResponse,
+import { getPairsDataIsLoaded, getPairsDataIsLoading,
 } from '../../../+state/db-config/db-config.selectors';
 import { ColDef } from 'ag-grid-community';
-import { setBotsData } from '../../../+state/db-config/db-config.actions';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
+import {
+  getPairsWithRelations,
+  getQuoteRelationsIsLoaded,
+  getQuoteRelationsIsLoading,
+} from '../../../+state/relations/relations.selectors';
+import { AsyncPipe } from '@angular/common';
+import { Loader } from '../../../components/loader/loader';
 
 @Component({
   selector: 'app-ag-grid-quote-relations-container',
@@ -18,29 +21,23 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
     AgGrid,
     HeaderContentLayout,
     TitleTableButton,
+    AsyncPipe,
+    Loader,
   ],
   templateUrl: './ag-grid-quote-relations-container.html',
   styleUrl: './ag-grid-quote-relations-container.scss',
 })
 export class AgGridQuoteRelationsContainer {
-
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  botsDataResponse$ = this.store.select(getPairsDataResponse);
-  botsDataIsLoading$ = this.store.select(getBotsDataIsLoading);
-  botsDataIsLoaded$ = this.store.select(getBotsDataIsLoaded);
+  pairsWithRelations$ = this.store.select(getPairsWithRelations);
+  pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
+  pairsDataIsLoaded$ = this.store.select(getPairsDataIsLoaded);
+  quoteRelationsIsLoading$ = this.store.select(getQuoteRelationsIsLoading);
+  quoteRelationsIsLoaded$ = this.store.select(getQuoteRelationsIsLoaded);
 
   readonly colDefs: ColDef[] = [
-    // {
-    //   field: "chainName",
-    //   headerName: 'Chain Name',
-    //   width: 150,
-    //   filter: 'agTextColumnFilter',
-    //   filterParams: {
-    //     defaultToNothingSelected: true,
-    //   },
-    // },
     {
       headerName: 'Chain Name',
       width: 150,
@@ -160,10 +157,6 @@ export class AgGridQuoteRelationsContainer {
     suppressMovable: true,
     headerClass: 'align-center',
   };
-
-  constructor() {
-    this.store.dispatch(setBotsData());
-  }
 
   onAction($event: any, row: any) {
     if ($event.event === 'Actions:ACTION_CLICKED') {

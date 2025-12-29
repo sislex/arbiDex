@@ -3,6 +3,7 @@
   [columnDefs]="colDefs"
   [defaultColDef]="defaultColDef"
   [rowSelection]="isRowSelection"
+  (gridReady)="onGridReady($event)"
   (selectionChanged)="onSelectionChanged($event)"
   (rowDoubleClicked)="onRowDoubleClicked($event)"
 >
