@@ -1,5 +1,5 @@
 <app-title-content-layout
-  [title]="'TITLE IM'"
+  [title]="'Check old soft to header'"
 >
   <app-actions
     title-start
@@ -9,13 +9,5 @@
   >
   </app-actions>
 
-  <mat-tab-group content>
-    <mat-tab label="Relations with Pairs">
-      <app-ag-grid-quote-pair-relations-container></app-ag-grid-quote-pair-relations-container>
-    </mat-tab>
-    <mat-tab label="Relations with Jobs">
-      <app-ag-grid-quote-job-relations-container></app-ag-grid-quote-job-relations-container>
-    </mat-tab>
-  </mat-tab-group>
+  <app-ag-grid-quote-relations-container content></app-ag-grid-quote-relations-container>
 </app-title-content-layout>
-

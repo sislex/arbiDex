@@ -37,10 +37,20 @@ export class PairQuoteRelationsService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const item = await this.pairQuoteRelationsRepository.findOne({
-      where: { pairQuoteRelationId: id.toString() },
-      relations: ['pair', 'quote'],
+      where: { pairQuoteRelationId: id },
+      relations: [
+        'pair',
+        'pair.tokenIn',
+        'pair.tokenOut',
+        'pair.pool',
+        'pair.pool.dex',
+        'pair.pool.chain',
+        'pair.pool.token',
+        'pair.pool.token2',
+        'quote',
+      ],
     });
     if (!item) {
       throw new Error(`Pair-Quote Relation with id ${id} not found`);
@@ -48,7 +58,32 @@ export class PairQuoteRelationsService {
     return item;
   }
 
-  async update(id: number, pairQuoteRelationDto: PairQuoteRelationDto) {
+  async findByQuoteId(id: string) {
+    const item = await this.pairQuoteRelationsRepository.find({
+      where: {
+        quote: {
+          quoteId: id,
+        },
+      },
+      relations: [
+        'pair',
+        'pair.tokenIn',
+        'pair.tokenOut',
+        'pair.pool',
+        'pair.pool.dex',
+        'pair.pool.chain',
+        'pair.pool.token',
+        'pair.pool.token2',
+        'quote',
+      ],
+    });
+    if (!item) {
+      throw new Error(`Pair-Quote Relation with id ${id} not found`);
+    }
+    return item;
+  }
+
+  async update(id: string, pairQuoteRelationDto: PairQuoteRelationDto) {
     const pairQuoteRelations = await this.findOne(id);
 
     pairQuoteRelations.pair = await this.pairsService.findOne(
@@ -61,7 +96,7 @@ export class PairQuoteRelationsService {
     return await this.pairQuoteRelationsRepository.save(pairQuoteRelations);
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     return await this.pairQuoteRelationsRepository.delete(id);
   }
 }

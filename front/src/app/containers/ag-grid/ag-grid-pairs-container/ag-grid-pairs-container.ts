@@ -93,7 +93,6 @@ export class AgGridPairsContainer {
     headerClass: 'align-center',
     cellStyle: {
       textAlign: 'center',
-      cursor: 'pointer',
     },
   };
 
@@ -116,8 +115,6 @@ export class AgGridPairsContainer {
       if (note === 'add') {
         this.openCreateDialog();
       }
-    } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
-      this.router.navigate([`/data-view/pairs/${$event.row.data.pairId}`]);
     }
   }
 

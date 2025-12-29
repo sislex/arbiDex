@@ -27,8 +27,18 @@ export class PairQuoteRelationsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pairQuoteRelationsService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const pair = await this.pairQuoteRelationsService.findOne(id);
+    return {
+      pairQuoteRelationId: pair.pairQuoteRelationId,
+      pair: pair.pair,
+      quote: pair.quote,
+    };
+  }
+
+  @Get('by-quote-id/:id')
+  async findByQuoteId(@Param('id') id: string) {
+    return await this.pairQuoteRelationsService.findByQuoteId(id);
   }
 
   @Put(':id')
@@ -37,13 +47,13 @@ export class PairQuoteRelationsController {
     @Body() updatePairQuoteRelationDto: PairQuoteRelationDto,
   ) {
     return this.pairQuoteRelationsService.update(
-      +id,
+      id,
       updatePairQuoteRelationDto,
     );
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.pairQuoteRelationsService.remove(+id);
+    return this.pairQuoteRelationsService.remove(id);
   }
 }

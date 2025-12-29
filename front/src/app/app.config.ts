@@ -11,6 +11,8 @@ import {provideHttpClient} from '@angular/common/http';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { VIEW_FEATURE_KEY, viewReducer } from './+state/view/view.reducer';
 import { ViewEffects } from './+state/view/view.effects';
+import { RELATIONS_FEATURE_KEY, relationsReducer } from './+state/relations/relations.reducer';
+import { RelationsEffects } from './+state/relations/relations.effects';
 
 
 export const appConfig: ApplicationConfig = {
@@ -18,8 +20,9 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     provideStore(),
     provideState(DB_CONFIG_FEATURE_KEY, dbConfigReducer),
+    provideState(RELATIONS_FEATURE_KEY, relationsReducer),
     provideState(VIEW_FEATURE_KEY, viewReducer),
-    provideEffects(DbConfigEffects, ViewEffects),
+    provideEffects(DbConfigEffects, ViewEffects, RelationsEffects),
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),

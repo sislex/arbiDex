@@ -10,7 +10,6 @@ import { AgGridQuotesContainer } from './containers/ag-grid/ag-grid-quotes-conta
 import { AgGridBotsContainer } from './containers/ag-grid/ag-grid-bots-container/ag-grid-bots-container';
 import { AgGridServersContainer } from './containers/ag-grid/ag-grid-servers-container/ag-grid-servers-container';
 import { QuotePageContainer } from './containers/pages/quote-page-container/quote-page-container';
-import { PairPageContainer } from './containers/pages/pair-page-container/pair-page-container';
 import { JobPageContainer } from './containers/pages/job-page-container/job-page-container';
 
 export const routes: Routes = [
@@ -71,18 +70,13 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'data-view/pairs/:id',
-    component: PairPageContainer,
-    data: { feature: 'pairs/:id' },
-  },
-  {
     path: 'data-view/quotes/:id',
     component: QuotePageContainer,
-    data: { feature: 'quotes/:id' },
+    data: { feature: 'quote relations' },
   },
   {
     path: 'data-view/jobs/:id',
     component: JobPageContainer,
-    data: { feature: 'jobs/:id' },
+    data: { feature: 'job relations' },
   },
 ];
