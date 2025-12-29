@@ -6,6 +6,11 @@ import { TitleContentLayout } from '../../../components/layouts/title-content-la
 import {
   AgGridQuoteRelationsContainer
 } from '../../ag-grid/ag-grid-quote-relations-container/ag-grid-quote-relations-container';
+import { ContentFooterLayout } from '../../../components/layouts/content-footer-layout/content-footer-layout';
+import { ButtonPanel } from '../../../components/button-panel/button-panel';
+import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
+import { Store } from '@ngrx/store';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-quote-page-container',
@@ -14,12 +19,19 @@ import {
     Actions,
     TitleContentLayout,
     AgGridQuoteRelationsContainer,
+    ContentFooterLayout,
+    ButtonPanel,
+    AsyncPipe,
   ],
   templateUrl: './quote-page-container.html',
   styleUrl: './quote-page-container.scss',
 })
 export class QuotePageContainer {
   private router = inject(Router);
+  private store = inject(Store);
+  footerButtons = ['save', 'cancel'];
+
+  activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
   onAction($event: any, note: string) {
     if ($event.event === 'Actions:ACTION_CLICKED') {

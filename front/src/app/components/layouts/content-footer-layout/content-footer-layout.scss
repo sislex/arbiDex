@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+  flex: 1;
+
+  .content-footer-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .footer {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      height: 36px;
+      background: var(--toolbar-gradient);
+      padding: 0 16px;
+      color: var(--white-color);
+    }
+  }
+}
+
+

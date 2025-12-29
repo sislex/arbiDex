@@ -1,5 +1,5 @@
 <app-title-content-layout
-  [title]="'Check old soft to header'"
+  [title]="(activeSidebarItem$ | async)!"
 >
   <app-actions
     title-start
@@ -8,6 +8,12 @@
     (emitter)="onAction($event, 'reply')"
   >
   </app-actions>
-
-  <app-ag-grid-quote-relations-container content></app-ag-grid-quote-relations-container>
+  <app-content-footer-layout content>
+    <app-ag-grid-quote-relations-container content></app-ag-grid-quote-relations-container>
+    <app-button-panel
+      footer
+      [buttons]="footerButtons"
+      [disabled]="false"
+    ></app-button-panel>
+  </app-content-footer-layout>
 </app-title-content-layout>

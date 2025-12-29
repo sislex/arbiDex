@@ -1,0 +1,18 @@
+@if (buttons.length) {
+  <div class="footer">
+    <mat-toolbar>
+      <span class="example-spacer"></span>
+      <div class="footer-buttons">
+        @for (button of buttons; track button) {
+          <button
+            matButton="outlined"
+            [disabled]="disabled"
+            (click)="event(button)"
+          >
+            {{ button | uppercase }}
+          </button>
+        }
+      </div>
+    </mat-toolbar>
+  </div>
+}
