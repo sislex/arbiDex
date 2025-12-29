@@ -68,7 +68,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.address || '-';
+        return params.data?.pool?.poolAddress || '-';
       },
     },
     {
@@ -101,7 +101,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.token1?.tokenId || '-';
+        return params.data?.pool?.token?.tokenId || '-';
       },
     },
     {
