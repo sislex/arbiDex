@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Put,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { PairQuoteRelationsService } from './pair-quote-relations.service';
 import { PairQuoteRelationDto } from '../dtos/pair-quote-relations-dto/pair-quote-relation.dto';
 
@@ -17,8 +9,10 @@ export class PairQuoteRelationsController {
   ) {}
 
   @Post()
-  create(@Body() createPairQuoteRelationDto: PairQuoteRelationDto) {
-    return this.pairQuoteRelationsService.create(createPairQuoteRelationDto);
+  create(@Body() createPairQuoteRelationDto: PairQuoteRelationDto[]) {
+    return this.pairQuoteRelationsService.createMany(
+      createPairQuoteRelationDto,
+    );
   }
 
   @Get()
@@ -41,19 +35,8 @@ export class PairQuoteRelationsController {
     return await this.pairQuoteRelationsService.findByQuoteId(id);
   }
 
-  @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePairQuoteRelationDto: PairQuoteRelationDto,
-  ) {
-    return this.pairQuoteRelationsService.update(
-      id,
-      updatePairQuoteRelationDto,
-    );
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete()
+  remove(@Body() id: string[]) {
     return this.pairQuoteRelationsService.remove(id);
   }
 }

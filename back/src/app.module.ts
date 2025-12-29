@@ -15,7 +15,6 @@ import { Dexes } from './entities/entities/Dexes';
 import { Servers } from './entities/entities/Servers';
 import { JobsModule } from './jobs/jobs.module';
 import { BotsModule } from './bots/bots.module';
-import { JobBotRelationsModule } from './job-bot-relations/job-bot-relations.module';
 import { Jobs } from './entities/entities/Jobs';
 import { Bots } from './entities/entities/Bots';
 import { Quotes } from './entities/entities/Quotes';
@@ -51,7 +50,6 @@ import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relatio
           Bots,
           Quotes,
           QuoteJobRelations,
-          JobBotRelationsModule,
           Pairs,
           PairQuoteRelations,
         ],
@@ -70,7 +68,6 @@ import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relatio
     DexesModule,
     JobsModule,
     BotsModule,
-    JobBotRelationsModule,
     PairsModule,
     QuotesModule,
     PairQuoteRelationsModule,

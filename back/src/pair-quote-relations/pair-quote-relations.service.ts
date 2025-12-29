@@ -14,18 +14,17 @@ export class PairQuoteRelationsService {
     private pairsService: PairsService,
     private quotesService: QuotesService,
   ) {}
-  async create(pairQuoteRelationDto: PairQuoteRelationDto) {
-    const pair = await this.pairsService.findOne(pairQuoteRelationDto.pairId);
-    const quote = await this.quotesService.findOne(
-      pairQuoteRelationDto.quoteId,
+
+  async createMany(pairQuoteRelationDto: PairQuoteRelationDto[]) {
+    const data = await Promise.all(
+      pairQuoteRelationDto.map(async (dto) => {
+        const pair = await this.pairsService.findOne(dto.pairId);
+        const quote = await this.quotesService.findOne(dto.quoteId);
+        return { pair, quote };
+      }),
     );
 
-    const pairQuoteRelation = this.pairQuoteRelationsRepository.create({
-      pair,
-      quote,
-    });
-
-    return await this.pairQuoteRelationsRepository.save(pairQuoteRelation);
+    return await this.pairQuoteRelationsRepository.save(data);
   }
 
   async findAll() {
@@ -83,7 +82,7 @@ export class PairQuoteRelationsService {
     return item;
   }
 
-  async remove(id: string) {
+  async remove(id: string[]) {
     return await this.pairQuoteRelationsRepository.delete(id);
   }
 }

@@ -4,11 +4,10 @@ import { ServersController } from './servers.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Servers } from '../entities/entities/Servers';
 import { Bots } from '../entities/entities/Bots';
-import { JobBotRelations } from '../entities/entities/JobBotRelations';
 import { Jobs } from '../entities/entities/Jobs';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Servers, Bots, JobBotRelations, Jobs])],
+  imports: [TypeOrmModule.forFeature([Servers, Bots, Jobs])],
   controllers: [ServersController],
   providers: [ServersService],
   exports: [ServersService],
