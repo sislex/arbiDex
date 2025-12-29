@@ -6,7 +6,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Bots } from './Bots';
-import { JobBotRelations } from './JobBotRelations';
 import { QuoteJobRelations } from './QuoteJobRelations';
 
 @Index('jobs_pkey', ['jobId'], { unique: true })
@@ -24,9 +23,6 @@ export class Jobs {
 
   @OneToMany(() => Bots, (bots) => bots.job)
   bots: Bots[];
-
-  @OneToMany(() => JobBotRelations, (jobBotRelations) => jobBotRelations.job)
-  jobBotRelations: JobBotRelations[];
 
   @OneToMany(
     () => QuoteJobRelations,

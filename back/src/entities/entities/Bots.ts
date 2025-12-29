@@ -4,12 +4,10 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Jobs } from './Jobs';
 import { Servers } from './Servers';
-import { JobBotRelations } from './JobBotRelations';
 
 @Index('bots_pkey', ['botId'], { unique: true })
 @Entity('bots', { schema: 'public' })
@@ -41,7 +39,4 @@ export class Bots {
   @ManyToOne(() => Servers, (servers) => servers.bots, { onDelete: 'RESTRICT' })
   @JoinColumn([{ name: 'server_id', referencedColumnName: 'serverId' }])
   server: Servers;
-
-  @OneToMany(() => JobBotRelations, (jobBotRelations) => jobBotRelations.bot)
-  jobBotRelations: JobBotRelations[];
 }
