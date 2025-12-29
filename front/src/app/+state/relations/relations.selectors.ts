@@ -6,7 +6,7 @@ export const selectFeature = createFeatureSelector<RelationsState>(RELATIONS_FEA
 
 export const getQuoteRelations = createSelector(
   selectFeature,
-  (state: RelationsState) => state.quoteRelations
+  (state: RelationsState) => state.quoteRelations.response
 );
 export const getQuoteRelationsIsLoading = createSelector(
   selectFeature,
@@ -22,7 +22,7 @@ export const getPairsWithRelations = createSelector(
   getPairsDataResponse,
   (quoteRelations, pairsList) => {
     const activeIds = new Set(
-      quoteRelations?.response.map(relation => relation.pair?.pairId) || []
+      quoteRelations?.map(relation => relation.pair?.pairId) || []
     );
 
     return pairsList.map(pair => ({

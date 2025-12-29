@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { getPairsDataIsLoaded, getPairsDataIsLoading,
@@ -28,6 +28,7 @@ import { Loader } from '../../../components/loader/loader';
   styleUrl: './ag-grid-quote-relations-container.scss',
 })
 export class AgGridQuoteRelationsContainer {
+  @Output() emitter = new EventEmitter();
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
@@ -137,17 +138,6 @@ export class AgGridQuoteRelationsContainer {
         return params.data?.tokenOut?.tokenId || '-';
       },
     },
-
-
-    // {
-    //   field: "botId",
-    //   headerName: 'Bot ID',
-    //   width: 150,
-    //   filter: 'agTextColumnFilter',
-    //   filterParams: {
-    //     defaultToNothingSelected: true,
-    //   },
-    // },
   ];
 
   readonly defaultColDef: ColDef = {
@@ -169,15 +159,10 @@ export class AgGridQuoteRelationsContainer {
   }
 
   events($event: any) {
-    console.log('$event:::', $event.row.selectedNodes.map((item: any) => item.data))
-  }
-
-  createRelation() {
-    // this.store.dispatch(createChain({ data: result.formData }));
-  }
-
-  deleteRelation() {
-    // this.store.dispatch(deletingChain({ chainId: row.chainId }));
+    this.emitter.emit({
+      event: 'AgGridQuoteRelationsContainer:ACTIVE_RELATIONS',
+      data: $event.row.selectedNodes.map((item: any) => item.data.pairId),
+    });
   }
 
 }

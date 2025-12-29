@@ -1,18 +1,18 @@
 import {API} from './api';
-import { IJobs, IPairs } from './db-config';
+import { IJobs, IPairs, IQuotes } from './db-config';
 
 export interface IQuoteRelationsAPI extends API {
-  response: IPairRelations[];
+  response: IQuoteRelations[];
 }
-export interface IQuoteRelation {
-  jobBotsRelationsId: number;
+export interface IQuoteRelations {
+  pairQuoteRelationId: number;
   pair: IPairs;
-  job: IJobs;
+  quote: IQuotes;
 }
-export interface IQuoteRelationCreate {
-  jobBotsRelationsId: number;
+export interface IQuoteRelationsCreate {
+  pairQuoteRelationsId?: number;
   pairId: number;
-  jobId: number;
+  quoteId: number;
 }
 
 export interface IJobRelationsAPI extends API {

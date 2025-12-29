@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { catchError, EMPTY, map, of, switchMap, tap } from 'rxjs';
 import * as RelationsActions from './relations.actions';
 import {ApiService} from '../../services/api-service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
 
 @Injectable()
 export class RelationsEffects {
@@ -15,64 +14,6 @@ export class RelationsEffects {
 //====================================================================================================================
 //                                                   Pair Quote Relations
 //====================================================================================================================
-
-  // setPairRelationsDataList$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(DbConfigActions.setPairRelationsDataList),
-  //     switchMap(() =>
-  //       this.apiService.getPairQuoteRelationsByPairId(id).pipe(
-  //         // tap(response => {
-  //         //   console.log('Servers response:', response);
-  //         // }),
-  //         map(response =>
-  //           DbConfigActions.setServersDataSuccess({ response })
-  //         ),
-  //         catchError(error =>
-  //           of(DbConfigActions.setServersDataFailure({ error }))
-  //         )
-  //       )
-  //     )
-  //   )
-  // );
-
-  // createServer$ = createEffect(() =>
-  //     this.actions$.pipe(
-  //       ofType(DbConfigActions.createServer),
-  //       switchMap(action =>
-  //         this.apiService.createServer({ ...action.data }).pipe(
-  //           tap(response => {
-  //             this.store.dispatch(setServersData());
-  //             this._snackBar.open(`Server is created: ${response.serverId}`, '', { duration: 5000 });
-  //           }),
-  //           catchError(error => {
-  //             this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
-  //             return EMPTY;
-  //           })
-  //         )
-  //       )
-  //     ),
-  //   { dispatch: false }
-  // );
-  //
-  // deletingServer$ = createEffect(() =>
-  //     this.actions$.pipe(
-  //       ofType(DbConfigActions.deletingServer),
-  //       switchMap((action) => {
-  //
-  //         return this.apiService.deletingServer(action.serverId).pipe(
-  //           tap(response => {
-  //             this.store.dispatch(setServersData());
-  //             this._snackBar.open(`Server is delete`, '', { duration: 5000 });
-  //           }),
-  //           catchError(error => {
-  //             this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
-  //             return EMPTY;
-  //           })
-  //         );
-  //       })
-  //     ),
-  //   { dispatch: false }
-  // );
 
   setQuoteRelationsDataList$ = createEffect(() =>
     this.actions$.pipe(
@@ -98,4 +39,45 @@ export class RelationsEffects {
       ),
     ),
   );
+
+  createQuoteRelations$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(RelationsActions.createQuoteRelations),
+        switchMap(action =>
+          this.apiService.createQuoteRelations(action.data).pipe(
+            tap(response => {
+              console.log(response)
+              // this.store.dispatch(RelationsActions.setQuoteRelationsDataList({ quoteId: 1 }));
+              this._snackBar.open(`Relations is created: ${response.pairQuoteRelationId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  deletingQuoteRelations$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(RelationsActions.deletingQuoteRelations),
+        switchMap((action) => {
+          return this.apiService.deleteQuoteRelations(action.quoteRelationsIds).pipe(
+            tap(response => {
+              // this.store.dispatch(RelationsActions.setQuoteRelationsData());
+              this._snackBar.open(`QuoteRelations is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+
 }

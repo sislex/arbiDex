@@ -1,4 +1,5 @@
 import { createAction, props } from '@ngrx/store';
+import { IQuoteRelationsCreate } from '../../models/relations';
 
 //====================================================================================================================
 //                                                   Pair Quote Relations
@@ -16,15 +17,11 @@ export const setQuoteRelationsDataListFailure = createAction(
   '[DbConfig] setQuoteRelationsDataListFailure',
   props<{ error: string }>()
 );
-// export const createServer = createAction(
-//   '[DbConfig] createServer',
-//   props<{ data: IServersCreate }>()
-// );
-// export const editServer = createAction(
-//   '[DbConfig] editServer',
-//   props<{ data: IServersCreate }>()
-// );
-// export const deletingServer = createAction(
-//   '[DbConfig] deletingServer',
-//   props<{ serverId: number }>()
-// );
+export const createQuoteRelations = createAction(
+  '[DbConfig] createQuoteRelations',
+  props<{ data: IQuoteRelationsCreate[] }>()
+);
+export const deletingQuoteRelations = createAction(
+  '[DbConfig] deletingQuoteRelations',
+  props<{ quoteRelationsIds: number[] }>()
+);

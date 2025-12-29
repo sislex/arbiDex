@@ -171,13 +171,10 @@ export class ApiService {
   getQuoteRelationsByQuoteId(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/pair-quote-relations/by-quote-id/${id}`);
   }
-  // createServer(data: any): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/servers`, {...data});
-  // }
-  // editServer(id: number, data: any): Observable<any> {
-  //   return this.http.put(`${this.apiUrl}/servers/${id}`, data);
-  // }
-  // deletingServer(id: number): Observable<any> {
-  //   return this.http.delete(`${this.apiUrl}/servers/${id}`);
-  // }
+  createQuoteRelations(data: any[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/pair-quote-relations`, data);
+  }
+  deleteQuoteRelations(ids: number[]): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/pair-quote-relations`, { body: ids });
+  }
 }
