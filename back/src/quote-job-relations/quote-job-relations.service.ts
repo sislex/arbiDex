@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { QuotesService } from '../quotes/quotes.service';
 import { JobsService } from '../jobs/jobs.service';
 import { QuoteJobRelations } from '../entities/entities/QuoteJobRelations';
+import { QuoteJobRelationDto } from '../dtos/quote-job-relations-dto/quote-job-relation.dto';
+import { PairQuoteRelationsService } from '../pair-quote-relations/pair-quote-relations.service';
 
 @Injectable()
 export class QuoteJobRelationsService {
@@ -11,8 +12,22 @@ export class QuoteJobRelationsService {
     @InjectRepository(QuoteJobRelations)
     private quoteJobRelationsRepository: Repository<QuoteJobRelations>,
     private jobsService: JobsService,
-    private quotesService: QuotesService,
+    private pairQuoteRelationsService: PairQuoteRelationsService,
   ) {}
+
+  async createMany(quoteJobRelationDto: QuoteJobRelationDto[]) {
+    const data = await Promise.all(
+      quoteJobRelationDto.map(async (dto) => {
+        const job = await this.jobsService.findOne(dto.jobId);
+        const quoteRelation = await this.pairQuoteRelationsService.findOne(
+          dto.pairQuoteRelationId,
+        );
+        return { job, quoteRelation };
+      }),
+    );
+
+    return await this.quoteJobRelationsRepository.save(data);
+  }
 
   async findByQuoteId(id: string) {
     const item = await this.quoteJobRelationsRepository.findOne({
@@ -45,7 +60,7 @@ export class QuoteJobRelationsService {
     return item;
   }
 
-  // async remove(id: number) {
-  //   return await this.quoteJobRelationsRepository.delete(id);
-  // }
+  async remove(id: string[] | number[]) {
+    return await this.quoteJobRelationsRepository.delete(id);
+  }
 }
