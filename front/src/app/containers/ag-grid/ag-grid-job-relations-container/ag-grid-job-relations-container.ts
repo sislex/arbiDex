@@ -7,7 +7,6 @@ import {
   getBotsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { ColDef } from 'ag-grid-community';
-import { setBotsData } from '../../../+state/db-config/db-config.actions';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
@@ -59,10 +58,6 @@ export class AgGridJobRelationsContainer {
     headerClass: 'align-center',
   };
 
-  constructor() {
-    this.store.dispatch(setBotsData());
-  }
-
   onAction($event: any, row: any) {
     if ($event.event === 'Actions:ACTION_CLICKED') {
       // if ($event.actionType === 'delete') {
@@ -75,13 +70,5 @@ export class AgGridJobRelationsContainer {
 
   events($event: any) {
     console.log('$event:::', $event.row.selectedNodes.map((item: any) => item.data))
-  }
-
-  createRelation() {
-    // this.store.dispatch(createChain({ data: result.formData }));
-  }
-
-  deleteRelation() {
-    // this.store.dispatch(deletingChain({ chainId: row.chainId }));
   }
 }

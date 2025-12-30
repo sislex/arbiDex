@@ -165,7 +165,7 @@ export class ApiService {
   }
 
   //====================================================================================================================
-  //                                                   Pair Relations
+  //                                                   Quote Relations
   //====================================================================================================================
 
   getQuoteRelationsByQuoteId(id: number): Observable<any> {
@@ -176,5 +176,19 @@ export class ApiService {
   }
   deleteQuoteRelations(ids: number[]): Observable<any> {
     return this.http.delete(`${this.apiUrl}/pair-quote-relations`, { body: ids });
+  }
+
+  //====================================================================================================================
+  //                                                   Job Relations
+  //====================================================================================================================
+
+  getJobRelationsByQuoteId(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/quote-job-relations/by-quote-id/${id}`);
+  }
+  createJobRelations(data: any[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/quote-job-relations`, data);
+  }
+  deleteJobRelations(ids: number[]): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/quote-job-relations`, { body: ids });
   }
 }

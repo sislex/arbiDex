@@ -15,7 +15,6 @@ export class QuoteJobRelationsController {
 
   @Get('by-quote-id/:id')
   async findByQuoteId(@Param('id') id: string) {
-    console.log('id:::::::', id);
     return await this.quoteJobRelationsService.findByQuoteId(id);
   }
 

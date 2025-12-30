@@ -16,15 +16,15 @@ export interface IQuoteRelationsCreate {
 }
 
 export interface IJobRelationsAPI extends API {
-  response: IPairRelations[];
+  response: IJobRelation[];
 }
-export interface IPairRelations {
-  jobBotsRelationsId: number;
-  pair: IPairs;
+export interface IJobRelation {
+  quoteJobRelationId: number;
   job: IJobs;
+  quote: IQuotes;
 }
-export interface IPairRelationsCreate {
-  jobBotsRelationsId: number;
-  pairId: number;
+export interface IJobRelationCreate {
+  quoteJobRelationId?: number;
   jobId: number;
+  quoteId: number;
 }

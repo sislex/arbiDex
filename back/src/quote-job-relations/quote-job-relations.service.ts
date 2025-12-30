@@ -30,12 +30,10 @@ export class QuoteJobRelationsService {
   }
 
   async findByQuoteId(id: string) {
-    const item = await this.quoteJobRelationsRepository.findOne({
+    const item = await this.quoteJobRelationsRepository.find({
       where: {
-        quoteRelation: {
-          quote: {
-            quoteId: id,
-          },
+        job: {
+          jobId: id,
         },
       },
       relations: [

@@ -12,7 +12,7 @@ export class RelationsEffects {
   private _snackBar = inject(MatSnackBar);
 
 //====================================================================================================================
-//                                                   Pair Quote Relations
+//                                                   Quote Relations
 //====================================================================================================================
 
   setQuoteRelationsDataList$ = createEffect(() =>
@@ -68,6 +68,76 @@ export class RelationsEffects {
             tap(response => {
               // this.store.dispatch(RelationsActions.setQuoteRelationsData());
               this._snackBar.open(`QuoteRelations is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+//====================================================================================================================
+//                                                   Job Relations
+//====================================================================================================================
+
+  setJobRelationsDataList$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(RelationsActions.setJobRelationsDataList),
+      switchMap(action =>
+        this.apiService.getJobRelationsByQuoteId(action.jobId).pipe(
+          map(response =>
+            RelationsActions.setJobRelationsDataListSuccess({ response }),
+          ),
+          catchError(error => {
+            console.log(error)
+
+            this._snackBar.open(
+              `${JSON.stringify(error.error?.message) ?? 'Error'}`,
+              '',
+              { duration: 5000 },
+            );
+            return of(
+              RelationsActions.setJobRelationsDataListFailure({
+                error: error.error?.message ?? 'Unknown error',
+              }),
+            );
+          }),
+        ),
+      ),
+    ),
+  );
+
+  createJobRelations$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(RelationsActions.createJobRelations),
+        switchMap(action =>
+          this.apiService.createJobRelations(action.data).pipe(
+            tap(response => {
+              console.log(response)
+              // this.store.dispatch(RelationsActions.setJobRelationsDataList({ jobId: 1 }));
+              this._snackBar.open(`Relations is created: ${response.pairJobRelationId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  deletingJobRelations$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(RelationsActions.deletingJobRelations),
+        switchMap((action) => {
+          return this.apiService.deleteJobRelations(action.jobRelationsIds).pipe(
+            tap(response => {
+              // this.store.dispatch(RelationsActions.setJobRelationsData());
+              this._snackBar.open(`JobRelations is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });

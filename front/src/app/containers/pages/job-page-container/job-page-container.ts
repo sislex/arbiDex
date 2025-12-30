@@ -4,7 +4,9 @@ import {
 } from '../../ag-grid/ag-grid-job-relations-container/ag-grid-job-relations-container';
 import { Actions } from '../../../components/actions/actions';
 import { TitleContentLayout } from '../../../components/layouts/title-content-layout/title-content-layout';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { setJobRelationsDataList } from '../../../+state/relations/relations.actions';
 
 @Component({
   selector: 'app-job-page-container',
@@ -18,6 +20,18 @@ import { Router } from '@angular/router';
 })
 export class JobPageContainer {
   private router = inject(Router);
+  private store = inject(Store);
+  private route = inject(ActivatedRoute);
+
+  currentJobId: number;
+
+  constructor() {
+    this.currentJobId = Number(this.route.snapshot.paramMap.get('id'));
+    // this.store.dispatch(setQuoteRelations());
+    this.store.dispatch(
+      setJobRelationsDataList({ jobId: this.currentJobId }),
+    );
+  };
 
   onAction($event: any, note: string) {
     if ($event.event === 'Actions:ACTION_CLICKED') {
