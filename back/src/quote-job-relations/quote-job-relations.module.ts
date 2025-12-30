@@ -7,12 +7,14 @@ import { QuotesModule } from '../quotes/quotes.module';
 import { QuoteJobRelations } from '../entities/entities/QuoteJobRelations';
 import { Jobs } from '../entities/entities/Jobs';
 import { JobsModule } from '../jobs/jobs.module';
+import { PairQuoteRelationsModule } from '../pair-quote-relations/pair-quote-relations.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Jobs, Quotes, QuoteJobRelations]),
     JobsModule,
     QuotesModule,
+    PairQuoteRelationsModule,
   ],
   controllers: [QuoteJobRelationsController],
   providers: [QuoteJobRelationsService],

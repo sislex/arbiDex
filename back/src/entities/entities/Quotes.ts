@@ -6,7 +6,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PairQuoteRelations } from './PairQuoteRelations';
-import { QuoteJobRelations } from './QuoteJobRelations';
 
 @Index('quotes_pkey', ['quoteId'], { unique: true })
 @Entity('quotes', { schema: 'public' })
@@ -39,10 +38,4 @@ export class Quotes {
     (pairQuoteRelations) => pairQuoteRelations.quote,
   )
   pairQuoteRelations: PairQuoteRelations[];
-
-  @OneToMany(
-    () => QuoteJobRelations,
-    (quoteJobRelations) => quoteJobRelations.quote,
-  )
-  quoteJobRelations: QuoteJobRelations[];
 }
