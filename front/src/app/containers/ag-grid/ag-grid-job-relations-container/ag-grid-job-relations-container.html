@@ -1,24 +1,34 @@
 <app-header-content-layout>
-  <!--  @if ((dexesDataIsLoaded$ | async) && !(dexesDataIsLoading$ | async)) {-->
-  <app-title-table-button
-    header
-    [title]="'Job relations table'"
-  ></app-title-table-button>
-  <!--  }-->
-  <!--  @if ((dexesDataIsLoaded$ | async) && !(dexesDataIsLoading$ | async)) {-->
-  <app-ag-grid
-    content
-    [rowData]="[ {botName: '43', botId: 332}, {botName: '41', botId: 323}, {botName: '42', botId: 313},]"
-    [colDefs]="colDefs"
-    [defaultColDef]="defaultColDef"
-    [isRowSelection]="{
+  @if (
+    (quoteRelationsIsLoaded$ | async) &&
+    !(quoteRelationsIsLoading$ | async) &&
+    (jobRelationsIsLoaded$ | async) &&
+    !(jobRelationsIsLoading$ | async)
+    ) {
+    <app-title-table-button
+      header
+      [title]="'Job relations table'"
+    ></app-title-table-button>
+  }
+  @if (
+    (quoteRelationsIsLoaded$ | async) &&
+    !(quoteRelationsIsLoading$ | async) &&
+    (jobRelationsIsLoaded$ | async) &&
+    !(jobRelationsIsLoading$ | async)
+    ) {
+    <app-ag-grid
+      content
+      [rowData]="(jobRelations$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      [isRowSelection]="{
       mode: 'multiRow',
       selectAll: 'filtered',
     }"
-    (emitter)="events($event)"
-  ></app-ag-grid>
-  <!--  } @else {-->
-  <!--    <app-loader header></app-loader>-->
-  <!--  }-->
+      (emitter)="events($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
 </app-header-content-layout>
 

@@ -21,7 +21,13 @@ export interface IJobRelationsAPI extends API {
 export interface IJobRelation {
   quoteJobRelationId: number;
   job: IJobs;
-  quote: IQuotes;
+  quote: IQuoteRelations;
+}
+
+export interface ISetJobRelation {
+  quoteJobRelationId: number;
+  job: IJobs;
+  quoteRelation: IQuoteRelations;
 }
 export interface IJobRelationCreate {
   quoteJobRelationId?: number;

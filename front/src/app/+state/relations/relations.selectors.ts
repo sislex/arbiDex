@@ -8,21 +8,33 @@ export const selectFeature = createFeatureSelector<RelationsState>(RELATIONS_FEA
 //                                                   Quote Relations
 //====================================================================================================================
 
-export const getQuoteRelations = createSelector(
+export const getQuoteRelationsByQuoteId = createSelector(
   selectFeature,
   (state: RelationsState) => state.quoteRelationsByQuoteId.response
 );
-export const getQuoteRelationsIsLoading = createSelector(
+export const getQuoteRelationsByQuoteIdIsLoading = createSelector(
   selectFeature,
   (state: RelationsState) => state.quoteRelationsByQuoteId.isLoading
 );
-export const getQuoteRelationsIsLoaded = createSelector(
+export const getQuoteRelationsByQuoteIdIsLoaded = createSelector(
   selectFeature,
   (state: RelationsState) => state.quoteRelationsByQuoteId.isLoaded
 );
+export const getQuoteRelations = createSelector(
+  selectFeature,
+  (state: RelationsState) => state.quoteRelationsList.response
+);
+export const getQuoteRelationsIsLoading = createSelector(
+  selectFeature,
+  (state: RelationsState) => state.quoteRelationsList.isLoading
+);
+export const getQuoteRelationsIsLoaded = createSelector(
+  selectFeature,
+  (state: RelationsState) => state.quoteRelationsList.isLoaded
+);
 
 export const getPairsWithRelations = createSelector(
-  getQuoteRelations,
+  getQuoteRelationsByQuoteId,
   getPairsDataResponse,
   (quoteRelations, pairsList) => {
     const activeIds = new Set(
@@ -53,18 +65,19 @@ export const getJobRelationsIsLoaded = createSelector(
   (state: RelationsState) => state.jobRelations.isLoaded
 );
 
-// export const getPairsWithRelations = createSelector(
-//   getJobRelations,
-//   getPairsDataResponse,
-//   (jobRelations, pairsList) => {
-//     const activeIds = new Set(
-//       jobRelations?.map(relation => relation.pair?.pairId) || []
-//     );
-//
-//     return pairsList.map(pair => ({
-//       ...pair,
-//       active: activeIds.has(pair.pairId)
-//     }));
-//   }
-// );
+export const getQuoteRelationsWithStatus = createSelector(
+  getJobRelations,
+  getQuoteRelations,
+  (jobRelations, quoteRelations) => {
+
+    const activeIds = new Set(
+      jobRelations?.map(relation => relation.quote?.pairQuoteRelationId) || []
+    );
+
+    return quoteRelations.map(quote => ({
+      ...quote,
+      active: activeIds.has(quote.pairQuoteRelationId)
+    }));
+  }
+);
 

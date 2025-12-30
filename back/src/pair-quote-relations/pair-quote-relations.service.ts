@@ -29,7 +29,17 @@ export class PairQuoteRelationsService {
 
   async findAll() {
     return await this.pairQuoteRelationsRepository.find({
-      relations: ['pair', 'quote'],
+      relations: [
+        'pair',
+        'pair.tokenIn',
+        'pair.tokenOut',
+        'pair.pool',
+        'pair.pool.dex',
+        'pair.pool.chain',
+        'pair.pool.token',
+        'pair.pool.token2',
+        'quote',
+      ],
       order: {
         pairQuoteRelationId: 'DESC',
       },

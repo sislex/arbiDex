@@ -40,6 +40,31 @@ export class RelationsEffects {
     ),
   );
 
+  setQuoteRelations$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(RelationsActions.setQuoteRelations),
+      switchMap(action =>
+        this.apiService.getQuoteRelations().pipe(
+          map(response =>
+            RelationsActions.setQuoteRelationsSuccess({ response }),
+          ),
+          catchError(error => {
+            this._snackBar.open(
+              `${JSON.stringify(error.error?.message) ?? 'Error'}`,
+              '',
+              { duration: 5000 },
+            );
+            return of(
+              RelationsActions.setQuoteRelationsFailure({
+                error: error.error?.message ?? 'Unknown error',
+              }),
+            );
+          }),
+        ),
+      ),
+    ),
+  );
+
   createQuoteRelations$ = createEffect(() =>
       this.actions$.pipe(
         ofType(RelationsActions.createQuoteRelations),
@@ -88,27 +113,34 @@ export class RelationsEffects {
       ofType(RelationsActions.setJobRelationsDataList),
       switchMap(action =>
         this.apiService.getJobRelationsByQuoteId(action.jobId).pipe(
-          map(response =>
-            RelationsActions.setJobRelationsDataListSuccess({ response }),
-          ),
-          catchError(error => {
-            console.log(error)
+          map((response: any[]) => {
+            const formattedData = response.map(item => ({
+              quoteJobRelationId: item.quoteJobRelationId,
+              job: item.job,
+              quote: item.quoteRelation
+            }));
 
+            return RelationsActions.setJobRelationsDataListSuccess({
+              response: formattedData
+            });
+          }),
+          catchError(error => {
             this._snackBar.open(
-              `${JSON.stringify(error.error?.message) ?? 'Error'}`,
+              error.error?.message ?? 'Error loading links',
               '',
-              { duration: 5000 },
+              { duration: 5000 }
             );
             return of(
               RelationsActions.setJobRelationsDataListFailure({
                 error: error.error?.message ?? 'Unknown error',
-              }),
+              })
             );
-          }),
-        ),
-      ),
-    ),
+          })
+        )
+      )
+    )
   );
+
 
   createJobRelations$ = createEffect(() =>
       this.actions$.pipe(

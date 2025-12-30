@@ -17,7 +17,7 @@ import {
   deletingQuoteRelations,
   setQuoteRelationsDataList,
 } from '../../../+state/relations/relations.actions';
-import { getQuoteRelations } from '../../../+state/relations/relations.selectors';
+import { getQuoteRelationsByQuoteId } from '../../../+state/relations/relations.selectors';
 import { take } from 'rxjs';
 import { IQuoteRelations, IQuoteRelationsCreate } from '../../../models/relations';
 
@@ -65,7 +65,7 @@ export class QuotePageContainer {
   events($event: any) {
     if ($event.event === 'ButtonPanel:BUTTON_CLICKED') {
       if ($event.data === 'save') {
-        this.store.select(getQuoteRelations)
+        this.store.select(getQuoteRelationsByQuoteId)
           .pipe(take(1))
           .subscribe((data: any) => {
             const mappedOldRelations = data.map((relation: IQuoteRelations) => ({

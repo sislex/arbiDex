@@ -6,7 +6,7 @@ import { Actions } from '../../../components/actions/actions';
 import { TitleContentLayout } from '../../../components/layouts/title-content-layout/title-content-layout';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { setJobRelationsDataList } from '../../../+state/relations/relations.actions';
+import { setJobRelationsDataList, setQuoteRelations } from '../../../+state/relations/relations.actions';
 
 @Component({
   selector: 'app-job-page-container',
@@ -27,7 +27,7 @@ export class JobPageContainer {
 
   constructor() {
     this.currentJobId = Number(this.route.snapshot.paramMap.get('id'));
-    // this.store.dispatch(setQuoteRelations());
+    this.store.dispatch(setQuoteRelations());
     this.store.dispatch(
       setJobRelationsDataList({ jobId: this.currentJobId }),
     );

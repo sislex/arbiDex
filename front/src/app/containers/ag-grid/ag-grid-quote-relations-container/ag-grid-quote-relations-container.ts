@@ -9,8 +9,8 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import {
   getPairsWithRelations,
-  getQuoteRelationsIsLoaded,
-  getQuoteRelationsIsLoading,
+  getQuoteRelationsByQuoteIdIsLoaded,
+  getQuoteRelationsByQuoteIdIsLoading,
 } from '../../../+state/relations/relations.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
@@ -35,8 +35,8 @@ export class AgGridQuoteRelationsContainer {
   pairsWithRelations$ = this.store.select(getPairsWithRelations);
   pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
   pairsDataIsLoaded$ = this.store.select(getPairsDataIsLoaded);
-  quoteRelationsIsLoading$ = this.store.select(getQuoteRelationsIsLoading);
-  quoteRelationsIsLoaded$ = this.store.select(getQuoteRelationsIsLoaded);
+  quoteRelationsIsLoading$ = this.store.select(getQuoteRelationsByQuoteIdIsLoading);
+  quoteRelationsIsLoaded$ = this.store.select(getQuoteRelationsByQuoteIdIsLoaded);
 
   readonly colDefs: ColDef[] = [
     {
@@ -47,7 +47,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.dex?.name || '-';
+        return params.data?.pool?.chain?.name || '-';
       },
     },
     {
@@ -148,21 +148,10 @@ export class AgGridQuoteRelationsContainer {
     headerClass: 'align-center',
   };
 
-  onAction($event: any, row: any) {
-    if ($event.event === 'Actions:ACTION_CLICKED') {
-      // if ($event.actionType === 'delete') {
-      //   this.openDeleteDialog(row);
-      // } else if ($event.actionType === 'edit') {
-      //   this.openEditDialog(row);
-      // }
-    }
-  }
-
   events($event: any) {
     this.emitter.emit({
       event: 'AgGridQuoteRelationsContainer:ACTIVE_RELATIONS',
       data: $event.row.selectedNodes.map((item: any) => item.data.pairId),
     });
   }
-
 }
