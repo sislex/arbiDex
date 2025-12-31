@@ -24,13 +24,8 @@ export interface IJobRelation {
   quote: IQuoteRelations;
 }
 
-export interface ISetJobRelation {
-  quoteJobRelationId: number;
-  job: IJobs;
-  quoteRelation: IQuoteRelations;
-}
 export interface IJobRelationCreate {
   quoteJobRelationId?: number;
   jobId: number;
-  quoteId: number;
+  quoteRelationId: number;
 }

@@ -1,4 +1,4 @@
 export class QuoteJobRelationDto {
-  pairQuoteRelationId: string;
+  quoteRelationId: string;
   jobId: number;
 }

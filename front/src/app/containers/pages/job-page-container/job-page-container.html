@@ -1,5 +1,5 @@
 <app-title-content-layout
-  [title]="'TITLE IM'"
+  [title]="(activeSidebarItem$ | async)!"
 >
   <app-actions
     title-start
@@ -8,7 +8,18 @@
     (emitter)="onAction($event, 'reply')"
   >
   </app-actions>
-
-  <app-ag-grid-job-relations-container content></app-ag-grid-job-relations-container>
+  <app-content-footer-layout content>
+    <app-ag-grid-job-relations-container
+      content
+      (emitter)="events($event)"
+    ></app-ag-grid-job-relations-container>
+    <app-button-panel
+      footer
+      [buttons]="footerButtons"
+      [disabled]="false"
+      (emitter)="events($event)"
+    ></app-button-panel>
+  </app-content-footer-layout>
 </app-title-content-layout>
+
 

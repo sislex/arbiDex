@@ -20,7 +20,7 @@ export class QuoteJobRelationsService {
       quoteJobRelationDto.map(async (dto) => {
         const job = await this.jobsService.findOne(dto.jobId);
         const quoteRelation = await this.pairQuoteRelationsService.findOne(
-          dto.pairQuoteRelationId,
+          dto.quoteRelationId,
         );
         return { job, quoteRelation };
       }),

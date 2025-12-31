@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { ColDef } from 'ag-grid-community';
@@ -25,6 +25,7 @@ import { Loader } from '../../../components/loader/loader';
   styleUrl: './ag-grid-job-relations-container.scss',
 })
 export class AgGridJobRelationsContainer {
+  @Output() emitter = new EventEmitter();
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
@@ -211,6 +212,9 @@ export class AgGridJobRelationsContainer {
   };
 
   events($event: any) {
-    console.log('$event:::', $event.row.selectedNodes.map((item: any) => item.data))
+    this.emitter.emit({
+      event: 'AgGridJobRelationsContainer:ACTIVE_RELATIONS',
+      data: $event.row.selectedNodes.map((item: any) => item.data.pairQuoteRelationId),
+    });
   }
 }
