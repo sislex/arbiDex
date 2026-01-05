@@ -19,11 +19,11 @@ export const setQuoteRelationsDataListFailure = createAction(
 );
 export const createQuoteRelations = createAction(
   '[Relations] createQuoteRelations',
-  props<{ data: IQuoteRelationsCreate[] }>()
+  props<{ quoteId: number, data: IQuoteRelationsCreate[] }>()
 );
 export const deletingQuoteRelations = createAction(
   '[Relations] deletingQuoteRelations',
-  props<{ quoteRelationsIds: number[] }>()
+  props<{ quoteId: number, quoteRelationsIds: number[] }>()
 );
 export const setQuoteRelations = createAction('[Relations] setQuoteRelations');
 export const setQuoteRelationsSuccess = createAction(
@@ -53,9 +53,9 @@ export const setJobRelationsDataListFailure = createAction(
 );
 export const createJobRelations = createAction(
   '[Relations] createJobRelations',
-  props<{ data: IJobRelationCreate[] }>()
+  props<{ jobId: number, data: IJobRelationCreate[] }>()
 );
 export const deletingJobRelations = createAction(
   '[Relations] deletingJobRelations',
-  props<{ jobRelationsIds: number[] }>()
+  props<{ jobId: number, jobRelationsIds: number[] }>()
 );

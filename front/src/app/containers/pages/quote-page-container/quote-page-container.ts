@@ -105,10 +105,10 @@ export class QuotePageContainer {
 
   sendActions(createList: IQuoteRelationsCreate[], deleteList: number[]) {
     if (createList.length !== 0) {
-      this.store.dispatch(createQuoteRelations({ data: createList }));
+      this.store.dispatch(createQuoteRelations({ quoteId: this.currentQuoteId, data: createList }));
     }
     if (deleteList.length !==0) {
-      this.store.dispatch(deletingQuoteRelations({ quoteRelationsIds: deleteList }));
+      this.store.dispatch(deletingQuoteRelations({ quoteId: this.currentQuoteId, quoteRelationsIds: deleteList }));
     }
   };
 }

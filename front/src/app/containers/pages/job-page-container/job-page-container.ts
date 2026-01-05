@@ -114,10 +114,10 @@ export class JobPageContainer {
   sendActions(createList: IJobRelationCreate[], deleteList: number[]) {
     if (createList.length !== 0) {
       console.log('createList', createList)
-      this.store.dispatch(createJobRelations({ data: createList }));
+      this.store.dispatch(createJobRelations({ jobId: this.currentJobId, data: createList }));
     }
     if (deleteList.length !==0) {
-      this.store.dispatch(deletingJobRelations({ jobRelationsIds: deleteList }));
+      this.store.dispatch(deletingJobRelations({ jobId: this.currentJobId, jobRelationsIds: deleteList }));
     }
   };
 }
