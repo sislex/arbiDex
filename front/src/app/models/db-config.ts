@@ -31,7 +31,7 @@ export interface IPools {
   token2: ITokens;
   fee: number;
   dex: IDexes;
-  version: string;
+  version: 'v2' | 'v3' | 'v4';
 }
 export interface IPoolsCreate {
   poolId: number;
@@ -98,6 +98,7 @@ export interface IQuotes {
   side: string;
   blockTag: string;
   quoteSource: string;
+  createdAt?: string;
 }
 export interface IQuotesCreate {
   quoteId: number;

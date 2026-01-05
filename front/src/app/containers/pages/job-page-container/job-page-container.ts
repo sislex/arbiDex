@@ -25,6 +25,7 @@ import { AsyncPipe } from '@angular/common';
 import { ButtonPanel } from '../../../components/button-panel/button-panel';
 import { ContentFooterLayout } from '../../../components/layouts/content-footer-layout/content-footer-layout';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
+import { getJobConfig } from '../../../+state/main/main.actions';
 
 @Component({
   selector: 'app-job-page-container',
@@ -45,7 +46,7 @@ export class JobPageContainer {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
 
-  footerButtons = ['save', 'cancel'];
+  footerButtons = ['save', 'get config', 'cancel'];
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
   relatedJobRelationsIds: number[] = [];
@@ -80,6 +81,8 @@ export class JobPageContainer {
             }));
             this.setCreateAndRemoveLists(mappedOldRelations, this.relatedJobRelationsIds);
           });
+      } else if ($event.data === 'get config') {
+        this.store.dispatch(getJobConfig());
       } else if ($event.data === 'cancel') {
         console.log('cancelTO')
       }

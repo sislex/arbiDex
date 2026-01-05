@@ -14,24 +14,24 @@ export const setQuoteRelationsDataListSuccess = createAction(
   props<{ response: any }>()
 );
 export const setQuoteRelationsDataListFailure = createAction(
-  '[DbConfig] setQuoteRelationsDataListFailure',
+  '[Relations] setQuoteRelationsDataListFailure',
   props<{ error: string }>()
 );
 export const createQuoteRelations = createAction(
-  '[DbConfig] createQuoteRelations',
+  '[Relations] createQuoteRelations',
   props<{ data: IQuoteRelationsCreate[] }>()
 );
 export const deletingQuoteRelations = createAction(
-  '[DbConfig] deletingQuoteRelations',
+  '[Relations] deletingQuoteRelations',
   props<{ quoteRelationsIds: number[] }>()
 );
-export const setQuoteRelations = createAction('[DbConfig] setQuoteRelations');
+export const setQuoteRelations = createAction('[Relations] setQuoteRelations');
 export const setQuoteRelationsSuccess = createAction(
   '[Relations] setQuoteRelationsSuccess',
   props<{ response: any }>()
 );
 export const setQuoteRelationsFailure = createAction(
-  '[DbConfig] setQuoteRelationsFailure',
+  '[Relations] setQuoteRelationsFailure',
   props<{ error: string }>()
 );
 
@@ -48,14 +48,14 @@ export const setJobRelationsDataListSuccess = createAction(
   props<{ response: any }>()
 );
 export const setJobRelationsDataListFailure = createAction(
-  '[DbConfig] setJobRelationsDataListFailure',
+  '[Relations] setJobRelationsDataListFailure',
   props<{ error: string }>()
 );
 export const createJobRelations = createAction(
-  '[DbConfig] createJobRelations',
+  '[Relations] createJobRelations',
   props<{ data: IJobRelationCreate[] }>()
 );
 export const deletingJobRelations = createAction(
-  '[DbConfig] deletingJobRelations',
+  '[Relations] deletingJobRelations',
   props<{ jobRelationsIds: number[] }>()
 );

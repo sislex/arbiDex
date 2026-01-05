@@ -13,7 +13,7 @@ export interface RelationsState {
   jobRelations: IJobRelationsAPI;
 }
 
-export interface DbConfigPartialState {
+export interface RelationsPartialState {
   readonly [RELATIONS_FEATURE_KEY]: RelationsState;
 }
 
