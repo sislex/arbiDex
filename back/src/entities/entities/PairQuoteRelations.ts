@@ -3,10 +3,12 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Pairs } from './Pairs';
 import { Quotes } from './Quotes';
+import { QuoteJobRelations } from './QuoteJobRelations';
 
 @Index('pair_quote_relations_pkey', ['pairQuoteRelationId'], { unique: true })
 @Entity('pair_quote_relations', { schema: 'public' })
@@ -25,4 +27,10 @@ export class PairQuoteRelations {
   })
   @JoinColumn([{ name: 'quote_id', referencedColumnName: 'quoteId' }])
   quote: Quotes;
+
+  @OneToMany(
+    () => QuoteJobRelations,
+    (quoteJobRelations) => quoteJobRelations.quoteRelation,
+  )
+  quoteJobRelations: QuoteJobRelations[];
 }

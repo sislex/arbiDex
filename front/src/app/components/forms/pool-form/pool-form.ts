@@ -4,7 +4,7 @@ import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
 import { InputField } from '../../input-field/input-field';
 import { SelectField } from '../../select-field/select-field';
-import { IPools } from '../../../models/db-config';
+import { IPoolsCreate } from '../../../models/db-config';
 
 @Component({
   selector: 'app-pool-form',
@@ -19,7 +19,7 @@ import { IPools } from '../../../models/db-config';
   styleUrl: './pool-form.scss',
 })
 export class PoolForm {
-  @Input() formData!: IPools;
+  @Input() formData!: IPoolsCreate;
   @Input() chainsList: any = [];
   @Input() tokensList: any = [];
   @Input() dexesList: any = [];
@@ -32,7 +32,6 @@ export class PoolForm {
       ...this.formData,
       [field]: event.data,
     };
-
     this.emitter.emit(this.formData);
   };
 }

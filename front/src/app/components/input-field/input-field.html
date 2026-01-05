@@ -12,9 +12,10 @@
            [(ngModel)]="inputValue"
            (ngModelChange)="onInputChange($event)"
            value="{{ inputValue }}"
+           [disabled]="disabled"
     >
 
-    @if (inputValue) {
+    @if (inputValue && !disabled) {
       <button matSuffix matIconButton aria-label="Clear" (click)="clearInput()">
         <mat-icon>close</mat-icon>
       </button>

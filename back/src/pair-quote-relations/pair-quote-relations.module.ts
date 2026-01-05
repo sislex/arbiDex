@@ -7,12 +7,14 @@ import { QuotesModule } from '../quotes/quotes.module';
 import { Pairs } from '../entities/entities/Pairs';
 import { Quotes } from '../entities/entities/Quotes';
 import { PairQuoteRelations } from '../entities/entities/PairQuoteRelations';
+import { TokensModule } from '../tokens/tokens.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Pairs, Quotes, PairQuoteRelations]),
     PairsModule,
     QuotesModule,
+    TokensModule,
   ],
   controllers: [PairQuoteRelationsController],
   providers: [PairQuoteRelationsService],

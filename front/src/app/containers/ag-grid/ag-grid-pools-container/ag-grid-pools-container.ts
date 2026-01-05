@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -30,7 +30,7 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
   templateUrl: './ag-grid-pools-container.html',
   styleUrl: './ag-grid-pools-container.scss',
 })
-export class AgGridPoolsContainer implements OnInit {
+export class AgGridPoolsContainer {
   private store = inject(Store);
   readonly poolDialog = inject(PoolDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
@@ -75,7 +75,7 @@ export class AgGridPoolsContainer implements OnInit {
   poolsDataIsLoading$ = this.store.select(getPoolsDataIsLoading);
   poolsDataIsLoaded$ = this.store.select(getPoolsDataIsLoaded);
 
-  colDefs: ColDef[] = [
+  readonly colDefs: ColDef[] = [
     {
       field: "poolId",
       headerName: 'Pool ID',
@@ -87,14 +87,18 @@ export class AgGridPoolsContainer implements OnInit {
       flex: 1,
     },
     {
-      field: "chainId",
       headerName: 'Chain ID',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.chain?.chainId || '-';
+      },
     },
     {
-      field: "dexId",
       headerName: 'Dex ID',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.dex?.dexId || '-';
+      },
     },
     {
       field: "version",
@@ -107,14 +111,19 @@ export class AgGridPoolsContainer implements OnInit {
       flex: 1,
     },
     {
-      field: "token",
       headerName: 'Token 1',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.token?.tokenId || '-';
+      },
     },
     {
       field: "token2",
       headerName: 'Token 2',
       flex: 1,
+      valueGetter: (params) => {
+        return params.data?.token2?.tokenId || '-';
+      },
     },
     {
       headerName: 'Actions',
@@ -126,16 +135,16 @@ export class AgGridPoolsContainer implements OnInit {
     },
   ];
 
-  defaultColDef: ColDef = {
+  readonly defaultColDef: ColDef = {
     sortable: false,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
   };
 
-  ngOnInit() {
+  constructor() {
     this.store.dispatch(setPoolsData());
-  };
+  }
 
   onAction($event: any, row: any) {
     if ($event.event === 'Actions:ACTION_CLICKED') {

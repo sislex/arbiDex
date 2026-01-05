@@ -5,19 +5,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TokensModule } from './tokens/tokens.module';
 import { ChainsModule } from './chains/chains.module';
-import { MarketsModule } from './markets/markets.module';
 import { PoolsModule } from './pools/pools.module';
 import { ServersModule } from './servers/servers.module';
 import { DexesModule } from './dexes/dexes.module';
 import { Tokens } from './entities/entities/Tokens';
 import { Pools } from './entities/entities/Pools';
 import { Chains } from './entities/entities/Chains';
-import { Markets } from './entities/entities/Markets';
 import { Dexes } from './entities/entities/Dexes';
 import { Servers } from './entities/entities/Servers';
 import { JobsModule } from './jobs/jobs.module';
 import { BotsModule } from './bots/bots.module';
-import { JobBotRelationsModule } from './job-bot-relations/job-bot-relations.module';
 import { Jobs } from './entities/entities/Jobs';
 import { Bots } from './entities/entities/Bots';
 import { Quotes } from './entities/entities/Quotes';
@@ -47,14 +44,12 @@ import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relatio
           Tokens,
           Pools,
           Chains,
-          Markets,
           Dexes,
           Servers,
           Jobs,
           Bots,
           Quotes,
           QuoteJobRelations,
-          JobBotRelationsModule,
           Pairs,
           PairQuoteRelations,
         ],
@@ -68,13 +63,11 @@ import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relatio
     }),
     TokensModule,
     ChainsModule,
-    MarketsModule,
     PoolsModule,
     ServersModule,
     DexesModule,
     JobsModule,
     BotsModule,
-    JobBotRelationsModule,
     PairsModule,
     QuotesModule,
     PairQuoteRelationsModule,

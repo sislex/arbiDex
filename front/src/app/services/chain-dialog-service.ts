@@ -10,8 +10,8 @@ export class ChainDialogService {
   openCreate() {
     return this.dialog.open(ChainFormContainer, {
       width: '90%',
+      height: '90%',
       maxWidth: '100%',
-      maxHeight: '600px',
       minHeight: '400px',
       minWidth: '600px',
       panelClass: 'custom-dialog-container',
@@ -31,6 +31,8 @@ export class ChainDialogService {
       width: '90%',
       height: '90%',
       maxWidth: '100%',
+      minHeight: '400px',
+      minWidth: '600px',
       panelClass: 'custom-dialog-container',
       data: {
         title: 'Edit chain',

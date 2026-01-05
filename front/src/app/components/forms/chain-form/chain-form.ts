@@ -19,7 +19,7 @@ export class ChainForm {
 
   @Output() emitter = new EventEmitter();
 
-  events(event: any, field: 'chainId' | 'name') {
+  events(event: any, field: 'newChainId' | 'name') {
     this.formData = {
       ...this.formData,
       [field]: event.data,

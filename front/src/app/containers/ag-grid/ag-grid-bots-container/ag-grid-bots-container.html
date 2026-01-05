@@ -1,0 +1,21 @@
+<app-header-content-layout>
+  @if ((botsDataIsLoaded$ | async) && !(botsDataIsLoading$ | async)) {
+    <app-title-table-button
+      header
+      [title]="'Bots table'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+    ></app-title-table-button>
+  }
+  @if ((botsDataIsLoaded$ | async) && !(botsDataIsLoading$ | async)) {
+    <app-ag-grid
+      content
+      [rowData]="(botsDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
+</app-header-content-layout>
+

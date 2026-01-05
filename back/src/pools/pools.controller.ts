@@ -24,10 +24,10 @@ export class PoolsController {
     const pools = await this.poolsService.findAll();
     return pools.map((p) => ({
       poolId: p.poolId,
-      chainId: p.chain.chainId,
-      token: p.token.tokenId,
-      token2: p.token2.tokenId,
-      dexId: p.dex.dexId,
+      chain: p.chain,
+      token: p.token,
+      token2: p.token2,
+      dex: p.dex,
       version: p.version,
       fee: p.fee,
       poolAddress: p.poolAddress,

@@ -1,0 +1,14 @@
+<app-confirmation-pop-up
+  [title]="data.title"
+  [buttons]="data.buttons"
+  (emitter)="eventClose($event)"
+>
+  <div class="scroll" popupContent>
+    <app-pair-form
+      [formData]="data.form"
+      [poolList]="data.poolList"
+      [poolsListResponse]="data.poolsListResponse"
+      (emitter)="eventsForm($event)"
+    ></app-pair-form>
+  </div>
+</app-confirmation-pop-up>

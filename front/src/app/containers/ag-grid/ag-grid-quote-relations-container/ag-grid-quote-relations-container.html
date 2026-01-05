@@ -1,0 +1,24 @@
+<app-header-content-layout>
+  @if ((pairsDataIsLoaded$ | async) && !(pairsDataIsLoading$ | async)&& (quoteRelationsIsLoaded$ | async)&& !(quoteRelationsIsLoading$ | async)) {
+    <app-title-table-button
+      header
+      [title]="'Quote relations table'"
+    ></app-title-table-button>
+  }
+  @if ((pairsDataIsLoaded$ | async) && !(pairsDataIsLoading$ | async)&& (quoteRelationsIsLoaded$ | async)&& !(quoteRelationsIsLoading$ | async)) {
+    <app-ag-grid
+      content
+      [rowData]="(pairsWithRelations$ | async) !"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      [isRowSelection]="{
+      mode: 'multiRow',
+      selectAll: 'filtered',
+    }"
+      (emitter)="events($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
+</app-header-content-layout>
+

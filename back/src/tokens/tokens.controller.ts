@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Delete, Param, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Delete,
+  Param,
+  Put,
+} from '@nestjs/common';
 import { TokensService } from './tokens.service';
 import { CreateTokenDto } from '../dtos/token-dto/token.dto';
 
@@ -15,7 +23,7 @@ export class TokensController {
       symbol: t.symbol,
       tokenName: t.tokenName,
       decimals: t.decimals,
-      chainId: t.chain?.chainId,
+      chain: t.chain,
     }));
   }
 

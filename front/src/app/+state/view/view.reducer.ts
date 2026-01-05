@@ -18,9 +18,13 @@ export const initialState: ViewState = {
   sidebarList: [
     'Tokens',
     'Pools',
-    'Markets',
     'Dexes',
     'Chains',
+    'Pairs',
+    'Quotes',
+    'Jobs',
+    'Bots',
+    'Servers',
   ],
   activeSidebarItem: '',
 };

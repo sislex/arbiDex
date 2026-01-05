@@ -23,7 +23,7 @@ export class PoolsService {
     const token2 = await this.tokensService.findOne(poolDto.token2);
     const dex = await this.dexesService.findOne(poolDto.dexId);
 
-    const market = this.poolRepository.create({
+    const pool = this.poolRepository.create({
       chain,
       token,
       token2,
@@ -33,7 +33,7 @@ export class PoolsService {
       poolAddress: poolDto.poolAddress,
     });
 
-    return await this.poolRepository.save(market);
+    return await this.poolRepository.save(pool);
   }
 
   async findAll() {
@@ -69,7 +69,7 @@ export class PoolsService {
     pool.version = poolDto.version;
     pool.chain = chain;
     pool.token = token;
-    pool.token = token2;
+    pool.token2 = token2;
     pool.dex = dex;
 
     return await this.poolRepository.save(pool);

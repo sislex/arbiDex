@@ -15,6 +15,7 @@ import { MatIconModule } from '@angular/material/icon';
 export class InputField {
   @Input() label: string = '';
   @Input() placeholder: string = '';
+  @Input() disabled: boolean = false;
   @Input() inputValue: string | number = '';
   @Input() title: string = '';
   @Input() type: 'number' | 'text' = 'text';

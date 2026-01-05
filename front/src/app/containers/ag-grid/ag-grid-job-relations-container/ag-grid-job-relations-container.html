@@ -1,0 +1,34 @@
+<app-header-content-layout>
+  @if (
+    (quoteRelationsIsLoaded$ | async) &&
+    !(quoteRelationsIsLoading$ | async) &&
+    (jobRelationsIsLoaded$ | async) &&
+    !(jobRelationsIsLoading$ | async)
+    ) {
+    <app-title-table-button
+      header
+      [title]="'Job relations table'"
+    ></app-title-table-button>
+  }
+  @if (
+    (quoteRelationsIsLoaded$ | async) &&
+    !(quoteRelationsIsLoading$ | async) &&
+    (jobRelationsIsLoaded$ | async) &&
+    !(jobRelationsIsLoading$ | async)
+    ) {
+    <app-ag-grid
+      content
+      [rowData]="(jobRelations$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      [isRowSelection]="{
+      mode: 'multiRow',
+      selectAll: 'filtered',
+    }"
+      (emitter)="events($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
+</app-header-content-layout>
+

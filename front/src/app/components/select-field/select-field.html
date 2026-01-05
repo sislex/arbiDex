@@ -1,6 +1,6 @@
 <mat-form-field>
   <mat-label>{{ title }}</mat-label>
-  <mat-select [(value)]="selected">
+  <mat-select [(value)]="selected" [disabled]="disabled">
     @for (item of list; track item.id) {
       <mat-option (click)="click(item.id)" [value]="item.id">{{item.name}}</mat-option>
     }

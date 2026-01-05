@@ -63,31 +63,6 @@ export const getPoolsDataIsLoaded = createSelector(
 );
 
 //====================================================================================================================
-//                                                   Markets
-//====================================================================================================================
-
-export const getMarketsDataResponse = createSelector(
-  selectFeature,
-  (state: DbConfigState) => state.markets.response
-);
-export const getMarketsDataFailure = createSelector(
-  selectFeature,
-  (state: DbConfigState) => state.markets.error
-);
-export const getMarketsDataIsFailure = createSelector(
-  selectFeature,
-  (state: DbConfigState) => !!state.markets.error
-);
-export const getMarketsDataIsLoading = createSelector(
-  selectFeature,
-  (state: DbConfigState) => state.markets.isLoading
-);
-export const getMarketsDataIsLoaded = createSelector(
-  selectFeature,
-  (state: DbConfigState) => state.markets.isLoaded
-);
-
-//====================================================================================================================
 //                                                   Dexes
 //====================================================================================================================
 
@@ -135,4 +110,129 @@ export const getChainsDataIsLoading = createSelector(
 export const getChainsDataIsLoaded = createSelector(
   selectFeature,
   (state: DbConfigState) => state.chains.isLoaded
+);
+
+//====================================================================================================================
+//                                                   Pairs
+//====================================================================================================================
+
+export const getPairsDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.pairs.response
+);
+export const getPairsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.pairs.error
+);
+export const getPairsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.pairs.error
+);
+export const getPairsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.pairs.isLoading
+);
+export const getPairsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.pairs.isLoaded
+);
+
+//====================================================================================================================
+//                                                   Quotes
+//====================================================================================================================
+
+export const getQuotesDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.quotes.response
+);
+export const getQuotesDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.quotes.error
+);
+export const getQuotesDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.quotes.error
+);
+export const getQuotesDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.quotes.isLoading
+);
+export const getQuotesDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.quotes.isLoaded
+);
+
+//====================================================================================================================
+//                                                   Jobs
+//====================================================================================================================
+
+export const getJobsDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.jobs.response
+);
+export const getJobsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.jobs.error
+);
+export const getJobsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.jobs.error
+);
+export const getJobsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.jobs.isLoading
+);
+export const getJobsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.jobs.isLoaded
+);
+
+//====================================================================================================================
+//                                                   Bots
+//====================================================================================================================
+
+export const getBotsDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.bots.response
+);
+export const getBotsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.bots.error
+);
+export const getBotsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.bots.error
+);
+export const getBotsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.bots.isLoading
+);
+export const getBotsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.bots.isLoaded
+);
+
+//====================================================================================================================
+//                                                   Servers
+//====================================================================================================================
+
+export const getServersDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.servers.response
+);
+export const getServersDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.servers.error
+);
+export const getServersDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.servers.error
+);
+export const getServersDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.servers.isLoading
+);
+export const getServersDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.servers.isLoaded
 );

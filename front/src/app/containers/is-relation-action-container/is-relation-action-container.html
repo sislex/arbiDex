@@ -1,0 +1,15 @@
+<div class="action-buttons">
+  @if (params.data.botName === '1') {
+    <app-actions
+      [icon]="'add_link'"
+      [type]="'green'"
+      (emitter)="onAction($event, 'edit')"
+    ></app-actions>
+  } @else {
+    <app-actions
+      [icon]="'link_off'"
+      [type]="'red'"
+      (emitter)="onAction($event, 'delete')"
+    ></app-actions>
+  }
+</div>

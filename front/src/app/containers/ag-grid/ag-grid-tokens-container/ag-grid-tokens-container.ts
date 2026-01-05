@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { createToken, deletingToken, editToken, setTokensData } from '../../../+state/db-config/db-config.actions';
@@ -29,7 +29,7 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
   templateUrl: './ag-grid-tokens-container.html',
   styleUrl: './ag-grid-tokens-container.scss',
 })
-export class AgGridTokensContainer implements OnInit {
+export class AgGridTokensContainer {
   private store = inject(Store);
   readonly tokenDialog = inject(TokenDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
@@ -46,12 +46,11 @@ export class AgGridTokensContainer implements OnInit {
       }))
     )
   );
-
-  ngOnInit() {
+  constructor() {
     this.store.dispatch(setTokensData());
-  };
+  }
 
-  colDefs: ColDef[] = [
+  readonly colDefs: ColDef[] = [
     {
       field: "tokenId",
       headerName: 'Token ID',
@@ -63,9 +62,11 @@ export class AgGridTokensContainer implements OnInit {
       flex: 1,
     },
     {
-      field: "chainId",
       headerName: 'Chain ID',
-      flex: 1
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.chain?.chainId || '-';
+      },
     },
     {
       field: "address",
@@ -92,7 +93,7 @@ export class AgGridTokensContainer implements OnInit {
     },
   ];
 
-  defaultColDef: ColDef = {
+  readonly defaultColDef: ColDef = {
     sortable: false,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,

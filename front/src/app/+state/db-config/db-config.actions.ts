@@ -1,5 +1,15 @@
 import { createAction, props } from '@ngrx/store';
-import { IChainsCreate, IDexesCreate, IMarketsCreate, IPoolsCreate, ITokensCreate } from '../../models/db-config';
+import {
+  IChainsCreate,
+  IDexesCreate,
+  IJobsCreate,
+  IPoolsCreate,
+  IQuotesCreate,
+  ITokensCreate,
+  IBotsCreate,
+  IServersCreate,
+  IPairsCreate,
+} from '../../models/db-config';
 
 export const setServerList = createAction('[DbConfig] setServerList');
 
@@ -56,32 +66,6 @@ export const deletingPools = createAction(
 );
 
 //====================================================================================================================
-//                                                   Markets
-//====================================================================================================================
-
-export const setMarketsData = createAction('[DbConfig] setMarketsData');
-export const setMarketsDataSuccess = createAction(
-  '[DbConfig] setMarketsDataSuccess',
-  props<{ response: any }>()
-);
-export const setMarketsDataFailure = createAction(
-  '[DbConfig] setMarketsDataFailure',
-  props<{ error: string }>()
-);
-export const createMarket = createAction(
-  '[DbConfig] createMarket',
-  props<{ data: IMarketsCreate }>()
-);
-export const editMarket = createAction(
-  '[DbConfig] editMarket',
-  props<{ data: IMarketsCreate }>()
-);
-export const deletingMarket = createAction(
-  '[DbConfig] deletingMarket',
-  props<{ marketId: number }>()
-);
-
-//====================================================================================================================
 //                                                   Dexes
 //====================================================================================================================
 
@@ -131,4 +115,134 @@ export const editChain = createAction(
 export const deletingChain = createAction(
   '[DbConfig] deletingChain',
   props<{ chainId: number }>()
+);
+
+//====================================================================================================================
+//                                                   Pairs
+//====================================================================================================================
+
+export const setPairsData = createAction('[DbConfig] setPairsData');
+export const setPairsDataSuccess = createAction(
+  '[DbConfig] setPairsDataSuccess',
+  props<{ response: any }>()
+);
+export const setPairsDataFailure = createAction(
+  '[DbConfig] setPairsDataFailure',
+  props<{ error: string }>()
+);
+export const createPair = createAction(
+  '[DbConfig] createPair',
+  props<{ data: IPairsCreate }>()
+);
+export const editPair = createAction(
+  '[DbConfig] editPair',
+  props<{ data: IPairsCreate }>()
+);
+export const deletingPair = createAction(
+  '[DbConfig] deletingPair',
+  props<{ pairId: number }>()
+);
+
+//====================================================================================================================
+//                                                   Quotes
+//====================================================================================================================
+
+export const setQuotesData = createAction('[DbConfig] setQuotesData');
+export const setQuotesDataSuccess = createAction(
+  '[DbConfig] setQuotesDataSuccess',
+  props<{ response: any }>()
+);
+export const setQuotesDataFailure = createAction(
+  '[DbConfig] setQuotesDataFailure',
+  props<{ error: string }>()
+);
+export const createQuote = createAction(
+  '[DbConfig] createQuote',
+  props<{ data: IQuotesCreate }>()
+);
+export const editQuote = createAction(
+  '[DbConfig] editQuote',
+  props<{ data: IQuotesCreate }>()
+);
+export const deletingQuote = createAction(
+  '[DbConfig] deletingQuote',
+  props<{ quoteId: number }>()
+);
+
+//====================================================================================================================
+//                                                   Jobs
+//====================================================================================================================
+
+export const setJobsData = createAction('[DbConfig] setJobsData');
+export const setJobsDataSuccess = createAction(
+  '[DbConfig] setJobsDataSuccess',
+  props<{ response: any }>()
+);
+export const setJobsDataFailure = createAction(
+  '[DbConfig] setJobsDataFailure',
+  props<{ error: string }>()
+);
+export const createJob = createAction(
+  '[DbConfig] createJob',
+  props<{ data: IJobsCreate }>()
+);
+export const editJob = createAction(
+  '[DbConfig] editJob',
+  props<{ data: IJobsCreate }>()
+);
+export const deletingJob = createAction(
+  '[DbConfig] deletingJob',
+  props<{ jobId: number }>()
+);
+
+//====================================================================================================================
+//                                                   Bots
+//====================================================================================================================
+
+export const setBotsData = createAction('[DbConfig] setBotsData');
+export const setBotsDataSuccess = createAction(
+  '[DbConfig] setBotsDataSuccess',
+  props<{ response: any }>()
+);
+export const setBotsDataFailure = createAction(
+  '[DbConfig] setBotsDataFailure',
+  props<{ error: string }>()
+);
+export const createBot = createAction(
+  '[DbConfig] createBot',
+  props<{ data: IBotsCreate }>()
+);
+export const editBot = createAction(
+  '[DbConfig] editBot',
+  props<{ data: IBotsCreate }>()
+);
+export const deletingBot = createAction(
+  '[DbConfig] deletingBot',
+  props<{ botId: number }>()
+);
+
+//====================================================================================================================
+//                                                   Servers
+//====================================================================================================================
+
+export const setServersData = createAction('[DbConfig] setServersData');
+export const setServersDataSuccess = createAction(
+  '[DbConfig] setServersDataSuccess',
+  props<{ response: any }>()
+);
+export const setServersDataFailure = createAction(
+  '[DbConfig] setServersDataFailure',
+  props<{ error: string }>()
+);
+export const createServer = createAction(
+  '[DbConfig] createServer',
+  props<{ data: IServersCreate }>()
+);
+export const editServer = createAction(
+  '[DbConfig] editServer',
+  props<{ data: IServersCreate }>()
+);
+export const deletingServer = createAction(
+  '[DbConfig] deletingServer',
+  props<{ serverId: number }>()
 );

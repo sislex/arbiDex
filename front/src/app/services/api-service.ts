@@ -45,24 +45,6 @@ export class ApiService {
     return this.http.delete(`${this.apiUrl}/pools/${id}`);
   }
 
-
-  //====================================================================================================================
-  //                                                   Markets
-  //====================================================================================================================
-
-  getMarkets(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/markets`);
-  }
-  createMarket(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/markets`, {...data});
-  }
-  editMarket(id: number, data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/markets/${id}`, data);
-  }
-  deletingMarket(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/markets/${id}`);
-  }
-
   //====================================================================================================================
   //                                                   Dexes
   //====================================================================================================================
@@ -98,6 +80,74 @@ export class ApiService {
   }
 
   //====================================================================================================================
+  //                                                   Bots
+  //====================================================================================================================
+
+  getBots(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/bots`);
+  }
+  createBot(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/bots`, {...data});
+  }
+  editBot(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/bots/${id}`, data);
+  }
+  deletingBot(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/bots/${id}`);
+  }
+
+  //====================================================================================================================
+  //                                                   Pairs
+  //====================================================================================================================
+
+  getPairs(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/pairs`);
+  }
+  createPair(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/pairs`, {...data});
+  }
+  editPair(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/pairs/${id}`, data);
+  }
+  deletingPair(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/pairs/${id}`);
+  }
+
+  //====================================================================================================================
+  //                                                   Quotes
+  //====================================================================================================================
+
+  getQuotes(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/quotes`);
+  }
+  createQuote(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/quotes`, {...data});
+  }
+  editQuote(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/quotes/${id}`, data);
+  }
+  deletingQuote(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/quotes/${id}`);
+  }
+
+  //====================================================================================================================
+  //                                                   Jobs
+  //====================================================================================================================
+
+  getJobs(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/jobs`);
+  }
+  createJob(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/jobs`, {...data});
+  }
+  editJob(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/jobs/${id}`, data);
+  }
+  deletingJob(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/jobs/${id}`);
+  }
+
+  //====================================================================================================================
   //                                                   Servers
   //====================================================================================================================
 
@@ -112,5 +162,36 @@ export class ApiService {
   }
   deletingServer(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/servers/${id}`);
+  }
+
+  //====================================================================================================================
+  //                                                   Quote Relations
+  //====================================================================================================================
+
+  getQuoteRelationsByQuoteId(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/pair-quote-relations/by-quote-id/${id}`);
+  }
+  getQuoteRelations(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/pair-quote-relations`);
+  }
+  createQuoteRelations(data: any[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/pair-quote-relations`, data);
+  }
+  deleteQuoteRelations(ids: number[]): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/pair-quote-relations`, { body: ids });
+  }
+
+  //====================================================================================================================
+  //                                                   Job Relations
+  //====================================================================================================================
+
+  getJobRelationsByQuoteId(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/quote-job-relations/by-quote-id/${id}`);
+  }
+  createJobRelations(data: any[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/quote-job-relations`, data);
+  }
+  deleteJobRelations(ids: number[]): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/quote-job-relations`, { body: ids });
   }
 }

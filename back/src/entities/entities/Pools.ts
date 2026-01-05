@@ -7,7 +7,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Markets } from './Markets';
 import { Pairs } from './Pairs';
 import { Chains } from './Chains';
 import { Dexes } from './Dexes';
@@ -28,13 +27,13 @@ export class Pools {
   @Column('character varying', { name: 'pool_address', nullable: true })
   poolAddress: string | null;
 
-  @OneToMany(() => Markets, (markets) => markets.pool)
-  markets: Markets[];
-
   @OneToMany(() => Pairs, (pairs) => pairs.pool)
   pairs: Pairs[];
 
-  @ManyToOne(() => Chains, (chains) => chains.pools, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Chains, (chains) => chains.pools, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'chain_id', referencedColumnName: 'chainId' }])
   chain: Chains;
 

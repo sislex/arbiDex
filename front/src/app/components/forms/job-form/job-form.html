@@ -1,0 +1,8 @@
+<app-header-content-layout>
+  <app-field-title header [title]="'Type'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.jobType"
+    (emitter)="events($event, 'jobType')"
+    content
+  ></app-input-field>
+</app-header-content-layout>

@@ -1,0 +1,43 @@
+<app-header-content-layout>
+  <app-field-title header [title]="'Bot Name'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.botName"
+    (emitter)="events($event, 'botName')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Description'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.description"
+    (emitter)="events($event, 'description')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+@if (jobList) {
+  <app-header-content-layout>
+    <app-field-title header [title]="'Job Id'"></app-field-title>
+    <app-select-field
+      [title]="'Job Id'"
+      [list]="jobList | async"
+      [selected]="formData.jobId"
+      (emitter)="events($event, 'jobId')"
+      content
+    ></app-select-field>
+  </app-header-content-layout>
+}
+
+@if (serversList) {
+  <app-header-content-layout>
+    <app-field-title header [title]="'Server Id'"></app-field-title>
+    <app-select-field
+      [title]="'Server Id'"
+      [list]="serversList | async"
+      [selected]="formData.serverId"
+      (emitter)="events($event, 'serverId')"
+      content
+    ></app-select-field>
+  </app-header-content-layout>
+}

@@ -1,6 +1,15 @@
 import {createReducer, on} from '@ngrx/store';
 import * as DbConfigActions from './db-config.actions';
-import {IChainsAPI, IDexesAPI, IMarketsAPI, IPoolsAPI, ITokensAPI} from '../../models/db-config';
+import {
+  IBotsAPI,
+  IChainsAPI,
+  IDexesAPI,
+  IJobsAPI,
+  IQuotesAPI,
+  IPoolsAPI,
+  IServersAPI,
+  ITokensAPI, IPairsAPI,
+} from '../../models/db-config';
 import {emptyAsyncResponse} from './configs';
 
 export const DB_CONFIG_FEATURE_KEY = 'db_config';
@@ -9,9 +18,14 @@ export interface DbConfigState {
   featureName: string;
   tokens: ITokensAPI;
   pools: IPoolsAPI;
-  markets: IMarketsAPI;
   dexes: IDexesAPI;
   chains: IChainsAPI;
+  pairs: IPairsAPI;
+  quotes: IQuotesAPI;
+  jobs: IJobsAPI;
+  bots: IBotsAPI;
+  servers: IServersAPI;
+
   versions: string[];
 }
 
@@ -23,9 +37,14 @@ export const initialState: DbConfigState = {
   featureName: 'database',
   tokens: emptyAsyncResponse([]),
   pools: emptyAsyncResponse([]),
-  markets: emptyAsyncResponse([]),
   dexes: emptyAsyncResponse([]),
   chains: emptyAsyncResponse([]),
+  pairs: emptyAsyncResponse([]),
+  quotes: emptyAsyncResponse([]),
+  jobs: emptyAsyncResponse([]),
+  bots: emptyAsyncResponse([]),
+  servers: emptyAsyncResponse([]),
+
   versions: ['v2', 'v3', 'v4'],
 }
 
@@ -92,36 +111,6 @@ export const dbConfigReducer = createReducer(
     }
   })),
 
-  on(DbConfigActions.setMarketsData, (state) => ({
-    ...state,
-    markets: {
-      ...state.markets,
-      startTime:  Date.now(),
-      isLoading: true,
-      isLoaded: false,
-    }
-  })),
-  on(DbConfigActions.setMarketsDataSuccess, (state, {response}) => ({
-    ...state,
-    markets: {
-      ...state.markets,
-      loadingTime: Date.now() - state.markets.startTime!,
-      isLoading: false,
-      isLoaded: true,
-      response
-    }
-  })),
-  on(DbConfigActions.setMarketsDataFailure, (state, {error}) => ({
-    ...state,
-    markets: {
-      ...state.markets,
-      loadingTime: Date.now() - state.markets.startTime!,
-      isLoading: false,
-      isLoaded: true,
-      error
-    }
-  })),
-
   on(DbConfigActions.setDexesData, (state) => ({
     ...state,
     dexes: {
@@ -176,6 +165,156 @@ export const dbConfigReducer = createReducer(
     chains: {
       ...state.chains,
       loadingTime: Date.now() - state.chains.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(DbConfigActions.setPairsData, (state) => ({
+    ...state,
+    pairs: {
+      ...state.pairs,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setPairsDataSuccess, (state, {response}) => ({
+    ...state,
+    pairs: {
+      ...state.pairs,
+      loadingTime: Date.now() - state.pairs.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setPairsDataFailure, (state, {error}) => ({
+    ...state,
+    pairs: {
+      ...state.pairs,
+      loadingTime: Date.now() - state.pairs.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(DbConfigActions.setQuotesData, (state) => ({
+    ...state,
+    quotes: {
+      ...state.quotes,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setQuotesDataSuccess, (state, {response}) => ({
+    ...state,
+    quotes: {
+      ...state.quotes,
+      loadingTime: Date.now() - state.quotes.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setQuotesDataFailure, (state, {error}) => ({
+    ...state,
+    quotes: {
+      ...state.quotes,
+      loadingTime: Date.now() - state.quotes.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(DbConfigActions.setJobsData, (state) => ({
+    ...state,
+    jobs: {
+      ...state.jobs,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setJobsDataSuccess, (state, {response}) => ({
+    ...state,
+    jobs: {
+      ...state.jobs,
+      loadingTime: Date.now() - state.jobs.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setJobsDataFailure, (state, {error}) => ({
+    ...state,
+    jobs: {
+      ...state.jobs,
+      loadingTime: Date.now() - state.jobs.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(DbConfigActions.setBotsData, (state) => ({
+    ...state,
+    bots: {
+      ...state.bots,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setBotsDataSuccess, (state, {response}) => ({
+    ...state,
+    bots: {
+      ...state.bots,
+      loadingTime: Date.now() - state.bots.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setBotsDataFailure, (state, {error}) => ({
+    ...state,
+    bots: {
+      ...state.bots,
+      loadingTime: Date.now() - state.bots.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(DbConfigActions.setServersData, (state) => ({
+    ...state,
+    servers: {
+      ...state.servers,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setServersDataSuccess, (state, {response}) => ({
+    ...state,
+    servers: {
+      ...state.servers,
+      loadingTime: Date.now() - state.servers.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setServersDataFailure, (state, {error}) => ({
+    ...state,
+    servers: {
+      ...state.servers,
+      loadingTime: Date.now() - state.servers.startTime!,
       isLoading: false,
       isLoaded: true,
       error

@@ -1,5 +1,4 @@
 import {
-  Column,
   Entity,
   Index,
   JoinColumn,
@@ -9,18 +8,13 @@ import {
 } from 'typeorm';
 import { PairQuoteRelations } from './PairQuoteRelations';
 import { Pools } from './Pools';
+import { Tokens } from './Tokens';
 
 @Index('pairs_pkey', ['pairId'], { unique: true })
 @Entity('pairs', { schema: 'public' })
 export class Pairs {
   @PrimaryGeneratedColumn({ type: 'bigint', name: 'pair_id' })
   pairId: string;
-
-  @Column('bigint', { name: 'token_in' })
-  tokenIn: string;
-
-  @Column('bigint', { name: 'token_out' })
-  tokenOut: string;
 
   @OneToMany(
     () => PairQuoteRelations,
@@ -34,4 +28,18 @@ export class Pairs {
   })
   @JoinColumn([{ name: 'pool_id', referencedColumnName: 'poolId' }])
   pool: Pools;
+
+  @ManyToOne(() => Tokens, (tokens) => tokens.pairs, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'token_in', referencedColumnName: 'tokenId' }])
+  tokenIn: Tokens;
+
+  @ManyToOne(() => Tokens, (tokens) => tokens.pairs2, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'token_out', referencedColumnName: 'tokenId' }])
+  tokenOut: Tokens;
 }

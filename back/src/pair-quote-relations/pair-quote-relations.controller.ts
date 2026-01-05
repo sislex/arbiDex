@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Put,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { PairQuoteRelationsService } from './pair-quote-relations.service';
 import { PairQuoteRelationDto } from '../dtos/pair-quote-relations-dto/pair-quote-relation.dto';
 
@@ -17,8 +9,10 @@ export class PairQuoteRelationsController {
   ) {}
 
   @Post()
-  create(@Body() createPairQuoteRelationDto: PairQuoteRelationDto) {
-    return this.pairQuoteRelationsService.create(createPairQuoteRelationDto);
+  create(@Body() createPairQuoteRelationDto: PairQuoteRelationDto[]) {
+    return this.pairQuoteRelationsService.createMany(
+      createPairQuoteRelationDto,
+    );
   }
 
   @Get()
@@ -27,23 +21,22 @@ export class PairQuoteRelationsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pairQuoteRelationsService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const pair = await this.pairQuoteRelationsService.findOne(id);
+    return {
+      pairQuoteRelationId: pair.pairQuoteRelationId,
+      pair: pair.pair,
+      quote: pair.quote,
+    };
   }
 
-  @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePairQuoteRelationDto: PairQuoteRelationDto,
-  ) {
-    return this.pairQuoteRelationsService.update(
-      +id,
-      updatePairQuoteRelationDto,
-    );
+  @Get('by-quote-id/:id')
+  async findByQuoteId(@Param('id') id: string) {
+    return await this.pairQuoteRelationsService.findByQuoteId(id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pairQuoteRelationsService.remove(+id);
+  @Delete()
+  remove(@Body() id: string[]) {
+    return this.pairQuoteRelationsService.remove(id);
   }
 }

@@ -1,8 +1,8 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {Sidebar} from '../../components/sidebar/sidebar';
 import {Store} from '@ngrx/store';
-import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
-import { setActiveSidebarItem, toggleSidebar } from '../../+state/view/view.actions';
+import { Router, RouterOutlet} from '@angular/router';
+import { toggleSidebar } from '../../+state/view/view.actions';
 import { getActiveSidebarItem, getIsSidebarOpen, getSidebarList } from '../../+state/view/view.selectors';
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import { getChainsDataResponse, getFeatureName } from '../../+state/db-config/db-config.selectors';
@@ -10,8 +10,6 @@ import { HeaderContentLayout } from '../../components/layouts/header-content-lay
 import { MainTitlePage } from '../../components/main-title-page/main-title-page';
 import { MatDialog } from '@angular/material/dialog';
 import { map } from 'rxjs';
-import { NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-sidebar-container',
@@ -27,10 +25,9 @@ import { filter } from 'rxjs/operators';
   templateUrl: './sidebar-container.html',
   styleUrl: './sidebar-container.scss'
 })
-export class SidebarContainer implements OnInit {
+export class SidebarContainer {
   private store = inject(Store);
   private router = inject(Router);
-  private route=inject(ActivatedRoute);
   readonly dialog = inject(MatDialog);
 
   isSidebarOpen$ = this.store.select(getIsSidebarOpen);
@@ -46,22 +43,6 @@ export class SidebarContainer implements OnInit {
       }))
     )
   );
-
-  ngOnInit() {
-    const logFeature = () => {
-      let route = this.route;
-      while (route.firstChild) {
-        route = route.firstChild;
-      }
-      this.store.dispatch(setActiveSidebarItem({item: route.snapshot.data['feature']}))
-    };
-
-    logFeature();
-
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => logFeature());
-  }
 
   events($event: any) {
     if ($event.event === 'Sidebar:TOGGLE_CLICKED') {

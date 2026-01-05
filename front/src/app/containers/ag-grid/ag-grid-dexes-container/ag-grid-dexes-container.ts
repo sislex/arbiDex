@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -28,7 +28,7 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
   templateUrl: './ag-grid-dexes-container.html',
   styleUrl: './ag-grid-dexes-container.scss',
 })
-export class AgGridDexesContainer implements OnInit {
+export class AgGridDexesContainer {
   private store = inject(Store);
   readonly dexDialog = inject(DexDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
@@ -39,7 +39,7 @@ export class AgGridDexesContainer implements OnInit {
   dexesDataIsLoaded$ = this.store.select(getDexesDataIsLoaded);
 
 
-  colDefs: ColDef[] = [
+  readonly colDefs: ColDef[] = [
     {
       field: "dexId",
       headerName: 'Dex ID',
@@ -60,16 +60,16 @@ export class AgGridDexesContainer implements OnInit {
     },
   ];
 
-  defaultColDef: ColDef = {
+  readonly defaultColDef: ColDef = {
     sortable: false,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
   };
 
-  ngOnInit() {
+  constructor() {
     this.store.dispatch(setDexesData());
-  };
+  }
 
   onAction($event: any, row: any) {
     if ($event.event === 'Actions:ACTION_CLICKED') {

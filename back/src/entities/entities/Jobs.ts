@@ -5,7 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { JobBotRelations } from './JobBotRelations';
+import { Bots } from './Bots';
 import { QuoteJobRelations } from './QuoteJobRelations';
 
 @Index('jobs_pkey', ['jobId'], { unique: true })
@@ -21,8 +21,8 @@ export class Jobs {
   })
   jobType: string | null;
 
-  @OneToMany(() => JobBotRelations, (jobBotRelations) => jobBotRelations.job)
-  jobBotRelations: JobBotRelations[];
+  @OneToMany(() => Bots, (bots) => bots.job)
+  bots: Bots[];
 
   @OneToMany(
     () => QuoteJobRelations,
