@@ -4,12 +4,14 @@ import { catchError, EMPTY, map, of, switchMap, tap } from 'rxjs';
 import * as RelationsActions from './relations.actions';
 import {ApiService} from '../../services/api-service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class RelationsEffects {
   private actions$ = inject(Actions);
   private apiService = inject(ApiService);
   private _snackBar = inject(MatSnackBar);
+  private store = inject(Store);
 
 //====================================================================================================================
 //                                                   Quote Relations
@@ -71,9 +73,8 @@ export class RelationsEffects {
         switchMap(action =>
           this.apiService.createQuoteRelations(action.data).pipe(
             tap(response => {
-              console.log(response)
-              // this.store.dispatch(RelationsActions.setQuoteRelationsDataList({ quoteId: 1 }));
-              this._snackBar.open(`Relations is created: ${response.pairQuoteRelationId}`, '', { duration: 5000 });
+              this.store.dispatch(RelationsActions.setQuoteRelationsDataList({ quoteId: action.quoteId }));
+              this._snackBar.open(`Relations is created`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -91,7 +92,7 @@ export class RelationsEffects {
         switchMap((action) => {
           return this.apiService.deleteQuoteRelations(action.quoteRelationsIds).pipe(
             tap(response => {
-              // this.store.dispatch(RelationsActions.setQuoteRelationsData());
+              this.store.dispatch(RelationsActions.setQuoteRelationsDataList({ quoteId: action.quoteId }));
               this._snackBar.open(`QuoteRelations is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -141,16 +142,14 @@ export class RelationsEffects {
     )
   );
 
-
   createJobRelations$ = createEffect(() =>
       this.actions$.pipe(
         ofType(RelationsActions.createJobRelations),
         switchMap(action =>
           this.apiService.createJobRelations(action.data).pipe(
             tap(response => {
-              console.log(response)
-              // this.store.dispatch(RelationsActions.setJobRelationsDataList({ jobId: 1 }));
-              this._snackBar.open(`Relations is created: ${response.pairJobRelationId}`, '', { duration: 5000 });
+              this._snackBar.open(`Relations is created`, '', { duration: 5000 });
+              this.store.dispatch(RelationsActions.setJobRelationsDataList({ jobId: action.jobId }));
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -168,7 +167,7 @@ export class RelationsEffects {
         switchMap((action) => {
           return this.apiService.deleteJobRelations(action.jobRelationsIds).pipe(
             tap(response => {
-              // this.store.dispatch(RelationsActions.setJobRelationsData());
+              this.store.dispatch(RelationsActions.setJobRelationsDataList({ jobId: action.jobId }));
               this._snackBar.open(`JobRelations is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -180,6 +179,4 @@ export class RelationsEffects {
       ),
     { dispatch: false }
   );
-
-
 }
