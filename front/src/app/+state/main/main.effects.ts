@@ -6,12 +6,14 @@ import { Store } from '@ngrx/store';
 import { getJobRelations } from '../relations/relations.selectors';
 import { IArbitrumMultiQuoteJob } from '../../models/main';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfigDialogService } from '../../services/config-dialog-service';
 
 @Injectable()
 export class MainEffects {
   private actions$ = inject(Actions);
   private store = inject(Store);
   private _snackBar = inject(MatSnackBar);
+  private configDialogService = inject(ConfigDialogService);
 
   createJobConfig$ = createEffect(
     () =>
@@ -50,8 +52,19 @@ export class MainEffects {
             }))
           };
           const configString = JSON.stringify(jobConfig, null, 2);
+          const configTitle = 'Copy Job config'
+          this.configDialogService.openConfig(configTitle, configString);
+        })
+      ),
+    { dispatch: false }
+  );
 
-          navigator.clipboard.writeText(configString)
+  copyConfig$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(MainActions.copyConfig),
+        tap((action: any) => {
+          navigator.clipboard.writeText(action.config)
             .then(() => {
               this._snackBar.open('Config has been copied', 'OK', { duration: 5000 });
             })
@@ -59,8 +72,6 @@ export class MainEffects {
               console.error('Could not copy config: ', err);
               this._snackBar.open('Copy failed', 'Error', { duration: 3000 });
             });
-
-          console.log('jobConfig', jobConfig)
         })
       ),
     { dispatch: false }

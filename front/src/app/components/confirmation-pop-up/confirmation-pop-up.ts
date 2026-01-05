@@ -19,12 +19,14 @@ import {UpperCasePipe} from '@angular/common';
 export class ConfirmationPopUp {
   @Input() title: string = '';
   @Input() buttons: string[] = [];
+  @Input() dataFromContent: any;
 
   @Output() emitter = new EventEmitter();
   event($event: any) {
     this.emitter.emit({
       event: 'ConfirmationPopUp:RESULT_CLICKED',
-      data: $event
+      data: $event,
+      dataFromContent: this.dataFromContent,
     });
   }
 }
