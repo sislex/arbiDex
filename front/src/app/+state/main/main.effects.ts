@@ -47,7 +47,6 @@ export class MainEffects {
               amount: String(item.quote.quote.amount),
               blockTag: item.quote.quote.blockTag,
               quoteSource: item.quote.quote.quoteSource,
-              createdAt: item.quote.quote.createdAt || ''
             }))
           };
           const configString = JSON.stringify(jobConfig, null, 2);

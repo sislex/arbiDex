@@ -17,7 +17,6 @@ export interface IQuotePair {
   amount: string;
   blockTag: string;
   quoteSource: string;
-  createdAt: string;
 }
 
 export interface ITokenInfo {
