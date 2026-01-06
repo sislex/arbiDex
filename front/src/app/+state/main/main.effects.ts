@@ -1,9 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as MainActions from './main.actions';
-import { tap, withLatestFrom } from 'rxjs';
-import { Store } from '@ngrx/store';
-import { getJobRelations } from '../relations/relations.selectors';
+import { tap } from 'rxjs';
 import { IArbitrumMultiQuoteJob } from '../../models/main';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfigDialogService } from '../../services/config-dialog-service';
@@ -11,44 +9,44 @@ import { ConfigDialogService } from '../../services/config-dialog-service';
 @Injectable()
 export class MainEffects {
   private actions$ = inject(Actions);
-  private store = inject(Store);
   private _snackBar = inject(MatSnackBar);
   private configDialogService = inject(ConfigDialogService);
 
-  createJobConfig$ = createEffect(
+  setPreConfig$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(MainActions.getJobConfig),
-        withLatestFrom(this.store.select(getJobRelations)),
-        tap(([_, jobData]) => {
+        ofType(MainActions.setPreConfig),
+        tap((data: any) => {
+          console.log(data.data)
           const jobConfig: IArbitrumMultiQuoteJob = {
-            jobType: jobData[0].job.jobType,
+            // jobType: jobData[0].job.jobType || 0,
+            jobType: '1',
             rpcUrl: 'https://arb1.arbitrum.io/rpc',
-            pairsToQuote: jobData.map(item => ({
-              dex: item.quote.pair.pool.dex.name,
-              version: item.quote.pair.pool.version as "v2" | "v3" | "v4",
+            pairsToQuote: data.data.map((item: any) => ({
+              dex: item.pair.pool.dex.name,
+              version: item.pair.pool.version as "v2" | "v3" | "v4",
               token0: {
-                address: item.quote.pair.pool.token.address,
-                decimals: item.quote.pair.pool.token.decimals ?? 0
+                address: item.pair.pool.token.address,
+                decimals: item.pair.pool.token.decimals ?? 0
               },
               token1: {
-                address: item.quote.pair.pool.token2.address,
-                decimals: item.quote.pair.pool.token2.decimals ?? 0
+                address: item.pair.pool.token2.address,
+                decimals: item.pair.pool.token2.decimals ?? 0
               },
-              poolAddress: String(item.quote.pair.pool.poolAddress),
-              feePpm: item.quote.pair.pool.fee,
+              poolAddress: String(item.pair.pool.poolAddress),
+              feePpm: item.pair.pool.fee,
               tokenIn: {
-                address: item.quote.pair.tokenIn.address,
-                decimals: item.quote.pair.tokenIn.decimals ?? 0
+                address: item.pair.tokenIn.address,
+                decimals: item.pair.tokenIn.decimals ?? 0
               },
               tokenOut: {
-                address: item.quote.pair.tokenOut.address,
-                decimals: item.quote.pair.tokenOut.decimals ?? 0
+                address: item.pair.tokenOut.address,
+                decimals: item.pair.tokenOut.decimals ?? 0
               },
-              side: item.quote.quote.side,
-              amount: String(item.quote.quote.amount),
-              blockTag: item.quote.quote.blockTag,
-              quoteSource: item.quote.quote.quoteSource,
+              side: item.quote.side,
+              amount: String(item.quote.amount),
+              blockTag: item.quote.blockTag,
+              quoteSource: item.quote.quoteSource,
             }))
           };
           const configString = JSON.stringify(jobConfig, null, 2);

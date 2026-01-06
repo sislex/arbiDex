@@ -25,7 +25,7 @@ import { AsyncPipe } from '@angular/common';
 import { ButtonPanel } from '../../../components/button-panel/button-panel';
 import { ContentFooterLayout } from '../../../components/layouts/content-footer-layout/content-footer-layout';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
-import { getJobConfig } from '../../../+state/main/main.actions';
+import { setPreConfig } from '../../../+state/main/main.actions';
 
 @Component({
   selector: 'app-job-page-container',
@@ -50,6 +50,7 @@ export class JobPageContainer {
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
   relatedJobRelationsIds: number[] = [];
+  relatedFullJobData: any[] = [];
   currentJobId: number;
 
   constructor() {
@@ -82,12 +83,13 @@ export class JobPageContainer {
             this.setCreateAndRemoveLists(mappedOldRelations, this.relatedJobRelationsIds);
           });
       } else if ($event.data === 'get config') {
-        this.store.dispatch(getJobConfig());
+        this.store.dispatch(setPreConfig({ data: this.relatedFullJobData }))
       } else if ($event.data === 'cancel') {
         console.log('cancelTO')
       }
     } else if ($event.event === 'AgGridJobRelationsContainer:ACTIVE_RELATIONS') {
       this.relatedJobRelationsIds = $event.data
+      this.relatedFullJobData = $event.fullData
     }
   };
 

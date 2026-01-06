@@ -215,6 +215,7 @@ export class AgGridJobRelationsContainer {
     this.emitter.emit({
       event: 'AgGridJobRelationsContainer:ACTIVE_RELATIONS',
       data: $event.row.selectedNodes.map((item: any) => item.data.pairQuoteRelationId),
+      fullData: $event.row.selectedNodes.map((item: any) => item.data),
     });
   }
 }
