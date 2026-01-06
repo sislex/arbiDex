@@ -12,9 +12,6 @@ import {
   setJobRelationsDataList,
   setQuoteRelations,
 } from '../../../+state/relations/relations.actions';
-import {
-  AgGridQuoteRelationsContainer
-} from '../../ag-grid/ag-grid-quote-relations-container/ag-grid-quote-relations-container';
 import { getJobRelations } from '../../../+state/relations/relations.selectors';
 import { take } from 'rxjs';
 import {
@@ -33,7 +30,6 @@ import { setPreConfig } from '../../../+state/main/main.actions';
     AgGridJobRelationsContainer,
     Actions,
     TitleContentLayout,
-    AgGridQuoteRelationsContainer,
     AsyncPipe,
     ButtonPanel,
     ContentFooterLayout,

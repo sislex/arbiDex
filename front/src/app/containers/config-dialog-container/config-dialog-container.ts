@@ -2,7 +2,6 @@ import { Component, inject, signal } from '@angular/core';
 import { ConfirmationPopUp } from '../../components/confirmation-pop-up/confirmation-pop-up';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { InputField } from '../../components/input-field/input-field';
 import { copyConfig } from '../../+state/main/main.actions';
 import { FormsModule } from '@angular/forms';
 
@@ -10,7 +9,6 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-config-dialog-container',
   imports: [
     ConfirmationPopUp,
-    InputField,
     FormsModule,
   ],
   templateUrl: './config-dialog-container.html',
