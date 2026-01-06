@@ -11,6 +11,7 @@ import { AgGridBotsContainer } from './containers/ag-grid/ag-grid-bots-container
 import { AgGridServersContainer } from './containers/ag-grid/ag-grid-servers-container/ag-grid-servers-container';
 import { QuotePageContainer } from './containers/pages/quote-page-container/quote-page-container';
 import { JobPageContainer } from './containers/pages/job-page-container/job-page-container';
+import { BotPageContainer } from './containers/pages/bot-page-container/bot-page-container';
 
 export const routes: Routes = [
   {
@@ -78,5 +79,10 @@ export const routes: Routes = [
     path: 'data-view/jobs/:id',
     component: JobPageContainer,
     data: { feature: 'job relations' },
+  },
+  {
+    path: 'data-view/bots/:id',
+    component: BotPageContainer,
+    data: { feature: 'bot relations' },
   },
 ];
