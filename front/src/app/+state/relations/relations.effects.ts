@@ -179,4 +179,25 @@ export class RelationsEffects {
       ),
     { dispatch: false }
   );
+
+//====================================================================================================================
+//                                                   Bot Relations
+//====================================================================================================================
+
+  setActiveBot$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(RelationsActions.setActiveBot),
+      switchMap((action) =>
+        this.apiService.setBotById(action.botId).pipe(
+          map(response =>
+            RelationsActions.setActiveBotSuccess({ response })
+          ),
+          catchError(error =>
+            of(RelationsActions.setActiveBotFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
 }

@@ -37,6 +37,7 @@ export class BotsService {
 
   async findOne(id: number) {
     const bot = await this.botRepository.findOne({
+      relations: ['server', 'job'],
       where: { botId: id.toString() },
     });
     if (!bot) {

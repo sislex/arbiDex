@@ -59,3 +59,20 @@ export const deletingJobRelations = createAction(
   '[Relations] deletingJobRelations',
   props<{ jobId: number, jobRelationsIds: number[] }>()
 );
+
+//====================================================================================================================
+//                                                   Bot Relations
+//====================================================================================================================
+
+export const setActiveBot = createAction(
+  '[Relations] setActiveBot',
+  props<{ botId: number }>()
+);
+export const setActiveBotSuccess = createAction(
+  '[Relations] setActiveBotSuccess',
+  props<{ response: any }>()
+);
+export const setActiveBotFailure = createAction(
+  '[Relations] setActiveBotFailure',
+  props<{ error: string }>()
+);

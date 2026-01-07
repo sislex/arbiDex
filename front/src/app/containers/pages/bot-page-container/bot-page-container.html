@@ -1,0 +1,24 @@
+<app-title-content-layout
+  [title]="(activeSidebarItem$ | async)!"
+>
+  <app-actions
+    title-start
+    [icon]="'reply'"
+    [type]="'default'"
+    (emitter)="onAction($event, 'reply')"
+  >
+  </app-actions>
+  <app-content-footer-layout content>
+    <app-ag-grid-bot-relations-container
+      content
+      [currentBotId]="currentBotId"
+      (emitter)="events($event)"
+    ></app-ag-grid-bot-relations-container>
+    <app-button-panel
+      footer
+      [buttons]="footerButtons"
+      [disabled]="false"
+      (emitter)="events($event)"
+    ></app-button-panel>
+  </app-content-footer-layout>
+</app-title-content-layout>

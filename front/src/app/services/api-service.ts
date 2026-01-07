@@ -86,6 +86,9 @@ export class ApiService {
   getBots(): Observable<any> {
     return this.http.get(`${this.apiUrl}/bots`);
   }
+  setBotById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/bots/${id}`);
+  }
   createBot(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/bots`, {...data});
   }

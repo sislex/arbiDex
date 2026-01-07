@@ -1,0 +1,36 @@
+<app-header-content-layout>
+  @if (
+    (jobsDataIsLoaded$ | async) &&
+    !(jobsDataIsLoading$ | async) &&
+    (activeBotIsLoaded$ | async) &&
+    !(activeBotIsLoading$ | async) &&
+    !!(jobsDataResponse$ | async)
+    ) {
+    <app-title-table-button
+      header
+      [title]="'Bot ' + currentBotId + 'relations table'"
+    ></app-title-table-button>
+  }
+  @if (
+    (jobsDataIsLoaded$ | async) &&
+    !(jobsDataIsLoading$ | async) &&
+    (activeBotIsLoaded$ | async) &&
+    !(activeBotIsLoading$ | async) &&
+    !!(jobsDataResponse$ | async)
+    ) {
+    <app-ag-grid
+      content
+      [rowData]="(jobsDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      [isRowSelection]="{
+      mode: 'multiRow',
+      selectAll: 'filtered',
+    }"
+      (emitter)="events($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
+</app-header-content-layout>
+
