@@ -17,9 +17,7 @@ export class MainEffects {
       this.actions$.pipe(
         ofType(MainActions.setPreConfig),
         tap((data: any) => {
-          console.log(data.data)
           const jobConfig: IArbitrumMultiQuoteJob = {
-            // jobType: jobData[0].job.jobType || 0,
             jobType: '1',
             rpcUrl: 'https://arb1.arbitrum.io/rpc',
             pairsToQuote: data.data.map((item: any) => ({
