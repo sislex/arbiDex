@@ -1,0 +1,20 @@
+<app-header-content-layout>
+  <app-field-title header [title]="'Select chain'"></app-field-title>
+  <app-select-field
+    [title]="'Chain name'"
+    [list]="chainsList | async"
+    [selected]="formData.chainId"
+    (emitter)="events($event, 'chainId')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Rpc url'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.rpcUrl"
+    (emitter)="events($event, 'rpcUrl')"
+    [type]="'text'"
+    content
+  ></app-input-field>
+</app-header-content-layout>

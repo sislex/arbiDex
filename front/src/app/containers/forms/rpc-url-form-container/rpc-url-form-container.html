@@ -1,0 +1,13 @@
+<app-confirmation-pop-up
+  [title]="data.title"
+  [buttons]="data.buttons"
+  (emitter)="eventClose($event)"
+>
+  <div class="scroll" popupContent>
+    <app-rpc-url-form
+      [formData]="data.form"
+      [chainsList]="data.chainsList"
+      (emitter)="eventsForm($event)"
+    ></app-rpc-url-form>
+  </div>
+</app-confirmation-pop-up>
