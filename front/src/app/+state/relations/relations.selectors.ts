@@ -1,6 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import { RELATIONS_FEATURE_KEY, RelationsState } from './relations.reducer';
-import { getJobsDataResponse, getPairsDataResponse } from '../db-config/db-config.selectors';
+import { getBotsDataResponse, getJobsDataResponse, getPairsDataResponse } from '../db-config/db-config.selectors';
 
 export const selectFeature = createFeatureSelector<RelationsState>(RELATIONS_FEATURE_KEY);
 
@@ -108,6 +108,37 @@ export const getBotRelation = createSelector(
     return jobData.map(job => ({
       ...job,
       active: job.jobId === botData.job.jobId
+    }));
+  }
+);
+
+//====================================================================================================================
+//                                                   Server Relations
+//====================================================================================================================
+
+export const getActiveServer = createSelector(
+  selectFeature,
+  (state: RelationsState) => state.activeServer.response
+);
+export const getActiveServerIsLoading = createSelector(
+  selectFeature,
+  (state: RelationsState) => state.activeServer.isLoading
+);
+export const getActiveServerIsLoaded = createSelector(
+  selectFeature,
+  (state: RelationsState) => state.activeServer.isLoaded
+);
+
+export const getServerRelation = createSelector(
+  getBotsDataResponse,
+  getActiveServer,
+  (botData, serverData: any) => {
+    if (!botData?.length || !serverData?.serverId) {
+      return null;
+    }
+    return botData.map(bot => ({
+      ...bot,
+      active: bot.server.serverId === serverData.serverId
     }));
   }
 );

@@ -1,26 +1,24 @@
 <app-header-content-layout>
   @if (
-    (jobsDataIsLoaded$ | async) &&
-    !(jobsDataIsLoading$ | async) &&
-    (activeBotIsLoaded$ | async) &&
-    !(activeBotIsLoading$ | async) &&
-    !!(botRelation$| async)
+    (botsDataIsLoaded$ | async) &&
+    !(botsDataIsLoading$ | async) &&
+    (activeServerIsLoaded$ | async) &&
+    !(activeServerIsLoading$ | async)
     ) {
     <app-title-table-button
       header
-      [title]="'Bot ' + currentBotId + ' relations table'"
+      [title]="'Server ' + currentServerId + ' relations table'"
     ></app-title-table-button>
   }
   @if (
-    (jobsDataIsLoaded$ | async) &&
-    !(jobsDataIsLoading$ | async) &&
-    (activeBotIsLoaded$ | async) &&
-    !(activeBotIsLoading$ | async) &&
-    !!(botRelation$ | async)
+    (botsDataIsLoaded$ | async) &&
+    !(botsDataIsLoading$ | async) &&
+    (activeServerIsLoaded$ | async) &&
+    !(activeServerIsLoading$ | async)
     ) {
     <app-ag-grid
       content
-      [rowData]="(botRelation$| async)!"
+      [rowData]="(serverRelation$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
       [isRowSelection]="{

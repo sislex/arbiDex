@@ -38,7 +38,7 @@ export class AgGridBotRelationsContainer {
   activeBotIsLoading$ = this.store.select(getActiveBotIsLoading);
   activeBotIsLoaded$ = this.store.select(getActiveBotIsLoaded);
 
-  jobsDataResponse$ = this.store.select(getBotRelation);
+  botRelation$ = this.store.select(getBotRelation);
 
   readonly colDefs: ColDef[] = [
     {
@@ -62,6 +62,29 @@ export class AgGridBotRelationsContainer {
       valueGetter: (params) => {
         return params.data?.jobType || '-';
       },
+    },
+    {
+      field: "chainId",
+      headerName: 'Chain Id',
+      flex: 1,
+      valueGetter() {
+        return '-'
+      }
+    },
+    {
+      field: "rpcUrl",
+      headerName: 'Rpc Url',
+      flex: 1,
+      valueGetter() {
+        return '-'
+      }
+    },
+    {
+      headerName: 'Pairs count',
+      flex: 1,
+      valueGetter() {
+        return '-'
+      }
     },
   ];
 

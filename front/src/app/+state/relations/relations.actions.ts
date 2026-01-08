@@ -76,3 +76,20 @@ export const setActiveBotFailure = createAction(
   '[Relations] setActiveBotFailure',
   props<{ error: string }>()
 );
+
+//====================================================================================================================
+//                                                   Server Relations
+//====================================================================================================================
+
+export const setActiveServer = createAction(
+  '[Relations] setActiveServer',
+  props<{ serverId: number }>()
+);
+export const setActiveServerSuccess = createAction(
+  '[Relations] setActiveServerSuccess',
+  props<{ response: any }>()
+);
+export const setActiveServerFailure = createAction(
+  '[Relations] setActiveServerFailure',
+  props<{ error: string }>()
+);

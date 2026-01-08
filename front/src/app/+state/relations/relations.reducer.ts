@@ -4,7 +4,7 @@ import {
   IJobRelationsAPI, IQuoteRelationsAPI,
 } from '../../models/relations';
 import * as RelationsActions from './relations.actions';
-import { IBotsAPI } from '../../models/db-config';
+import { IBotsAPI, IServersAPI } from '../../models/db-config';
 
 export const RELATIONS_FEATURE_KEY = 'relations';
 
@@ -13,6 +13,7 @@ export interface RelationsState {
   quoteRelationsList: IQuoteRelationsAPI;
   jobRelations: IJobRelationsAPI;
   activeBot: IBotsAPI;
+  activeServer: IServersAPI;
 }
 
 export interface RelationsPartialState {
@@ -24,6 +25,7 @@ export const initialState: RelationsState = {
   quoteRelationsList: emptyAsyncResponse([]),
   jobRelations: emptyAsyncResponse([]),
   activeBot: emptyAsyncResponse([]),
+  activeServer: emptyAsyncResponse([]),
 }
 
 export const relationsReducer = createReducer(
@@ -142,6 +144,36 @@ export const relationsReducer = createReducer(
     activeBot: {
       ...state.activeBot,
       loadingTime: Date.now() - state.activeBot.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(RelationsActions.setActiveServer, (state) => ({
+    ...state,
+    activeServer: {
+      ...state.activeServer,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(RelationsActions.setActiveServerSuccess, (state, {response}) => ({
+    ...state,
+    activeServer: {
+      ...state.activeServer,
+      loadingTime: Date.now() - state.activeServer.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(RelationsActions.setActiveServerFailure, (state, {error}) => ({
+    ...state,
+    activeServer: {
+      ...state.activeServer,
+      loadingTime: Date.now() - state.activeServer.startTime!,
       isLoading: false,
       isLoaded: true,
       error

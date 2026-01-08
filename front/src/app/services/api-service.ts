@@ -157,6 +157,9 @@ export class ApiService {
   getServers(): Observable<any> {
     return this.http.get(`${this.apiUrl}/servers`);
   }
+  setServerById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/servers/${id}`);
+  }
   createServer(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/servers`, {...data});
   }

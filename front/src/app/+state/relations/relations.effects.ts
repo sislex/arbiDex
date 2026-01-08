@@ -200,4 +200,24 @@ export class RelationsEffects {
     )
   );
 
+//====================================================================================================================
+//                                                   Server Relations
+//====================================================================================================================
+
+  setActiveServer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(RelationsActions.setActiveServer),
+      switchMap((action) =>
+        this.apiService.setServerById(action.serverId).pipe(
+          map(response =>
+            RelationsActions.setActiveServerSuccess({ response })
+          ),
+          catchError(error =>
+            of(RelationsActions.setActiveServerFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
 }

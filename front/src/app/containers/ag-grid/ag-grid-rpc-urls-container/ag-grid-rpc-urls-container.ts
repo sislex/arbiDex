@@ -1,40 +1,35 @@
 import { Component, inject } from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
-import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
-import { ColDef } from 'ag-grid-community';
-import { DeleteDialogService } from '../../../services/delete-dialog-service';
+import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { Store } from '@ngrx/store';
-import { ActionsContainer } from '../../actions-container/actions-container';
+import { DeleteDialogService } from '../../../services/delete-dialog-service';
+import { Router } from '@angular/router';
 import {
   getChainsDataResponse,
   getJobsDataIsLoaded,
   getJobsDataIsLoading,
   getJobsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { createJob, deletingJob, editJob, setJobsData } from '../../../+state/db-config/db-config.actions';
-import { Loader } from '../../../components/loader/loader';
-import { AsyncPipe } from '@angular/common';
-import { Router } from '@angular/router';
-import { JobDialogService } from '../../../services/job-dialog-service';
+import { ColDef } from 'ag-grid-community';
+import { ActionsContainer } from '../../actions-container/actions-container';
+import { RpcUrlsDialogService } from '../../../services/rpc-urls-dialog-service';
 import { map } from 'rxjs';
 
 @Component({
-  selector: 'app-ag-grid-jobs-container',
+  selector: 'app-ag-grid-rpc-urls-container',
   imports: [
     AgGrid,
-    HeaderContentLayout,
     TitleTableButton,
-    Loader,
-    AsyncPipe,
+    HeaderContentLayout,
   ],
-  templateUrl: './ag-grid-jobs-container.html',
-  styleUrl: './ag-grid-jobs-container.scss',
+  templateUrl: './ag-grid-rpc-urls-container.html',
+  styleUrl: './ag-grid-rpc-urls-container.scss',
 })
-export class AgGridJobsContainer {
+export class AgGridRpcUrlsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
-  readonly jobDialog = inject(JobDialogService);
+  readonly rpcUrlDialog = inject(RpcUrlsDialogService);
   readonly router = inject(Router);
 
   jobsDataResponse$ = this.store.select(getJobsDataResponse);
@@ -52,18 +47,8 @@ export class AgGridJobsContainer {
 
   readonly colDefs: ColDef[] = [
     {
-      field: "jobId",
-      headerName: 'Job ID',
-      flex: 1,
-    },
-    {
-      field: "jobType",
-      headerName: 'Job Type',
-      flex: 1,
-    },
-    {
-      field: "chainId",
-      headerName: 'Chain Id',
+      field: "rpcUrlId",
+      headerName: 'Rpc Url Id',
       flex: 1,
       valueGetter() {
         return '-'
@@ -78,7 +63,8 @@ export class AgGridJobsContainer {
       }
     },
     {
-      headerName: 'Pairs count',
+      field: "chainId",
+      headerName: 'Chain Id',
       flex: 1,
       valueGetter() {
         return '-'
@@ -96,16 +82,13 @@ export class AgGridJobsContainer {
 
   readonly defaultColDef: ColDef = {
     sortable: false,
+    cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
-    cellStyle: {
-      textAlign: 'center',
-      cursor: 'pointer',
-    },
   };
 
   constructor() {
-    this.store.dispatch(setJobsData());
+    // this.store.dispatch(setJobsData());
   }
 
   onAction($event: any, row: any) {
@@ -124,31 +107,32 @@ export class AgGridJobsContainer {
         this.openCreateDialog();
       }
     } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
-      this.router.navigate([`/data-view/jobs/${$event.row.data.jobId}`]);
+      // this.router.navigate([`/data-view/rpc/${$event.row.data.rpcUrlId}`]);
     }
   }
 
   openCreateDialog() {
-    this.jobDialog.openCreate(this.chainsList$).subscribe(result => {
+    this.rpcUrlDialog.openCreate(this.chainsList$).subscribe(result => {
       if (result?.data === 'add') {
-        this.store.dispatch(createJob({ data: result.formData }));
+        // this.store.dispatch(createJob({ data: result.formData }));
       }
     });
   }
 
   openEditDialog(row: any) {
-    this.jobDialog.openEdit(row, this.chainsList$).subscribe(result => {
+    this.rpcUrlDialog.openEdit(row, this.chainsList$,).subscribe(result => {
       if (result?.data === 'save') {
-        this.store.dispatch(editJob({ data: result.formData }));
+        // this.store.dispatch(editJob({ data: result.formData }));
       }
     });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row.jobId, 'job').subscribe(result => {
+    this.deleteDialog.openDelete(row.rpcUrlId, 'rpc').subscribe(result => {
       if (result?.data === 'yes') {
-        this.store.dispatch(deletingJob({ jobId: row.jobId }));
+        // this.store.dispatch(deletingJob({ jobId: row.jobId }));
       }
     });
   }
+
 }

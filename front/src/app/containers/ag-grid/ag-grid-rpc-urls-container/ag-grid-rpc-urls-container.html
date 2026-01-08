@@ -1,22 +1,22 @@
 <app-header-content-layout>
-  @if ((serversDataIsLoaded$ | async) && !(serversDataIsLoading$ | async)) {
+<!--  @if ((jobsDataIsLoaded$ | async) && !(jobsDataIsLoading$ | async)) {-->
     <app-title-table-button
       header
-      [title]="'Servers table'"
+      [title]="'Rpc urls table'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
-  }
-  @if ((serversDataIsLoaded$ | async) && !(serversDataIsLoading$ | async)) {
+<!--  }-->
+<!--  @if ((jobsDataIsLoaded$ | async) && !(jobsDataIsLoading$ | async)) {-->
     <app-ag-grid
       content
-      [rowData]="(serversDataResponse$ | async)!"
+      [rowData]="[{rpcUrlId: '', rpcUrl: '', chainId: ''}]"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
       (emitter)="actions($event)"
     ></app-ag-grid>
-  } @else {
-    <app-loader header></app-loader>
-  }
+<!--  } @else {-->
+<!--    <app-loader header></app-loader>-->
+<!--  }-->
 </app-header-content-layout>
 

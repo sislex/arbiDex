@@ -90,6 +90,13 @@ export class AgGridBotsContainer {
       },
     },
     {
+      headerName: 'Pairs count',
+      flex: 1,
+      valueGetter() {
+        return '-'
+      }
+    },
+    {
       headerName: 'Actions',
       width: 125,
       cellRenderer: ActionsContainer,

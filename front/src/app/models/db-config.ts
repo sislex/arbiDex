@@ -114,10 +114,27 @@ export interface IJobsAPI extends API {
 export interface IJobs {
   jobId: number;
   jobType: string;
+  chainId: string;
+  rpcUrl: IRpcUrl;
+  pairs: number;
 }
 export interface IJobsCreate {
   jobId: number;
   jobType: string;
+}
+
+export interface IRpcUrlApi extends API {
+  response: IRpcUrl[];
+}
+export interface IRpcUrl {
+  rpcUrlId: number;
+  rpcUrl: string;
+  chain: IChains;
+}
+export interface IRpcUrlCreate {
+  rpcUrlId: number;
+  rpcUrl: string;
+  chainId: number;
 }
 
 export interface IBotsAPI extends API {
@@ -129,6 +146,7 @@ export interface IBots {
   description: string;
   server: IServers;
   job: IJobs;
+  pairs: number;
 }
 export interface IBotsCreate {
   botId: number;
