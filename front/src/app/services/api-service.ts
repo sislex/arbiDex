@@ -200,4 +200,22 @@ export class ApiService {
   deleteJobRelations(ids: number[]): Observable<any> {
     return this.http.delete(`${this.apiUrl}/quote-job-relations`, { body: ids });
   }
+
+
+  //====================================================================================================================
+  //                                                   Rpc Urls Relations
+  //====================================================================================================================
+
+  getRpcUrls(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/rpc-urls`);
+  }
+  createRpcUrl(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/rpc-urls`, {...data});
+  }
+  editRpcUrl(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/rpc-urls/${id}`, data);
+  }
+  deletingRpcUrl(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/rpc-urls/${id}`);
+  }
 }

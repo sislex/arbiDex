@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { RpcUrlsService } from './rpc-urls.service';
 import { RpcUrlsDto } from '../dtos/rpc-urls-dto/rpc-urls.dto';
 

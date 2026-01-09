@@ -1,6 +1,6 @@
 export class RpcUrlsDto {
-  rpcUrlsId: number;
+  rpcUrlsId?: number;
   rpcUrl: string;
-  jobId: number;
+  // jobId: number;
   chainId: number;
 }
