@@ -22,6 +22,12 @@ export class BotsService {
       description: createBotDto.description,
       server: server,
       job: job,
+      paused: createBotDto.paused,
+      isRepeat: createBotDto.isRepeat,
+      delayBetweenRepeat: createBotDto.delayBetweenRepeat,
+      maxJobs: createBotDto.maxJobs,
+      maxErrors: createBotDto.maxErrors,
+      timeoutMs: createBotDto.timeoutMs,
     });
     return await this.botRepository.save(bot);
   }
@@ -63,6 +69,13 @@ export class BotsService {
     bot.description = updateBotDto.description;
     bot.server = server;
     bot.job = job;
+
+    bot.paused = updateBotDto.paused;
+    bot.isRepeat = updateBotDto.isRepeat;
+    bot.delayBetweenRepeat = updateBotDto.delayBetweenRepeat;
+    bot.maxJobs = updateBotDto.maxJobs;
+    bot.maxErrors = updateBotDto.maxErrors;
+    bot.timeoutMs = updateBotDto.timeoutMs;
 
     return await this.botRepository.save(bot);
   }

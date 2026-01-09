@@ -1,0 +1,12 @@
+<div class="custom-toggle">
+  @if (title) {
+    <span class="toggle-title">{{ title }}</span>
+  }
+  <mat-slide-toggle
+    [(ngModel)]="isChecked"
+    (ngModelChange)="onToggle(isChecked)"
+  >
+    {{ description }}
+  </mat-slide-toggle>
+</div>
+

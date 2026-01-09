@@ -1,0 +1,10 @@
+.custom-toggle {
+  display: flex;
+  flex-direction: column;
+
+  .toggle-title {
+    font-size: 12px;
+    font-weight: 300;
+    margin-bottom: 4px;
+  }
+}

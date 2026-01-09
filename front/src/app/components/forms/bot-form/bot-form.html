@@ -41,3 +41,68 @@
     ></app-select-field>
   </app-header-content-layout>
 }
+
+<!--________________________________________________________________________________-->
+<!--fields hidden in the table-->
+<!--________________________________________________________________________________-->
+
+<div class="row">
+  <app-header-content-layout>
+    <app-field-title header [title]="'Is Paused'"></app-field-title>
+    <app-toggle
+      [isChecked]="formData.paused"
+      (emitter)="events($event, 'paused')"
+      content
+    ></app-toggle>
+  </app-header-content-layout>
+
+  <app-header-content-layout>
+    <app-field-title header [title]="'Is repeat'"></app-field-title>
+    <app-toggle
+      [isChecked]="formData.isRepeat"
+      (emitter)="events($event, 'isRepeat')"
+      content
+    ></app-toggle>
+  </app-header-content-layout>
+</div>
+
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Delay between repeat'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.delayBetweenRepeat"
+    [type]="'number'"
+    (emitter)="events($event, 'delayBetweenRepeat')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Max jobs'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.maxJobs"
+    [type]="'number'"
+    (emitter)="events($event, 'maxJobs')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Max errors'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.maxErrors"
+    [type]="'number'"
+    (emitter)="events($event, 'maxErrors')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Timeout ms'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.timeoutMs"
+    [type]="'number'"
+    (emitter)="events($event, 'timeoutMs')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
