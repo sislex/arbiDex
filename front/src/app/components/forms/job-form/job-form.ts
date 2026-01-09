@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IJobs } from '../../../models/db-config';
 import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
 import { InputField } from '../../input-field/input-field';
@@ -19,16 +18,19 @@ import { SelectField } from '../../select-field/select-field';
   styleUrl: './job-form.scss',
 })
 export class JobForm {
-  @Input() formData!: IJobs;
+  @Input() formData!: any;
   @Input() chainsList: any = [];
+  @Input() rpcUrlList: any = [];
 
   @Output() emitter = new EventEmitter();
 
-  events(event: any, field: 'jobType' | 'chainId'| '') {
+  events(event: any, field: 'jobType' | 'chainId'| 'rpcUrl') {
     this.formData = {
       ...this.formData,
       [field]: event.data,
     };
+
+    console.log(this.formData)
 
     this.emitter.emit(this.formData);
   };

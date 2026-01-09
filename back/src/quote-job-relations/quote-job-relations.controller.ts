@@ -13,9 +13,9 @@ export class QuoteJobRelationsController {
     return this.quoteJobRelationsService.createMany(createQuoteJobRelationDto);
   }
 
-  @Get('by-quote-id/:id')
+  @Get('by-job-id/:id')
   async findByQuoteId(@Param('id') id: string) {
-    return await this.quoteJobRelationsService.findByQuoteId(id);
+    return await this.quoteJobRelationsService.findByJobId(id);
   }
 
   @Delete()

@@ -147,6 +147,12 @@ export interface IBots {
   server: IServers;
   job: IJobs;
   pairs: number;
+  paused: boolean;
+  isRepeat: boolean;
+  delayBetweenRepeat: number;
+  maxJobs: number;
+  maxErrors: number;
+  timeoutMs: number;
 }
 export interface IBotsCreate {
   botId: number;
@@ -154,6 +160,12 @@ export interface IBotsCreate {
   description: string;
   serverId: number;
   jobId: number;
+  paused: boolean;
+  isRepeat: boolean;
+  delayBetweenRepeat: number;
+  maxJobs: number;
+  maxErrors: number;
+  timeoutMs: number;
 }
 
 export interface IServersAPI extends API {

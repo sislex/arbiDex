@@ -16,7 +16,7 @@ export class BotsService {
   ) {}
   async create(createBotDto: BotDto) {
     const server = await this.serverService.findOne(createBotDto.serverId);
-    const job = await this.jobService.findOne(createBotDto.jobId);
+    const job = await this.jobService.findOneWithPairs(createBotDto.jobId);
     const bot = this.botRepository.create({
       botName: createBotDto.botName,
       description: createBotDto.description,
@@ -27,8 +27,15 @@ export class BotsService {
   }
 
   async findAll() {
+    // const jobPairsCount = await this.jobService.findOneWithPairs(createBotDto.jobId);
     return await this.botRepository.find({
-      relations: ['server', 'job'],
+      relations: {
+        server: true,
+        job: {
+          chain: true,
+          rpcUrl: true,
+        },
+      },
       order: {
         botId: 'DESC',
       },

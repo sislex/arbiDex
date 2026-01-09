@@ -43,13 +43,49 @@ export class AgGridServerRelationsContainer {
     {
       // field: "botName",
       headerName: 'Bot Name',
-      width: 150,
+      flex: 1,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
         return params.data?.botName || '-';
+      },
+    },
+    {
+      headerName: 'Chain Id',
+      flex: 1,
+      filter: 'agTextColumnFilter',
+      filterParams: {
+        defaultToNothingSelected: true,
+      },
+      valueGetter: (params) => {
+        return '-';
+        // return params.data?.botName || '-';
+      },
+    },
+    {
+      headerName: 'Job Name',
+      flex: 1,
+      filter: 'agTextColumnFilter',
+      filterParams: {
+        defaultToNothingSelected: true,
+      },
+      valueGetter: (params) => {
+        return '-';
+        // return params.data?.botName || '-';
+      },
+    },
+    {
+      headerName: 'Pairs count',
+      flex: 1,
+      filter: 'agTextColumnFilter',
+      filterParams: {
+        defaultToNothingSelected: true,
+      },
+      valueGetter: (params) => {
+        return '-';
+        // return params.data?.botName || '-';
       },
     },
   ];

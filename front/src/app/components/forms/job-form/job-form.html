@@ -10,6 +10,17 @@
 </app-header-content-layout>
 
 <app-header-content-layout>
+  <app-field-title header [title]="'Select Rpc Url'"></app-field-title>
+  <app-select-field
+    [title]="'Rpc Url'"
+    [list]="rpcUrlList | async"
+    [selected]="formData.rpcUrlId"
+    (emitter)="events($event, 'rpcUrl')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
   <app-field-title header [title]="'Type'"></app-field-title>
   <app-input-field
     [inputValue]="formData.jobType"

@@ -10,7 +10,7 @@ import {
   getChainsDataResponse,
   getJobsDataIsLoaded,
   getJobsDataIsLoading,
-  getJobsDataResponse,
+  getJobsDataResponse, getRpcUrlDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { createJob, deletingJob, editJob, setJobsData } from '../../../+state/db-config/db-config.actions';
 import { Loader } from '../../../components/loader/loader';
@@ -50,6 +50,15 @@ export class AgGridJobsContainer {
     )
   );
 
+  rpcUrlList$ = this.store.select(getRpcUrlDataResponse).pipe(
+    map(item =>
+      item.map(item => ({
+        id: item.rpcUrlId,
+        name: item.rpcUrl,
+      }))
+    )
+  );
+
   readonly colDefs: ColDef[] = [
     {
       field: "jobId",
@@ -62,27 +71,23 @@ export class AgGridJobsContainer {
       flex: 1,
     },
     {
-      field: "chainId",
       headerName: 'Chain Id',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
+      valueGetter: (params) => {
+        return params.data?.chain?.chainId || '-';
+      },
     },
     {
-      field: "rpcUrl",
       headerName: 'Rpc Url',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
+      valueGetter: (params) => {
+        return params.data?.rpcUrl?.rpcUrlId || '-';
+      },
     },
     {
+      field: "pairsCount",
       headerName: 'Pairs count',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
     },
     {
       headerName: 'Actions',
@@ -129,7 +134,7 @@ export class AgGridJobsContainer {
   }
 
   openCreateDialog() {
-    this.jobDialog.openCreate(this.chainsList$).subscribe(result => {
+    this.jobDialog.openCreate(this.chainsList$, this.rpcUrlList$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createJob({ data: result.formData }));
       }
@@ -137,7 +142,7 @@ export class AgGridJobsContainer {
   }
 
   openEditDialog(row: any) {
-    this.jobDialog.openEdit(row, this.chainsList$).subscribe(result => {
+    this.jobDialog.openEdit(row, this.chainsList$, this.rpcUrlList$).subscribe(result => {
       if (result?.data === 'save') {
         this.store.dispatch(editJob({ data: result.formData }));
       }

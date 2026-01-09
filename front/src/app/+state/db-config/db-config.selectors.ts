@@ -236,3 +236,28 @@ export const getServersDataIsLoaded = createSelector(
   selectFeature,
   (state: DbConfigState) => state.servers.isLoaded
 );
+
+//====================================================================================================================
+//                                                   Rpc Urls
+//====================================================================================================================
+
+export const getRpcUrlDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.rpcUrls.response
+);
+// export const getServersDataFailure = createSelector(
+//   selectFeature,
+//   (state: DbConfigState) => state.servers.error
+// );
+// export const getServersDataIsFailure = createSelector(
+//   selectFeature,
+//   (state: DbConfigState) => !!state.servers.error
+// );
+// export const getServersDataIsLoading = createSelector(
+//   selectFeature,
+//   (state: DbConfigState) => state.servers.isLoading
+// );
+// export const getServersDataIsLoaded = createSelector(
+//   selectFeature,
+//   (state: DbConfigState) => state.servers.isLoaded
+// );

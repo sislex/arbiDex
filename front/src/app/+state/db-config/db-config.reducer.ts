@@ -8,7 +8,9 @@ import {
   IQuotesAPI,
   IPoolsAPI,
   IServersAPI,
-  ITokensAPI, IPairsAPI,
+  ITokensAPI,
+  IPairsAPI,
+  IRpcUrlApi,
 } from '../../models/db-config';
 import {emptyAsyncResponse} from './configs';
 
@@ -25,6 +27,7 @@ export interface DbConfigState {
   jobs: IJobsAPI;
   bots: IBotsAPI;
   servers: IServersAPI;
+  rpcUrls: IRpcUrlApi;
 
   versions: string[];
 }
@@ -44,6 +47,7 @@ export const initialState: DbConfigState = {
   jobs: emptyAsyncResponse([]),
   bots: emptyAsyncResponse([]),
   servers: emptyAsyncResponse([]),
+  rpcUrls: emptyAsyncResponse([]),
 
   versions: ['v2', 'v3', 'v4'],
 }

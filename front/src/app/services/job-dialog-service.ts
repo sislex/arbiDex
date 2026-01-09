@@ -10,6 +10,7 @@ export class JobDialogService {
   private dialog = inject(MatDialog);
   openCreate(
     chainsList$: Observable<any>,
+    rpcUrlList$: Observable<any>,
   ) {
     return this.dialog.open(JobFormContainer, {
       width: '90%',
@@ -22,15 +23,18 @@ export class JobDialogService {
         title: 'Add new job',
         buttons: ['add', 'cancel'],
         chainsList: chainsList$,
+        rpcUrlList: rpcUrlList$,
         form: {
           jobId: null,
-          jobType: ''
+          jobType: '',
+          chainId: null,
+          rpcUrlId: null
         }
       }
     }).afterClosed();
   }
 
-  openEdit(row: any, chainsList$: Observable<any>) {
+  openEdit(row: any, chainsList$: Observable<any>, rpcUrlList$: Observable<any>) {
     return this.dialog.open(JobFormContainer, {
       width: '90%',
       height: '90%',
@@ -42,7 +46,13 @@ export class JobDialogService {
         title: 'Edit job',
         buttons: ['save', 'cancel'],
         chainsList: chainsList$,
-        form: { ...row }
+        rpcUrlList: rpcUrlList$,
+        form: {
+          jobId: row.jobId,
+          jobType: row.jobType,
+          chainId: row.chain.chainId,
+          rpcUrlId: row.rpcUrl.rpcUrlId,
+        }
       }
     }).afterClosed();
   }

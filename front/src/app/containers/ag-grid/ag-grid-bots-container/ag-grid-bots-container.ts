@@ -92,9 +92,9 @@ export class AgGridBotsContainer {
     {
       headerName: 'Pairs count',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
+      valueGetter: (params) => {
+        return params.data?.job?.pairsCount || '-';
+      },
     },
     {
       headerName: 'Actions',
@@ -117,7 +117,7 @@ export class AgGridBotsContainer {
   };
 
   constructor() {
-      this.store.dispatch(setBotsData());
+    this.store.dispatch(setBotsData());
   }
 
   onAction($event: any, row: any) {
@@ -149,11 +149,11 @@ export class AgGridBotsContainer {
   }
 
   openEditDialog(row: any) {
-      this.botDialog.openEdit(row, this.serversList$, this.jobList$).subscribe(result => {
-        if (result?.data === 'save') {
-          this.store.dispatch(editBot({ data: result.formData }));
-        }
-      });
+    this.botDialog.openEdit(row, this.serversList$, this.jobList$).subscribe(result => {
+      if (result?.data === 'save') {
+        this.store.dispatch(editBot({ data: result.formData }));
+      }
+    });
   }
 
   openDeleteDialog(row: any) {

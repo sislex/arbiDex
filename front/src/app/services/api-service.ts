@@ -192,7 +192,7 @@ export class ApiService {
   //====================================================================================================================
 
   getJobRelationsByQuoteId(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/quote-job-relations/by-quote-id/${id}`);
+    return this.http.get(`${this.apiUrl}/quote-job-relations/by-job-id/${id}`);
   }
   createJobRelations(data: any[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/quote-job-relations`, data);

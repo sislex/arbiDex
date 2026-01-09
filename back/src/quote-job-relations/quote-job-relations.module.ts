@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { QuoteJobRelationsService } from './quote-job-relations.service';
 import { QuoteJobRelationsController } from './quote-job-relations.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,7 +12,7 @@ import { PairQuoteRelationsModule } from '../pair-quote-relations/pair-quote-rel
 @Module({
   imports: [
     TypeOrmModule.forFeature([Jobs, Quotes, QuoteJobRelations]),
-    JobsModule,
+    forwardRef(() => JobsModule),
     QuotesModule,
     PairQuoteRelationsModule,
   ],
