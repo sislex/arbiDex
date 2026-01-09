@@ -24,10 +24,8 @@ export class RpcUrlsDialogService {
         buttons: ['add', 'cancel'],
         chainsList: chainsList$,
         form: {
-          amount: '',
-          side: 'exactIn',
-          blockTag: 'latest',
-          quoteSource: ''
+          rpcUrl: '',
+          chainId: null
         }
       }
     }).afterClosed();
@@ -48,7 +46,11 @@ export class RpcUrlsDialogService {
         title: 'Edit quote',
         buttons: ['save', 'cancel'],
         chainsList: chainsList$,
-        form: { ...row }
+        form: {
+          rpcUrlId: row.rpcUrlId,
+          rpcUrl: row.rpcUrl,
+          chainId: row.chain.chainId,
+        }
       }
     }).afterClosed();
   }

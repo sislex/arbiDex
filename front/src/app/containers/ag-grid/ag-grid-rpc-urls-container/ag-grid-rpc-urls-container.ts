@@ -7,15 +7,15 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Router } from '@angular/router';
 import {
   getChainsDataResponse,
-  getJobsDataIsLoaded,
-  getJobsDataIsLoading,
-  getJobsDataResponse, getRpcUrlDataResponse, getRpcUrlsDataIsLoaded, getRpcUrlsDataIsLoading,
+  getRpcUrlDataResponse,
+  getRpcUrlsDataIsLoaded,
+  getRpcUrlsDataIsLoading,
 } from '../../../+state/db-config/db-config.selectors';
 import { ColDef } from 'ag-grid-community';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { RpcUrlsDialogService } from '../../../services/rpc-urls-dialog-service';
 import { map } from 'rxjs';
-import { setRpcUrlsData, setTokensData } from '../../../+state/db-config/db-config.actions';
+import { createRpcUrl, deletingRpcUrl, editRpcUrl, setRpcUrlsData } from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 
@@ -105,15 +105,13 @@ export class AgGridRpcUrlsContainer {
       if (note === 'add') {
         this.openCreateDialog();
       }
-    } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
-      // this.router.navigate([`/data-view/rpc/${$event.row.data.rpcUrlId}`]);
     }
   }
 
   openCreateDialog() {
     this.rpcUrlDialog.openCreate(this.chainsList$).subscribe(result => {
       if (result?.data === 'add') {
-        // this.store.dispatch(createJob({ data: result.formData }));
+        this.store.dispatch(createRpcUrl({ data: result.formData }));
       }
     });
   }
@@ -121,7 +119,7 @@ export class AgGridRpcUrlsContainer {
   openEditDialog(row: any) {
     this.rpcUrlDialog.openEdit(row, this.chainsList$,).subscribe(result => {
       if (result?.data === 'save') {
-        // this.store.dispatch(editJob({ data: result.formData }));
+        this.store.dispatch(editRpcUrl({ data: result.formData }));
       }
     });
   }
@@ -129,7 +127,7 @@ export class AgGridRpcUrlsContainer {
   openDeleteDialog(row: any) {
     this.deleteDialog.openDelete(row.rpcUrlId, 'rpc').subscribe(result => {
       if (result?.data === 'yes') {
-        // this.store.dispatch(deletingJob({ jobId: row.jobId }));
+        this.store.dispatch(deletingRpcUrl({ rpcUrlId: row.rpcUrlId }));
       }
     });
   }
