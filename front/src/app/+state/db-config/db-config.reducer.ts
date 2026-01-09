@@ -324,4 +324,34 @@ export const dbConfigReducer = createReducer(
       error
     }
   })),
+
+  on(DbConfigActions.setRpcUrlsData, (state) => ({
+    ...state,
+    rpcUrls: {
+      ...state.rpcUrls,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setRpcUrlsDataSuccess, (state, {response}) => ({
+    ...state,
+    rpcUrls: {
+      ...state.rpcUrls,
+      loadingTime: Date.now() - state.rpcUrls.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setRpcUrlsDataFailure, (state, {error}) => ({
+    ...state,
+    rpcUrls: {
+      ...state.rpcUrls,
+      loadingTime: Date.now() - state.rpcUrls.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
 )

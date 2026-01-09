@@ -28,6 +28,7 @@ export class AgGrid implements OnChanges{
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    console.log(this.rowData)
     if (changes['rowData'] && this.gridApi) {
       this.selectRows();
     }

@@ -742,4 +742,83 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
+//====================================================================================================================
+//                                                   Rpc Urls
+//====================================================================================================================
+
+  setRpcUrlsData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setRpcUrlsData),
+      switchMap(() =>
+        this.apiService.getRpcUrls().pipe(
+          map(response =>
+            DbConfigActions.setRpcUrlsDataSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setRpcUrlsDataFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
+  createRpcUrl$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createRpcUrl),
+        switchMap(action =>
+          this.apiService.createRpcUrl({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(DbConfigActions.setRpcUrlsData());
+              this._snackBar.open(`Rpc Url is created: ${response.rpcUrlId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  editRpcUrl$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editRpcUrl),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editRpcUrl(data.rpcUrlId, data).pipe(
+            tap(response => {
+              this.store.dispatch(DbConfigActions.setRpcUrlsData());
+              this._snackBar.open(`Rpc Url is update: ${response.rpcUrlId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  deletingRpcUrl$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingRpcUrl),
+        switchMap((action) => {
+
+          return this.apiService.deletingRpcUrl(action.rpcUrlId).pipe(
+            tap(response => {
+              this.store.dispatch(DbConfigActions.setRpcUrlsData());
+              this._snackBar.open(`RpcUrl is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
 }

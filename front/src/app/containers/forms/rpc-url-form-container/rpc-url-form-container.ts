@@ -4,14 +4,12 @@ import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confi
 import { RpcUrlForm } from '../../../components/forms/rpc-url-form/rpc-url-form';
 import { setChainsData } from '../../../+state/db-config/db-config.actions';
 import { Store } from '@ngrx/store';
-import { PoolForm } from '../../../components/forms/pool-form/pool-form';
 
 @Component({
   selector: 'app-rpc-url-form-container',
   imports: [
     ConfirmationPopUp,
     RpcUrlForm,
-    PoolForm,
   ],
   templateUrl: './rpc-url-form-container.html',
   styleUrl: './rpc-url-form-container.scss',

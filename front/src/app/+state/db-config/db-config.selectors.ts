@@ -245,19 +245,19 @@ export const getRpcUrlDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.rpcUrls.response
 );
-// export const getServersDataFailure = createSelector(
-//   selectFeature,
-//   (state: DbConfigState) => state.servers.error
-// );
-// export const getServersDataIsFailure = createSelector(
-//   selectFeature,
-//   (state: DbConfigState) => !!state.servers.error
-// );
-// export const getServersDataIsLoading = createSelector(
-//   selectFeature,
-//   (state: DbConfigState) => state.servers.isLoading
-// );
-// export const getServersDataIsLoaded = createSelector(
-//   selectFeature,
-//   (state: DbConfigState) => state.servers.isLoaded
-// );
+export const getRpcUrlsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.rpcUrls.error
+);
+export const getRpcUrlsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.rpcUrls.error
+);
+export const getRpcUrlsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.rpcUrls.isLoading
+);
+export const getRpcUrlsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.rpcUrls.isLoaded
+);

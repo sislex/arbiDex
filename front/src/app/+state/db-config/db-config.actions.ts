@@ -8,7 +8,7 @@ import {
   ITokensCreate,
   IBotsCreate,
   IServersCreate,
-  IPairsCreate,
+  IPairsCreate, IRpcUrlCreate,
 } from '../../models/db-config';
 
 export const setServerList = createAction('[DbConfig] setServerList');
@@ -245,4 +245,30 @@ export const editServer = createAction(
 export const deletingServer = createAction(
   '[DbConfig] deletingServer',
   props<{ serverId: number }>()
+);
+
+//====================================================================================================================
+//                                                   Rpc Urls
+//====================================================================================================================
+
+export const setRpcUrlsData = createAction('[DbConfig] setRpcUrlsData');
+export const setRpcUrlsDataSuccess = createAction(
+  '[DbConfig] setRpcUrlsDataSuccess',
+  props<{ response: any }>()
+);
+export const setRpcUrlsDataFailure = createAction(
+  '[DbConfig] setRpcUrlsDataFailure',
+  props<{ error: string }>()
+);
+export const createRpcUrl = createAction(
+  '[DbConfig] createRpcUrl',
+  props<{ data: IRpcUrlCreate }>()
+);
+export const editRpcUrl = createAction(
+  '[DbConfig] editRpcUrl',
+  props<{ data: IRpcUrlCreate }>()
+);
+export const deletingRpcUrl = createAction(
+  '[DbConfig] deletingRpcUrl',
+  props<{ rpcUrlId: number }>()
 );

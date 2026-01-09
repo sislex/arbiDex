@@ -9,12 +9,15 @@ import {
   getChainsDataResponse,
   getJobsDataIsLoaded,
   getJobsDataIsLoading,
-  getJobsDataResponse,
+  getJobsDataResponse, getRpcUrlDataResponse, getRpcUrlsDataIsLoaded, getRpcUrlsDataIsLoading,
 } from '../../../+state/db-config/db-config.selectors';
 import { ColDef } from 'ag-grid-community';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { RpcUrlsDialogService } from '../../../services/rpc-urls-dialog-service';
 import { map } from 'rxjs';
+import { setRpcUrlsData, setTokensData } from '../../../+state/db-config/db-config.actions';
+import { AsyncPipe } from '@angular/common';
+import { Loader } from '../../../components/loader/loader';
 
 @Component({
   selector: 'app-ag-grid-rpc-urls-container',
@@ -22,6 +25,8 @@ import { map } from 'rxjs';
     AgGrid,
     TitleTableButton,
     HeaderContentLayout,
+    AsyncPipe,
+    Loader,
   ],
   templateUrl: './ag-grid-rpc-urls-container.html',
   styleUrl: './ag-grid-rpc-urls-container.scss',
@@ -32,9 +37,10 @@ export class AgGridRpcUrlsContainer {
   readonly rpcUrlDialog = inject(RpcUrlsDialogService);
   readonly router = inject(Router);
 
-  jobsDataResponse$ = this.store.select(getJobsDataResponse);
-  jobsDataIsLoading$ = this.store.select(getJobsDataIsLoading);
-  jobsDataIsLoaded$ = this.store.select(getJobsDataIsLoaded);
+  rpcUrlsDataResponse$ = this.store.select(getRpcUrlDataResponse);
+  rpcUrlsDataIsLoading$ = this.store.select(getRpcUrlsDataIsLoading);
+  rpcUrlsDataIsLoaded$ = this.store.select(getRpcUrlsDataIsLoaded);
+
 
   chainsList$ = this.store.select(getChainsDataResponse).pipe(
     map(item =>
@@ -50,25 +56,18 @@ export class AgGridRpcUrlsContainer {
       field: "rpcUrlId",
       headerName: 'Rpc Url Id',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
     },
     {
       field: "rpcUrl",
       headerName: 'Rpc Url',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
     },
     {
-      field: "chainId",
       headerName: 'Chain Id',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
+      valueGetter: (params) => {
+        return params.data?.chain?.chainId || '-';
+      },
     },
     {
       headerName: 'Actions',
@@ -88,7 +87,7 @@ export class AgGridRpcUrlsContainer {
   };
 
   constructor() {
-    // this.store.dispatch(setJobsData());
+    this.store.dispatch(setRpcUrlsData());
   }
 
   onAction($event: any, row: any) {

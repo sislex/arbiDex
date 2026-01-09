@@ -4,14 +4,12 @@ import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confi
 import { JobForm } from '../../../components/forms/job-form/job-form';
 import { setChainsData } from '../../../+state/db-config/db-config.actions';
 import { Store } from '@ngrx/store';
-import { RpcUrlForm } from '../../../components/forms/rpc-url-form/rpc-url-form';
 
 @Component({
   selector: 'app-job-form-container',
   imports: [
     ConfirmationPopUp,
     JobForm,
-    RpcUrlForm,
   ],
   templateUrl: './job-form-container.html',
   styleUrl: './job-form-container.scss',
