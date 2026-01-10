@@ -93,7 +93,7 @@ export class AgGridBotsContainer {
       headerName: 'Pairs count',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.job?.pairsCount || '-';
+        return params.data?.job?.quoteJobRelations.length || '-';
       },
     },
     {

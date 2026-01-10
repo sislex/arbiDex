@@ -22,7 +22,7 @@ import { AsyncPipe } from '@angular/common';
 import { ButtonPanel } from '../../../components/button-panel/button-panel';
 import { ContentFooterLayout } from '../../../components/layouts/content-footer-layout/content-footer-layout';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
-import { setPreConfig } from '../../../+state/main/main.actions';
+import { setJobPreConfig } from '../../../+state/main/main.actions';
 
 @Component({
   selector: 'app-job-page-container',
@@ -79,7 +79,7 @@ export class JobPageContainer {
             this.setCreateAndRemoveLists(mappedOldRelations, this.relatedJobRelationsIds);
           });
       } else if ($event.data === 'get config') {
-        this.store.dispatch(setPreConfig({ data: this.relatedFullJobData }))
+        this.store.dispatch(setJobPreConfig({ data: this.relatedFullJobData, jobId: this.currentJobId}))
       } else if ($event.data === 'cancel') {
         console.log('cancelTO')
       }
@@ -111,7 +111,6 @@ export class JobPageContainer {
 
   sendActions(createList: IJobRelationCreate[], deleteList: number[]) {
     if (createList.length !== 0) {
-      console.log('createList', createList)
       this.store.dispatch(createJobRelations({ jobId: this.currentJobId, data: createList }));
     }
     if (deleteList.length !==0) {

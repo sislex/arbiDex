@@ -23,7 +23,25 @@ export class JobsService {
 
   async findAll() {
     const jobData = await this.jobRepository.find({
-      relations: ['chain', 'rpcUrl'],
+      relations: {
+        chain: true,
+        rpcUrl: true,
+        quoteJobRelations: {
+          quoteRelation: {
+            quote: true,
+            pair: {
+              tokenIn: true,
+              tokenOut: true,
+              pool: {
+                dex: true,
+                chain: true,
+                token: true,
+                token2: true,
+              },
+            },
+          },
+        },
+      },
       order: { jobId: 'DESC' },
     });
 

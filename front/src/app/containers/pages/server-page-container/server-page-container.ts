@@ -12,6 +12,7 @@ import { setBotsData } from '../../../+state/db-config/db-config.actions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
+import { setServerPreConfig } from '../../../+state/main/main.actions';
 
 @Component({
   selector: 'app-server-page-container',
@@ -33,6 +34,8 @@ export class ServerPageContainer {
 
   footerButtons = ['save', 'get config', 'cancel'];
   currentServerId: number;
+  relatedServerRelationsIds: number[] = [];
+  relatedFullServerData: any[] = [];
 
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
@@ -51,26 +54,15 @@ export class ServerPageContainer {
   }
 
   events($event: any) {
-  //   if ($event.event === 'ButtonPanel:BUTTON_CLICKED') {
-  //     if ($event.data === 'save') {
-  //       this.store.select(getJobRelations)
-  //         .pipe(take(1))
-  //         .subscribe((data: any) => {
-  //           const mappedOldRelations = data.map((relation: IJobRelation) => ({
-  //             quoteJobRelationId: relation.quoteJobRelationId,
-  //             jobId: relation.job.jobId,
-  //             quoteRelationId: relation.quote.pairQuoteRelationId
-  //           }));
-  //           this.setCreateAndRemoveLists(mappedOldRelations, this.relatedJobRelationsIds);
-  //         });
-  //     } else if ($event.data === 'get config') {
-  //       this.store.dispatch(setPreConfig({ data: this.relatedFullJobData }))
-  //     } else if ($event.data === 'cancel') {
-  //       console.log('cancelTO')
-  //     }
-  //   } else if ($event.event === 'AgGridJobRelationsContainer:ACTIVE_RELATIONS') {
-  //     this.relatedJobRelationsIds = $event.data
-  //     this.relatedFullJobData = $event.fullData
-  //   }
+    if ($event.event === 'ButtonPanel:BUTTON_CLICKED') {
+      if ($event.data === 'get config') {
+        this.store.dispatch(setServerPreConfig({ data: this.relatedFullServerData, serverId: this.currentServerId }))
+      } else if ($event.data === 'cancel') {
+        console.log('cancelTO')
+      }
+    } else if ($event.event === 'AgGridServerRelationsContainer:ACTIVE_RELATIONS') {
+      this.relatedServerRelationsIds = $event.data
+      this.relatedFullServerData = $event.fullData
+    }
   };
 }

@@ -64,27 +64,23 @@ export class AgGridBotRelationsContainer {
       },
     },
     {
-      field: "chainId",
       headerName: 'Chain Id',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
+      valueGetter: (params) => {
+        return params.data?.chain?.chainId || '-';
+      },
     },
     {
-      field: "rpcUrl",
       headerName: 'Rpc Url',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
+      valueGetter: (params) => {
+        return params.data?.rpcUrl?.rpcUrlId || '-';
+      },
     },
     {
+      field: "pairsCount",
       headerName: 'Pairs count',
       flex: 1,
-      valueGetter() {
-        return '-'
-      }
     },
   ];
 
@@ -99,7 +95,7 @@ export class AgGridBotRelationsContainer {
   events($event: any) {
     this.emitter.emit({
       event: 'AgGridBotRelationsContainer:ACTIVE_RELATIONS',
-      data: $event.row.selectedNodes.map((item: any) => item.data.pairQuoteRelationId),
+      data: $event.row.selectedNodes.map((item: any) => item.data.jobId),
       fullData: $event.row.selectedNodes.map((item: any) => item.data),
     });
   }

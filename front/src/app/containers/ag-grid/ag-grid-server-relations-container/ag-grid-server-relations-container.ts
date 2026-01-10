@@ -41,7 +41,6 @@ export class AgGridServerRelationsContainer {
 
   readonly colDefs: ColDef[] = [
     {
-      // field: "botName",
       headerName: 'Bot Name',
       flex: 1,
       filter: 'agTextColumnFilter',
@@ -60,8 +59,7 @@ export class AgGridServerRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return '-';
-        // return params.data?.botName || '-';
+        return params.data?.job?.chain?.chainId || '-';
       },
     },
     {
@@ -72,8 +70,7 @@ export class AgGridServerRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return '-';
-        // return params.data?.botName || '-';
+        return params.data?.job?.jobType || '-';
       },
     },
     {
@@ -84,8 +81,7 @@ export class AgGridServerRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return '-';
-        // return params.data?.botName || '-';
+        return params.data?.job?.quoteJobRelations.length || '-';
       },
     },
   ];
@@ -100,9 +96,9 @@ export class AgGridServerRelationsContainer {
 
   events($event: any) {
     this.emitter.emit({
-      event: 'AgGridJobRelationsContainer:ACTIVE_RELATIONS',
-      // data: $event.row.selectedNodes.map((item: any) => item.data.pairQuoteRelationId),
-      // fullData: $event.row.selectedNodes.map((item: any) => item.data),
+      event: 'AgGridServerRelationsContainer:ACTIVE_RELATIONS',
+      data: $event.row.selectedNodes.map((item: any) => item.data.botId),
+      fullData: $event.row.selectedNodes.map((item: any) => item.data),
     });
   }
 }

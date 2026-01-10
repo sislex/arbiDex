@@ -140,6 +140,9 @@ export class ApiService {
   getJobs(): Observable<any> {
     return this.http.get(`${this.apiUrl}/jobs`);
   }
+  getJobById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/jobs/${id}`);
+  }
   createJob(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/jobs`, {...data});
   }

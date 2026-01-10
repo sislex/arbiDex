@@ -33,13 +33,27 @@ export class BotsService {
   }
 
   async findAll() {
-    // const jobPairsCount = await this.jobService.findOneWithPairs(createBotDto.jobId);
     return await this.botRepository.find({
       relations: {
         server: true,
         job: {
           chain: true,
           rpcUrl: true,
+          quoteJobRelations: {
+            quoteRelation: {
+              quote: true,
+              pair: {
+                tokenIn: true,
+                tokenOut: true,
+                pool: {
+                  dex: true,
+                  chain: true,
+                  token: true,
+                  token2: true,
+                },
+              },
+            },
+          },
         },
       },
       order: {
