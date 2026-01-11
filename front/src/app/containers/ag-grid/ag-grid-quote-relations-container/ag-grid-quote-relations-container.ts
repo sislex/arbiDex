@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { getPairsDataIsLoaded, getPairsDataIsLoading,
@@ -28,6 +28,7 @@ import { Loader } from '../../../components/loader/loader';
   styleUrl: './ag-grid-quote-relations-container.scss',
 })
 export class AgGridQuoteRelationsContainer {
+  @Input() currentQuoteId: number = 0;
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);

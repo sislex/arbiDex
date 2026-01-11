@@ -23,6 +23,9 @@ import { ButtonPanel } from '../../../components/button-panel/button-panel';
 import { ContentFooterLayout } from '../../../components/layouts/content-footer-layout/content-footer-layout';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
 import { setJobPreConfig } from '../../../+state/main/main.actions';
+import {
+  AgGridBotRelationsContainer
+} from '../../ag-grid/ag-grid-bot-relations-container/ag-grid-bot-relations-container';
 
 @Component({
   selector: 'app-job-page-container',
@@ -33,6 +36,7 @@ import { setJobPreConfig } from '../../../+state/main/main.actions';
     AsyncPipe,
     ButtonPanel,
     ContentFooterLayout,
+    AgGridBotRelationsContainer,
   ],
   templateUrl: './job-page-container.html',
   styleUrl: './job-page-container.scss',

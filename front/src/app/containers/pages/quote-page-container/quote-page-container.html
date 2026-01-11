@@ -11,6 +11,7 @@
   <app-content-footer-layout content>
     <app-ag-grid-quote-relations-container
       content
+      [currentQuoteId]="currentQuoteId"
       (emitter)="events($event)"
     ></app-ag-grid-quote-relations-container>
     <app-button-panel

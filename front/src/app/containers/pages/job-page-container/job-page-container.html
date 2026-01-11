@@ -11,6 +11,7 @@
   <app-content-footer-layout content>
     <app-ag-grid-job-relations-container
       content
+      [currentJobId]="currentJobId"
       (emitter)="events($event)"
     ></app-ag-grid-job-relations-container>
     <app-button-panel

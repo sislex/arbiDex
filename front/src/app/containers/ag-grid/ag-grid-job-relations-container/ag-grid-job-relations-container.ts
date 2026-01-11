@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { ColDef } from 'ag-grid-community';
@@ -25,6 +25,7 @@ import { Loader } from '../../../components/loader/loader';
   styleUrl: './ag-grid-job-relations-container.scss',
 })
 export class AgGridJobRelationsContainer {
+  @Input() currentJobId: number = 0;
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
