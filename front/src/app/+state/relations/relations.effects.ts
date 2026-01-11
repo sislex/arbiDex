@@ -113,7 +113,7 @@ export class RelationsEffects {
     this.actions$.pipe(
       ofType(RelationsActions.setJobRelationsDataList),
       switchMap(action =>
-        this.apiService.getJobRelationsByQuoteId(action.jobId).pipe(
+        this.apiService.getJobRelationsByJobId(action.jobId).pipe(
           map((response: any[]) => {
             const formattedData = response.map(item => ({
               quoteJobRelationId: item.quoteJobRelationId,

@@ -194,7 +194,7 @@ export class ApiService {
   //                                                   Job Relations
   //====================================================================================================================
 
-  getJobRelationsByQuoteId(id: number): Observable<any> {
+  getJobRelationsByJobId(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/quote-job-relations/by-job-id/${id}`);
   }
   createJobRelations(data: any[]): Observable<any> {
@@ -203,7 +203,6 @@ export class ApiService {
   deleteJobRelations(ids: number[]): Observable<any> {
     return this.http.delete(`${this.apiUrl}/quote-job-relations`, { body: ids });
   }
-
 
   //====================================================================================================================
   //                                                   Rpc Urls Relations
