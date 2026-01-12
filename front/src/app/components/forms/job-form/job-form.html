@@ -28,3 +28,12 @@
     content
   ></app-input-field>
 </app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Description'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.description"
+    (emitter)="events($event, 'description')"
+    content
+  ></app-input-field>
+</app-header-content-layout>

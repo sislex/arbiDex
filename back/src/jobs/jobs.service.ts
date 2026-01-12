@@ -24,6 +24,7 @@ export class JobsService {
 
     const job = this.jobRepository.create({
       jobType: createJobDto.jobType,
+      description: createJobDto.description,
       chain,
       rpcUrl,
     });
@@ -103,6 +104,7 @@ export class JobsService {
     const rpcUrl = await this.rpcUrlsService.findOne(updateJobDto.rpcUrlId);
 
     job.jobType = updateJobDto.jobType;
+    job.description = updateJobDto.description;
     job.chain = chain;
     job.rpcUrl = rpcUrl;
 

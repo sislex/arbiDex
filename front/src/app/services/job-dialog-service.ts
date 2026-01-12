@@ -27,6 +27,7 @@ export class JobDialogService {
         form: {
           jobId: null,
           jobType: '',
+          description: '',
           chainId: null,
           rpcUrlId: null
         }
@@ -50,6 +51,7 @@ export class JobDialogService {
         form: {
           jobId: row.jobId,
           jobType: row.jobType,
+          description: row.description,
           chainId: row.chain.chainId,
           rpcUrlId: row.rpcUrl.rpcUrlId,
         }

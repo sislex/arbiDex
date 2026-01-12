@@ -71,6 +71,11 @@ export class AgGridJobsContainer {
       flex: 1,
     },
     {
+      field: "description",
+      headerName: 'Description',
+      flex: 1,
+    },
+    {
       headerName: 'Chain Id',
       flex: 1,
       valueGetter: (params) => {

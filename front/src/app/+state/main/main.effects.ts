@@ -136,8 +136,6 @@ export class MainEffects {
         switchMap((data: any) =>
           from(this.apiService.setServerById(data.serverId)).pipe(
             tap((serverData: any) => {
-
-
               const botConfig = data.data.map((botData: any) => {
                 const jobQuoteJobRelations = botData.job.quoteJobRelations.map((quoteRelation: any) => {
                     return {
@@ -186,7 +184,6 @@ export class MainEffects {
               })
 
               const serverConfig = {
-                ...serverData,
                 botList: botConfig
               }
               const configString = JSON.stringify(serverConfig, null, 2);

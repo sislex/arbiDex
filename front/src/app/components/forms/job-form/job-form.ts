@@ -24,7 +24,7 @@ export class JobForm {
 
   @Output() emitter = new EventEmitter();
 
-  events(event: any, field: 'jobType' | 'chainId'| 'rpcUrlId') {
+  events(event: any, field: 'jobType' | 'chainId' | 'rpcUrlId' | 'description') {
     this.formData = {
       ...this.formData,
       [field]: event.data,
