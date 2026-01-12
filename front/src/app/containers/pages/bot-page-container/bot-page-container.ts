@@ -34,7 +34,7 @@ export class BotPageContainer {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
 
-  footerButtons = ['save', 'get config', 'cancel'];
+  footerButtons = ['send', 'get config', 'cancel'];
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
   relatedBotRelationsIds: number[] = [];

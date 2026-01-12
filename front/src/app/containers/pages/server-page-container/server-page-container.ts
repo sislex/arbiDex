@@ -32,7 +32,7 @@ export class ServerPageContainer {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
 
-  footerButtons = ['save', 'get config', 'cancel'];
+  footerButtons = ['send', 'get config', 'cancel'];
   currentServerId: number;
   relatedServerRelationsIds: number[] = [];
   relatedFullServerData: any[] = [];
