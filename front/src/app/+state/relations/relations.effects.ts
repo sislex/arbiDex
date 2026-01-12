@@ -46,7 +46,7 @@ export class RelationsEffects {
     this.actions$.pipe(
       ofType(RelationsActions.setQuoteRelations),
       switchMap(action =>
-        this.apiService.getQuoteRelations().pipe(
+        this.apiService.getQuoteRelations(action.jobId).pipe(
           map(response =>
             RelationsActions.setQuoteRelationsSuccess({ response }),
           ),

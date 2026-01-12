@@ -180,8 +180,10 @@ export class ApiService {
   getQuoteRelationsByQuoteId(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/pair-quote-relations/by-quote-id/${id}`);
   }
-  getQuoteRelations(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/pair-quote-relations`);
+  getQuoteRelations(jobId: any): Observable<any> {
+    return this.http.get(`${this.apiUrl}/pair-quote-relations/findAllWithFilter`, {
+      params: { jobId: jobId.toString() }
+    });
   }
   createQuoteRelations(data: any[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/pair-quote-relations`, data);

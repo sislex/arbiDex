@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { PairQuoteRelationsService } from './pair-quote-relations.service';
 import { PairQuoteRelationDto } from '../dtos/pair-quote-relations-dto/pair-quote-relation.dto';
 
@@ -18,6 +26,11 @@ export class PairQuoteRelationsController {
   @Get()
   findAll() {
     return this.pairQuoteRelationsService.findAll();
+  }
+
+  @Get('findAllWithFilter')
+  findAllWithFilter(@Query('jobId') jobId: any) {
+    return this.pairQuoteRelationsService.findAllWithFilter(+jobId);
   }
 
   @Get(':id')

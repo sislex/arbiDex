@@ -25,7 +25,10 @@ export const deletingQuoteRelations = createAction(
   '[Relations] deletingQuoteRelations',
   props<{ quoteId: number, quoteRelationsIds: number[] }>()
 );
-export const setQuoteRelations = createAction('[Relations] setQuoteRelations');
+export const setQuoteRelations = createAction(
+  '[Relations] setQuoteRelations',
+  props<{ jobId: number }>()
+);
 export const setQuoteRelationsSuccess = createAction(
   '[Relations] setQuoteRelationsSuccess',
   props<{ response: any }>()

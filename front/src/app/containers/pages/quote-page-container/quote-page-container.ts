@@ -20,9 +20,6 @@ import {
 import { getQuoteRelationsByQuoteId } from '../../../+state/relations/relations.selectors';
 import { take } from 'rxjs';
 import { IQuoteRelations, IQuoteRelationsCreate } from '../../../models/relations';
-import {
-  AgGridJobRelationsContainer
-} from '../../ag-grid/ag-grid-job-relations-container/ag-grid-job-relations-container';
 
 @Component({
   selector: 'app-quote-page-container',
@@ -34,7 +31,6 @@ import {
     ContentFooterLayout,
     ButtonPanel,
     AsyncPipe,
-    AgGridJobRelationsContainer,
   ],
   templateUrl: './quote-page-container.html',
   styleUrl: './quote-page-container.scss',
