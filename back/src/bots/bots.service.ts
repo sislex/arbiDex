@@ -34,6 +34,7 @@ export class BotsService {
 
   async findAll() {
     return await this.botRepository.find({
+      relationLoadStrategy: 'query',
       relations: {
         server: true,
         job: {
@@ -54,6 +55,42 @@ export class BotsService {
               },
             },
           },
+        },
+      },
+      order: {
+        botId: 'DESC',
+      },
+    });
+  }
+
+  async findAllByServerId(serverId: string) {
+    return await this.botRepository.find({
+      relationLoadStrategy: 'query',
+      relations: {
+        server: true,
+        job: {
+          chain: true,
+          rpcUrl: true,
+          quoteJobRelations: {
+            quoteRelation: {
+              quote: true,
+              pair: {
+                tokenIn: true,
+                tokenOut: true,
+                pool: {
+                  dex: true,
+                  chain: true,
+                  token: true,
+                  token2: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      where: {
+        server: {
+          serverId: serverId,
         },
       },
       order: {

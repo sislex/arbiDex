@@ -601,6 +601,26 @@ export class DbConfigEffects {
     )
   );
 
+  setBotsByServerId$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setBotsByServerId),
+      switchMap((action) =>
+        this.apiService.getBotsByServerId(action.serverId).pipe(
+          // tap(response => {
+          //   console.log('Bots action:', action);
+          //   console.log('Bots response:', response);
+          // }),
+          map(response =>
+            DbConfigActions.setBotsByServerIdSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setBotsByServerIdFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
   createBot$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.createBot),

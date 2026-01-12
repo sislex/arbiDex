@@ -8,7 +8,7 @@ import {
   AgGridServerRelationsContainer
 } from '../../ag-grid/ag-grid-server-relations-container/ag-grid-server-relations-container';
 import { setActiveServer } from '../../../+state/relations/relations.actions';
-import { setBotsData } from '../../../+state/db-config/db-config.actions';
+import { setBotsByServerId } from '../../../+state/db-config/db-config.actions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
@@ -32,7 +32,7 @@ export class ServerPageContainer {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
 
-  footerButtons = ['send', 'get config', 'cancel'];
+  footerButtons = ['reset server', 'get config', 'cancel'];
   currentServerId: number;
   relatedServerRelationsIds: number[] = [];
   relatedFullServerData: any[] = [];
@@ -42,7 +42,7 @@ export class ServerPageContainer {
   constructor() {
     this.currentServerId = Number(this.route.snapshot.paramMap.get('id'));
     this.store.dispatch(setActiveServer({ serverId: this.currentServerId }));
-    this.store.dispatch(setBotsData());
+    this.store.dispatch(setBotsByServerId({ serverId: this.currentServerId }));
   };
 
   onAction($event: any, note: string) {

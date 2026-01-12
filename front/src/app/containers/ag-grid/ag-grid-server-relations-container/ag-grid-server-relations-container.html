@@ -21,10 +21,6 @@
       [rowData]="(serverRelation$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
-      [isRowSelection]="{
-      mode: 'multiRow',
-      selectAll: 'filtered',
-    }"
       (emitter)="events($event)"
     ></app-ag-grid>
   } @else {

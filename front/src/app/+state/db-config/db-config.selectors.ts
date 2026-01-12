@@ -212,6 +212,20 @@ export const getBotsDataIsLoaded = createSelector(
   (state: DbConfigState) => state.bots.isLoaded
 );
 
+
+export const getBotsByServerIdResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.botsByServerId.response
+);
+export const getBotsByServerIdIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.botsByServerId.isLoading
+);
+export const getBotsByServerIdIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.botsByServerId.isLoaded
+);
+
 //====================================================================================================================
 //                                                   Servers
 //====================================================================================================================

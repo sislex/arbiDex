@@ -7,11 +7,14 @@ import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { ColDef } from 'ag-grid-community';
 import { AsyncPipe } from '@angular/common';
-import { getBotsDataIsLoaded, getBotsDataIsLoading } from '../../../+state/db-config/db-config.selectors';
+import {
+  getBotsByServerIdIsLoaded,
+  getBotsByServerIdIsLoading,
+  getBotsByServerIdResponse,
+} from '../../../+state/db-config/db-config.selectors';
 import {
   getActiveServerIsLoaded,
   getActiveServerIsLoading,
-  getServerRelation,
 } from '../../../+state/relations/relations.selectors';
 
 @Component({
@@ -32,12 +35,12 @@ export class AgGridServerRelationsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  botsDataIsLoading$ = this.store.select(getBotsDataIsLoading);
-  botsDataIsLoaded$ = this.store.select(getBotsDataIsLoaded);
+  botsDataIsLoading$ = this.store.select(getBotsByServerIdIsLoading);
+  botsDataIsLoaded$ = this.store.select(getBotsByServerIdIsLoaded);
   activeServerIsLoading$ = this.store.select(getActiveServerIsLoading);
   activeServerIsLoaded$ = this.store.select(getActiveServerIsLoaded);
 
-  serverRelation$ = this.store.select(getServerRelation);
+  serverRelation$ = this.store.select(getBotsByServerIdResponse);
 
   readonly colDefs: ColDef[] = [
     {

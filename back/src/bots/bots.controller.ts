@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Put,
+  Query,
 } from '@nestjs/common';
 import { BotsService } from './bots.service';
 import { BotDto } from '../dtos/bots-dto/bot.dto';
@@ -22,6 +23,11 @@ export class BotsController {
   @Get()
   findAll() {
     return this.botsService.findAll();
+  }
+
+  @Get('findAllByServerId')
+  findAllByServerId(@Query('serverId') serverId: string) {
+    return this.botsService.findAllByServerId(serverId);
   }
 
   @Get(':id')

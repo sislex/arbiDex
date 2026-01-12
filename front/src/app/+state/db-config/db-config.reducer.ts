@@ -26,6 +26,7 @@ export interface DbConfigState {
   quotes: IQuotesAPI;
   jobs: IJobsAPI;
   bots: IBotsAPI;
+  botsByServerId: IBotsAPI;
   servers: IServersAPI;
   rpcUrls: IRpcUrlApi;
 
@@ -46,6 +47,7 @@ export const initialState: DbConfigState = {
   quotes: emptyAsyncResponse([]),
   jobs: emptyAsyncResponse([]),
   bots: emptyAsyncResponse([]),
+  botsByServerId: emptyAsyncResponse([]),
   servers: emptyAsyncResponse([]),
   rpcUrls: emptyAsyncResponse([]),
 
@@ -289,6 +291,36 @@ export const dbConfigReducer = createReducer(
     bots: {
       ...state.bots,
       loadingTime: Date.now() - state.bots.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(DbConfigActions.setBotsByServerId, (state) => ({
+    ...state,
+    botsByServerId: {
+      ...state.botsByServerId,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setBotsByServerIdSuccess, (state, {response}) => ({
+    ...state,
+    botsByServerId: {
+      ...state.botsByServerId,
+      loadingTime: Date.now() - state.botsByServerId.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setBotsByServerIdFailure, (state, {error}) => ({
+    ...state,
+    botsByServerId: {
+      ...state.bots,
+      loadingTime: Date.now() - state.botsByServerId.startTime!,
       isLoading: false,
       isLoaded: true,
       error

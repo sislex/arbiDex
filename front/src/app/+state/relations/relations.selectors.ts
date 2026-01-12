@@ -1,6 +1,9 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import { RELATIONS_FEATURE_KEY, RelationsState } from './relations.reducer';
-import { getBotsDataResponse, getJobsDataResponse, getPairsDataResponse } from '../db-config/db-config.selectors';
+import {
+  getJobsDataResponse,
+  getPairsDataResponse,
+} from '../db-config/db-config.selectors';
 
 export const selectFeature = createFeatureSelector<RelationsState>(RELATIONS_FEATURE_KEY);
 
@@ -127,18 +130,4 @@ export const getActiveServerIsLoading = createSelector(
 export const getActiveServerIsLoaded = createSelector(
   selectFeature,
   (state: RelationsState) => state.activeServer.isLoaded
-);
-
-export const getServerRelation = createSelector(
-  getBotsDataResponse,
-  getActiveServer,
-  (botData, serverData: any) => {
-    if (!botData?.length || !serverData?.serverId) {
-      return null;
-    }
-    return botData.map(bot => ({
-      ...bot,
-      active: bot.server.serverId === serverData.serverId
-    }));
-  }
 );

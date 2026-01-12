@@ -208,6 +208,20 @@ export const setBotsDataFailure = createAction(
   '[DbConfig] setBotsDataFailure',
   props<{ error: string }>()
 );
+
+export const setBotsByServerId = createAction(
+  '[DbConfig] setBotsByServerId',
+  props<{ serverId: number }>()
+);
+export const setBotsByServerIdSuccess = createAction(
+  '[DbConfig] setBotsByServerIdSuccess',
+  props<{ response: any }>()
+);
+export const setBotsByServerIdFailure = createAction(
+  '[DbConfig] setBotsByServerIdFailure',
+  props<{ error: string }>()
+);
+
 export const createBot = createAction(
   '[DbConfig] createBot',
   props<{ data: IBotsCreate }>()

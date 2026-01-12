@@ -86,6 +86,11 @@ export class ApiService {
   getBots(): Observable<any> {
     return this.http.get(`${this.apiUrl}/bots`);
   }
+  getBotsByServerId(serverId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/bots/findAllByServerId`, {
+      params: { serverId: serverId.toString() }
+    });
+  }
   setBotById(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/bots/${id}`);
   }
