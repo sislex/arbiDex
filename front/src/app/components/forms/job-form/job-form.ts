@@ -24,13 +24,11 @@ export class JobForm {
 
   @Output() emitter = new EventEmitter();
 
-  events(event: any, field: 'jobType' | 'chainId'| 'rpcUrl') {
+  events(event: any, field: 'jobType' | 'chainId'| 'rpcUrlId') {
     this.formData = {
       ...this.formData,
       [field]: event.data,
     };
-
-    console.log(this.formData)
 
     this.emitter.emit(this.formData);
   };

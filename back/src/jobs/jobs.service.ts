@@ -4,6 +4,8 @@ import { Jobs } from '../entities/entities/Jobs';
 import { Repository } from 'typeorm';
 import { JobDto } from '../dtos/jobs-dto/job.dto';
 import { QuoteJobRelationsService } from '../quote-job-relations/quote-job-relations.service';
+import { ChainsService } from '../chains/chains.service';
+import { RpcUrlsService } from '../rpc-urls/rpc-urls.service';
 
 @Injectable()
 export class JobsService {
@@ -12,11 +14,18 @@ export class JobsService {
     private jobRepository: Repository<Jobs>,
     @Inject(forwardRef(() => QuoteJobRelationsService))
     private quoteJobRelationsService: QuoteJobRelationsService,
+    private chainsService: ChainsService,
+    private rpcUrlsService: RpcUrlsService,
   ) {}
 
   async create(createJobDto: JobDto) {
+    const chain = await this.chainsService.findOne(createJobDto.chainId);
+    const rpcUrl = await this.rpcUrlsService.findOne(createJobDto.rpcUrlId);
+
     const job = this.jobRepository.create({
       jobType: createJobDto.jobType,
+      chain,
+      rpcUrl,
     });
     return await this.jobRepository.save(job);
   }
@@ -90,8 +99,12 @@ export class JobsService {
 
   async update(id: number, updateJobDto: JobDto) {
     const job = await this.findOne(id);
+    const chain = await this.chainsService.findOne(updateJobDto.chainId);
+    const rpcUrl = await this.rpcUrlsService.findOne(updateJobDto.rpcUrlId);
 
     job.jobType = updateJobDto.jobType;
+    job.chain = chain;
+    job.rpcUrl = rpcUrl;
 
     return await this.jobRepository.save(job);
   }

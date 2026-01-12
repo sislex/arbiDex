@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
 import { JobForm } from '../../../components/forms/job-form/job-form';
-import { setChainsData } from '../../../+state/db-config/db-config.actions';
+import { setChainsData, setRpcUrlsData } from '../../../+state/db-config/db-config.actions';
 import { Store } from '@ngrx/store';
 
 @Component({
@@ -25,6 +25,7 @@ export class JobFormContainer {
 
   constructor() {
     this.store.dispatch(setChainsData());
+    this.store.dispatch(setRpcUrlsData());
   }
 
   eventsForm($event: any) {

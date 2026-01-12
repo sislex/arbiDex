@@ -15,7 +15,7 @@
     [title]="'Rpc Url'"
     [list]="rpcUrlList | async"
     [selected]="formData.rpcUrlId"
-    (emitter)="events($event, 'rpcUrl')"
+    (emitter)="events($event, 'rpcUrlId')"
     content
   ></app-select-field>
 </app-header-content-layout>
