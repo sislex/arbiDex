@@ -5,7 +5,7 @@ export interface ITokensAPI extends API {
 }
 export interface ITokens {
   tokenId: number | null;
-  chainId: number | null;
+  chain: IChains;
   address: string;
   symbol: string;
   tokenName: string;

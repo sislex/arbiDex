@@ -15,6 +15,7 @@
     [title]="'Rpc Url'"
     [list]="rpcUrlList | async"
     [selected]="formData.rpcUrlId"
+    [disabled]="rpcUrlDisabled"
     (emitter)="events($event, 'rpcUrlId')"
     content
   ></app-select-field>

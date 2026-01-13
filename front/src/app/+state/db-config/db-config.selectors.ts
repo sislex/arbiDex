@@ -1,5 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {DB_CONFIG_FEATURE_KEY, DbConfigState} from './db-config.reducer';
+import { IRpcUrl, ITokens } from '../../models/db-config';
 
 export const selectFeature = createFeatureSelector<DbConfigState>(DB_CONFIG_FEATURE_KEY);
 
@@ -19,6 +20,12 @@ export const getVersionList = createSelector(
 export const getTokensDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.tokens.response
+);
+export const getTokensDataResponseFilterChainId = (chainId: number) => createSelector(
+  selectFeature,
+  (state: DbConfigState) => state?.tokens?.response
+    ?.filter((token: ITokens) => token.chain?.chainId === chainId)
+    ?? []
 );
 export const getTokensDataFailure = createSelector(
   selectFeature,
@@ -258,6 +265,12 @@ export const getServersDataIsLoaded = createSelector(
 export const getRpcUrlDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.rpcUrls.response
+);
+export const getRpcUrlDataResponseFilterChainId = (chainId: number) => createSelector(
+  selectFeature,
+  (state: DbConfigState) => state?.rpcUrls?.response
+      ?.filter((rpcUrl: IRpcUrl) => rpcUrl.chain?.chainId === chainId)
+    ?? []
 );
 export const getRpcUrlsDataFailure = createSelector(
   selectFeature,

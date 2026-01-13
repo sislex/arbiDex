@@ -1,17 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { JobFormContainer } from '../containers/forms/job-form-container/job-form-container';
-import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class JobDialogService {
   private dialog = inject(MatDialog);
-  openCreate(
-    chainsList$: Observable<any>,
-    rpcUrlList$: Observable<any>,
-  ) {
+  openCreate() {
     return this.dialog.open(JobFormContainer, {
       width: '90%',
       height: '90%',
@@ -22,8 +18,6 @@ export class JobDialogService {
       data: {
         title: 'Add new job',
         buttons: ['add', 'cancel'],
-        chainsList: chainsList$,
-        rpcUrlList: rpcUrlList$,
         form: {
           jobId: null,
           jobType: '',
@@ -35,7 +29,7 @@ export class JobDialogService {
     }).afterClosed();
   }
 
-  openEdit(row: any, chainsList$: Observable<any>, rpcUrlList$: Observable<any>) {
+  openEdit(row: any) {
     return this.dialog.open(JobFormContainer, {
       width: '90%',
       height: '90%',
@@ -46,8 +40,6 @@ export class JobDialogService {
       data: {
         title: 'Edit job',
         buttons: ['save', 'cancel'],
-        chainsList: chainsList$,
-        rpcUrlList: rpcUrlList$,
         form: {
           jobId: row.jobId,
           jobType: row.jobType,

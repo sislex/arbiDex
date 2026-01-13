@@ -15,6 +15,7 @@
     [title]="'Base Token Id'"
     [list]="tokensList | async"
     [selected]="formData.token"
+    [disabled]="tokenDisabled"
     (emitter)="events($event, 'token')"
     content
   ></app-select-field>
@@ -26,6 +27,7 @@
     [title]="'Quote Token Id'"
     [list]="tokensList | async"
     [selected]="formData.token2"
+    [disabled]="tokenDisabled"
     (emitter)="events($event, 'token2')"
     content
   ></app-select-field>

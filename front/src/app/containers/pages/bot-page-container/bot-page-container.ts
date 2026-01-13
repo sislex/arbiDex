@@ -34,7 +34,7 @@ export class BotPageContainer {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
 
-  footerButtons = ['send', 'get config', 'cancel'];
+  footerButtons = ['create for server', 'get config', 'cancel'];
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
   relatedBotRelationsIds: number[] = [];
@@ -59,6 +59,8 @@ export class BotPageContainer {
     if ($event.event === 'ButtonPanel:BUTTON_CLICKED') {
       if ($event.data === 'get config') {
         this.store.dispatch(setBotPreConfig({ data: this.relatedFullBotData, botId: this.currentBotId }))
+      } else if ($event.data === 'create for server') {
+        console.log('create for server', $event)
       } else if ($event.data === 'cancel') {
         console.log('cancelTO')
       }

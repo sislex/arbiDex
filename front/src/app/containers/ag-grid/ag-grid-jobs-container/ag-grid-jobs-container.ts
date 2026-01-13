@@ -7,17 +7,15 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import {
-  getChainsDataResponse,
   getJobsDataIsLoaded,
   getJobsDataIsLoading,
-  getJobsDataResponse, getRpcUrlDataResponse,
+  getJobsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { createJob, deletingJob, editJob, setJobsData } from '../../../+state/db-config/db-config.actions';
 import { Loader } from '../../../components/loader/loader';
 import { AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { JobDialogService } from '../../../services/job-dialog-service';
-import { map } from 'rxjs';
 
 @Component({
   selector: 'app-ag-grid-jobs-container',
@@ -40,24 +38,6 @@ export class AgGridJobsContainer {
   jobsDataResponse$ = this.store.select(getJobsDataResponse);
   jobsDataIsLoading$ = this.store.select(getJobsDataIsLoading);
   jobsDataIsLoaded$ = this.store.select(getJobsDataIsLoaded);
-
-  chainsList$ = this.store.select(getChainsDataResponse).pipe(
-    map(item =>
-      item.map(item => ({
-        id: item.chainId,
-        name: item.name,
-      }))
-    )
-  );
-
-  rpcUrlList$ = this.store.select(getRpcUrlDataResponse).pipe(
-    map(item =>
-      item.map(item => ({
-        id: item.rpcUrlId,
-        name: item.rpcUrl,
-      }))
-    )
-  );
 
   readonly colDefs: ColDef[] = [
     {
@@ -139,7 +119,7 @@ export class AgGridJobsContainer {
   }
 
   openCreateDialog() {
-    this.jobDialog.openCreate(this.chainsList$, this.rpcUrlList$).subscribe(result => {
+    this.jobDialog.openCreate().subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createJob({ data: result.formData }));
       }
@@ -147,7 +127,7 @@ export class AgGridJobsContainer {
   }
 
   openEditDialog(row: any) {
-    this.jobDialog.openEdit(row, this.chainsList$, this.rpcUrlList$).subscribe(result => {
+    this.jobDialog.openEdit(row).subscribe(result => {
       if (result?.data === 'save') {
         this.store.dispatch(editJob({ data: result.formData }));
       }
