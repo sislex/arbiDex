@@ -1,0 +1,314 @@
+260114121525930225,pg_restore: connecting to database for restore
+
+260114121525938936,pg_restore: implied data-only restore
+
+260114121525940179,pg_restore: processing data for table "public.bots"
+
+260114121525940800,pg_restore: while PROCESSING TOC:
+
+260114121525941414,pg_restore: from TOC entry 3534; 0 16687 TABLE DATA bots user_secret
+
+260114121525941957,pg_restore: error: could not execute query: ERROR:  relation "public.bots" does not exist
+
+260114121525942453,Command was: COPY public.bots (bot_id, bot_name, description, server_id, job_id, paused, is_repeat, delay_between_repeat, max_jobs, max_errors, timeout_ms) FROM stdin;
+
+260114121525943313,pg_restore: processing data for table "public.chains"
+
+260114121525943886,pg_restore: from TOC entry 3524; 0 16389 TABLE DATA chains user_secret
+
+260114121525944440,pg_restore: error: could not execute query: ERROR:  relation "public.chains" does not exist
+
+260114121525945069,Command was: COPY public.chains (chain_id, name, created_at) FROM stdin;
+
+260114121525945867,pg_restore: processing data for table "public.dexes"
+
+260114121525946581,pg_restore: from TOC entry 3528; 0 16408 TABLE DATA dexes user_secret
+
+260114121525947225,pg_restore: error: could not execute query: ERROR:  relation "public.dexes" does not exist
+
+260114121525947834,Command was: COPY public.dexes (dex_id, name, created_at) FROM stdin;
+
+260114121525948193,pg_restore: processing data for table "public.jobs"
+
+260114121525948500,pg_restore: from TOC entry 3532; 0 16644 TABLE DATA jobs user_secret
+
+260114121525948842,pg_restore: error: could not execute query: ERROR:  relation "public.jobs" does not exist
+
+260114121525949149,Command was: COPY public.jobs (job_id, job_type, rpc_url_id, chain_id, description) FROM stdin;
+
+260114121525949444,pg_restore: processing data for table "public.pair_quote_relations"
+
+260114121525949783,pg_restore: from TOC entry 3544; 0 16737 TABLE DATA pair_quote_relations user_secret
+
+260114121525950092,pg_restore: error: could not execute query: ERROR:  relation "public.pair_quote_relations" does not exist
+
+260114121525950417,Command was: COPY public.pair_quote_relations (pair_quote_relation_id, pair_id, quote_id) FROM stdin;
+
+260114121525950707,pg_restore: processing data for table "public.pairs"
+
+260114121525951041,pg_restore: from TOC entry 3538; 0 16719 TABLE DATA pairs user_secret
+
+260114121525951338,pg_restore: error: could not execute query: ERROR:  relation "public.pairs" does not exist
+
+260114121525951637,Command was: COPY public.pairs (pair_id, pool_id, token_in, token_out) FROM stdin;
+
+260114121525951955,pg_restore: processing data for table "public.pools"
+
+260114121525952241,pg_restore: from TOC entry 3530; 0 16421 TABLE DATA pools user_secret
+
+260114121525952527,pg_restore: error: could not execute query: ERROR:  relation "public.pools" does not exist
+
+260114121525952817,Command was: COPY public.pools (pool_id, chain_id, token0, token1, fee, dex_id, version, pool_address) FROM stdin;
+
+260114121525953109,pg_restore: processing data for table "public.quote_job_relations"
+
+260114121525953402,pg_restore: from TOC entry 3548; 0 16748 TABLE DATA quote_job_relations user_secret
+
+260114121525953713,pg_restore: error: could not execute query: ERROR:  relation "public.quote_job_relations" does not exist
+
+260114121525954015,Command was: COPY public.quote_job_relations (quote_job_relation_id, quote_relation_id, job_id) FROM stdin;
+
+260114121525954304,pg_restore: processing data for table "public.quotes"
+
+260114121525954590,pg_restore: from TOC entry 3540; 0 16726 TABLE DATA quotes user_secret
+
+260114121525954876,pg_restore: error: could not execute query: ERROR:  relation "public.quotes" does not exist
+
+260114121525955161,Command was: COPY public.quotes (quote_id, amount, side, block_tag, quote_source) FROM stdin;
+
+260114121525955447,pg_restore: processing data for table "public.rpc_urls"
+
+260114121525955730,pg_restore: from TOC entry 3550; 0 24962 TABLE DATA rpc_urls user_secret
+
+260114121525956014,pg_restore: error: could not execute query: ERROR:  relation "public.rpc_urls" does not exist
+
+260114121525956330,Command was: COPY public.rpc_urls (rpc_url_id, rpc_url, chain_id) FROM stdin;
+
+260114121525956621,pg_restore: processing data for table "public.servers"
+
+260114121525956906,pg_restore: from TOC entry 3536; 0 16706 TABLE DATA servers user_secret
+
+260114121525957189,pg_restore: error: could not execute query: ERROR:  relation "public.servers" does not exist
+
+260114121525957536,Command was: COPY public.servers (server_id, ip, port, server_name) FROM stdin;
+
+260114121525957833,pg_restore: processing data for table "public.tokens"
+
+260114121525958124,pg_restore: from TOC entry 3526; 0 16395 TABLE DATA tokens user_secret
+
+260114121525958410,pg_restore: error: could not execute query: ERROR:  relation "public.tokens" does not exist
+
+260114121525958695,Command was: COPY public.tokens (token_id, chain_id, address, symbol, decimals, token_name) FROM stdin;
+
+260114121525958982,pg_restore: executing SEQUENCE SET bots_bot_id_seq
+
+260114121525959265,pg_restore: from TOC entry 3570; 0 0 SEQUENCE SET bots_bot_id_seq user_secret
+
+260114121525959548,pg_restore: error: could not execute query: ERROR:  relation "public.bots_bot_id_seq" does not exist
+
+260114121525959841,LINE 1: SELECT pg_catalog.setval('public.bots_bot_id_seq', 16, true)...
+
+260114121525960155,                                 ^
+
+260114121525960516,Command was: SELECT pg_catalog.setval('public.bots_bot_id_seq', 16, true);
+
+260114121525960846,
+260114121525961071,
+260114121525961310,pg_restore: executing SEQUENCE SET dexes_dex_id_seq
+
+260114121525961903,pg_restore: from TOC entry 3571; 0 0 SEQUENCE SET dexes_dex_id_seq user_secret
+
+260114121525962362,pg_restore: error: could not execute query: ERROR:  relation "public.dexes_dex_id_seq" does not exist
+
+260114121525962800,LINE 1: SELECT pg_catalog.setval('public.dexes_dex_id_seq', 24, true...
+
+260114121525963182,                                 ^
+
+260114121525963493,Command was: SELECT pg_catalog.setval('public.dexes_dex_id_seq', 24, true);
+
+260114121525963783,
+260114121525964006,
+260114121525964242,pg_restore: executing SEQUENCE SET jobs_job_id_seq
+
+260114121525964536,pg_restore: from TOC entry 3572; 0 0 SEQUENCE SET jobs_job_id_seq user_secret
+
+260114121525964821,pg_restore: error: could not execute query: ERROR:  relation "public.jobs_job_id_seq" does not exist
+
+260114121525965106,LINE 1: SELECT pg_catalog.setval('public.jobs_job_id_seq', 16, true)...
+
+260114121525965391,                                 ^
+
+260114121525965753,Command was: SELECT pg_catalog.setval('public.jobs_job_id_seq', 16, true);
+
+260114121525966052,
+260114121525966274,
+260114121525966499,pg_restore: executing SEQUENCE SET pair_quote_relations_pair_id_seq
+
+260114121525966782,pg_restore: from TOC entry 3573; 0 0 SEQUENCE SET pair_quote_relations_pair_id_seq user_secret
+
+260114121525967065,pg_restore: error: could not execute query: ERROR:  relation "public.pair_quote_relations_pair_id_seq" does not exist
+
+260114121525967349,LINE 1: SELECT pg_catalog.setval('public.pair_quote_relations_pair_i...
+
+260114121525967632,                                 ^
+
+260114121525967914,Command was: SELECT pg_catalog.setval('public.pair_quote_relations_pair_id_seq', 1, false);
+
+260114121525968197,
+260114121525968416,
+260114121525968636,pg_restore: executing SEQUENCE SET pair_quote_relations_pair_quote_relarion_id_seq
+
+260114121525968922,pg_restore: from TOC entry 3574; 0 0 SEQUENCE SET pair_quote_relations_pair_quote_relarion_id_seq user_secret
+
+260114121525969206,pg_restore: error: could not execute query: ERROR:  relation "public.pair_quote_relations_pair_quote_relarion_id_seq" does not exist
+
+260114121525969517,LINE 1: SELECT pg_catalog.setval('public.pair_quote_relations_pair_q...
+
+260114121525969850,                                 ^
+
+260114121525970148,Command was: SELECT pg_catalog.setval('public.pair_quote_relations_pair_quote_relarion_id_seq', 76, true);
+
+260114121525970454,
+260114121525970690,
+260114121525971069,pg_restore: executing SEQUENCE SET pair_quote_relations_quote_id_seq
+
+260114121525971369,pg_restore: from TOC entry 3575; 0 0 SEQUENCE SET pair_quote_relations_quote_id_seq user_secret
+
+260114121525971680,pg_restore: error: could not execute query: ERROR:  relation "public.pair_quote_relations_quote_id_seq" does not exist
+
+260114121525971969,LINE 1: SELECT pg_catalog.setval('public.pair_quote_relations_quote_...
+
+260114121525972252,                                 ^
+
+260114121525972550,Command was: SELECT pg_catalog.setval('public.pair_quote_relations_quote_id_seq', 1, false);
+
+260114121525972841,
+260114121525973062,
+260114121525973286,pg_restore: executing SEQUENCE SET pairs_pair_id_seq
+
+260114121525973612,pg_restore: from TOC entry 3576; 0 0 SEQUENCE SET pairs_pair_id_seq user_secret
+
+260114121525973885,pg_restore: error: could not execute query: ERROR:  relation "public.pairs_pair_id_seq" does not exist
+
+260114121525974156,LINE 1: SELECT pg_catalog.setval('public.pairs_pair_id_seq', 210, tr...
+
+260114121525974424,                                 ^
+
+260114121525974693,Command was: SELECT pg_catalog.setval('public.pairs_pair_id_seq', 210, true);
+
+260114121525974961,
+260114121525975167,
+260114121525975375,pg_restore: executing SEQUENCE SET pools_pool_id_seq
+
+260114121525975645,pg_restore: from TOC entry 3577; 0 0 SEQUENCE SET pools_pool_id_seq user_secret
+
+260114121525975915,pg_restore: error: could not execute query: ERROR:  relation "public.pools_pool_id_seq" does not exist
+
+260114121525976298,LINE 1: SELECT pg_catalog.setval('public.pools_pool_id_seq', 98, tru...
+
+260114121525976571,                                 ^
+
+260114121525976837,Command was: SELECT pg_catalog.setval('public.pools_pool_id_seq', 98, true);
+
+260114121525977154,
+260114121525977358,
+260114121525977602,pg_restore: executing SEQUENCE SET quote_job_relations_job_id_seq
+
+260114121525977905,pg_restore: from TOC entry 3578; 0 0 SEQUENCE SET quote_job_relations_job_id_seq user_secret
+
+260114121525978384,pg_restore: error: could not execute query: ERROR:  relation "public.quote_job_relations_job_id_seq" does not exist
+
+260114121525978769,LINE 1: SELECT pg_catalog.setval('public.quote_job_relations_job_id_...
+
+260114121525979137,                                 ^
+
+260114121525979482,Command was: SELECT pg_catalog.setval('public.quote_job_relations_job_id_seq', 1, false);
+
+260114121525979766,
+260114121525979983,
+260114121525980197,pg_restore: executing SEQUENCE SET quote_job_relations_quote_id_seq
+
+260114121525980507,pg_restore: from TOC entry 3579; 0 0 SEQUENCE SET quote_job_relations_quote_id_seq user_secret
+
+260114121525980773,pg_restore: error: could not execute query: ERROR:  relation "public.quote_job_relations_quote_id_seq" does not exist
+
+260114121525981039,LINE 1: SELECT pg_catalog.setval('public.quote_job_relations_quote_i...
+
+260114121525981303,                                 ^
+
+260114121525981599,Command was: SELECT pg_catalog.setval('public.quote_job_relations_quote_id_seq', 2, true);
+
+260114121525981877,
+260114121525982085,
+260114121525982296,pg_restore: executing SEQUENCE SET quote_job_relations_quote_job_relarion_id_seq
+
+260114121525982566,pg_restore: from TOC entry 3580; 0 0 SEQUENCE SET quote_job_relations_quote_job_relarion_id_seq user_secret
+
+260114121525982836,pg_restore: error: could not execute query: ERROR:  relation "public.quote_job_relations_quote_job_relarion_id_seq" does not exist
+
+260114121525983164,LINE 1: SELECT pg_catalog.setval('public.quote_job_relations_quote_j...
+
+260114121525983436,                                 ^
+
+260114121525983715,Command was: SELECT pg_catalog.setval('public.quote_job_relations_quote_job_relarion_id_seq', 70, true);
+
+260114121525983988,
+260114121525984193,
+260114121525984401,pg_restore: executing SEQUENCE SET quotes_quote_id_seq
+
+260114121525984673,pg_restore: from TOC entry 3581; 0 0 SEQUENCE SET quotes_quote_id_seq user_secret
+
+260114121525984943,pg_restore: error: could not execute query: ERROR:  relation "public.quotes_quote_id_seq" does not exist
+
+260114121525985214,LINE 1: SELECT pg_catalog.setval('public.quotes_quote_id_seq', 11, t...
+
+260114121525985535,                                 ^
+
+260114121525985814,Command was: SELECT pg_catalog.setval('public.quotes_quote_id_seq', 11, true);
+
+260114121525986091,
+260114121525986298,
+260114121525986504,pg_restore: executing SEQUENCE SET rpc_urls_rpc_url_id_seq
+
+260114121525986774,pg_restore: from TOC entry 3582; 0 0 SEQUENCE SET rpc_urls_rpc_url_id_seq user_secret
+
+260114121525987044,pg_restore: error: could not execute query: ERROR:  relation "public.rpc_urls_rpc_url_id_seq" does not exist
+
+260114121525987314,LINE 1: SELECT pg_catalog.setval('public.rpc_urls_rpc_url_id_seq', 1...
+
+260114121525987602,                                 ^
+
+260114121525987884,Command was: SELECT pg_catalog.setval('public.rpc_urls_rpc_url_id_seq', 12, true);
+
+260114121525988154,
+260114121525988360,
+260114121525988566,pg_restore: executing SEQUENCE SET servers_server_id_seq
+
+260114121525988834,pg_restore: from TOC entry 3583; 0 0 SEQUENCE SET servers_server_id_seq user_secret
+
+260114121525989105,pg_restore: error: could not execute query: ERROR:  relation "public.servers_server_id_seq" does not exist
+
+260114121525989373,LINE 1: SELECT pg_catalog.setval('public.servers_server_id_seq', 9, ...
+
+260114121525989662,                                 ^
+
+260114121525989934,Command was: SELECT pg_catalog.setval('public.servers_server_id_seq', 9, true);
+
+260114121525990204,
+260114121525990411,
+260114121525990616,pg_restore: executing SEQUENCE SET tokens_token_id_seq
+
+260114121525990885,pg_restore: from TOC entry 3584; 0 0 SEQUENCE SET tokens_token_id_seq user_secret
+
+260114121525991153,pg_restore: error: could not execute query: ERROR:  relation "public.tokens_token_id_seq" does not exist
+
+260114121525991422,LINE 1: SELECT pg_catalog.setval('public.tokens_token_id_seq', 126, ...
+
+260114121525991690,                                 ^
+
+260114121525991961,Command was: SELECT pg_catalog.setval('public.tokens_token_id_seq', 126, true);
+
+260114121525992230,
+260114121525992434,
+260114121525992640,pg_restore: warning: errors ignored on restore: 27
+
