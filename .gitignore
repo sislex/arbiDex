@@ -48,3 +48,4 @@ storybook-static
 .env
 
 db/pgadmin_storage
+db/node_modules
