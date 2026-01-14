@@ -4,17 +4,21 @@ services:
     container_name: arbi-postgres
     restart: unless-stopped
     env_file:
-      .env
+     - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "${DB_PORT}:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
-      - ./backups:/backups
+      - ./db/backups:/backups
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user_secret -d db_5444 -h localhost" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -h localhost" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   arbi-pgadmin:
     image: dpage/pgadmin4:8
@@ -23,17 +27,18 @@ services:
     env_file:
       - .env
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: adminpass
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "True"
       PGADMIN_SERVER_JSON_FILE: /db/pgadmin4/servers.json
     ports:
-      - "8081:80"
+      - "${PGADMIN_PORT}:80"
     depends_on:
       arbi-postgres:
         condition: service_healthy
     volumes:
       - ./db/pgadmin_storage:/var/lib/pgadmin
-      - ./db/pgadmin4/servers.json:/pgadmin4/servers.json:ro
+      - ./db/pgadmin4/servers.json:/db/pgadmin4/servers.json
 
 volumes:
   pg_data:
