@@ -67,14 +67,14 @@ export class AgGridPairsContainer {
       headerName: 'Token In',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.tokenIn?.tokenId || '-';
+        return params.data?.tokenIn?.tokenName || '-';
       },
     },
     {
       headerName: 'Token Out',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.tokenOut?.tokenId || '-';
+        return params.data?.tokenOut?.tokenName || '-';
       },
     },
     {
