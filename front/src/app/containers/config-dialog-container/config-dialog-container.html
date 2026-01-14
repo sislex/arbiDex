@@ -1,0 +1,14 @@
+<app-confirmation-pop-up
+  [title]="data.title"
+  [buttons]="data.buttons"
+  [dataFromContent]=""
+  (emitter)="eventClose($event)"
+>
+  <div class="scroll" popupContent>
+   <textarea
+     [ngModel]="configValue()"
+     (ngModelChange)="configValue.set($event)"
+     style="white-space: pre; font-family: monospace;"
+   ></textarea>
+  </div>
+</app-confirmation-pop-up>

@@ -15,6 +15,7 @@ import { createServer, deletingServer, editServer, setServersData } from '../../
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 import { ServerDialogService } from '../../../services/server-dialog-service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-ag-grid-servers-container',
@@ -32,6 +33,7 @@ export class AgGridServersContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly serverDialog = inject(ServerDialogService);
+  readonly router = inject(Router);
 
   serversDataResponse$ = this.store.select(getServersDataResponse);
   serversDataIsLoading$ = this.store.select(getServersDataIsLoading);
@@ -70,11 +72,13 @@ export class AgGridServersContainer {
 
   readonly defaultColDef: ColDef = {
     sortable: false,
-    cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
+    cellStyle: {
+      textAlign: 'center',
+      cursor: 'pointer',
+    },
   };
-
 
   constructor() {
     this.store.dispatch(setServersData());
@@ -90,9 +94,13 @@ export class AgGridServersContainer {
     }
   }
 
-  actions($event: any, note: any) {
-    if (note === 'add' ) {
-      this.openCreateDialog();
+  actions($event: any, note?: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if (note === 'add') {
+        this.openCreateDialog();
+      }
+    } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
+      this.router.navigate([`/data-view/servers/${$event.row.data.serverId}`]);
     }
   }
 

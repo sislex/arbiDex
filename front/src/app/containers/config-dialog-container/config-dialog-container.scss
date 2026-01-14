@@ -1,0 +1,10 @@
+.scroll {
+  display: flex;
+  flex: 1;
+  padding: 16px;
+
+  textarea {
+    padding: 16px;
+    width: 100%;
+  }
+}

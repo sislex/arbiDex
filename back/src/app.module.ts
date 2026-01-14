@@ -25,6 +25,7 @@ import { PairsModule } from './pairs/pairs.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { PairQuoteRelationsModule } from './pair-quote-relations/pair-quote-relations.module';
 import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relations.module';
+import { RpcUrlsModule } from './rpc-urls/rpc-urls.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relatio
     QuotesModule,
     PairQuoteRelationsModule,
     QuoteJobRelationsModule,
+    RpcUrlsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

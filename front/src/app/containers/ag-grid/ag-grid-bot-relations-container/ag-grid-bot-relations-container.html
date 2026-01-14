@@ -1,0 +1,36 @@
+<app-header-content-layout>
+  @if (
+    (jobsDataIsLoaded$ | async) &&
+    !(jobsDataIsLoading$ | async) &&
+    (activeBotIsLoaded$ | async) &&
+    !(activeBotIsLoading$ | async) &&
+    !!(botRelation$| async)
+    ) {
+    <app-title-table-button
+      header
+      [title]="'Bot ID:' + currentBotId + ' relations table'"
+    ></app-title-table-button>
+  }
+  @if (
+    (jobsDataIsLoaded$ | async) &&
+    !(jobsDataIsLoading$ | async) &&
+    (activeBotIsLoaded$ | async) &&
+    !(activeBotIsLoading$ | async) &&
+    !!(botRelation$ | async)
+    ) {
+    <app-ag-grid
+      content
+      [rowData]="(botRelation$| async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      [isRowSelection]="{
+      mode: 'singleRow',
+      selectAll: 'filtered',
+    }"
+      (emitter)="events($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
+</app-header-content-layout>
+

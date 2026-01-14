@@ -6,15 +6,13 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
 import { Store } from '@ngrx/store';
 import { PoolDialogService } from '../../../services/pool-dialog-service';
 import {
-  getChainsDataResponse, getDexesDataResponse,
   getPoolsDataIsLoaded,
   getPoolsDataIsLoading,
-  getPoolsDataResponse, getTokensDataResponse, getVersionList,
+  getPoolsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 import { createPool, deletingPools, editPool, setPoolsData } from '../../../+state/db-config/db-config.actions';
-import { map } from 'rxjs';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 
@@ -35,42 +33,6 @@ export class AgGridPoolsContainer {
   readonly poolDialog = inject(PoolDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  chainsList$ = this.store.select(getChainsDataResponse).pipe(
-    map(item =>
-      item.map(item => ({
-        id: item.chainId,
-        name: item.name,
-      }))
-    )
-  );
-
-  tokensList$ = this.store.select(getTokensDataResponse).pipe(
-    map(item =>
-      item.map(item => ({
-        id: item.tokenId,
-        name: item.tokenName,
-      }))
-    )
-  );
-
-  dexesList$ = this.store.select(getDexesDataResponse).pipe(
-    map(item =>
-      item.map(item => ({
-        id: item.dexId,
-        name: item.name,
-      }))
-    )
-  );
-
-  versionList$ = this.store.select(getVersionList).pipe(
-    map(item =>
-      item.map(item => ({
-        id: item,
-        name: item,
-      }))
-    )
-  );
-
   poolsDataResponse$ = this.store.select(getPoolsDataResponse);
   poolsDataIsLoading$ = this.store.select(getPoolsDataIsLoading);
   poolsDataIsLoaded$ = this.store.select(getPoolsDataIsLoaded);
@@ -90,14 +52,14 @@ export class AgGridPoolsContainer {
       headerName: 'Chain ID',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.chain?.chainId || '-';
+        return params.data?.chain?.name || '-';
       },
     },
     {
-      headerName: 'Dex ID',
+      headerName: 'Dex Name',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.dex?.dexId || '-';
+        return params.data?.dex?.name || '-';
       },
     },
     {
@@ -114,7 +76,7 @@ export class AgGridPoolsContainer {
       headerName: 'Token 1',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.token?.tokenId || '-';
+        return params.data?.token?.tokenName || '-';
       },
     },
     {
@@ -122,7 +84,7 @@ export class AgGridPoolsContainer {
       headerName: 'Token 2',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.token2?.tokenId || '-';
+        return params.data?.token2?.tokenName || '-';
       },
     },
     {
@@ -163,7 +125,7 @@ export class AgGridPoolsContainer {
   }
 
   openCreateDialog() {
-    this.poolDialog.openCreate(this.chainsList$, this.tokensList$, this.dexesList$, this.versionList$).subscribe(result => {
+    this.poolDialog.openCreate().subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createPool({ data: result.formData }));
       }
@@ -171,7 +133,7 @@ export class AgGridPoolsContainer {
   }
 
   openEditDialog(row: any) {
-    this.poolDialog.openEdit(row, this.chainsList$, this.tokensList$, this.dexesList$, this.versionList$).subscribe(result => {
+    this.poolDialog.openEdit(row).subscribe(result => {
       if (result?.data === 'save') {
         this.store.dispatch(editPool({ data: result.formData }));
       }

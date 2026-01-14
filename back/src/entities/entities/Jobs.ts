@@ -2,10 +2,14 @@ import {
   Column,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Bots } from './Bots';
+import { Chains } from './Chains';
+import { RpcUrls } from './RpcUrls';
 import { QuoteJobRelations } from './QuoteJobRelations';
 
 @Index('jobs_pkey', ['jobId'], { unique: true })
@@ -21,8 +25,19 @@ export class Jobs {
   })
   jobType: string | null;
 
+  @Column('text', { name: 'description', nullable: true })
+  description: string | null;
+
   @OneToMany(() => Bots, (bots) => bots.job)
   bots: Bots[];
+
+  @ManyToOne(() => Chains, (chains) => chains.jobs, { onDelete: 'RESTRICT' })
+  @JoinColumn([{ name: 'chain_id', referencedColumnName: 'chainId' }])
+  chain: Chains;
+
+  @ManyToOne(() => RpcUrls, (rpcUrls) => rpcUrls.jobs, { onDelete: 'RESTRICT' })
+  @JoinColumn([{ name: 'rpc_url_id', referencedColumnName: 'rpcUrlId' }])
+  rpcUrl: RpcUrls;
 
   @OneToMany(
     () => QuoteJobRelations,

@@ -51,6 +51,30 @@ export class AgGridJobsContainer {
       flex: 1,
     },
     {
+      field: "description",
+      headerName: 'Description',
+      flex: 1,
+    },
+    {
+      headerName: 'Chain Id',
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.chain?.chainId || '-';
+      },
+    },
+    {
+      headerName: 'Rpc Url',
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.rpcUrl?.rpcUrlId || '-';
+      },
+    },
+    {
+      field: "pairsCount",
+      headerName: 'Pairs count',
+      flex: 1,
+    },
+    {
       headerName: 'Actions',
       width: 125,
       cellRenderer: ActionsContainer,

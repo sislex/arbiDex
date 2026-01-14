@@ -29,6 +29,24 @@ export class Bots {
   })
   description: string | null;
 
+  @Column('boolean', { name: 'paused', nullable: true })
+  paused: boolean | null;
+
+  @Column('boolean', { name: 'is_repeat', nullable: true })
+  isRepeat: boolean | null;
+
+  @Column('integer', { name: 'delay_between_repeat', nullable: true })
+  delayBetweenRepeat: number | null;
+
+  @Column('integer', { name: 'max_jobs', nullable: true })
+  maxJobs: number | null;
+
+  @Column('integer', { name: 'max_errors', nullable: true })
+  maxErrors: number | null;
+
+  @Column('integer', { name: 'timeout_ms', nullable: true })
+  timeoutMs: number | null;
+
   @ManyToOne(() => Jobs, (jobs) => jobs.bots, {
     onDelete: 'RESTRICT',
     onUpdate: 'CASCADE',

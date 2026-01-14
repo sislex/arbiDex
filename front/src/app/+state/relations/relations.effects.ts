@@ -46,7 +46,7 @@ export class RelationsEffects {
     this.actions$.pipe(
       ofType(RelationsActions.setQuoteRelations),
       switchMap(action =>
-        this.apiService.getQuoteRelations().pipe(
+        this.apiService.getQuoteRelations(action.jobId).pipe(
           map(response =>
             RelationsActions.setQuoteRelationsSuccess({ response }),
           ),
@@ -113,7 +113,7 @@ export class RelationsEffects {
     this.actions$.pipe(
       ofType(RelationsActions.setJobRelationsDataList),
       switchMap(action =>
-        this.apiService.getJobRelationsByQuoteId(action.jobId).pipe(
+        this.apiService.getJobRelationsByJobId(action.jobId).pipe(
           map((response: any[]) => {
             const formattedData = response.map(item => ({
               quoteJobRelationId: item.quoteJobRelationId,
@@ -179,4 +179,45 @@ export class RelationsEffects {
       ),
     { dispatch: false }
   );
+
+//====================================================================================================================
+//                                                   Bot Relations
+//====================================================================================================================
+
+  setActiveBot$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(RelationsActions.setActiveBot),
+      switchMap((action) =>
+        this.apiService.setBotById(action.botId).pipe(
+          map(response =>
+            RelationsActions.setActiveBotSuccess({ response })
+          ),
+          catchError(error =>
+            of(RelationsActions.setActiveBotFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
+//====================================================================================================================
+//                                                   Server Relations
+//====================================================================================================================
+
+  setActiveServer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(RelationsActions.setActiveServer),
+      switchMap((action) =>
+        this.apiService.setServerById(action.serverId).pipe(
+          map(response =>
+            RelationsActions.setActiveServerSuccess({ response })
+          ),
+          catchError(error =>
+            of(RelationsActions.setActiveServerFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
 }

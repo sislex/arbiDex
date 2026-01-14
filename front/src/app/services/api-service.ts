@@ -86,6 +86,14 @@ export class ApiService {
   getBots(): Observable<any> {
     return this.http.get(`${this.apiUrl}/bots`);
   }
+  getBotsByServerId(serverId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/bots/findAllByServerId`, {
+      params: { serverId: serverId.toString() }
+    });
+  }
+  setBotById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/bots/${id}`);
+  }
   createBot(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/bots`, {...data});
   }
@@ -137,6 +145,9 @@ export class ApiService {
   getJobs(): Observable<any> {
     return this.http.get(`${this.apiUrl}/jobs`);
   }
+  getJobById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/jobs/${id}`);
+  }
   createJob(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/jobs`, {...data});
   }
@@ -153,6 +164,9 @@ export class ApiService {
 
   getServers(): Observable<any> {
     return this.http.get(`${this.apiUrl}/servers`);
+  }
+  setServerById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/servers/${id}`);
   }
   createServer(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/servers`, {...data});
@@ -171,8 +185,10 @@ export class ApiService {
   getQuoteRelationsByQuoteId(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/pair-quote-relations/by-quote-id/${id}`);
   }
-  getQuoteRelations(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/pair-quote-relations`);
+  getQuoteRelations(jobId: any): Observable<any> {
+    return this.http.get(`${this.apiUrl}/pair-quote-relations/findAllWithFilter`, {
+      params: { jobId: jobId.toString() }
+    });
   }
   createQuoteRelations(data: any[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/pair-quote-relations`, data);
@@ -185,13 +201,30 @@ export class ApiService {
   //                                                   Job Relations
   //====================================================================================================================
 
-  getJobRelationsByQuoteId(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/quote-job-relations/by-quote-id/${id}`);
+  getJobRelationsByJobId(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/quote-job-relations/by-job-id/${id}`);
   }
   createJobRelations(data: any[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/quote-job-relations`, data);
   }
   deleteJobRelations(ids: number[]): Observable<any> {
     return this.http.delete(`${this.apiUrl}/quote-job-relations`, { body: ids });
+  }
+
+  //====================================================================================================================
+  //                                                   Rpc Urls Relations
+  //====================================================================================================================
+
+  getRpcUrls(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/rpc-urls`);
+  }
+  createRpcUrl(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/rpc-urls`, {...data});
+  }
+  editRpcUrl(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/rpc-urls/${id}`, data);
+  }
+  deletingRpcUrl(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/rpc-urls/${id}`);
   }
 }

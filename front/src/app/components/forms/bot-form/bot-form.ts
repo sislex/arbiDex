@@ -6,6 +6,7 @@ import { InputField } from '../../input-field/input-field';
 import { AsyncPipe } from '@angular/common';
 import { SelectField } from '../../select-field/select-field';
 import { Observable } from 'rxjs';
+import { Toggle } from '../../toggle/toggle';
 
 @Component({
   selector: 'app-bot-form',
@@ -15,6 +16,7 @@ import { Observable } from 'rxjs';
     InputField,
     AsyncPipe,
     SelectField,
+    Toggle,
   ],
   templateUrl: './bot-form.html',
   styleUrl: './bot-form.scss',
@@ -26,7 +28,20 @@ export class BotForm {
 
   @Output() emitter = new EventEmitter();
 
-  events(event: any, field: 'botName' | 'description' | 'jobId' | 'serverId') {
+  events(
+    event: any,
+    field:
+      'botName' |
+      'description' |
+      'jobId' |
+      'serverId' |
+      'paused' |
+      'isRepeat' |
+      'delayBetweenRepeat' |
+      'maxJobs' |
+      'maxErrors' |
+      'timeoutMs'
+  ) {
     this.formData = {
       ...this.formData,
       [field]: event.data,

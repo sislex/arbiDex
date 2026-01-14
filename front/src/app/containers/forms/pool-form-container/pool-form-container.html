@@ -4,13 +4,14 @@
   (emitter)="eventClose($event)"
 >
   <div class="scroll" popupContent>
-  <app-pool-form
-    [formData]="data.form"
-    [chainsList]="data.chainsList"
-    [tokensList]="data.tokensList"
-    [dexesList]="data.dexesList"
-    [versionsList]="data.versionsList"
-    (emitter)="eventsForm($event)"
-  ></app-pool-form>
+    <app-pool-form
+      [formData]="data.form"
+      [chainsList]="chainsList$"
+      [tokensList]="tokensList$"
+      [dexesList]="dexesList$"
+      [versionsList]="versionList$"
+      [tokenDisabled]="(tokenDisabled$ | async)!"
+      (emitter)="eventsForm($event)"
+    ></app-pool-form>
   </div>
 </app-confirmation-pop-up>

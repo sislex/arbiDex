@@ -25,7 +25,10 @@ export const deletingQuoteRelations = createAction(
   '[Relations] deletingQuoteRelations',
   props<{ quoteId: number, quoteRelationsIds: number[] }>()
 );
-export const setQuoteRelations = createAction('[Relations] setQuoteRelations');
+export const setQuoteRelations = createAction(
+  '[Relations] setQuoteRelations',
+  props<{ jobId: number }>()
+);
 export const setQuoteRelationsSuccess = createAction(
   '[Relations] setQuoteRelationsSuccess',
   props<{ response: any }>()
@@ -58,4 +61,38 @@ export const createJobRelations = createAction(
 export const deletingJobRelations = createAction(
   '[Relations] deletingJobRelations',
   props<{ jobId: number, jobRelationsIds: number[] }>()
+);
+
+//====================================================================================================================
+//                                                   Bot Relations
+//====================================================================================================================
+
+export const setActiveBot = createAction(
+  '[Relations] setActiveBot',
+  props<{ botId: number }>()
+);
+export const setActiveBotSuccess = createAction(
+  '[Relations] setActiveBotSuccess',
+  props<{ response: any }>()
+);
+export const setActiveBotFailure = createAction(
+  '[Relations] setActiveBotFailure',
+  props<{ error: string }>()
+);
+
+//====================================================================================================================
+//                                                   Server Relations
+//====================================================================================================================
+
+export const setActiveServer = createAction(
+  '[Relations] setActiveServer',
+  props<{ serverId: number }>()
+);
+export const setActiveServerSuccess = createAction(
+  '[Relations] setActiveServerSuccess',
+  props<{ response: any }>()
+);
+export const setActiveServerFailure = createAction(
+  '[Relations] setActiveServerFailure',
+  props<{ error: string }>()
 );

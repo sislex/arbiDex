@@ -17,6 +17,7 @@ import {
 import { createBot, deletingBot, editBot, setBotsData } from '../../../+state/db-config/db-config.actions';
 import { BotDialogService } from '../../../services/bot-dialog-service';
 import { map } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-ag-grid-bots-container',
@@ -34,6 +35,7 @@ export class AgGridBotsContainer {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly botDialog = inject(BotDialogService);
+  readonly router = inject(Router);
 
   botsDataResponse$ = this.store.select(getBotsDataResponse);
   botsDataIsLoading$ = this.store.select(getBotsDataIsLoading);
@@ -88,6 +90,13 @@ export class AgGridBotsContainer {
       },
     },
     {
+      headerName: 'Pairs count',
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.job?.quoteJobRelations.length || '-';
+      },
+    },
+    {
       headerName: 'Actions',
       width: 125,
       cellRenderer: ActionsContainer,
@@ -99,13 +108,16 @@ export class AgGridBotsContainer {
 
   readonly defaultColDef: ColDef = {
     sortable: false,
-    cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',
+    cellStyle: {
+      textAlign: 'center',
+      cursor: 'pointer',
+    },
   };
 
   constructor() {
-      this.store.dispatch(setBotsData());
+    this.store.dispatch(setBotsData());
   }
 
   onAction($event: any, row: any) {
@@ -118,9 +130,13 @@ export class AgGridBotsContainer {
     }
   }
 
-  actions($event: any, note: any) {
-    if (note === 'add' ) {
-      this.openCreateDialog();
+  actions($event: any, note?: any) {
+    if ($event.event === 'Actions:ACTION_CLICKED') {
+      if (note === 'add') {
+        this.openCreateDialog();
+      }
+    } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
+      this.router.navigate([`/data-view/bots/${$event.row.data.botId}`]);
     }
   }
 
@@ -133,11 +149,11 @@ export class AgGridBotsContainer {
   }
 
   openEditDialog(row: any) {
-      this.botDialog.openEdit(row, this.serversList$, this.jobList$).subscribe(result => {
-        if (result?.data === 'save') {
-          this.store.dispatch(editBot({ data: result.formData }));
-        }
-      });
+    this.botDialog.openEdit(row, this.serversList$, this.jobList$).subscribe(result => {
+      if (result?.data === 'save') {
+        this.store.dispatch(editBot({ data: result.formData }));
+      }
+    });
   }
 
   openDeleteDialog(row: any) {

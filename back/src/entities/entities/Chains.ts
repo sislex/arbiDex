@@ -1,5 +1,7 @@
 import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Jobs } from './Jobs';
 import { Pools } from './Pools';
+import { RpcUrls } from './RpcUrls';
 import { Tokens } from './Tokens';
 
 @Index('chains_pkey', ['chainId'], { unique: true })
@@ -18,8 +20,14 @@ export class Chains {
   })
   createdAt: Date | null;
 
+  @OneToMany(() => Jobs, (jobs) => jobs.chain)
+  jobs: Jobs[];
+
   @OneToMany(() => Pools, (pools) => pools.chain)
   pools: Pools[];
+
+  @OneToMany(() => RpcUrls, (rpcUrls) => rpcUrls.chain)
+  rpcUrls: RpcUrls[];
 
   @OneToMany(() => Tokens, (tokens) => tokens.chain)
   tokens: Tokens[];

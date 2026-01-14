@@ -5,7 +5,7 @@ export interface ITokensAPI extends API {
 }
 export interface ITokens {
   tokenId: number | null;
-  chainId: number | null;
+  chain: IChains;
   address: string;
   symbol: string;
   tokenName: string;
@@ -114,10 +114,27 @@ export interface IJobsAPI extends API {
 export interface IJobs {
   jobId: number;
   jobType: string;
+  chainId: string;
+  rpcUrl: IRpcUrl;
+  pairs: number;
 }
 export interface IJobsCreate {
   jobId: number;
   jobType: string;
+}
+
+export interface IRpcUrlApi extends API {
+  response: IRpcUrl[];
+}
+export interface IRpcUrl {
+  rpcUrlId: number;
+  rpcUrl: string;
+  chain: IChains;
+}
+export interface IRpcUrlCreate {
+  rpcUrlId: number;
+  rpcUrl: string;
+  chainId: number;
 }
 
 export interface IBotsAPI extends API {
@@ -129,6 +146,13 @@ export interface IBots {
   description: string;
   server: IServers;
   job: IJobs;
+  pairs: number;
+  paused: boolean;
+  isRepeat: boolean;
+  delayBetweenRepeat: number;
+  maxJobs: number;
+  maxErrors: number;
+  timeoutMs: number;
 }
 export interface IBotsCreate {
   botId: number;
@@ -136,6 +160,12 @@ export interface IBotsCreate {
   description: string;
   serverId: number;
   jobId: number;
+  paused: boolean;
+  isRepeat: boolean;
+  delayBetweenRepeat: number;
+  maxJobs: number;
+  maxErrors: number;
+  timeoutMs: number;
 }
 
 export interface IServersAPI extends API {

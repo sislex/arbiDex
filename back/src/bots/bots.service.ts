@@ -16,19 +16,83 @@ export class BotsService {
   ) {}
   async create(createBotDto: BotDto) {
     const server = await this.serverService.findOne(createBotDto.serverId);
-    const job = await this.jobService.findOne(createBotDto.jobId);
+    const job = await this.jobService.findOneWithPairs(createBotDto.jobId);
     const bot = this.botRepository.create({
       botName: createBotDto.botName,
       description: createBotDto.description,
       server: server,
       job: job,
+      paused: createBotDto.paused,
+      isRepeat: createBotDto.isRepeat,
+      delayBetweenRepeat: createBotDto.delayBetweenRepeat,
+      maxJobs: createBotDto.maxJobs,
+      maxErrors: createBotDto.maxErrors,
+      timeoutMs: createBotDto.timeoutMs,
     });
     return await this.botRepository.save(bot);
   }
 
   async findAll() {
     return await this.botRepository.find({
-      relations: ['server', 'job'],
+      relationLoadStrategy: 'query',
+      relations: {
+        server: true,
+        job: {
+          chain: true,
+          rpcUrl: true,
+          quoteJobRelations: {
+            quoteRelation: {
+              quote: true,
+              pair: {
+                tokenIn: true,
+                tokenOut: true,
+                pool: {
+                  dex: true,
+                  chain: true,
+                  token: true,
+                  token2: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      order: {
+        botId: 'DESC',
+      },
+    });
+  }
+
+  async findAllByServerId(serverId: string) {
+    return await this.botRepository.find({
+      relationLoadStrategy: 'query',
+      relations: {
+        server: true,
+        job: {
+          chain: true,
+          rpcUrl: true,
+          quoteJobRelations: {
+            quoteRelation: {
+              quote: true,
+              pair: {
+                tokenIn: true,
+                tokenOut: true,
+                pool: {
+                  dex: true,
+                  chain: true,
+                  token: true,
+                  token2: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      where: {
+        server: {
+          serverId: serverId,
+        },
+      },
       order: {
         botId: 'DESC',
       },
@@ -37,6 +101,7 @@ export class BotsService {
 
   async findOne(id: number) {
     const bot = await this.botRepository.findOne({
+      relations: ['server', 'job'],
       where: { botId: id.toString() },
     });
     if (!bot) {
@@ -55,6 +120,13 @@ export class BotsService {
     bot.description = updateBotDto.description;
     bot.server = server;
     bot.job = job;
+
+    bot.paused = updateBotDto.paused;
+    bot.isRepeat = updateBotDto.isRepeat;
+    bot.delayBetweenRepeat = updateBotDto.delayBetweenRepeat;
+    bot.maxJobs = updateBotDto.maxJobs;
+    bot.maxErrors = updateBotDto.maxErrors;
+    bot.timeoutMs = updateBotDto.timeoutMs;
 
     return await this.botRepository.save(bot);
   }

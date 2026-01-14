@@ -1,8 +1,40 @@
 <app-header-content-layout>
+  <app-field-title header [title]="'Select chain'"></app-field-title>
+  <app-select-field
+    [title]="'Chain name'"
+    [list]="chainsList | async"
+    [selected]="formData.chainId"
+    (emitter)="events($event, 'chainId')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Select Rpc Url'"></app-field-title>
+  <app-select-field
+    [title]="'Rpc Url'"
+    [list]="rpcUrlList | async"
+    [selected]="formData.rpcUrlId"
+    [disabled]="rpcUrlDisabled"
+    (emitter)="events($event, 'rpcUrlId')"
+    content
+  ></app-select-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
   <app-field-title header [title]="'Type'"></app-field-title>
   <app-input-field
     [inputValue]="formData.jobType"
     (emitter)="events($event, 'jobType')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Description'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.description"
+    (emitter)="events($event, 'description')"
     content
   ></app-input-field>
 </app-header-content-layout>

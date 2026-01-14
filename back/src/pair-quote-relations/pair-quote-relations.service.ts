@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PairQuoteRelationDto } from '../dtos/pair-quote-relations-dto/pair-quote-relation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PairQuoteRelations } from '../entities/entities/PairQuoteRelations';
 import { Repository } from 'typeorm';
 import { PairsService } from '../pairs/pairs.service';
 import { QuotesService } from '../quotes/quotes.service';
+import { JobsService } from '../jobs/jobs.service';
 
 @Injectable()
 export class PairQuoteRelationsService {
@@ -13,6 +14,8 @@ export class PairQuoteRelationsService {
     private pairQuoteRelationsRepository: Repository<PairQuoteRelations>,
     private pairsService: PairsService,
     private quotesService: QuotesService,
+    @Inject(forwardRef(() => JobsService))
+    private readonly jobsService: JobsService,
   ) {}
 
   async createMany(pairQuoteRelationDto: PairQuoteRelationDto[]) {
@@ -40,6 +43,35 @@ export class PairQuoteRelationsService {
         'pair.pool.token2',
         'quote',
       ],
+      order: {
+        pairQuoteRelationId: 'DESC',
+      },
+    });
+  }
+
+  async findAllWithFilter(jobId: number) {
+    const chainIdFilter = await this.jobsService.findOneWithPairs(jobId);
+    return await this.pairQuoteRelationsRepository.find({
+      where: {
+        pair: {
+          pool: {
+            chain: { chainId: chainIdFilter?.chain?.chainId },
+          },
+        },
+      },
+      relations: {
+        pair: {
+          tokenIn: true,
+          tokenOut: true,
+          pool: {
+            dex: true,
+            chain: true,
+            token: true,
+            token2: true,
+          },
+        },
+        quote: true,
+      },
       order: {
         pairQuoteRelationId: 'DESC',
       },

@@ -8,7 +8,9 @@ import {
   IQuotesAPI,
   IPoolsAPI,
   IServersAPI,
-  ITokensAPI, IPairsAPI,
+  ITokensAPI,
+  IPairsAPI,
+  IRpcUrlApi,
 } from '../../models/db-config';
 import {emptyAsyncResponse} from './configs';
 
@@ -24,7 +26,9 @@ export interface DbConfigState {
   quotes: IQuotesAPI;
   jobs: IJobsAPI;
   bots: IBotsAPI;
+  botsByServerId: IBotsAPI;
   servers: IServersAPI;
+  rpcUrls: IRpcUrlApi;
 
   versions: string[];
 }
@@ -43,7 +47,9 @@ export const initialState: DbConfigState = {
   quotes: emptyAsyncResponse([]),
   jobs: emptyAsyncResponse([]),
   bots: emptyAsyncResponse([]),
+  botsByServerId: emptyAsyncResponse([]),
   servers: emptyAsyncResponse([]),
+  rpcUrls: emptyAsyncResponse([]),
 
   versions: ['v2', 'v3', 'v4'],
 }
@@ -291,6 +297,36 @@ export const dbConfigReducer = createReducer(
     }
   })),
 
+  on(DbConfigActions.setBotsByServerId, (state) => ({
+    ...state,
+    botsByServerId: {
+      ...state.botsByServerId,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setBotsByServerIdSuccess, (state, {response}) => ({
+    ...state,
+    botsByServerId: {
+      ...state.botsByServerId,
+      loadingTime: Date.now() - state.botsByServerId.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setBotsByServerIdFailure, (state, {error}) => ({
+    ...state,
+    botsByServerId: {
+      ...state.bots,
+      loadingTime: Date.now() - state.botsByServerId.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
   on(DbConfigActions.setServersData, (state) => ({
     ...state,
     servers: {
@@ -315,6 +351,36 @@ export const dbConfigReducer = createReducer(
     servers: {
       ...state.servers,
       loadingTime: Date.now() - state.servers.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(DbConfigActions.setRpcUrlsData, (state) => ({
+    ...state,
+    rpcUrls: {
+      ...state.rpcUrls,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setRpcUrlsDataSuccess, (state, {response}) => ({
+    ...state,
+    rpcUrls: {
+      ...state.rpcUrls,
+      loadingTime: Date.now() - state.rpcUrls.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setRpcUrlsDataFailure, (state, {error}) => ({
+    ...state,
+    rpcUrls: {
+      ...state.rpcUrls,
+      loadingTime: Date.now() - state.rpcUrls.startTime!,
       isLoading: false,
       isLoaded: true,
       error

@@ -1,0 +1,30 @@
+<app-header-content-layout>
+  @if (
+    (botsDataIsLoaded$ | async) &&
+    !(botsDataIsLoading$ | async) &&
+    (activeServerIsLoaded$ | async) &&
+    !(activeServerIsLoading$ | async)
+    ) {
+    <app-title-table-button
+      header
+      [title]="'Server ID:' + currentServerId + ' relations table'"
+    ></app-title-table-button>
+  }
+  @if (
+    (botsDataIsLoaded$ | async) &&
+    !(botsDataIsLoading$ | async) &&
+    (activeServerIsLoaded$ | async) &&
+    !(activeServerIsLoading$ | async)
+    ) {
+    <app-ag-grid
+      content
+      [rowData]="(serverRelation$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      (emitter)="events($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
+</app-header-content-layout>
+

@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
 import { PoolFormContainer } from '../containers/forms/pool-form-container/pool-form-container';
 
 @Injectable({
@@ -8,12 +7,7 @@ import { PoolFormContainer } from '../containers/forms/pool-form-container/pool-
 })
 export class PoolDialogService {
   private dialog = inject(MatDialog);
-  openCreate(
-    chainsList$: Observable<any>,
-    tokensList$: Observable<any>,
-    dexesList$: Observable<any>,
-    versionsList$: Observable<any>,
-  ) {
+  openCreate() {
     return this.dialog.open(PoolFormContainer, {
       width: '90%',
       height: '90%',
@@ -24,10 +18,6 @@ export class PoolDialogService {
       data: {
         title: 'Add new pool',
         buttons: ['add', 'cancel'],
-        chainsList: chainsList$,
-        tokensList: tokensList$,
-        dexesList: dexesList$,
-        versionsList: versionsList$,
         form: {
           chainId: null,
           versionId: null,
@@ -36,18 +26,13 @@ export class PoolDialogService {
           dexId: null,
           fee: null,
           poolAddress: '',
-        }
-      }
+        },
+      },
+
     }).afterClosed();
   }
 
-  openEdit(
-    row: any,
-    chainsList$: Observable<any>,
-    tokensList$: Observable<any>,
-    dexesList$: Observable<any>,
-    versionsList$: Observable<any>,
-  ) {
+  openEdit( row: any ) {
     return this.dialog.open(PoolFormContainer, {
       width: '90%',
       height: '90%',
@@ -58,10 +43,6 @@ export class PoolDialogService {
       data: {
         title: 'Edit pool',
         buttons: ['save', 'cancel'],
-        chainsList: chainsList$,
-        tokensList: tokensList$,
-        dexesList: dexesList$,
-        versionsList: versionsList$,
         form: {
           poolId: row.poolId,
           chainId: row.chain.chainId,

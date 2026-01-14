@@ -4,6 +4,7 @@ import {
   IJobRelationsAPI, IQuoteRelationsAPI,
 } from '../../models/relations';
 import * as RelationsActions from './relations.actions';
+import { IBotsAPI, IServersAPI } from '../../models/db-config';
 
 export const RELATIONS_FEATURE_KEY = 'relations';
 
@@ -11,6 +12,8 @@ export interface RelationsState {
   quoteRelationsByQuoteId: IQuoteRelationsAPI;
   quoteRelationsList: IQuoteRelationsAPI;
   jobRelations: IJobRelationsAPI;
+  activeBot: IBotsAPI;
+  activeServer: IServersAPI;
 }
 
 export interface RelationsPartialState {
@@ -21,6 +24,8 @@ export const initialState: RelationsState = {
   quoteRelationsByQuoteId: emptyAsyncResponse([]),
   quoteRelationsList: emptyAsyncResponse([]),
   jobRelations: emptyAsyncResponse([]),
+  activeBot: emptyAsyncResponse([]),
+  activeServer: emptyAsyncResponse([]),
 }
 
 export const relationsReducer = createReducer(
@@ -109,6 +114,66 @@ export const relationsReducer = createReducer(
     jobRelations: {
       ...state.jobRelations,
       loadingTime: Date.now() - state.jobRelations.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(RelationsActions.setActiveBot, (state) => ({
+    ...state,
+    activeBot: {
+      ...state.activeBot,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(RelationsActions.setActiveBotSuccess, (state, {response}) => ({
+    ...state,
+    activeBot: {
+      ...state.activeBot,
+      loadingTime: Date.now() - state.activeBot.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(RelationsActions.setActiveBotFailure, (state, {error}) => ({
+    ...state,
+    activeBot: {
+      ...state.activeBot,
+      loadingTime: Date.now() - state.activeBot.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(RelationsActions.setActiveServer, (state) => ({
+    ...state,
+    activeServer: {
+      ...state.activeServer,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(RelationsActions.setActiveServerSuccess, (state, {response}) => ({
+    ...state,
+    activeServer: {
+      ...state.activeServer,
+      loadingTime: Date.now() - state.activeServer.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(RelationsActions.setActiveServerFailure, (state, {error}) => ({
+    ...state,
+    activeServer: {
+      ...state.activeServer,
+      loadingTime: Date.now() - state.activeServer.startTime!,
       isLoading: false,
       isLoaded: true,
       error

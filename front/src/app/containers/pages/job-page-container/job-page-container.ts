@@ -22,7 +22,7 @@ import { AsyncPipe } from '@angular/common';
 import { ButtonPanel } from '../../../components/button-panel/button-panel';
 import { ContentFooterLayout } from '../../../components/layouts/content-footer-layout/content-footer-layout';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
-import { getJobConfig } from '../../../+state/main/main.actions';
+import { setJobPreConfig } from '../../../+state/main/main.actions';
 
 @Component({
   selector: 'app-job-page-container',
@@ -46,11 +46,12 @@ export class JobPageContainer {
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
   relatedJobRelationsIds: number[] = [];
+  relatedFullJobData: any[] = [];
   currentJobId: number;
 
   constructor() {
     this.currentJobId = Number(this.route.snapshot.paramMap.get('id'));
-    this.store.dispatch(setQuoteRelations());
+    this.store.dispatch(setQuoteRelations({jobId: this.currentJobId}));
     this.store.dispatch(
       setJobRelationsDataList({ jobId: this.currentJobId }),
     );
@@ -78,12 +79,13 @@ export class JobPageContainer {
             this.setCreateAndRemoveLists(mappedOldRelations, this.relatedJobRelationsIds);
           });
       } else if ($event.data === 'get config') {
-        this.store.dispatch(getJobConfig());
+        this.store.dispatch(setJobPreConfig({ data: this.relatedFullJobData, jobId: this.currentJobId}))
       } else if ($event.data === 'cancel') {
         console.log('cancelTO')
       }
     } else if ($event.event === 'AgGridJobRelationsContainer:ACTIVE_RELATIONS') {
       this.relatedJobRelationsIds = $event.data
+      this.relatedFullJobData = $event.fullData
     }
   };
 
@@ -109,7 +111,6 @@ export class JobPageContainer {
 
   sendActions(createList: IJobRelationCreate[], deleteList: number[]) {
     if (createList.length !== 0) {
-      console.log('createList', createList)
       this.store.dispatch(createJobRelations({ jobId: this.currentJobId, data: createList }));
     }
     if (deleteList.length !==0) {

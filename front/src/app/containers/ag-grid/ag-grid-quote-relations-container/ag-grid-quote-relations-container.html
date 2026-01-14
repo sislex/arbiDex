@@ -2,7 +2,7 @@
   @if ((pairsDataIsLoaded$ | async) && !(pairsDataIsLoading$ | async)&& (quoteRelationsIsLoaded$ | async)&& !(quoteRelationsIsLoading$ | async)) {
     <app-title-table-button
       header
-      [title]="'Quote relations table'"
+    [title]="'Quote ID:' + currentQuoteId + ' relations table'"
     ></app-title-table-button>
   }
   @if ((pairsDataIsLoaded$ | async) && !(pairsDataIsLoading$ | async)&& (quoteRelationsIsLoaded$ | async)&& !(quoteRelationsIsLoading$ | async)) {

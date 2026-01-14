@@ -1,6 +1,22 @@
-import { createAction } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
 
 export const getJobConfig = createAction('[Main] getJobConfig');
 export const getJobConfigSuccess = createAction(
   '[Main] getJobConfigSuccess'
+);
+export const setJobPreConfig = createAction(
+  '[Main] setJobPreConfig',
+  props<{ data: any[], jobId: number }>()
+);
+export const setBotPreConfig = createAction(
+  '[Main] setBotPreConfig',
+  props<{ data: any[], botId: number }>()
+);
+export const setServerPreConfig = createAction(
+  '[Main] setServerPreConfig',
+  props<{ data: any[], serverId: number }>()
+);
+export const copyConfig = createAction(
+  '[Main] copyConfig',
+  props<{ config: string }>()
 );

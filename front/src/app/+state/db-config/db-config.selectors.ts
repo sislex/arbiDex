@@ -1,5 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {DB_CONFIG_FEATURE_KEY, DbConfigState} from './db-config.reducer';
+import { IRpcUrl, ITokens } from '../../models/db-config';
 
 export const selectFeature = createFeatureSelector<DbConfigState>(DB_CONFIG_FEATURE_KEY);
 
@@ -19,6 +20,12 @@ export const getVersionList = createSelector(
 export const getTokensDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.tokens.response
+);
+export const getTokensDataResponseFilterChainId = (chainId: number) => createSelector(
+  selectFeature,
+  (state: DbConfigState) => state?.tokens?.response
+    ?.filter((token: ITokens) => token.chain?.chainId === chainId)
+    ?? []
 );
 export const getTokensDataFailure = createSelector(
   selectFeature,
@@ -212,6 +219,20 @@ export const getBotsDataIsLoaded = createSelector(
   (state: DbConfigState) => state.bots.isLoaded
 );
 
+
+export const getBotsByServerIdResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.botsByServerId.response
+);
+export const getBotsByServerIdIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.botsByServerId.isLoading
+);
+export const getBotsByServerIdIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.botsByServerId.isLoaded
+);
+
 //====================================================================================================================
 //                                                   Servers
 //====================================================================================================================
@@ -235,4 +256,35 @@ export const getServersDataIsLoading = createSelector(
 export const getServersDataIsLoaded = createSelector(
   selectFeature,
   (state: DbConfigState) => state.servers.isLoaded
+);
+
+//====================================================================================================================
+//                                                   Rpc Urls
+//====================================================================================================================
+
+export const getRpcUrlDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.rpcUrls.response
+);
+export const getRpcUrlDataResponseFilterChainId = (chainId: number) => createSelector(
+  selectFeature,
+  (state: DbConfigState) => state?.rpcUrls?.response
+      ?.filter((rpcUrl: IRpcUrl) => rpcUrl.chain?.chainId === chainId)
+    ?? []
+);
+export const getRpcUrlsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.rpcUrls.error
+);
+export const getRpcUrlsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.rpcUrls.error
+);
+export const getRpcUrlsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.rpcUrls.isLoading
+);
+export const getRpcUrlsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.rpcUrls.isLoaded
 );

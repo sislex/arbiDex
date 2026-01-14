@@ -1,0 +1,21 @@
+<app-header-content-layout>
+  @if ((rpcUrlsDataIsLoaded$ | async) && !(rpcUrlsDataIsLoading$ | async)) {
+    <app-title-table-button
+      header
+      [title]="'Rpc urls table'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+    ></app-title-table-button>
+  }
+  @if ((rpcUrlsDataIsLoaded$ | async) && !(rpcUrlsDataIsLoading$ | async)) {
+    <app-ag-grid
+      content
+      [rowData]="(rpcUrlsDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
+</app-header-content-layout>
+

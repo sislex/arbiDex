@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
@@ -18,14 +18,19 @@ import { IPoolsCreate } from '../../../models/db-config';
   templateUrl: './pool-form.html',
   styleUrl: './pool-form.scss',
 })
-export class PoolForm {
+export class PoolForm implements OnInit {
   @Input() formData!: IPoolsCreate;
   @Input() chainsList: any = [];
   @Input() tokensList: any = [];
   @Input() dexesList: any = [];
   @Input() versionsList: any = [];
+  @Input() tokenDisabled: boolean = true;
 
   @Output() emitter = new EventEmitter();
+
+  ngOnInit() {
+    this.emitter.emit(this.formData);
+  }
 
   events(event: any, field: 'chainId' | 'token' | 'token2' | 'fee' | 'dexId' | 'version' | 'poolAddress') {
     this.formData = {

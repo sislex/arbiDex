@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JobsService } from '../jobs/jobs.service';
@@ -11,6 +11,7 @@ export class QuoteJobRelationsService {
   constructor(
     @InjectRepository(QuoteJobRelations)
     private quoteJobRelationsRepository: Repository<QuoteJobRelations>,
+    @Inject(forwardRef(() => JobsService))
     private jobsService: JobsService,
     private pairQuoteRelationsService: PairQuoteRelationsService,
   ) {}
@@ -29,7 +30,7 @@ export class QuoteJobRelationsService {
     return await this.quoteJobRelationsRepository.save(data);
   }
 
-  async findByQuoteId(id: string) {
+  async findByJobId(id: string) {
     const item = await this.quoteJobRelationsRepository.find({
       where: {
         job: {

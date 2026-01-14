@@ -20,7 +20,10 @@ export class JobDialogService {
         buttons: ['add', 'cancel'],
         form: {
           jobId: null,
-          jobType: ''
+          jobType: '',
+          description: '',
+          chainId: null,
+          rpcUrlId: null
         }
       }
     }).afterClosed();
@@ -37,7 +40,13 @@ export class JobDialogService {
       data: {
         title: 'Edit job',
         buttons: ['save', 'cancel'],
-        form: { ...row }
+        form: {
+          jobId: row.jobId,
+          jobType: row.jobType,
+          description: row.description,
+          chainId: row.chain.chainId,
+          rpcUrlId: row.rpcUrl.rpcUrlId,
+        }
       }
     }).afterClosed();
   }

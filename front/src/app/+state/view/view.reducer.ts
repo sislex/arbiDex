@@ -16,10 +16,11 @@ export interface ViewPartialState {
 export const initialState: ViewState = {
   isSidebarOpen: true,
   sidebarList: [
-    'Tokens',
-    'Pools',
     'Dexes',
     'Chains',
+    'Rpc-urls',
+    'Tokens',
+    'Pools',
     'Pairs',
     'Quotes',
     'Jobs',
