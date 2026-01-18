@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { SelectField } from '../../select-field/select-field';
-import { ITokens } from '../../../models/db-config';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
 import { FieldTitle } from '../../field-title/field-title';
 import { InputField } from '../../input-field/input-field';
@@ -19,7 +18,7 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: './token-form.scss',
 })
 export class TokenForm {
-  @Input() formData!: ITokens;
+  @Input() formData!: any;
   @Input() list: any = [];
 
   @Output() emitter = new EventEmitter();

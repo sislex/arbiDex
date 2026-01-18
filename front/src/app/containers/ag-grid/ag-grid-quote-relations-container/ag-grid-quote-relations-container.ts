@@ -103,7 +103,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.token?.tokenId || '-';
+        return params.data?.pool?.token?.tokenName || '-';
       },
     },
     {
@@ -114,7 +114,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.token2?.tokenId || '-';
+        return params.data?.pool?.token2?.tokenName || '-';
       },
     },
     {
@@ -125,7 +125,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.tokenIn?.tokenId || '-';
+        return params.data?.tokenIn?.tokenName || '-';
       },
     },
     {
@@ -136,7 +136,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.tokenOut?.tokenId || '-';
+        return params.data?.tokenOut?.tokenName || '-';
       },
     },
   ];
