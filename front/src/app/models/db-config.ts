@@ -10,6 +10,9 @@ export interface ITokens {
   symbol: string;
   tokenName: string;
   decimals: number | null;
+  isActive: boolean | null;
+  isChecked: boolean | null;
+  balance: boolean | null;
 }
 export interface ITokensCreate {
   tokenId: number;
@@ -18,6 +21,9 @@ export interface ITokensCreate {
   symbol: string;
   tokenName: string;
   decimals: number;
+  isActive: boolean | null;
+  isChecked: boolean | null;
+  balance: boolean | null;
 }
 
 export interface IPoolsAPI extends API {

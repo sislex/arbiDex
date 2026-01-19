@@ -13,4 +13,7 @@ export class CreateTokenDto {
   symbol: string;
   tokenName: string;
   decimals: number;
+  isActive?: boolean | null;
+  isChecked?: boolean | null;
+  balance?: boolean | null;
 }

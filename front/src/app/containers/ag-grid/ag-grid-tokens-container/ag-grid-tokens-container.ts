@@ -84,6 +84,27 @@ export class AgGridTokensContainer {
       flex: 1,
     },
     {
+      headerName: 'Is Active',
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.isActive || '-';
+      },
+    },
+    {
+      headerName: 'Is Checked',
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.isChecked || '-';
+      },
+    },
+    {
+      headerName: 'Balance',
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.balance || '-';
+      },
+    },
+    {
       headerName: 'Actions',
       width: 125,
       cellRenderer: ActionsContainer,
