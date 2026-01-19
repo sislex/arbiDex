@@ -17,6 +17,19 @@ export class TokensService {
   ) {}
 
   async create(tokenDto: CreateTokenDto) {
+    const existingToken = await this.tokensRepository.findOne({
+      where: {
+        address: tokenDto.address,
+        chain: {
+          chainId: tokenDto.chainId
+        }
+      }
+    });
+
+    if (existingToken) {
+        return existingToken;
+    }
+
     const chain = await this.chainsRepository.findOne({
       where: { chainId: tokenDto.chainId },
     });
@@ -27,8 +40,11 @@ export class TokensService {
       address: tokenDto.address,
       symbol: tokenDto.symbol,
       tokenName: tokenDto.tokenName,
-      decimals: tokenDto.decimals,
-      chain,
+      decimals: +tokenDto.decimals,
+      chain, // связь с объектом chain
+      isActive: null,
+      isChecked: null,
+      balance: null,
     });
 
     return await this.tokensRepository.save(token);
@@ -55,6 +71,19 @@ export class TokensService {
     return token;
   }
 
+  async findOneByAddress(tokenAddress: string) {
+    console.log(tokenAddress);
+    const token = await this.tokensRepository.findOne({
+      where: { address: tokenAddress },
+      relations: ['chain'],
+    });
+
+    if (!token) {
+      throw new Error(`Token with address ${tokenAddress} not found`);
+    }
+    return token;
+  }
+
   async update(id: number, tokenDto: CreateTokenDto) {
     const token = await this.findOne(id);
     const chain = await this.chainService.findOne(tokenDto.chainId);
@@ -63,7 +92,11 @@ export class TokensService {
     token.symbol = tokenDto.symbol;
     token.tokenName = tokenDto.tokenName;
     token.decimals = tokenDto.decimals;
+    token.isActive = null;
+    token.isChecked = null;
+    token.balance = null;
     token.chain = chain;
+
 
     return await this.tokensRepository.save(token);
   }
