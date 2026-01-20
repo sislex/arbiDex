@@ -27,6 +27,7 @@ import { PairQuoteRelationsModule } from './pair-quote-relations/pair-quote-rela
 import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relations.module';
 import { RpcUrlsModule } from './rpc-urls/rpc-urls.module';
 import { GetFeeModule } from './services/get-fee.module';
+import { SwapRateModule } from './swap-rate/swap-rate.module';
 
 @Module({
   imports: [
@@ -75,7 +76,8 @@ import { GetFeeModule } from './services/get-fee.module';
     PairQuoteRelationsModule,
     QuoteJobRelationsModule,
     RpcUrlsModule,
-    GetFeeModule
+    GetFeeModule,
+    SwapRateModule
   ],
   controllers: [AppController],
   providers: [AppService],
