@@ -18,6 +18,11 @@ export class ApiService {
   getTokens(): Observable<any> {
     return this.http.get(`${this.apiUrl}/tokens`);
   }
+  getOneTokenByAddress(address: any): Observable<any> {
+    return this.http.get(`${this.apiUrl}/tokens/get-one-token-by-address`, {
+      params: { tokenAddress: address }
+    });
+  }
   createToken(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/tokens`, {...data});
   }

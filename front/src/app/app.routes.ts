@@ -14,6 +14,7 @@ import { JobPageContainer } from './containers/pages/job-page-container/job-page
 import { BotPageContainer } from './containers/pages/bot-page-container/bot-page-container';
 import { AgGridRpcUrlsContainer } from './containers/ag-grid/ag-grid-rpc-urls-container/ag-grid-rpc-urls-container';
 import { ServerPageContainer } from './containers/pages/server-page-container/server-page-container';
+import {ImportsPage} from './containers/pages/imports-page/imports-page';
 
 export const routes: Routes = [
   {
@@ -74,6 +75,11 @@ export const routes: Routes = [
         path: 'tokens',
         component: AgGridTokensContainer,
         data: { feature: 'tokens' },
+      },
+      {
+        path: 'imports',
+        component: ImportsPage,
+        data: { feature: 'imports' },
       },
     ]
   },

@@ -1,0 +1,12 @@
+
+<div class="area">
+  <textarea
+    [(ngModel)]="data"
+    style="white-space: pre; font-family: monospace;"
+  ></textarea>
+</div>
+<div class="buttons">
+  <button (click)="events('token')">import Tokens</button>
+  <button (click)="events('pool')">import Pools</button>
+  <button (click)="events('setfee')">set fee</button>
+</div>

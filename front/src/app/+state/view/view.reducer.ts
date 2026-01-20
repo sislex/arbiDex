@@ -26,6 +26,7 @@ export const initialState: ViewState = {
     'Jobs',
     'Bots',
     'Servers',
+    'Imports',
   ],
   activeSidebarItem: '',
 };

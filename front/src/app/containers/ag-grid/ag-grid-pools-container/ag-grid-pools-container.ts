@@ -99,7 +99,7 @@ export class AgGridPoolsContainer {
 
   readonly defaultColDef: ColDef = {
     sortable: false,
-    cellStyle: { textAlign: 'center'},
+    cellStyle: { textAlign: 'center', userSelect: 'text',},
     suppressMovable: true,
     headerClass: 'align-center',
   };

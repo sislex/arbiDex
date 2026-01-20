@@ -32,7 +32,7 @@ export interface IPoolsAPI extends API {
 export interface IPools {
   poolId: number;
   chain: IChains;
-  poolAddress: number;
+  poolAddress: string;
   token: ITokens;
   token2: ITokens;
   fee: number;
@@ -42,7 +42,7 @@ export interface IPools {
 export interface IPoolsCreate {
   poolId: number;
   chainId: number;
-  poolAddress: number;
+  poolAddress: string;
   token: number;
   token2: number;
   fee: number;

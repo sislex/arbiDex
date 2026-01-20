@@ -20,3 +20,13 @@ export const copyConfig = createAction(
   '[Main] copyConfig',
   props<{ config: string }>()
 );
+export const tokenImportCamelotV3 = createAction(
+  '[Main] tokenImportCamelotV3',
+  props<{ data: string }>()
+);
+export const poolImportCamelotV3 = createAction(
+  '[Main] poolImportCamelotV3',
+  props<{ data: string }>()
+);
+
+export const setFee = createAction('[Main] setFee');
