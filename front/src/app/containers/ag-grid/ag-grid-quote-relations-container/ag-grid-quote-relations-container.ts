@@ -42,7 +42,7 @@ export class AgGridQuoteRelationsContainer {
   readonly colDefs: ColDef[] = [
     {
       headerName: 'Chain Name',
-      width: 150,
+
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
@@ -53,7 +53,7 @@ export class AgGridQuoteRelationsContainer {
     },
     {
       headerName: 'Dex Name',
-      width: 150,
+
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
@@ -64,7 +64,7 @@ export class AgGridQuoteRelationsContainer {
     },
     {
       headerName: 'Pool Address',
-      width: 150,
+
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
@@ -75,7 +75,7 @@ export class AgGridQuoteRelationsContainer {
     },
     {
       headerName: 'Dex version',
-      width: 150,
+
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
@@ -86,7 +86,7 @@ export class AgGridQuoteRelationsContainer {
     },
     {
       headerName: 'Fee',
-      width: 150,
+
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
@@ -97,7 +97,7 @@ export class AgGridQuoteRelationsContainer {
     },
     {
       headerName: 'Token 1',
-      width: 150,
+
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
@@ -108,7 +108,7 @@ export class AgGridQuoteRelationsContainer {
     },
     {
       headerName: 'Token 2',
-      width: 150,
+
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
@@ -119,7 +119,7 @@ export class AgGridQuoteRelationsContainer {
     },
     {
       headerName: 'Token In',
-      width: 150,
+
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
@@ -130,7 +130,7 @@ export class AgGridQuoteRelationsContainer {
     },
     {
       headerName: 'Token Out',
-      width: 150,
+
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
@@ -144,6 +144,8 @@ export class AgGridQuoteRelationsContainer {
   readonly defaultColDef: ColDef = {
     filter: true,
     sortable: true,
+    flex: 1,
+    minWidth: 150,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',

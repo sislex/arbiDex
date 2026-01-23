@@ -55,10 +55,14 @@ export class AgGridPairsContainer {
       field: "pairId",
       headerName: 'Pair ID',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       headerName: 'Pool ID',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.pool?.poolId || '-';
       },
@@ -66,6 +70,8 @@ export class AgGridPairsContainer {
     {
       headerName: 'Token In',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.tokenIn?.tokenName || '-';
       },
@@ -73,6 +79,8 @@ export class AgGridPairsContainer {
     {
       headerName: 'Token Out',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.tokenOut?.tokenName || '-';
       },

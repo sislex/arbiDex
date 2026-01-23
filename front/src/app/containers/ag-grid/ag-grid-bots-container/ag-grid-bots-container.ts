@@ -64,20 +64,28 @@ export class AgGridBotsContainer {
       field: "botId",
       headerName: 'Bot ID',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       field: "botName",
       headerName: 'Bot Name',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       field: "description",
       headerName: 'Description',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       headerName: 'Job',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.job?.jobType || '-';
       },
@@ -85,6 +93,8 @@ export class AgGridBotsContainer {
     {
       headerName: 'Server',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.server?.serverId || '-';
       },
@@ -92,6 +102,8 @@ export class AgGridBotsContainer {
     {
       headerName: 'Pairs count',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.job?.quoteJobRelations.length || '-';
       },

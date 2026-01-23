@@ -44,20 +44,28 @@ export class AgGridJobsContainer {
       field: "jobId",
       headerName: 'Job ID',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       field: "jobType",
       headerName: 'Job Type',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       field: "description",
       headerName: 'Description',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       headerName: 'Chain Id',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.chain?.chainId || '-';
       },
@@ -65,6 +73,8 @@ export class AgGridJobsContainer {
     {
       headerName: 'Rpc Url',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.rpcUrl?.rpcUrlId || '-';
       },
@@ -73,11 +83,13 @@ export class AgGridJobsContainer {
       field: "pairsCount",
       headerName: 'Pairs count',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       headerName: 'Actions',
-      width: 125,
       cellRenderer: ActionsContainer,
+      width: 125,
       cellRendererParams: {
         onAction: this.onAction.bind(this),
       },
