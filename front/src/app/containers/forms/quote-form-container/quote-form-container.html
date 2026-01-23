@@ -6,6 +6,7 @@
   <div class="scroll" popupContent>
     <app-quote-form
       [formData]="data.form"
+      [tokensList]="tokenList$"
       (emitter)="eventsForm($event)"
     ></app-quote-form>
   </div>

@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { Pairs } from "./Pairs";
 import { Pools } from "./Pools";
+import { Quotes } from "./Quotes";
 import { SwapRate } from "./SwapRate";
 import { Chains } from "./Chains";
 
@@ -51,6 +52,9 @@ export class Tokens {
 
   @OneToMany(() => Pools, (pools) => pools.token2)
   pools2: Pools[];
+
+  @OneToMany(() => Quotes, (quotes) => quotes.token)
+  quotes: Quotes[];
 
   @OneToMany(() => SwapRate, (swapRate) => swapRate.swapRateToken)
   swapRates: SwapRate[];

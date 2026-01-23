@@ -80,6 +80,18 @@ export class AgGridQuotesContainer {
       flex: 1,
       filter: true,
       sortable: true,
+      valueGetter: (params) => {
+        return params.data?.token?.tokenName || '-';
+      },
+    },
+    {
+      headerName: 'Pairs count',
+      flex: 1,
+      filter: true,
+      sortable: true,
+      valueGetter: (params) => {
+        return params.data?.pairQuoteRelations?.length || '-';
+      },
     },
     {
       headerName: 'Actions',

@@ -104,7 +104,8 @@ export interface IQuotes {
   side: string;
   blockTag: string;
   quoteSource: string;
-  createdAt?: string;
+  token: ITokens;
+  pairQuoteRelations?: IPairQuoteRelation;
 }
 export interface IQuotesCreate {
   quoteId: number;
@@ -112,6 +113,13 @@ export interface IQuotesCreate {
   side: string;
   blockTag: string;
   quoteSource: string;
+  token: number;
+  pairQuoteRelations?: IPairQuoteRelation;
+}
+export interface IPairQuoteRelation {
+  pairQuoteRelationId: number;
+  pair?: IPairs;
+  quote?: IQuotes;
 }
 
 export interface IJobsAPI extends API {

@@ -20,8 +20,8 @@ export class QuotesController {
   }
 
   @Get()
-  findAll() {
-    return this.quotesService.findAll();
+  async findAll() {
+    return await this.quotesService.findAll();
   }
 
   @Get(':id')

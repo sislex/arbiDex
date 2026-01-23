@@ -2,10 +2,13 @@ import {
   Column,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { PairQuoteRelations } from "./PairQuoteRelations";
+import { Tokens } from "./Tokens";
 
 @Index("quotes_pkey", ["quoteId"], { unique: true })
 @Entity("quotes", { schema: "public" })
@@ -38,4 +41,8 @@ export class Quotes {
     (pairQuoteRelations) => pairQuoteRelations.quote
   )
   pairQuoteRelations: PairQuoteRelations[];
+
+  @ManyToOne(() => Tokens, (tokens) => tokens.quotes, { onDelete: "RESTRICT" })
+  @JoinColumn([{ name: "token_id", referencedColumnName: "tokenId" }])
+  token: Tokens;
 }
