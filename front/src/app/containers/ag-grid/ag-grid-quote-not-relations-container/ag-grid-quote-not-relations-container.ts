@@ -1,33 +1,33 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { DeleteDialogService } from '../../../services/delete-dialog-service';
-import { ColDef } from 'ag-grid-community';
-import { AgGrid } from '../../../components/ag-grid/ag-grid';
-import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
-import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
+import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {Store} from '@ngrx/store';
+import {DeleteDialogService} from '../../../services/delete-dialog-service';
 import {
-  getActivePairs,
+  getInactivePairs,
 } from '../../../+state/relations/relations.selectors';
-import { AsyncPipe } from '@angular/common';
+import {ColDef} from 'ag-grid-community';
+import {HeaderContentLayout} from '../../../components/layouts/header-content-layout/header-content-layout';
+import {TitleTableButton} from '../../../components/title-table-button/title-table-button';
+import {AsyncPipe} from '@angular/common';
+import {AgGrid} from '../../../components/ag-grid/ag-grid';
 
 @Component({
-  selector: 'app-ag-grid-quote-relations-container',
+  selector: 'app-ag-grid-quote-not-relations-container',
   imports: [
-    AgGrid,
     HeaderContentLayout,
     TitleTableButton,
     AsyncPipe,
+    AgGrid,
   ],
-  templateUrl: './ag-grid-quote-relations-container.html',
-  styleUrl: './ag-grid-quote-relations-container.scss',
+  templateUrl: './ag-grid-quote-not-relations-container.html',
+  styleUrl: './ag-grid-quote-not-relations-container.scss',
 })
-export class AgGridQuoteRelationsContainer {
+export class AgGridQuoteNotRelationsContainer {
   @Input() currentQuoteId: number = 0;
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  activePairs$ = this.store.select(getActivePairs);
+  inactivePairs$ = this.store.select(getInactivePairs);
 
   readonly colDefs: ColDef[] = [
     {
@@ -143,8 +143,9 @@ export class AgGridQuoteRelationsContainer {
 
   events($event: any) {
     this.emitter.emit({
-      event: 'AgGridQuoteRelationsContainer:ACTIVE_RELATIONS',
+      event: 'AgGridQuoteNotRelationsContainer:ACTIVE_RELATIONS',
       data: $event.row.selectedNodes.map((item: any) => item.data.pairId),
     });
   }
+
 }

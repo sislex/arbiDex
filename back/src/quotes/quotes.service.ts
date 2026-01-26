@@ -42,6 +42,12 @@ export class QuotesService {
   async findOne(id: number) {
     const quote = await this.quotesRepository.findOne({
       where: { quoteId: id.toString() },
+      relations: {
+        token: true,
+        pairQuoteRelations: {
+          pair: true
+        }
+      },
     });
     if (!quote) {
       throw new Error(`Quote with id ${id} not found`);

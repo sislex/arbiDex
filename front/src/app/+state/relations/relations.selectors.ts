@@ -36,7 +36,7 @@ export const getQuoteRelationsIsLoaded = createSelector(
   (state: RelationsState) => state.quoteRelationsList.isLoaded
 );
 
-export const getPairsWithRelations = createSelector(
+const getPairsWithActivityFlag = createSelector(
   getQuoteRelationsByQuoteId,
   getPairsDataResponse,
   (quoteRelations, pairsList) => {
@@ -49,6 +49,14 @@ export const getPairsWithRelations = createSelector(
       active: activeIds.has(pair.pairId)
     }));
   }
+);
+export const getActivePairs = createSelector(
+  getPairsWithActivityFlag,
+  (pairs) => pairs.filter(pair => pair.active)
+);
+export const getInactivePairs = createSelector(
+  getPairsWithActivityFlag,
+  (pairs) => pairs.filter(pair => !pair.active)
 );
 
 //====================================================================================================================

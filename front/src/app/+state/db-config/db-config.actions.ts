@@ -148,6 +148,10 @@ export const deletingPair = createAction(
 //====================================================================================================================
 
 export const setQuotesData = createAction('[DbConfig] setQuotesData');
+export const setOneQuoteData = createAction(
+  '[DbConfig] setOneQuoteData',
+  props<{ id: number }>()
+);
 export const setQuotesDataSuccess = createAction(
   '[DbConfig] setQuotesDataSuccess',
   props<{ response: any }>()

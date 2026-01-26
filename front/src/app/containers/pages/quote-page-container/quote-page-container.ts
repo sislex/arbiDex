@@ -11,15 +11,29 @@ import { ButtonPanel } from '../../../components/button-panel/button-panel';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
 import { Store } from '@ngrx/store';
 import { AsyncPipe } from '@angular/common';
-import { setPairsData } from '../../../+state/db-config/db-config.actions';
+import {setOneQuoteData, setPairsData} from '../../../+state/db-config/db-config.actions';
 import {
   createQuoteRelations,
   deletingQuoteRelations,
   setQuoteRelationsDataList,
 } from '../../../+state/relations/relations.actions';
-import { getQuoteRelationsByQuoteId } from '../../../+state/relations/relations.selectors';
+import {
+  getQuoteRelationsByQuoteId, getQuoteRelationsByQuoteIdIsLoaded,
+  getQuoteRelationsByQuoteIdIsLoading
+} from '../../../+state/relations/relations.selectors';
 import { take } from 'rxjs';
 import { IQuoteRelations, IQuoteRelationsCreate } from '../../../models/relations';
+import {AgGridOneQuoteContainer} from '../../ag-grid/ag-grid-one-quote-container/ag-grid-one-quote-container';
+import {
+  AgGridQuoteNotRelationsContainer
+} from '../../ag-grid/ag-grid-quote-not-relations-container/ag-grid-quote-not-relations-container';
+import {Loader} from '../../../components/loader/loader';
+import {
+  getPairsDataIsLoaded,
+  getPairsDataIsLoading,
+  getQuotesDataIsLoaded,
+  getQuotesDataIsLoading
+} from '../../../+state/db-config/db-config.selectors';
 
 @Component({
   selector: 'app-quote-page-container',
@@ -31,6 +45,9 @@ import { IQuoteRelations, IQuoteRelationsCreate } from '../../../models/relation
     ContentFooterLayout,
     ButtonPanel,
     AsyncPipe,
+    AgGridOneQuoteContainer,
+    AgGridQuoteNotRelationsContainer,
+    Loader,
   ],
   templateUrl: './quote-page-container.html',
   styleUrl: './quote-page-container.scss',
@@ -43,7 +60,17 @@ export class QuotePageContainer {
   footerButtons = ['save', 'cancel'];
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
+
+  quotesDataIsLoading$ = this.store.select(getQuotesDataIsLoading);
+  quotesDataIsLoaded$ = this.store.select(getQuotesDataIsLoaded);
+  pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
+  pairsDataIsLoaded$ = this.store.select(getPairsDataIsLoaded);
+  quoteRelationsIsLoading$ = this.store.select(getQuoteRelationsByQuoteIdIsLoading);
+  quoteRelationsIsLoaded$ = this.store.select(getQuoteRelationsByQuoteIdIsLoaded);
+
   relatedPairsIds: number[] = [];
+  newRelations: number[] = [];
+  oldRelations: number[] = [];
   currentQuoteId: number;
 
   constructor() {
@@ -52,6 +79,8 @@ export class QuotePageContainer {
     this.store.dispatch(
       setQuoteRelationsDataList({ quoteId: this.currentQuoteId }),
     );
+    this.store.dispatch(setOneQuoteData({id: this.currentQuoteId}))
+
   };
 
   onAction($event: any, note: string) {
@@ -79,7 +108,17 @@ export class QuotePageContainer {
         console.log('cancelTO')
       }
     } else if ($event.event === 'AgGridQuoteRelationsContainer:ACTIVE_RELATIONS') {
-      this.relatedPairsIds = $event.data
+      this.oldRelations = $event.data
+      this.relatedPairsIds = [
+        ...(this.newRelations),
+        ...(this.oldRelations)
+      ]
+    } else if ($event.event === 'AgGridQuoteNotRelationsContainer:ACTIVE_RELATIONS') {
+      this.newRelations= $event.data
+      this.relatedPairsIds = [
+        ...(this.newRelations),
+        ...(this.oldRelations)
+      ]
     }
   };
 

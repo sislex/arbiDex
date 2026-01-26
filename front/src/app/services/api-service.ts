@@ -133,6 +133,9 @@ export class ApiService {
   getQuotes(): Observable<any> {
     return this.http.get(`${this.apiUrl}/quotes`);
   }
+  getOneQuote(quoteId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/quotes/${quoteId}`);
+  }
   createQuote(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/quotes`, {...data});
   }

@@ -1,11 +1,11 @@
 <app-header-content-layout>
   <app-title-table-button
     header
-    [title]="`It's relations`"
+    [title]="'Is not relations'"
   ></app-title-table-button>
   <app-ag-grid
     content
-    [rowData]="(activePairs$ | async)!"
+    [rowData]="(inactivePairs$ | async) !"
     [colDefs]="colDefs"
     [defaultColDef]="defaultColDef"
     [isRowSelection]="{

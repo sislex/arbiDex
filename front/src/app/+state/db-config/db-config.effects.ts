@@ -436,6 +436,22 @@ export class DbConfigEffects {
     )
   );
 
+  setOneQuoteData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setOneQuoteData),
+      switchMap((action) =>
+        this.apiService.getOneQuote(action.id).pipe(
+          map(response =>
+            DbConfigActions.setQuotesDataSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setQuotesDataFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
   createQuote$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.createQuote),
