@@ -86,28 +86,6 @@ export class AgGridQuoteNotRelationsContainer {
       },
     },
     {
-      headerName: 'Token 1',
-
-      filter: 'agTextColumnFilter',
-      filterParams: {
-        defaultToNothingSelected: true,
-      },
-      valueGetter: (params) => {
-        return params.data?.pool?.token?.tokenName || '-';
-      },
-    },
-    {
-      headerName: 'Token 2',
-
-      filter: 'agTextColumnFilter',
-      filterParams: {
-        defaultToNothingSelected: true,
-      },
-      valueGetter: (params) => {
-        return params.data?.pool?.token2?.tokenName || '-';
-      },
-    },
-    {
       headerName: 'Token In',
 
       filter: 'agTextColumnFilter',
@@ -119,17 +97,6 @@ export class AgGridQuoteNotRelationsContainer {
       },
     },
     {
-      headerName: 'Token In Address',
-
-      filter: 'agTextColumnFilter',
-      filterParams: {
-        defaultToNothingSelected: true,
-      },
-      valueGetter: (params) => {
-        return params.data?.tokenIn?.address || '-';
-      },
-    },
-    {
       headerName: 'Token Out',
 
       filter: 'agTextColumnFilter',
@@ -138,6 +105,17 @@ export class AgGridQuoteNotRelationsContainer {
       },
       valueGetter: (params) => {
         return params.data?.tokenOut?.tokenName || '-';
+      },
+    },
+    {
+      headerName: 'Token In Address',
+
+      filter: 'agTextColumnFilter',
+      filterParams: {
+        defaultToNothingSelected: true,
+      },
+      valueGetter: (params) => {
+        return params.data?.tokenIn?.address || '-';
       },
     },
     {

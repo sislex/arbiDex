@@ -13,6 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
 import { setServerPreConfig } from '../../../+state/main/main.actions';
+import {getBotsByServerIdResponse} from '../../../+state/db-config/db-config.selectors';
 
 @Component({
   selector: 'app-server-page-container',
@@ -38,7 +39,7 @@ export class ServerPageContainer {
   relatedFullServerData: any[] = [];
 
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
-
+  serverRelation$ = this.store.select(getBotsByServerIdResponse);
   constructor() {
     this.currentServerId = Number(this.route.snapshot.paramMap.get('id'));
     this.store.dispatch(setActiveServer({ serverId: this.currentServerId }));
