@@ -6,6 +6,11 @@ import { CreateTokenDto } from '../dtos/token-dto/token.dto';
 import { Chains } from '../entities/entities/Chains';
 import { ChainsService } from '../chains/chains.service';
 
+interface TokenFilter {
+  address?: string;
+  chainId?: number;
+}
+
 @Injectable()
 export class TokensService {
   constructor(
@@ -27,7 +32,7 @@ export class TokensService {
     });
 
     if (existingToken) {
-        return existingToken;
+      return existingToken;
     }
 
     const chain = await this.chainsRepository.findOne({
@@ -41,7 +46,7 @@ export class TokensService {
       symbol: tokenDto.symbol,
       tokenName: tokenDto.tokenName,
       decimals: +tokenDto.decimals,
-      chain, // связь с объектом chain
+      chain,
       isActive: null,
       isChecked: null,
       balance: null,
@@ -59,6 +64,17 @@ export class TokensService {
     });
   }
 
+  async findAllWithFilter(filter: TokenFilter) {
+    const where: any = {};
+    if (filter.address) where.address = filter.address.toLowerCase();
+    if (filter.chainId) where.chain = { chainId: filter.chainId };
+
+    return this.tokensRepository.find({
+      where,
+      relations: ['chain'],
+    });
+  }
+
   async findOne(id: number) {
     const token = await this.tokensRepository.findOne({
       where: { tokenId: id },
@@ -72,11 +88,12 @@ export class TokensService {
   }
 
   async findOneByAddress(tokenAddress: string) {
-    console.log(tokenAddress);
-    const token = await this.tokensRepository.findOne({
-      where: { address: tokenAddress },
-      relations: ['chain'],
-    });
+
+    const token = await this.tokensRepository
+      .createQueryBuilder('token')
+      .leftJoinAndSelect('token.chain', 'chain')
+      .where('LOWER(token.address) = LOWER(:address)', { address: tokenAddress })
+      .getOne();
 
     if (!token) {
       throw new Error(`Token with address ${tokenAddress} not found`);

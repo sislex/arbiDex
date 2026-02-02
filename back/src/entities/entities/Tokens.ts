@@ -23,13 +23,17 @@ export class Tokens {
   @Column("character varying", { name: "address", unique: true, length: 255 })
   address: string;
 
-  @Column("character varying", { name: "symbol", length: 50 })
+  @Column("character varying", { name: "symbol", length: 255 })
   symbol: string;
 
   @Column("integer", { name: "decimals" })
   decimals: number;
 
-  @Column("character varying", { name: "token_name", nullable: true })
+  @Column("character varying", {
+    name: "token_name",
+    nullable: true,
+    length: 255,
+  })
   tokenName: string | null;
 
   @Column("boolean", { name: "is_active", nullable: true })

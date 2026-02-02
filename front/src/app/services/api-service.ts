@@ -18,6 +18,9 @@ export class ApiService {
   getTokens(): Observable<any> {
     return this.http.get(`${this.apiUrl}/tokens`);
   }
+  blockchain(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/blockchain`, {});
+  }
   getOneTokenByAddress(address: any): Observable<any> {
     return this.http.get(`${this.apiUrl}/tokens/get-one-token-by-address`, {
       params: { tokenAddress: address }
@@ -44,7 +47,7 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/pools`, {...data});
   }
   editPool(id: number, data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/pools/${id}`, data);
+    return this.http.put(`${this.apiUrl}/pools/by-id/${id}`, data);
   }
   deletingPool(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/pools/${id}`);

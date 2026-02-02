@@ -8,7 +8,8 @@ import {
   ITokensCreate,
   IBotsCreate,
   IServersCreate,
-  IPairsCreate, IRpcUrlCreate,
+  IPairsCreate,
+  IRpcUrlCreate
 } from '../../models/db-config';
 
 export const setServerList = createAction('[DbConfig] setServerList');

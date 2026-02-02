@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PoolDto } from '../dtos/pools-dto/pool.dto';
+import { PoolDto, UpdatePoolDto, UpdateReservesDto } from '../dtos/pools-dto/pool.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Pools } from '../entities/entities/Pools';
 import { TokensService } from '../tokens/tokens.service';
 import { ChainsService } from '../chains/chains.service';
@@ -56,7 +56,7 @@ export class PoolsService {
     return item;
   }
 
-  async update(id: number, poolDto: PoolDto) {
+  async update(id: number, poolDto: UpdatePoolDto) {
     const pool = await this.findOne(id);
     const chain = await this.chainsService.findOne(poolDto.chainId);
     const token = await this.tokensService.findOne(poolDto.token);
@@ -74,6 +74,41 @@ export class PoolsService {
 
     return await this.poolRepository.save(pool);
   }
+
+  async updateReserves(reserves: UpdateReservesDto[]) {
+    const poolsMap = new Map<string, Pools>();
+    const poolAddresses = reserves.map(r => r.address);
+    const pools = await this.poolRepository.find({
+      where: { poolAddress: In(poolAddresses) },
+      relations: ['token', 'token2'],
+    });
+
+    pools.forEach(pool => poolsMap.set(pool.poolAddress!, pool));
+
+    for (const dto of reserves) {
+      const pool = poolsMap.get(dto.address);
+      if (!pool) continue;
+
+      const token = await this.tokensService.findOneByAddress(dto.token);
+      const token2 = await this.tokensService.findOneByAddress(dto.token2);
+
+      if (!token || !token2) continue;
+
+      if (pool.token.tokenId === token.tokenId && pool.token2.tokenId === token2.tokenId) {
+        pool.reserve0 = dto.reserve0;
+        pool.reserve1 = dto.reserve1;
+      } else {
+        pool.reserve0 = dto.reserve1;
+        pool.reserve1 = dto.reserve0;
+      }
+    }
+
+    const updatedPools = await this.poolRepository.save(Array.from(poolsMap.values()));
+    console.log(`Reserves update completed. Total pools updated: ${updatedPools.length}`);
+    return updatedPools;
+  }
+
+
 
   async remove(id: number) {
     return await this.poolRepository.delete(id);

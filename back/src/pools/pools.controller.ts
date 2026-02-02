@@ -8,7 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { PoolsService } from './pools.service';
-import { PoolDto } from '../dtos/pools-dto/pool.dto';
+import { PoolDto, UpdatePoolDto, UpdateReservesDto } from '../dtos/pools-dto/pool.dto';
 
 @Controller('pools')
 export class PoolsController {
@@ -21,22 +21,17 @@ export class PoolsController {
 
   @Get()
   async findAll() {
-    const pools = await this.poolsService.findAll();
-    return pools.map((p) => ({
-      poolId: p.poolId,
-      chain: p.chain,
-      token: p.token,
-      token2: p.token2,
-      dex: p.dex,
-      version: p.version,
-      fee: p.fee,
-      poolAddress: p.poolAddress,
-    }));
+    return await this.poolsService.findAll();
   }
 
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updatePoolDto: PoolDto) {
+  @Put('by-id/:id')
+  update(@Param('id') id: string, @Body() updatePoolDto: UpdatePoolDto) {
     return this.poolsService.update(+id, updatePoolDto);
+  }
+
+  @Put('update-reserves')
+  updateReserves(@Body() dto: UpdateReservesDto[]) {
+    return this.poolsService.updateReserves(dto);
   }
 
   @Delete(':id')

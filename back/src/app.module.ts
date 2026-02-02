@@ -28,6 +28,7 @@ import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relatio
 import { RpcUrlsModule } from './rpc-urls/rpc-urls.module';
 import { GetFeeModule } from './services/get-fee.module';
 import { SwapRateModule } from './swap-rate/swap-rate.module';
+import { BlockchainModule } from './blockchain/blockchain.module';
 
 @Module({
   imports: [
@@ -77,7 +78,8 @@ import { SwapRateModule } from './swap-rate/swap-rate.module';
     QuoteJobRelationsModule,
     RpcUrlsModule,
     GetFeeModule,
-    SwapRateModule
+    SwapRateModule,
+    BlockchainModule
   ],
   controllers: [AppController],
   providers: [AppService],

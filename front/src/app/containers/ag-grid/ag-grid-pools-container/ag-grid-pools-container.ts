@@ -104,6 +104,24 @@ export class AgGridPoolsContainer {
       },
     },
     {
+      headerName: 'Reserve 1',
+      flex: 1,
+      filter: true,
+      sortable: true,
+      valueGetter: (params) => {
+        return params.data?.reserve0 || '-';
+      },
+    },
+    {
+      headerName: 'Reserve 2',
+      flex: 1,
+      filter: true,
+      sortable: true,
+      valueGetter: (params) => {
+        return params.data?.reserve1 || '-';
+      },
+    },
+    {
       headerName: 'Actions',
       width: 125,
       cellRenderer: ActionsContainer,

@@ -12,6 +12,7 @@ import { Chains } from "./Chains";
 import { Dexes } from "./Dexes";
 import { Tokens } from "./Tokens";
 
+@Index("unique_pool_address", ["poolAddress"], { unique: true })
 @Index("pools_pkey", ["poolId"], { unique: true })
 @Entity("pools", { schema: "public" })
 export class Pools {
@@ -24,8 +25,18 @@ export class Pools {
   @Column("character varying", { name: "version", nullable: true, length: 2 })
   version: string | null;
 
-  @Column("character varying", { name: "pool_address", nullable: true })
+  @Column("character varying", {
+    name: "pool_address",
+    nullable: true,
+    unique: true,
+  })
   poolAddress: string | null;
+
+  @Column("numeric", { name: "reserve0", nullable: true })
+  reserve0: string | null;
+
+  @Column("numeric", { name: "reserve1", nullable: true })
+  reserve1: string | null;
 
   @OneToMany(() => Pairs, (pairs) => pairs.pool)
   pairs: Pairs[];
