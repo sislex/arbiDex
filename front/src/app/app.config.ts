@@ -30,6 +30,6 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes),
     provideRouterStore(),
-    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })
+    // provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })
   ]
 };
