@@ -53,25 +53,25 @@ export class AgGridTokensContainer {
   readonly colDefs: ColDef[] = [
     {
       field: "tokenId",
-      headerName: 'Token ID',
+      headerName: 'ID',
       flex: 1,
       filter: true,
       sortable: true,
     },
     {
       field: "tokenName",
-      headerName: 'Token Name',
+      headerName: 'Name',
       flex: 1,
       filter: true,
       sortable: true,
     },
     {
-      headerName: 'Chain ID',
+      headerName: 'Chain',
       flex: 1,
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.chain?.chainId || '-';
+        return params.data?.chain?.name || '-';
       },
     },
     {
