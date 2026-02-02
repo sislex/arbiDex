@@ -30,6 +30,7 @@ export class QuoteFormContainer {
       item.map(item => ({
         id: item.tokenId,
         name: item.tokenName,
+        address: item.address,
       }))
     )
   );

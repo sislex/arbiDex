@@ -13,6 +13,15 @@
       flex-direction: column;
       flex: 1;
     }
+
+    app-loader {
+      display: flex;
+      flex: 1;
+      loader {
+        display: flex;
+        flex: 1;
+      }
+    }
   }
 
 }
