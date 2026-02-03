@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import { catchError, EMPTY, map, of, switchMap, tap } from 'rxjs';
+import {catchError, EMPTY, map, mergeMap, of, switchMap, tap} from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {initPoolsPage} from './db-config.actions';
 
 
 @Injectable()
@@ -97,6 +98,18 @@ export class DbConfigEffects {
   //====================================================================================================================
   //                                                   Pools
   //====================================================================================================================
+
+  initPoolsPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(initPoolsPage),
+      mergeMap(() => [
+        DbConfigActions.setPoolsData(),
+        DbConfigActions.setTokensData(),
+        DbConfigActions.setDexesData(),
+        DbConfigActions.setChainsData(),
+      ])
+    )
+  );
 
   setPoolsData$ = createEffect(() =>
     this.actions$.pipe(

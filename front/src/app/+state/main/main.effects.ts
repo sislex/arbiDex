@@ -141,7 +141,7 @@ export class MainEffects {
         concatLatestFrom(() => this.store.select(getBotsByServerIdResponse)),
         switchMap(([action, botsData]) =>
           from(this.apiService.setServerById(action.serverId)).pipe(
-            tap((serverData: any) => {
+            tap((_: any) => {
               const botConfig = botsData.map((botData: any) => {
                 const jobQuoteJobRelations = botData.job.quoteJobRelations.map((quoteRelation: any) => ({
                   dex: quoteRelation.quoteRelation.pair.pool.dex.name,
@@ -171,22 +171,25 @@ export class MainEffects {
                 }));
 
                 return {
-                  botType: botData.botName,
-                  paused: botData.paused,
-                  isRepeat: botData.isRepeat,
-                  delayBetweenRepeat: botData.delayBetweenRepeat,
-                  maxJobs: botData.maxJobs,
-                  maxErrors: botData.maxErrors,
-                  timeoutMs: botData.timeoutMs,
+                  id: botData.botId,
+                  botParams: {
+                    botType: botData.botName,
+                    paused: botData.paused,
+                    isRepeat: botData.isRepeat,
+                    delayBetweenRepeat: botData.delayBetweenRepeat,
+                    maxJobs: botData.maxJobs,
+                    maxErrors: botData.maxErrors,
+                    timeoutMs: botData.timeoutMs,
+                  },
                   jobParams: {
                     jobType: botData.job.jobType,
-                    rpcUrl: 'https://arb1.arbitrum.io',
+                    rpcUrl: 'https://arb1.arbitrum.io/rpc',
                     pairsToQuote: jobQuoteJobRelations
                   }
                 };
               });
 
-              const serverConfig = { botList: botConfig };
+              const serverConfig = [...botConfig];
               this.configDialogService.openConfig('Copy Bot config', JSON.stringify(serverConfig, null, 2));
             }),
             catchError((err) => {

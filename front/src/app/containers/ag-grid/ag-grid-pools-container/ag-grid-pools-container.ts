@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -6,13 +6,17 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
 import { Store } from '@ngrx/store';
 import { PoolDialogService } from '../../../services/pool-dialog-service';
 import {
-  getPoolsDataIsLoaded,
-  getPoolsDataIsLoading,
-  getPoolsDataResponse,
+  getFullPoolsData,
+  getFullPoolsDataIsReady,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
-import { createPool, deletingPools, editPool, setPoolsData } from '../../../+state/db-config/db-config.actions';
+import {
+  createPool,
+  deletingPools,
+  editPool,
+  initPoolsPage
+} from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 
@@ -28,14 +32,13 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
   templateUrl: './ag-grid-pools-container.html',
   styleUrl: './ag-grid-pools-container.scss',
 })
-export class AgGridPoolsContainer {
+export class AgGridPoolsContainer implements OnInit {
   private store = inject(Store);
   readonly poolDialog = inject(PoolDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  poolsDataResponse$ = this.store.select(getPoolsDataResponse);
-  poolsDataIsLoading$ = this.store.select(getPoolsDataIsLoading);
-  poolsDataIsLoaded$ = this.store.select(getPoolsDataIsLoaded);
+  poolsDataResponse$ = this.store.select(getFullPoolsData);
+  poolsDataIsReady$ = this.store.select(getFullPoolsDataIsReady);
 
   readonly colDefs: ColDef[] = [
     {
@@ -138,8 +141,8 @@ export class AgGridPoolsContainer {
     headerClass: 'align-center',
   };
 
-  constructor() {
-    this.store.dispatch(setPoolsData());
+  ngOnInit() {
+    this.store.dispatch(initPoolsPage());
   }
 
   onAction($event: any, row: any) {
@@ -152,7 +155,7 @@ export class AgGridPoolsContainer {
     }
   }
 
-  actions($event: any, note: any) {
+  actions(_: any, note: string) {
     if (note === 'add' ) {
       this.openCreateDialog();
     }

@@ -19,9 +19,25 @@ export class PoolsController {
     return this.poolsService.create(createPoolDto);
   }
 
+  private toDto(pool: any) {
+    return {
+      poolId: pool.poolId,
+      poolAddress: pool.poolAddress,
+      reserve0: pool.reserve0,
+      reserve1: pool.reserve1,
+      version: pool.version,
+      fee: pool.fee,
+      chain: { chainId: pool.chain.chainId },
+      dex: { dexId: pool.dex.dexId },
+      token: { tokenId: pool.token.tokenId },
+      token2: { tokenId: pool.token2.tokenId },
+    };
+  }
+
   @Get()
   async findAll() {
-    return await this.poolsService.findAll();
+    const pools = await this.poolsService.findAll(); // вернем все поля
+    return pools.map(pool => this.toDto(pool));
   }
 
   @Put('by-id/:id')

@@ -17,7 +17,22 @@ export class TokensController {
 
   @Get()
   async findAll() {
-    return await this.tokensService.findAll();
+    const tokens = await this.tokensService.findAll();
+    return tokens.map(token => this.toDto(token));
+  }
+
+  private toDto(token: any) {
+    return {
+      tokenId: token.tokenId,
+      address: token.address,
+      symbol: token.symbol,
+      tokenName: token.tokenName,
+      decimals: token.decimals,
+      chain: {
+        chainId: token.chain.chainId,
+        name: token.chain.name,
+      },
+    };
   }
 
   @Get('get-one-token-by-address')

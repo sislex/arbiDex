@@ -44,6 +44,7 @@ export const deletingToken = createAction(
 //                                                   Pools
 //====================================================================================================================
 
+export const initPoolsPage = createAction('[DbConfig] initPoolsPage');
 export const setPoolsData = createAction('[DbConfig] setPoolsData');
 export const setPoolsDataSuccess = createAction(
   '[DbConfig] setPoolsDataSuccess',
