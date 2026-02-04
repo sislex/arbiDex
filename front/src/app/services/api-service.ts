@@ -188,6 +188,9 @@ export class ApiService {
   deletingServer(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/servers/${id}`);
   }
+  resetServerSettings(ip: string, port: string, data: any): Observable<any> {
+    return this.http.post(`http://${ip}:${port}/setBotsRulesList`, data);
+  }
 
   //====================================================================================================================
   //                                                   Quote Relations

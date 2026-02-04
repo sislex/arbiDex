@@ -16,6 +16,10 @@ export const setServerPreConfig = createAction(
   '[Main] setServerPreConfig',
   props<{ data: any[], serverId: number }>()
 );
+export const resetServerSettings = createAction(
+  '[Main] resetServerSettings',
+  props<{ data: any[], serverId: number }>()
+);
 export const copyConfig = createAction(
   '[Main] copyConfig',
   props<{ config: string }>()

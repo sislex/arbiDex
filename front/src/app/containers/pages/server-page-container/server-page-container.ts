@@ -12,7 +12,7 @@ import { setBotsByServerId } from '../../../+state/db-config/db-config.actions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
-import { setServerPreConfig } from '../../../+state/main/main.actions';
+import {resetServerSettings, setServerPreConfig} from '../../../+state/main/main.actions';
 import {getBotsByServerIdResponse} from '../../../+state/db-config/db-config.selectors';
 
 @Component({
@@ -60,6 +60,8 @@ export class ServerPageContainer {
         this.store.dispatch(setServerPreConfig({ data: this.relatedFullServerData, serverId: this.currentServerId }))
       } else if ($event.data === 'cancel') {
         console.log('cancelTO')
+      } else if ($event.data === 'reset server') {
+        this.store.dispatch(resetServerSettings({data: [], serverId: this.currentServerId}))
       }
     } else if ($event.event === 'AgGridServerRelationsContainer:ACTIVE_RELATIONS') {
       this.relatedServerRelationsIds = $event.data

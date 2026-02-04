@@ -2,13 +2,81 @@ import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as MainActions from './main.actions';
 import {catchError, EMPTY, from, switchMap, tap} from 'rxjs';
-import { IArbitrumMultiQuoteJob } from '../../models/main';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfigDialogService } from '../../services/config-dialog-service';
 import { ApiService } from '../../services/api-service';
 import { concatLatestFrom } from '@ngrx/operators';
 import {Store} from '@ngrx/store';
 import {getBotsByServerIdResponse} from '../db-config/db-config.selectors';
+import * as DbConfigSelectors from '../db-config/db-config.selectors';
+
+export function mapQuoteRelation(item: any) {
+  const qr = item.quoteRelation ?? item;
+
+  return {
+    dex: qr.pair.pool.dex.name,
+    version: qr.pair.pool.version as 'v2' | 'v3' | 'v4',
+    token0: {
+      address: qr.pair.pool.token.address,
+      decimals: qr.pair.pool.token.decimals ?? 0
+    },
+    token1: {
+      address: qr.pair.pool.token2.address,
+      decimals: qr.pair.pool.token2.decimals ?? 0
+    },
+    poolAddress: String(qr.pair.pool.poolAddress),
+    feePpm: qr.pair.pool.fee,
+    tokenIn: {
+      address: qr.pair.tokenIn.address,
+      decimals: qr.pair.tokenIn.decimals ?? 0
+    },
+    tokenOut: {
+      address: qr.pair.tokenOut.address,
+      decimals: qr.pair.tokenOut.decimals ?? 0
+    },
+    side: qr.quote.side,
+    amount: String(qr.quote.amount),
+    blockTag: qr.quote.blockTag,
+    quoteSource: qr.quote.quoteSource,
+  };
+}
+
+export function mapBotParams(botData: any) {
+  return {
+    botType: botData.botName,
+    paused: botData.paused,
+    isRepeat: botData.isRepeat,
+    delayBetweenRepeat: botData.delayBetweenRepeat,
+    maxJobs: botData.maxJobs,
+    maxErrors: botData.maxErrors,
+    timeoutMs: botData.timeoutMs,
+  };
+}
+
+export function mapBotToRule(botData: any) {
+  return {
+    id: botData.botId,
+    botParams: mapBotParams(botData),
+    jobParams: mapJobParams(botData.job)
+  };
+}
+
+export function mapJobParams(job: any) {
+  return {
+    jobType: job.jobType,
+    rpcUrl: 'https://arb1.arbitrum.io/rpc',
+    pairsToQuote: job.quoteJobRelations.map(mapQuoteRelation)
+  };
+}
+
+export function mapJobPreConfig(jobData: any, relations: any[]) {
+  return {
+    jobType: jobData.jobType,
+    rpcUrl: 'https://arb1.arbitrum.io/rpc',
+    pairsToQuote: relations.map(mapQuoteRelation)
+  };
+}
+
 
 @Injectable()
 export class MainEffects {
@@ -18,46 +86,19 @@ export class MainEffects {
   private apiService = inject(ApiService);
   private store = inject(Store);
 
-  setJobPreConfig$ = createEffect(() =>
+  setJobPreConfig$ = createEffect(
+    () =>
       this.actions$.pipe(
         ofType(MainActions.setJobPreConfig),
-        switchMap((data: any) =>
-          from(this.apiService.getJobById(data.jobId)).pipe(
+        switchMap((action: any) =>
+          from(this.apiService.getJobById(action.jobId)).pipe(
             tap((jobData) => {
-              const jobConfig: IArbitrumMultiQuoteJob = {
-                jobType: jobData.jobType,
-                rpcUrl: 'https://arb1.arbitrum.io/rpc',
-                pairsToQuote: data.data.map((item: any) => ({
-                  dex: item.pair.pool.dex.name,
-                  version: item.pair.pool.version as "v2" | "v3" | "v4",
-                  token0: {
-                    address: item.pair.pool.token.address,
-                    decimals: item.pair.pool.token.decimals ?? 0
-                  },
-                  token1: {
-                    address: item.pair.pool.token2.address,
-                    decimals: item.pair.pool.token2.decimals ?? 0
-                  },
-                  poolAddress: String(item.pair.pool.poolAddress),
-                  feePpm: item.pair.pool.fee,
-                  tokenIn: {
-                    address: item.pair.tokenIn.address,
-                    decimals: item.pair.tokenIn.decimals ?? 0
-                  },
-                  tokenOut: {
-                    address: item.pair.tokenOut.address,
-                    decimals: item.pair.tokenOut.decimals ?? 0
-                  },
-                  side: item.quote.side,
-                  amount: String(item.quote.amount),
-                  blockTag: item.quote.blockTag,
-                  quoteSource: item.quote.quoteSource,
-                }))
-              };
+              const jobConfig = mapJobPreConfig(jobData, action.data);
 
-              const configString = JSON.stringify(jobConfig, null, 2);
-              const configTitle = 'Copy Job config';
-              this.configDialogService.openConfig(configTitle, configString);
+              this.configDialogService.openConfig(
+                'Copy Job config',
+                JSON.stringify(jobConfig, null, 2)
+              );
             }),
             catchError(err => {
               console.error('Failed to load job data', err);
@@ -69,139 +110,55 @@ export class MainEffects {
     { dispatch: false }
   );
 
-
   setBotPreConfig$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(MainActions.setBotPreConfig),
-        switchMap((data: any) =>
-          from(this.apiService.setBotById(data.botId)).pipe(
+        switchMap((action: any) =>
+          from(this.apiService.setBotById(action.botId)).pipe(
             tap((botData: any) => {
-              const jobConfig = {
-                jobType: data.data[0].jobType,
-                rpcUrl: 'https://arb1.arbitrum.io/rpc',
-                pairsToQuote: data.data[0].quoteJobRelations.map((item: any) => ({
-                  dex: item.quoteRelation.pair.pool.dex.name,
-                  version: item.quoteRelation.pair.pool.version as "v2" | "v3" | "v4",
-                  token0: {
-                    address: item.quoteRelation.pair.pool.token.address,
-                    decimals: item.quoteRelation.pair.pool.token.decimals ?? 0
-                  },
-                  token1: {
-                    address: item.quoteRelation.pair.pool.token2.address,
-                    decimals: item.quoteRelation.pair.pool.token2.decimals ?? 0
-                  },
-                  poolAddress: String(item.quoteRelation.pair.pool.poolAddress),
-                  feePpm: item.quoteRelation.pair.pool.fee,
-                  tokenIn: {
-                    address: item.quoteRelation.pair.tokenIn.address,
-                    decimals: item.quoteRelation.pair.tokenIn.decimals ?? 0
-                  },
-                  tokenOut: {
-                    address: item.quoteRelation.pair.tokenOut.address,
-                    decimals: item.quoteRelation.pair.tokenOut.decimals ?? 0
-                  },
-                  side: item.quoteRelation.quote.side,
-                  amount: String(item.quoteRelation.quote.amount),
-                  blockTag: item.quoteRelation.quote.blockTag,
-                  quoteSource: item.quoteRelation.quote.quoteSource,
-                }))
-              };
-
               const botConfig = {
-                botType: botData.botName,
-                paused: botData.paused,
-                isRepeat: botData.isRepeat,
-                delayBetweenRepeat: botData.delayBetweenRepeat,
-                maxJobs: botData.maxJobs,
-                maxErrors: botData.maxErrors,
-                timeoutMs: botData.timeoutMs,
-                jobParams: jobConfig,
+                ...mapBotParams(botData),
+                jobParams: mapJobParams(action.data[0])
               };
 
-              const configString = JSON.stringify(botConfig, null, 2);
-              const configTitle = 'Copy Bot config';
-              this.configDialogService.openConfig(configTitle, configString);
+              this.configDialogService.openConfig(
+                'Copy Bot config',
+                JSON.stringify(botConfig, null, 2)
+              );
             }),
-            catchError((err) => {
-              console.error('Error fetching bot data:', err);
-              return EMPTY;
-            })
+            catchError(() => EMPTY)
           )
         )
       ),
     { dispatch: false }
   );
-
 
   setServerPreConfig$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(MainActions.setServerPreConfig),
         concatLatestFrom(() => this.store.select(getBotsByServerIdResponse)),
-        switchMap(([action, botsData]) =>
+        switchMap(([action, bots]) =>
           from(this.apiService.setServerById(action.serverId)).pipe(
-            tap((_: any) => {
-              const botConfig = botsData.map((botData: any) => {
-                const jobQuoteJobRelations = botData.job.quoteJobRelations.map((quoteRelation: any) => ({
-                  dex: quoteRelation.quoteRelation.pair.pool.dex.name,
-                  version: quoteRelation.quoteRelation.pair.pool.version,
-                  token0: {
-                    address: quoteRelation.quoteRelation.pair.pool.token.address,
-                    decimals: quoteRelation.quoteRelation.pair.pool.token.decimals ?? 0
-                  },
-                  token1: {
-                    address: quoteRelation.quoteRelation.pair.pool.token2.address,
-                    decimals: quoteRelation.quoteRelation.pair.pool.token2.decimals ?? 0
-                  },
-                  poolAddress: String(quoteRelation.quoteRelation.pair.pool.poolAddress),
-                  feePpm: quoteRelation.quoteRelation.pair.pool.fee,
-                  tokenIn: {
-                    address: quoteRelation.quoteRelation.pair.tokenIn.address,
-                    decimals: quoteRelation.quoteRelation.pair.tokenIn.decimals ?? 0
-                  },
-                  tokenOut: {
-                    address: quoteRelation.quoteRelation.pair.tokenOut.address,
-                    decimals: quoteRelation.quoteRelation.pair.tokenOut.decimals ?? 0
-                  },
-                  side: quoteRelation.quoteRelation.quote.side,
-                  amount: String(quoteRelation.quoteRelation.quote.amount),
-                  blockTag: quoteRelation.quoteRelation.quote.blockTag,
-                  quoteSource: quoteRelation.quoteRelation.quote.quoteSource,
-                }));
+            tap(() => {
+              const serverConfig = bots.map((bot: any) => ({
+                id: bot.botId,
+                botParams: mapBotParams(bot),
+                jobParams: mapJobParams(bot.job)
+              }));
 
-                return {
-                  id: botData.botId,
-                  botParams: {
-                    botType: botData.botName,
-                    paused: botData.paused,
-                    isRepeat: botData.isRepeat,
-                    delayBetweenRepeat: botData.delayBetweenRepeat,
-                    maxJobs: botData.maxJobs,
-                    maxErrors: botData.maxErrors,
-                    timeoutMs: botData.timeoutMs,
-                  },
-                  jobParams: {
-                    jobType: botData.job.jobType,
-                    rpcUrl: 'https://arb1.arbitrum.io/rpc',
-                    pairsToQuote: jobQuoteJobRelations
-                  }
-                };
-              });
-
-              const serverConfig = [...botConfig];
-              this.configDialogService.openConfig('Copy Bot config', JSON.stringify(serverConfig, null, 2));
+              this.configDialogService.openConfig(
+                'Copy Bot config',
+                JSON.stringify(serverConfig, null, 2)
+              );
             }),
-            catchError((err) => {
-              console.error('Error:', err);
-              return EMPTY;
-            })
+            catchError(() => EMPTY)
           )
         )
       ),
     { dispatch: false }
   );
-
 
   copyConfig$ = createEffect(
     () =>
@@ -220,4 +177,29 @@ export class MainEffects {
       ),
     { dispatch: false }
   );
+
+  resetServerSettings$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(MainActions.resetServerSettings),
+        concatLatestFrom(() => [
+          this.store.select(DbConfigSelectors.getServersDataResponse),
+          this.store.select(getBotsByServerIdResponse)
+        ]),
+        switchMap(([action, servers, bots]) => {
+          const server = servers.find(s => +s.serverId === +action.serverId);
+          if (!server || !bots) return EMPTY;
+
+          const payload = {
+            botsRulesList: bots.map(mapBotToRule)
+          };
+
+          return this.apiService
+            .resetServerSettings(server.ip, server.port, {...payload})
+            .pipe(tap(() => console.log('Config sent', payload)));
+        })
+      ),
+    { dispatch: false }
+  );
+
 }
