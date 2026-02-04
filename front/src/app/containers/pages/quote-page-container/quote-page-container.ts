@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Actions } from '../../../components/actions/actions';
@@ -11,15 +11,14 @@ import { ButtonPanel } from '../../../components/button-panel/button-panel';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
 import { Store } from '@ngrx/store';
 import { AsyncPipe } from '@angular/common';
-import {setOneQuoteData, setPairsData} from '../../../+state/db-config/db-config.actions';
+import {initPairsPage, setOneQuoteData} from '../../../+state/db-config/db-config.actions';
 import {
   createQuoteRelations,
   deletingQuoteRelations,
   setQuoteRelationsDataList,
 } from '../../../+state/relations/relations.actions';
 import {
-  getQuoteRelationsByQuoteId, getQuoteRelationsByQuoteIdIsLoaded,
-  getQuoteRelationsByQuoteIdIsLoading
+  getQuoteRelationsByQuoteId,
 } from '../../../+state/relations/relations.selectors';
 import { take } from 'rxjs';
 import { IQuoteRelations, IQuoteRelationsCreate } from '../../../models/relations';
@@ -28,12 +27,7 @@ import {
   AgGridQuoteNotRelationsContainer
 } from '../../ag-grid/ag-grid-quote-not-relations-container/ag-grid-quote-not-relations-container';
 import {Loader} from '../../../components/loader/loader';
-import {
-  getPairsDataIsLoaded,
-  getPairsDataIsLoading,
-  getQuotesDataIsLoaded,
-  getQuotesDataIsLoading
-} from '../../../+state/db-config/db-config.selectors';
+import {getQuotePageDataIsReady} from '../../../+state/db-config/db-config.selectors';
 
 @Component({
   selector: 'app-quote-page-container',
@@ -52,21 +46,14 @@ import {
   templateUrl: './quote-page-container.html',
   styleUrl: './quote-page-container.scss',
 })
-export class QuotePageContainer {
+export class QuotePageContainer implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private store = inject(Store);
 
   footerButtons = ['save', 'cancel'];
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
-
-
-  quotesDataIsLoading$ = this.store.select(getQuotesDataIsLoading);
-  quotesDataIsLoaded$ = this.store.select(getQuotesDataIsLoaded);
-  pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
-  pairsDataIsLoaded$ = this.store.select(getPairsDataIsLoaded);
-  quoteRelationsIsLoading$ = this.store.select(getQuoteRelationsByQuoteIdIsLoading);
-  quoteRelationsIsLoaded$ = this.store.select(getQuoteRelationsByQuoteIdIsLoaded);
+  quotePageDataIsReady$ = this.store.select(getQuotePageDataIsReady);
 
   relatedPairsIds: number[] = [];
   newRelations: number[] = [];
@@ -75,13 +62,13 @@ export class QuotePageContainer {
 
   constructor() {
     this.currentQuoteId = Number(this.route.snapshot.paramMap.get('id'));
-    this.store.dispatch(setPairsData());
-    this.store.dispatch(
-      setQuoteRelationsDataList({ quoteId: this.currentQuoteId }),
-    );
+    this.store.dispatch(setQuoteRelationsDataList({ quoteId: this.currentQuoteId }));
     this.store.dispatch(setOneQuoteData({id: this.currentQuoteId}))
-
   };
+
+  ngOnInit() {
+    this.store.dispatch(initPairsPage());
+  }
 
   onAction($event: any, note: string) {
     if ($event.event === 'Actions:ACTION_CLICKED') {

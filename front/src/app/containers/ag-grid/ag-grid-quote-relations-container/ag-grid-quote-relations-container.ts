@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { ColDef } from 'ag-grid-community';
@@ -9,7 +9,6 @@ import {
   getActivePairs,
 } from '../../../+state/relations/relations.selectors';
 import { AsyncPipe } from '@angular/common';
-import {initPairsPage} from '../../../+state/db-config/db-config.actions';
 
 @Component({
   selector: 'app-ag-grid-quote-relations-container',
@@ -22,7 +21,7 @@ import {initPairsPage} from '../../../+state/db-config/db-config.actions';
   templateUrl: './ag-grid-quote-relations-container.html',
   styleUrl: './ag-grid-quote-relations-container.scss',
 })
-export class AgGridQuoteRelationsContainer implements OnInit {
+export class AgGridQuoteRelationsContainer {
   @Input() currentQuoteId: number = 0;
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
@@ -141,10 +140,6 @@ export class AgGridQuoteRelationsContainer implements OnInit {
     suppressMovable: true,
     headerClass: 'align-center',
   };
-
-  ngOnInit() {
-    this.store.dispatch(initPairsPage());
-  }
 
   events($event: any) {
     this.emitter.emit({

@@ -9,14 +9,7 @@
   >
   </app-actions>
   <app-content-footer-layout content>
-    @if (
-      (quotesDataIsLoaded$ | async) &&
-      !(quotesDataIsLoading$ | async) &&
-      (pairsDataIsLoaded$ | async) &&
-      !(pairsDataIsLoading$ | async) &&
-      (quoteRelationsIsLoaded$ | async) &&
-      !(quoteRelationsIsLoading$ | async)
-      ) {
+    @if (quotePageDataIsReady$ | async) {
 
       <div class="tables-group" content>
         <app-ag-grid-one-quote-container
