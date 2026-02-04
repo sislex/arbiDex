@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, OnInit} from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
@@ -7,15 +7,19 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import {
-  getPairsDataIsLoaded,
-  getPairsDataIsLoading,
-  getPairsDataResponse, getPoolsDataResponse,
+  getFullPairsDataIsReady,
+  getPairsFullData,
+  getPoolsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { createPair, deletingPair, editPair, setPairsData } from '../../../+state/db-config/db-config.actions';
+import {
+  createPair,
+  deletingPair,
+  editPair, initPairsPage,
+} from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 import { PairDialogService } from '../../../services/pair-dialog-service';
-import { map } from 'rxjs';
+import {map, take} from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -29,25 +33,24 @@ import { Router } from '@angular/router';
   ],
   templateUrl: './ag-grid-pairs-container.html',
   styleUrl: './ag-grid-pairs-container.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgGridPairsContainer {
+export class AgGridPairsContainer implements OnInit {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly pairDialog = inject(PairDialogService);
   readonly router = inject(Router);
 
-  pairsDataResponse$ = this.store.select(getPairsDataResponse);
-  pairsDataIsLoading$ = this.store.select(getPairsDataIsLoading);
-  pairsDataIsLoaded$ = this.store.select(getPairsDataIsLoaded);
   poolsListResponse$ = this.store.select(getPoolsDataResponse)
 
-  poolsList$ = this.store.select(getPoolsDataResponse).pipe(
-    map(item =>
-      item.map(item => ({
-        id: item.poolId,
-        name: item.poolAddress.toString(),
-      }))
-    )
+  pairsDataResponse$ = this.store.select(getPairsFullData);
+  pairsDataIsReady$ = this.store.select(getFullPairsDataIsReady);
+
+  readonly poolsList$ = this.poolsListResponse$.pipe(
+    map(items => items.map(item => ({
+      id: item.poolId,
+      name: item.poolAddress.toString(),
+    })))
   );
 
   readonly colDefs: ColDef[] = [
@@ -64,7 +67,7 @@ export class AgGridPairsContainer {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.pool?.poolId || '-';
+        return params.data?.pool?.poolAddress || '-';
       },
     },
     {
@@ -104,8 +107,8 @@ export class AgGridPairsContainer {
     },
   };
 
-  constructor() {
-    this.store.dispatch(setPairsData());
+  ngOnInit() {
+    this.store.dispatch(initPairsPage());
   }
 
   onAction($event: any, row: any) {
@@ -118,7 +121,7 @@ export class AgGridPairsContainer {
     }
   }
 
-  actions($event: any, note?: any) {
+  actions($event: { event: string, data?: any }, note?: string) {
     if ($event.event === 'Actions:ACTION_CLICKED') {
       if (note === 'add') {
         this.openCreateDialog();
@@ -127,11 +130,13 @@ export class AgGridPairsContainer {
   }
 
   openCreateDialog() {
-    this.pairDialog.openCreate(this.poolsList$, this.poolsListResponse$).subscribe(result => {
-      if (result?.data === 'add') {
-        this.store.dispatch(createPair({ data: result.formData }));
-      }
-    });
+    this.pairDialog.openCreate(this.poolsList$, this.poolsListResponse$)
+      .pipe(take(1))
+      .subscribe(result => {
+        if (result?.data === 'add') {
+          this.store.dispatch(createPair({ data: result.formData }));
+        }
+      });
   }
 
   openEditDialog(row: any) {

@@ -24,7 +24,7 @@ export const getTokensDataResponse = createSelector(
 export const getTokensDataResponseFilterChainId = (chainId: number) => createSelector(
   selectFeature,
   (state: DbConfigState) => state?.tokens?.response
-    ?.filter((token: ITokens) => token.chain?.chainId === chainId)
+      ?.filter((token: ITokens) => token.chain?.chainId === chainId)
     ?? []
 );
 export const getTokensDataFailure = createSelector(
@@ -334,7 +334,6 @@ export const getFullPoolsDataIsLoading = createSelector(
   (pools, tokens, dexes, chains) =>
     pools || tokens || dexes || chains
 );
-
 export const getFullPoolsDataIsLoaded = createSelector(
   getPoolsDataIsLoaded,
   getTokensDataIsLoaded,
@@ -343,12 +342,60 @@ export const getFullPoolsDataIsLoaded = createSelector(
   (pools, tokens, dexes, chains) =>
     pools && tokens && dexes && chains
 );
-
 export const getFullPoolsDataIsReady = createSelector(
   getFullPoolsDataIsLoaded,
   getFullPoolsDataIsLoading,
   (loaded, loading) => loaded && !loading
 );
 
+//====================================================================================================================
+//                                                   Pairs_full_data
+//====================================================================================================================
 
+export const getPairsFullData = createSelector(
+  getPairsDataResponse,
+  getPoolsDataResponse,
+  getTokensDataResponse,
+  (pairsData, poolsData, tokensData) => {
+
+    const tokenMap = Object.fromEntries(tokensData.map(t => [t.tokenId, t.tokenName]));
+    const poolMap = Object.fromEntries(poolsData.map(p => [p.poolId, p.poolAddress]));
+
+    return pairsData.map(pair => ({
+      ...pair,
+      pool: {
+        ...pair.pool,
+        poolAddress: poolMap[pair.pool.poolId]
+      },
+      tokenIn: {
+        ...pair.tokenIn,
+        tokenName: tokenMap[pair.tokenIn.tokenId!]
+      },
+      tokenOut: {
+        ...pair.tokenOut,
+        tokenName: tokenMap[pair.tokenOut.tokenId!]
+      }
+    }));
+  }
+);
+
+export const getFullPairsDataIsLoading = createSelector(
+  getPoolsDataIsLoading,
+  getTokensDataIsLoading,
+  getPairsDataIsLoading,
+  (pools, tokens, pairs) =>
+    pools || tokens || pairs
+);
+export const getFullPairsDataIsLoaded = createSelector(
+  getPoolsDataIsLoaded,
+  getTokensDataIsLoaded,
+  getPairsDataIsLoaded,
+  (pools, tokens, pairs) =>
+    pools && tokens && pairs
+);
+export const getFullPairsDataIsReady = createSelector(
+  getFullPairsDataIsLoaded,
+  getFullPairsDataIsLoading,
+  (loaded, loading) => loaded && !loading
+);
 

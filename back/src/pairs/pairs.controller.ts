@@ -20,8 +20,17 @@ export class PairsController {
   }
 
   @Get()
-  findAll() {
-    return this.pairsService.findAll();
+  async findAll() {
+    const pairs = await this.pairsService.findAll();
+    return pairs.map(pair => this.toDto(pair));
+  }
+  private toDto(pair: any) {
+    return {
+      pairId: pair.pairId,
+      pool: {poolId: pair.pool.poolId},
+      tokenIn: {tokenId: pair.tokenIn.tokenId},
+      tokenOut: {tokenId: pair.tokenOut.tokenId},
+    };
   }
 
   @Get(':id')

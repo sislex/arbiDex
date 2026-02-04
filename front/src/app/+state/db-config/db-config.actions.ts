@@ -123,6 +123,7 @@ export const deletingChain = createAction(
 //                                                   Pairs
 //====================================================================================================================
 
+export const initPairsPage = createAction('[DbConfig] initPairsPage');
 export const setPairsData = createAction('[DbConfig] setPairsData');
 export const setPairsDataSuccess = createAction(
   '[DbConfig] setPairsDataSuccess',
