@@ -356,26 +356,44 @@ export const getPairsFullData = createSelector(
   getPairsDataResponse,
   getPoolsDataResponse,
   getTokensDataResponse,
-  (pairsData, poolsData, tokensData) => {
+  getChainsDataResponse,
+  getDexesDataResponse,
+  (pairsData, poolsData, tokensData, chainsData, dexesData) => {
+    const tokenMap = Object.fromEntries(tokensData.map(t => [t.tokenId, t.tokenName, t.address]));
+    const chainMap = Object.fromEntries(chainsData.map(c => [c.chainId, c.name]));
+    const dexMap = Object.fromEntries(dexesData.map(d => [d.dexId, d.name]));
 
-    const tokenMap = Object.fromEntries(tokensData.map(t => [t.tokenId, t.tokenName]));
-    const poolMap = Object.fromEntries(poolsData.map(p => [p.poolId, p.poolAddress]));
+    const poolInfoMap = Object.fromEntries(poolsData.map(p => [p.poolId, p]));
 
-    return pairsData.map(pair => ({
-      ...pair,
-      pool: {
-        ...pair.pool,
-        poolAddress: poolMap[pair.pool.poolId]
-      },
-      tokenIn: {
-        ...pair.tokenIn,
-        tokenName: tokenMap[pair.tokenIn.tokenId!]
-      },
-      tokenOut: {
-        ...pair.tokenOut,
-        tokenName: tokenMap[pair.tokenOut.tokenId!]
-      }
-    }));
+    return pairsData.map(pair => {
+      const fullPoolData = poolInfoMap[pair.pool.poolId];
+
+      return {
+        ...pair,
+        pool: {
+          ...pair.pool,
+          ...fullPoolData,
+          chain: {
+            ...fullPoolData?.chain,
+            name: chainMap[fullPoolData?.chain?.chainId],
+          },
+          dex: {
+            ...fullPoolData?.dex,
+            name: dexMap[fullPoolData?.dex?.dexId],
+          }
+        },
+        tokenIn: {
+          ...pair.tokenIn,
+          tokenName: tokenMap[pair.tokenIn.tokenId!],
+          address: tokenMap[pair.tokenIn.address!]
+        },
+        tokenOut: {
+          ...pair.tokenOut,
+          tokenName: tokenMap[pair.tokenOut.tokenId!],
+          address: tokenMap[pair.tokenOut.address!]
+        }
+      };
+    });
   }
 );
 

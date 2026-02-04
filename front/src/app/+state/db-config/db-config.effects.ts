@@ -360,6 +360,8 @@ export class DbConfigEffects {
         DbConfigActions.setPairsData(),
         DbConfigActions.setPoolsData(),
         DbConfigActions.setTokensData(),
+        DbConfigActions.setDexesData(),
+        DbConfigActions.setChainsData(),
       ])
     )
   );

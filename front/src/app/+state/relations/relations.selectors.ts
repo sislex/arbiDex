@@ -2,7 +2,7 @@ import {createFeatureSelector, createSelector} from '@ngrx/store';
 import { RELATIONS_FEATURE_KEY, RelationsState } from './relations.reducer';
 import {
   getJobsDataResponse,
-  getPairsDataResponse,
+  getPairsFullData,
 } from '../db-config/db-config.selectors';
 
 export const selectFeature = createFeatureSelector<RelationsState>(RELATIONS_FEATURE_KEY);
@@ -38,7 +38,7 @@ export const getQuoteRelationsIsLoaded = createSelector(
 
 const getPairsWithActivityFlag = createSelector(
   getQuoteRelationsByQuoteId,
-  getPairsDataResponse,
+  getPairsFullData,
   (quoteRelations, pairsList) => {
     const activeIds = new Set(
       quoteRelations?.map(relation => relation.pair?.pairId) || []
