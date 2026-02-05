@@ -1,0 +1,25 @@
+<mat-form-field class="w-full">
+  <mat-label>{{ title }}</mat-label>
+  <input
+    type="text"
+    matInput
+    [formControl]="myControl"
+    [matAutocomplete]="auto"
+    [placeholder]="title">
+
+  <mat-autocomplete
+    #auto="matAutocomplete"
+    [displayWith]="displayFn"
+    (optionSelected)="onOptionSelected($event)">
+
+    @for (item of (filteredOptions$ | async); track item.id) {
+      <mat-option [value]="item">
+        @if(item.address) {
+          {{item.name}} <span class="address-text">({{item.address}})</span>
+        } @else {
+          {{ item.name }}
+        }
+      </mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

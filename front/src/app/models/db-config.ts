@@ -77,6 +77,7 @@ export interface IChainsCreate {
 export interface ISelectMenu {
   id: number;
   name: string;
+  address?: string;
 }
 
 export interface IPairsAPI extends API {

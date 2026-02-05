@@ -19,32 +19,32 @@
 @if (jobList) {
   <app-header-content-layout>
     <app-field-title header [title]="'Job Id'"></app-field-title>
-    <app-select-field
+    <app-autocomplete
       [title]="'Job Id'"
-      [list]="jobList | async"
+      [list]="(jobList | async)!"
       [selected]="formData.jobId"
       (emitter)="events($event, 'jobId')"
       content
-    ></app-select-field>
+    ></app-autocomplete>
   </app-header-content-layout>
 }
 
 @if (serversList) {
   <app-header-content-layout>
     <app-field-title header [title]="'Server Id'"></app-field-title>
-    <app-select-field
+    <app-autocomplete
       [title]="'Server Id'"
-      [list]="serversList | async"
+      [list]="(serversList | async)!"
       [selected]="formData.serverId"
       (emitter)="events($event, 'serverId')"
       content
-    ></app-select-field>
+    ></app-autocomplete>
   </app-header-content-layout>
 }
 
-<!--________________________________________________________________________________-->
+<!--================================================================================-->
 <!--fields hidden in the table-->
-<!--________________________________________________________________________________-->
+<!--================================================================================-->
 
 <div class="row">
   <app-header-content-layout>

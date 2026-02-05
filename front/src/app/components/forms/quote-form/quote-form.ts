@@ -4,7 +4,7 @@ import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
 import { InputField } from '../../input-field/input-field';
 import {AsyncPipe} from '@angular/common';
-import {SelectField} from '../../select-field/select-field';
+import {Autocomplete} from '../../autocomplete/autocomplete';
 
 @Component({
   selector: 'app-quote-form',
@@ -13,7 +13,7 @@ import {SelectField} from '../../select-field/select-field';
     HeaderContentLayout,
     InputField,
     AsyncPipe,
-    SelectField,
+    Autocomplete,
   ],
   templateUrl: './quote-form.html',
   styleUrl: './quote-form.scss',

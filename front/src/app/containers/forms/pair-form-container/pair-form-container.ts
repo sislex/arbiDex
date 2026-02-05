@@ -4,7 +4,7 @@ import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confi
 import { PairForm } from '../../../components/forms/pair-form/pair-form';
 import {setPoolsData, setTokensData} from '../../../+state/db-config/db-config.actions';
 import { Store } from '@ngrx/store';
-import {getPoolsDataResponse} from '../../../+state/db-config/db-config.selectors';
+import {getFullPoolsData } from '../../../+state/db-config/db-config.selectors';
 import {map} from 'rxjs';
 
 @Component({
@@ -25,9 +25,9 @@ export class PairFormContainer {
     ...this.data.form
   }
 
-  poolsListResponse$ = this.store.select(getPoolsDataResponse)
+  fullPoolsData$ = this.store.select(getFullPoolsData)
 
-  readonly poolsList$ = this.poolsListResponse$.pipe(
+  poolsList$ = this.fullPoolsData$.pipe(
     map(items => items.map(item => ({
       id: item.poolId,
       name: item.poolAddress.toString(),

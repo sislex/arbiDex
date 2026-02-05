@@ -3,8 +3,8 @@ import { AsyncPipe } from '@angular/common';
 import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
 import { InputField } from '../../input-field/input-field';
-import { SelectField } from '../../select-field/select-field';
 import { IPoolsCreate } from '../../../models/db-config';
+import {Autocomplete} from '../../autocomplete/autocomplete';
 
 @Component({
   selector: 'app-pool-form',
@@ -13,7 +13,7 @@ import { IPoolsCreate } from '../../../models/db-config';
     FieldTitle,
     HeaderContentLayout,
     InputField,
-    SelectField,
+    Autocomplete,
   ],
   templateUrl: './pool-form.html',
   styleUrl: './pool-form.scss',
