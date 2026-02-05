@@ -7,6 +7,6 @@ async function bootstrap() {
     origin: 'http://45.135.182.251:4203/',
     credentials: true,
   });
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
 }
 bootstrap();

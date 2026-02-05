@@ -16,7 +16,7 @@ services:
     container_name: arbi-back
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3001"
     env_file:
       - ./back/.env
     #    volumes:
