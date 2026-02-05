@@ -65,7 +65,7 @@ services:
         condition: service_healthy
     volumes:
       - ./db/pgadmin_storage:/var/lib/pgadmin
-      - ./db/pgadmin4/servers.json:/db/pgadmin4/servers.json
+      - ./db/pgadmin4/servers.json:/db/pgadmin4/servers.json:ro
 
 volumes:
   pg_data:
