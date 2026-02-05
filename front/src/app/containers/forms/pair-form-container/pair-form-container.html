@@ -6,8 +6,8 @@
   <div class="scroll" popupContent>
     <app-pair-form
       [formData]="data.form"
-      [poolList]="data.poolList"
-      [poolsListResponse]="data.poolsListResponse"
+      [poolList]="poolsList$"
+      [poolsListResponse]="fullPoolsData$"
       (emitter)="eventsForm($event)"
     ></app-pair-form>
   </div>

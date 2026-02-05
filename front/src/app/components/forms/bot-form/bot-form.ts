@@ -1,12 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IBotsCreate, IJobs, IServers } from '../../../models/db-config';
+import { IBotsCreate } from '../../../models/db-config';
 import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
 import { InputField } from '../../input-field/input-field';
 import { AsyncPipe } from '@angular/common';
-import { SelectField } from '../../select-field/select-field';
-import { Observable } from 'rxjs';
 import { Toggle } from '../../toggle/toggle';
+import {Autocomplete} from '../../autocomplete/autocomplete';
 
 @Component({
   selector: 'app-bot-form',
@@ -15,16 +14,16 @@ import { Toggle } from '../../toggle/toggle';
     HeaderContentLayout,
     InputField,
     AsyncPipe,
-    SelectField,
     Toggle,
+    Autocomplete,
   ],
   templateUrl: './bot-form.html',
   styleUrl: './bot-form.scss',
 })
 export class BotForm {
   @Input() formData!: IBotsCreate;
-  @Input() serversList?: Observable<IServers>;
-  @Input() jobList?: Observable<IJobs>;
+  @Input() serversList?: any;
+  @Input() jobList?: any;
 
   @Output() emitter = new EventEmitter();
 

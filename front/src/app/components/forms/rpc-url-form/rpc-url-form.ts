@@ -2,8 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
-import { SelectField } from '../../select-field/select-field';
 import { InputField } from '../../input-field/input-field';
+import {Autocomplete} from '../../autocomplete/autocomplete';
 
 @Component({
   selector: 'app-rpc-url-form',
@@ -11,8 +11,8 @@ import { InputField } from '../../input-field/input-field';
     AsyncPipe,
     FieldTitle,
     HeaderContentLayout,
-    SelectField,
     InputField,
+    Autocomplete,
   ],
   templateUrl: './rpc-url-form.html',
   styleUrl: './rpc-url-form.scss',

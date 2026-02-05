@@ -21,7 +21,6 @@
       [rowData]="(serverRelation$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
-      (emitter)="events($event)"
     ></app-ag-grid>
   } @else {
     <app-loader header></app-loader>

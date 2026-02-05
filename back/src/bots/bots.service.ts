@@ -65,7 +65,7 @@ export class BotsService {
 
   async findAllByServerId(serverId: string) {
     return await this.botRepository.find({
-      relationLoadStrategy: 'query',
+      relationLoadStrategy: 'join',
       relations: {
         server: true,
         job: {

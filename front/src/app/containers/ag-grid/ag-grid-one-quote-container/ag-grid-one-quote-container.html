@@ -1,0 +1,16 @@
+<app-header-content-layout>
+
+  <app-title-table-button
+    header
+    [title]="'Quote info'"
+  ></app-title-table-button>
+
+  <app-ag-grid
+    content
+    [rowData]="[(quotesDataResponse$ | async)!]"
+    [colDefs]="colDefs"
+    [defaultColDef]="defaultColDef"
+  ></app-ag-grid>
+
+</app-header-content-layout>
+

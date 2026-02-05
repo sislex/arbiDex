@@ -35,3 +35,14 @@
     content
   ></app-input-field>
 </app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Select Quote Token'"></app-field-title>
+  <app-autocomplete
+    [title]="'Quote Token'"
+    [list]="(tokensList | async)!"
+    [selected]="formData.token"
+    (emitter)="events($event, 'token')"
+    content
+  ></app-autocomplete>
+</app-header-content-layout>

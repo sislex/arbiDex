@@ -1,0 +1,53 @@
+// ==========
+// CAMELOT V2
+// ==========
+'[Nest] 13116  - 30.01.2026, 09:06:30    WARN [BlockchainService] Токены не найдены для пула 0x42a4c1eab84d29c697fccf29c919b0be77fcceba: token0=0x82af49447d8a07e3bd95bd0d56f35241523fbab1 (2), token1=0xb43811c0b19639a4d4ddb3322173e7cbeaa77e57 (undefined)'
+
+// ==========
+// UNISWAP V2
+// ==========
+
+'[Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x52c38f31c34a33463c5d69774c4cca3986551640: token0=0x3855aba58b69c10b446d991bc28a555110846bc3 (3162), token1=0xe39ab88f8a4777030a534146a9ca3b52bd5d43a3 (undefined)'
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x45b554f8acb9324b926d94ce580d94933fe37302: token0=0x88bad8f748bc9fb19d93972b300e523e22073eee (4008), token1=0xe39ab88f8a4777030a534146a9ca3b52bd5d43a3 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x5a2769f4efb2f5f25efa45aba3bfed6e056e9a2b: token0=0x6472aa9c3111e05686e54f92d4b98ce5114a8131 (undefined), token1=0xaf88d065e77c8cc2239327c5edb3a432268e5831 (2299)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x5af5a99a22ba6c9a0c52e0e234494b0b9ad8359c: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xbbc7e76daa0f110702a888972057153a843ac2ed (5370)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x46e3691accc94f08aa46566ad7d298590172c510: token0=0x57beb06d8c7b19b7405ae3453c99b2e9982af4e2 (5444), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xf8514df886dab054f73c3e2a698a8313a77aad55: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xe153c8c9fcb69c042f47dce73010c2f3daf5fb64 (5445)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x4731257301fcbfe5efdcc3cfb503ac9128e5c198: token0=0x0829cf466566b602b79e3dc93cc3b0b4e71abdb3 (5447), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x117836c2c5499b775c7ffb390d6849b3dcbc17d4: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xae5bc8ff76db902314008020bf9719083edf9678 (5456)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x238c993b5fbcbbab2400e3bb98cb5ff57cd8f8b9: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0x94143dfba6c2e94be7b58aa35f1c068c2288ffc9 (5468)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xe3b90e0bf20a3c455636b7326bf7339d2701534d: token0=0x58ef7134d9419b66d2a204d40036c1d623d66923 (5473), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x5fabb70914386f37bab80fb0edaf0e7582151450: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xdc213369cda233119ae03a31f22fe218820ea1b7 (5492)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xa810166ed7d1ce832c0b063538cbeaa56d9c9e43: token0=0xcd3e4d9c081feb76d767ff97dc2514c83293377c (undefined), token1=0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9 (7)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x816165ad6a511611593fd3936c55cec7eee7fd68: token0=0x5b38da6a701c568545dcfcb03fcb875f56beddc4 (undefined), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xa0375892d61499c7e8cb15a2d1a2e39a00e5a3fe: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xd681da5b12ad6d6f8aeaf105e547d50336ef5cad (5500)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x3cdb4bac2ef20be0f804d7a0fc425d2676e59fb5: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xd8947221af8b13c1333d9390c68f74f7ddd2e22f (5532)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x6e9042b6affec231a0469c25a30b874d80c83006: token0=0x0b33e51346e7a09e025ba1003cb950a885cb4dcc (5531), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x22b5bf607eae2aa14c9ecfc9aff13f8960ce8df3: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xfe1450cf3140777b322e8e69aebe8ee83637c47b (5541)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xf76db7fdb6a27172012efa720ad3a52bc6bb9841: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xa8df06da05e43e89392d3ae4877cfb13a98e43eb (5542)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xcd8f46c2b857beccdf8e118ad6cb94ad5549c304: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0x8af3e9d97ce01fce02806d86137b876603a53d75 (5551)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x189ef518db9bf16d228a302188ddc3672d91be6b: token0=0x4cdbf165862458c6d7792f14404926597043312e (5559), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xe836e1353b0496eb01d77c57f9fd426b766c4b1c: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xb95ee579690fdaf14fccf5801a7bdb1f89ea5edf (5563)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xa1afab039ea3749b41de29efe6bc4396ec5bb1b1: token0=0x463b3aa0cc32e16960756a4bfc9841b014133f68 (5461), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x2e35d3f2fa0c43702a663232c19958abef8f048e: token0=0x44be6f31c678916bb9ef65bb27a1473df19ff93b (5567), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x7b64878782d6dda90d8f6a456456eb63485ce35a: token0=0x73dc9a5874dea2cf1ce6f865f1e3ff1d0af8287f (5584), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x959b7690c5e5621408b740cea21fdeb023517bb2: token0=0x03ade2600fe98b76b1f352e74ccc8bf7bbbcc108 (5604), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x2bf42fd05dc1cb74780335103b91a7a9a699c1fd: token0=0x7ca1f42426ce1a09c352f53d6aaab36d542a7a41 (5612), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xe554b8a05f7042f67aed3b69484e93f31af0a044: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9 (7)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x5c160db1dfece16ca66f000876408574b0c569cf: token0=0x1cf41164b0bd3ed3366bb456491ac6239f10cf7e (5624), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xfacbd5a2e1e41d1b055bb6b13e77f82ec66a6f61: token0=0x6f854850cfbbf7e37c1b4da2bc269765b5ac6a4e (5629), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xaef9b4effdc9bdbac1ed3b66c6eb935aede4ce9e: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0x9d7a873b3420f68324fcfd53deb73feb40995f74 (5630)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x54e99029f9e1970e714c352781760a7c0db3f78b: token0=0x6402fd97919e220f16c44f70116f46488353cc0e (5643), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x0e0f7b2aa7e28f76798738873763ae1f622b4947: token0=0x4ea0648dcf1b0c2e16a4a5b22b73473285c350b5 (5644), token1=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x0df28a0ed071138f632a31a368698b826980cfa6: token0=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913 (undefined), token1=0xc8e73913ebf9b3eeead0108507faf4f50aa343de (5667)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xe302f6b9714ee40889e0b6826e2fd11162fd4477: token0=0x606c3e5075e5555e79aa15f1e9facb776f96c248 (7073), token1=0xe958f107b467d5172573f761d26931d658c1b436 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x955c41ebf4b0ecbc6035104620380e54ddbc9a35: token0=0x82af49447d8a07e3bd95bd0d56f35241523fbab1 (2), token1=0xf1d7cc64fb4452f05c498126312ebe29f30fbcf9 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xbae8a54cf165da2033d0660a19b70bf764bf8b7f: token0=0x4200000000000000000000000000000000000006 (undefined), token1=0xf95a4029c5c9d7af56d3712aebbbfa374c2396ab (8708)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x645ace64990cc112b01aa20d1aade1f3cd2c8c13: token0=0x3fbd54f0cc17b7ae649008deea12ed7d2622b23f (undefined), token1=0xd57920f2bc5f70de977f4645cdf042903b45cb59 (undefined)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0xe9abc5458bf6d6d2dfbda35582873a429455a7a2: token0=0x02e3ce2362e863c39ac9d3696d8c9d1a2b2a037a (undefined), token1=0x9623063377ad1b27544c965ccd7342f7ea7e88c7 (1532)
+  // [Nest] 10776  - 31.01.2026, 00:23:04    WARN [BlockchainService] Токены не найдены для пула 0x02276e57ecfe30b6dab2628ee7f6ce67cce4aaf7: token0=0x9623063377ad1b27544c965ccd7342f7ea7e88c7 (1532), token1=0xf188af10b13c23a8427e533ce939a8af69e71be5 (undefined)
+
+
+// ==========
+// SUSHI V2
+// ==========

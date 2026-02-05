@@ -21,6 +21,10 @@ export class ChainsService {
 
   async findAll() {
     return await this.chainsRepository.find({
+      select: {
+        name: true,
+        chainId: true,
+      },
       order: {
         createdAt: 'DESC',
       },

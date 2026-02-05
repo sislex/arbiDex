@@ -1,12 +1,12 @@
 <app-header-content-layout>
   <app-field-title header [title]="'Select chain'"></app-field-title>
-  <app-select-field
+  <app-autocomplete
     [title]="'Chain name'"
-    [list]="chainsList | async"
+    [list]="(chainsList | async)!"
     [selected]="formData.chainId"
     (emitter)="events($event, 'chainId')"
     content
-  ></app-select-field>
+  ></app-autocomplete>
 </app-header-content-layout>
 
 <app-header-content-layout>

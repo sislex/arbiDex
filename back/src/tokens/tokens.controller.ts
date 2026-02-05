@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Put,
+  Query,
 } from '@nestjs/common';
 import { TokensService } from './tokens.service';
 import { CreateTokenDto } from '../dtos/token-dto/token.dto';
@@ -17,15 +18,28 @@ export class TokensController {
   @Get()
   async findAll() {
     const tokens = await this.tokensService.findAll();
-    return tokens.map((t) => ({
-      tokenId: t.tokenId,
-      address: t.address,
-      symbol: t.symbol,
-      tokenName: t.tokenName,
-      decimals: t.decimals,
-      chain: t.chain,
-    }));
+    return tokens.map(token => this.toDto(token));
   }
+
+  private toDto(token: any) {
+    return {
+      tokenId: token.tokenId,
+      address: token.address,
+      symbol: token.symbol,
+      tokenName: token.tokenName,
+      decimals: token.decimals,
+      chain: {
+        chainId: token.chain.chainId,
+        name: token.chain.name,
+      },
+    };
+  }
+
+  @Get('get-one-token-by-address')
+  async findOne(@Query('tokenAddress') tokenAddress: string) {
+    return this.tokensService.findOneByAddress(tokenAddress);
+  }
+
 
   @Post()
   create(@Body() tokenDto: CreateTokenDto) {

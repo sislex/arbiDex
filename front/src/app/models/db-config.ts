@@ -32,7 +32,7 @@ export interface IPoolsAPI extends API {
 export interface IPools {
   poolId: number;
   chain: IChains;
-  poolAddress: number;
+  poolAddress: string;
   token: ITokens;
   token2: ITokens;
   fee: number;
@@ -42,7 +42,7 @@ export interface IPools {
 export interface IPoolsCreate {
   poolId: number;
   chainId: number;
-  poolAddress: number;
+  poolAddress: string;
   token: number;
   token2: number;
   fee: number;
@@ -77,6 +77,7 @@ export interface IChainsCreate {
 export interface ISelectMenu {
   id: number;
   name: string;
+  address?: string;
 }
 
 export interface IPairsAPI extends API {
@@ -104,7 +105,8 @@ export interface IQuotes {
   side: string;
   blockTag: string;
   quoteSource: string;
-  createdAt?: string;
+  token: ITokens;
+  pairQuoteRelations?: IPairQuoteRelation;
 }
 export interface IQuotesCreate {
   quoteId: number;
@@ -112,6 +114,13 @@ export interface IQuotesCreate {
   side: string;
   blockTag: string;
   quoteSource: string;
+  token: number;
+  pairQuoteRelations?: IPairQuoteRelation;
+}
+export interface IPairQuoteRelation {
+  pairQuoteRelationId: number;
+  pair?: IPairs;
+  quote?: IQuotes;
 }
 
 export interface IJobsAPI extends API {

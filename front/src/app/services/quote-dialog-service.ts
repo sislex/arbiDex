@@ -22,7 +22,8 @@ export class QuoteDialogService {
           amount: '',
           side: 'exactIn',
           blockTag: 'latest',
-          quoteSource: ''
+          quoteSource: '',
+          token: null
         }
       }
     }).afterClosed();
@@ -39,7 +40,14 @@ export class QuoteDialogService {
       data: {
         title: 'Edit quote',
         buttons: ['save', 'cancel'],
-        form: { ...row }
+        form: {
+          quoteId: row.quoteId,
+          amount: row.amount,
+          side: row.side,
+          blockTag: row.blockTag,
+          quoteSource: row.quoteSource,
+          token: row.token.tokenId,
+        }
       }
     }).afterClosed();
   }

@@ -39,7 +39,7 @@ export class PoolFormContainer {
 
   tokensList$ = toObservable(this.chainId).pipe(
     switchMap(id => this.store.select(getTokensDataResponseFilterChainId(id || 0))),
-    map(items => items?.map(i => ({ id: i.tokenId, name: i.tokenName })) || [])
+    map(items => items?.map(i => ({ id: i.tokenId, name: i.tokenName, address: i.address })) || [])
   );
 
   chainsList$ = this.store.select(getChainsDataResponse).pipe(

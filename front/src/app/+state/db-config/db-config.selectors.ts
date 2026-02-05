@@ -24,7 +24,7 @@ export const getTokensDataResponse = createSelector(
 export const getTokensDataResponseFilterChainId = (chainId: number) => createSelector(
   selectFeature,
   (state: DbConfigState) => state?.tokens?.response
-    ?.filter((token: ITokens) => token.chain?.chainId === chainId)
+      ?.filter((token: ITokens) => token.chain?.chainId === chainId)
     ?? []
 );
 export const getTokensDataFailure = createSelector(
@@ -287,4 +287,155 @@ export const getRpcUrlsDataIsLoading = createSelector(
 export const getRpcUrlsDataIsLoaded = createSelector(
   selectFeature,
   (state: DbConfigState) => state.rpcUrls.isLoaded
+);
+
+//====================================================================================================================
+//                                                   Pools_full_data
+//====================================================================================================================
+
+export const getFullPoolsData = createSelector(
+  getPoolsDataResponse,
+  getTokensDataResponse,
+  getDexesDataResponse,
+  getChainsDataResponse,
+  (poolsData, tokensData, dexesData, chainsData) => {
+
+    const tokenMap = Object.fromEntries(tokensData.map(t => [t.tokenId, t.tokenName]));
+    const dexMap = Object.fromEntries(dexesData.map(d => [d.dexId, d.name]));
+    const chainMap = Object.fromEntries(chainsData.map(c => [c.chainId, c.name]));
+
+    return poolsData.map(pool => ({
+      ...pool,
+      chain: {
+        ...pool.chain,
+        name: chainMap[pool.chain.chainId]
+      },
+      dex: {
+        ...pool.dex,
+        name: dexMap[pool.dex.dexId]
+      },
+      token: {
+        ...pool.token,
+        tokenName: tokenMap[pool.token.tokenId!]
+      },
+      token2: {
+        ...pool.token2,
+        tokenName: tokenMap[pool.token2.tokenId!]
+      }
+    }));
+  }
+);
+
+export const getFullPoolsDataIsLoading = createSelector(
+  getPoolsDataIsLoading,
+  getTokensDataIsLoading,
+  getDexesDataIsLoading,
+  getChainsDataIsLoading,
+  (pools, tokens, dexes, chains) =>
+    pools || tokens || dexes || chains
+);
+export const getFullPoolsDataIsLoaded = createSelector(
+  getPoolsDataIsLoaded,
+  getTokensDataIsLoaded,
+  getDexesDataIsLoaded,
+  getChainsDataIsLoaded,
+  (pools, tokens, dexes, chains) =>
+    pools && tokens && dexes && chains
+);
+export const getFullPoolsDataIsReady = createSelector(
+  getFullPoolsDataIsLoaded,
+  getFullPoolsDataIsLoading,
+  (loaded, loading) => loaded && !loading
+);
+
+//====================================================================================================================
+//                                                   Pairs_full_data
+//====================================================================================================================
+const getTokenMap = createSelector(
+  getTokensDataResponse,
+  (tokens) => new Map(tokens.map(t => [t.tokenId, t]))
+);
+const getPoolInfoMap = createSelector(
+  getPoolsDataResponse,
+  (pools) => new Map(pools.map(p => [p.poolId, p]))
+);
+const getChainMap = createSelector(
+  getChainsDataResponse,
+  (chains) => new Map(chains.map(c => [c.chainId, c.name]))
+);
+const getDexMap = createSelector(
+  getDexesDataResponse,
+  (dexes) => new Map(dexes.map(d => [d.dexId, d.name]))
+);
+
+export const getPairsFullData = createSelector(
+  getPairsDataResponse,
+  getPoolInfoMap,
+  getTokenMap,
+  getChainMap,
+  getDexMap,
+  (pairsData, poolInfoMap, tokenMap, chainMap, dexMap) => {
+    return pairsData.map(pair => {
+      const fullPoolData = poolInfoMap.get(pair.pool.poolId);
+      const fullTokenIn = tokenMap.get(pair.tokenIn.tokenId);
+      const fullTokenOut = tokenMap.get(pair.tokenOut.tokenId);
+
+      return {
+        ...pair,
+        pool: {
+          ...pair.pool,
+          ...fullPoolData,
+          chain: {
+            ...fullPoolData?.chain,
+            name: chainMap.get(fullPoolData?.chain?.chainId!),
+          },
+          dex: {
+            ...fullPoolData?.dex,
+            name: dexMap.get(fullPoolData?.dex?.dexId!),
+          }
+        },
+        tokenIn: {
+          ...pair.tokenIn,
+          tokenName: fullTokenIn?.tokenName,
+          address: fullTokenIn?.address
+        },
+        tokenOut: {
+          ...pair.tokenOut,
+          tokenName: fullTokenOut?.tokenName,
+          address: fullTokenOut?.address
+        }
+      };
+    });
+  }
+);
+
+export const getFullPairsDataIsLoading = createSelector(
+  getPoolsDataIsLoading,
+  getTokensDataIsLoading,
+  getPairsDataIsLoading,
+  getDexesDataIsLoading,
+  getChainsDataIsLoading,
+  (pools, tokens, pairs, dexes, chains) =>
+    pools || tokens || pairs || dexes || chains
+);
+export const getFullPairsDataIsLoaded = createSelector(
+  getPoolsDataIsLoaded,
+  getTokensDataIsLoaded,
+  getPairsDataIsLoaded,
+  getDexesDataIsLoaded,
+  getChainsDataIsLoaded,
+  (pools, tokens, pairs, dexes, chains) =>
+    pools && tokens && pairs && dexes && chains
+);
+export const getFullPairsDataIsReady = createSelector(
+  getFullPairsDataIsLoaded,
+  getFullPairsDataIsLoading,
+  (loaded, loading) => loaded && !loading
+);
+
+export const getQuotePageDataIsReady = createSelector(
+  getQuotesDataIsLoaded,
+  getQuotesDataIsLoading,
+  getFullPairsDataIsReady,
+  (loaded, loading, pairs) => loaded && !loading && pairs
 );

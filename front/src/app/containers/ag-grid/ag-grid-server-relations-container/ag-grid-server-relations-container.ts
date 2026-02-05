@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
 import { Loader } from '../../../components/loader/loader';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -96,12 +96,4 @@ export class AgGridServerRelationsContainer {
     suppressMovable: true,
     headerClass: 'align-center',
   };
-
-  events($event: any) {
-    this.emitter.emit({
-      event: 'AgGridServerRelationsContainer:ACTIVE_RELATIONS',
-      data: $event.row.selectedNodes.map((item: any) => item.data.botId),
-      fullData: $event.row.selectedNodes.map((item: any) => item.data),
-    });
-  }
 }

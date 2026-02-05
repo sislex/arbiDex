@@ -29,7 +29,7 @@ export class AgGrid implements OnChanges{
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['rowData'] && this.gridApi) {
-      this.selectRows();
+      setTimeout(() => this.selectRows());
     }
   }
 

@@ -4,4 +4,5 @@ export class QuoteDto {
   side: string;
   blockTag: string;
   quoteSource: string;
+  token: number;
 }

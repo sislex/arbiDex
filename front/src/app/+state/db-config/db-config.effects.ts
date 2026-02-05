@@ -1,10 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import { catchError, EMPTY, map, of, switchMap, tap } from 'rxjs';
+import {catchError, EMPTY, map, mergeMap, of, switchMap, tap, withLatestFrom} from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
+import * as DbConfigSelectors from './db-config.selectors';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {initPairsPage, initPoolsPage} from './db-config.actions';
 
 
 @Injectable()
@@ -22,16 +24,17 @@ export class DbConfigEffects {
   setTokensData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setTokensData),
-      switchMap(() =>
-        this.apiService.getTokens().pipe(
-          map(response =>
-            DbConfigActions.setTokensDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setTokensDataFailure({ error }))
-          )
-        )
-      )
+      withLatestFrom(this.store.select(DbConfigSelectors.getTokensDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setTokensDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getTokens().pipe(
+          map(response => DbConfigActions.setTokensDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setTokensDataFailure({ error })))
+        );
+      })
     )
   );
 
@@ -80,7 +83,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingToken(action.tokenId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setTokensData());
               this._snackBar.open(`Token is delete`, '', { duration: 5000 });
             }),
@@ -98,19 +101,32 @@ export class DbConfigEffects {
   //                                                   Pools
   //====================================================================================================================
 
+  initPoolsPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(initPoolsPage),
+      mergeMap(() => [
+        DbConfigActions.setPoolsData(),
+        DbConfigActions.setTokensData(),
+        DbConfigActions.setDexesData(),
+        DbConfigActions.setChainsData(),
+      ])
+    )
+  );
+
   setPoolsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setPoolsData),
-      switchMap(() =>
-        this.apiService.getPools().pipe(
-          map(response =>
-            DbConfigActions.setPoolsDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setPoolsDataFailure({ error }))
-          )
-        )
-      )
+      withLatestFrom(this.store.select(DbConfigSelectors.getPoolsDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setPoolsDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getPools().pipe(
+          map(response => DbConfigActions.setPoolsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setPoolsDataFailure({ error })))
+        );
+      })
     )
   );
 
@@ -159,7 +175,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingPool(action.poolId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setPoolsData());
               this._snackBar.open(`Pool is delete`, '', { duration: 5000 });
             }),
@@ -180,16 +196,17 @@ export class DbConfigEffects {
   setDexesData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setDexesData),
-      switchMap(() =>
-        this.apiService.getDexes().pipe(
-          map(response =>
-            DbConfigActions.setDexesDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setDexesDataFailure({ error }))
-          )
-        )
-      )
+      withLatestFrom(this.store.select(DbConfigSelectors.getDexesDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setDexesDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getDexes().pipe(
+          map(response => DbConfigActions.setDexesDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setDexesDataFailure({ error })))
+        );
+      })
     )
   );
 
@@ -238,7 +255,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingDex(action.dexId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setDexesData());
               this._snackBar.open(`Dex is delete`, '', { duration: 5000 });
             }),
@@ -259,16 +276,17 @@ export class DbConfigEffects {
   setChainsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setChainsData),
-      switchMap(() =>
-        this.apiService.getChainsData().pipe(
-          map(response =>
-            DbConfigActions.setChainsDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setChainsDataFailure({ error }))
-          )
-        )
-      )
+      withLatestFrom(this.store.select(DbConfigSelectors.getChainsDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setChainsDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getChainsData().pipe(
+          map(response => DbConfigActions.setChainsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setChainsDataFailure({ error })))
+        );
+      })
     )
   );
 
@@ -317,7 +335,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingChain(action.chainId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setChainsData());
               this._snackBar.open(`Chain is delete`, '', { duration: 5000 });
             }),
@@ -335,22 +353,36 @@ export class DbConfigEffects {
 //                                                   Pairs
 //====================================================================================================================
 
+  initPairsPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(initPairsPage),
+      mergeMap(() => [
+        DbConfigActions.setPairsData(),
+        DbConfigActions.setPoolsData(),
+        DbConfigActions.setTokensData(),
+        DbConfigActions.setDexesData(),
+        DbConfigActions.setChainsData(),
+      ])
+    )
+  );
+
   setPairsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setPairsData),
-      switchMap(() =>
-        this.apiService.getPairs().pipe(
+      withLatestFrom(this.store.select(DbConfigSelectors.getPairsDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setPairsDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getPairs().pipe(
           // tap(response => {
           //   console.log('Pairs response:', response);
           // }),
-          map(response =>
-            DbConfigActions.setPairsDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setPairsDataFailure({ error }))
-          )
-        )
-      )
+          map(response => DbConfigActions.setPairsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setPairsDataFailure({ error })))
+        );
+      })
     )
   );
 
@@ -399,7 +431,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingPair(action.pairId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setPairsData());
               this._snackBar.open(`Pair is delete`, '', { duration: 5000 });
             }),
@@ -420,11 +452,28 @@ export class DbConfigEffects {
   setQuotesData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setQuotesData),
-      switchMap(() =>
-        this.apiService.getQuotes().pipe(
+      withLatestFrom(this.store.select(DbConfigSelectors.getQuotesDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setQuotesDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getQuotes().pipe(
           // tap(response => {
           //   console.log('Quotes response:', response);
           // }),
+          map(response => DbConfigActions.setQuotesDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setQuotesDataFailure({ error })))
+        );
+      })
+    )
+  );
+
+  setOneQuoteData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setOneQuoteData),
+      switchMap((action) =>
+        this.apiService.getOneQuote(action.id).pipe(
           map(response =>
             DbConfigActions.setQuotesDataSuccess({ response })
           ),
@@ -481,7 +530,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingQuote(action.quoteId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setQuotesData());
               this._snackBar.open(`Quote is delete`, '', { duration: 5000 });
             }),
@@ -502,19 +551,20 @@ export class DbConfigEffects {
   setJobsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setJobsData),
-      switchMap(() =>
-        this.apiService.getJobs().pipe(
+      withLatestFrom(this.store.select(DbConfigSelectors.getJobsDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setJobsDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getJobs().pipe(
           // tap(response => {
           //   console.log('Jobs response:', response);
           // }),
-          map(response =>
-            DbConfigActions.setJobsDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setJobsDataFailure({ error }))
-          )
-        )
-      )
+          map(response => DbConfigActions.setJobsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setJobsDataFailure({ error })))
+        );
+      })
     )
   );
 
@@ -563,7 +613,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingJob(action.jobId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setJobsData());
               this._snackBar.open(`Job is delete`, '', { duration: 5000 });
             }),
@@ -585,19 +635,20 @@ export class DbConfigEffects {
   setBotsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setBotsData),
-      switchMap(() =>
-        this.apiService.getBots().pipe(
+      withLatestFrom(this.store.select(DbConfigSelectors.getBotsDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setBotsDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getBots().pipe(
           // tap(response => {
           //   console.log('Bots response:', response);
           // }),
-          map(response =>
-            DbConfigActions.setBotsDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setBotsDataFailure({ error }))
-          )
-        )
-      )
+          map(response => DbConfigActions.setBotsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setBotsDataFailure({ error })))
+        );
+      })
     )
   );
 
@@ -666,7 +717,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingBot(action.botId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setBotsData());
               this._snackBar.open(`Bot is delete`, '', { duration: 5000 });
             }),
@@ -687,19 +738,20 @@ export class DbConfigEffects {
   setServersData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setServersData),
-      switchMap(() =>
-        this.apiService.getServers().pipe(
+      withLatestFrom(this.store.select(DbConfigSelectors.getServersDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setServersDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getServers().pipe(
           // tap(response => {
           //   console.log('Servers response:', response);
           // }),
-          map(response =>
-            DbConfigActions.setServersDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setServersDataFailure({ error }))
-          )
-        )
-      )
+          map(response => DbConfigActions.setServersDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setServersDataFailure({ error })))
+        );
+      })
     )
   );
 
@@ -748,7 +800,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingServer(action.serverId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setServersData());
               this._snackBar.open(`Server is delete`, '', { duration: 5000 });
             }),
@@ -769,16 +821,17 @@ export class DbConfigEffects {
   setRpcUrlsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setRpcUrlsData),
-      switchMap(() =>
-        this.apiService.getRpcUrls().pipe(
-          map(response =>
-            DbConfigActions.setRpcUrlsDataSuccess({ response })
-          ),
-          catchError(error =>
-            of(DbConfigActions.setRpcUrlsDataFailure({ error }))
-          )
-        )
-      )
+      withLatestFrom(this.store.select(DbConfigSelectors.getRpcUrlDataResponse)),
+      switchMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setRpcUrlsDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getRpcUrls().pipe(
+          map(response => DbConfigActions.setRpcUrlsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setRpcUrlsDataFailure({ error })))
+        );
+      })
     )
   );
 
@@ -827,7 +880,7 @@ export class DbConfigEffects {
         switchMap((action) => {
 
           return this.apiService.deletingRpcUrl(action.rpcUrlId).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.setRpcUrlsData());
               this._snackBar.open(`RpcUrl is delete`, '', { duration: 5000 });
             }),

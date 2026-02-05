@@ -53,39 +53,53 @@ export class AgGridTokensContainer {
   readonly colDefs: ColDef[] = [
     {
       field: "tokenId",
-      headerName: 'Token ID',
+      headerName: 'ID',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       field: "tokenName",
-      headerName: 'Token Name',
+      headerName: 'Name',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
-      headerName: 'Chain ID',
+      headerName: 'Chain',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
-        return params.data?.chain?.chainId || '-';
+        return params.data?.chain?.name || '-';
       },
     },
     {
       field: "address",
       headerName: 'Address',
-      flex: 1
+      flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       field: "symbol",
       headerName: 'Symbol',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       field: "decimals",
       headerName: 'Decimals',
       flex: 1,
+      filter: true,
+      sortable: true,
     },
     {
       headerName: 'Is Active',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.isActive || '-';
       },
@@ -93,6 +107,8 @@ export class AgGridTokensContainer {
     {
       headerName: 'Is Checked',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.isChecked || '-';
       },
@@ -100,6 +116,8 @@ export class AgGridTokensContainer {
     {
       headerName: 'Balance',
       flex: 1,
+      filter: true,
+      sortable: true,
       valueGetter: (params) => {
         return params.data?.balance || '-';
       },
@@ -115,7 +133,6 @@ export class AgGridTokensContainer {
   ];
 
   readonly defaultColDef: ColDef = {
-    sortable: false,
     cellStyle: { textAlign: 'center'},
     suppressMovable: true,
     headerClass: 'align-center',

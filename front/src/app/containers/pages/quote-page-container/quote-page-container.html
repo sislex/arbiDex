@@ -9,16 +9,36 @@
   >
   </app-actions>
   <app-content-footer-layout content>
-    <app-ag-grid-quote-relations-container
-      content
-      [currentQuoteId]="currentQuoteId"
-      (emitter)="events($event)"
-    ></app-ag-grid-quote-relations-container>
+    @if (quotePageDataIsReady$ | async) {
+
+      <div class="tables-group" content>
+        <app-ag-grid-one-quote-container
+          [currentJobId]="currentQuoteId"
+        >
+        </app-ag-grid-one-quote-container>
+
+        <app-ag-grid-quote-relations-container
+          content
+          [currentQuoteId]="currentQuoteId"
+          (emitter)="events($event)"
+        ></app-ag-grid-quote-relations-container>
+
+        <app-ag-grid-quote-not-relations-container
+          content
+          [currentQuoteId]="currentQuoteId"
+          (emitter)="events($event)"
+        ></app-ag-grid-quote-not-relations-container>
+      </div>
+    } @else {
+      <app-loader content></app-loader>
+    }
+
     <app-button-panel
       footer
       [buttons]="footerButtons"
       [disabled]="false"
       (emitter)="events($event)"
     ></app-button-panel>
+
   </app-content-footer-layout>
 </app-title-content-layout>

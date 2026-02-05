@@ -1,5 +1,5 @@
 <app-header-content-layout>
-  @if ((poolsDataIsLoaded$ | async) && !(poolsDataIsLoading$ | async)) {
+  @if (poolsDataIsReady$ | async) {
     <app-title-table-button
       header
       [title]="'Pools table'"
@@ -7,7 +7,7 @@
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
   }
-  @if ((poolsDataIsLoaded$ | async) && !(poolsDataIsLoading$ | async)) {
+  @if (poolsDataIsReady$ | async) {
     <app-ag-grid
       content
       [rowData]="(poolsDataResponse$ | async)!"

@@ -1,0 +1,18 @@
+<app-header-content-layout>
+  <app-title-table-button
+    header
+    [title]="'Is not relations'"
+  ></app-title-table-button>
+  <app-ag-grid
+    content
+    [rowData]="(inactivePairs$ | async) !"
+    [colDefs]="colDefs"
+    [defaultColDef]="defaultColDef"
+    [isRowSelection]="{
+      mode: 'multiRow',
+      selectAll: 'filtered',
+    }"
+    (emitter)="events($event)"
+  ></app-ag-grid>
+</app-header-content-layout>
+

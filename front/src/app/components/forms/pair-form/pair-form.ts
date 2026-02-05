@@ -3,10 +3,10 @@ import { IPairsCreate, IPools, ISelectMenu } from '../../../models/db-config';
 import { AsyncPipe } from '@angular/common';
 import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
-import { SelectField } from '../../select-field/select-field';
 import { Actions } from '../../actions/actions';
 import { Observable, take, filter } from 'rxjs';
 import { Loader } from '../../loader/loader';
+import {Autocomplete} from '../../autocomplete/autocomplete';
 
 @Component({
   selector: 'app-pair-form',
@@ -14,9 +14,9 @@ import { Loader } from '../../loader/loader';
     AsyncPipe,
     FieldTitle,
     HeaderContentLayout,
-    SelectField,
     Actions,
     Loader,
+    Autocomplete,
   ],
   templateUrl: './pair-form.html',
   styleUrl: './pair-form.scss',

@@ -1,13 +1,13 @@
 @if (poolList) {
   <app-header-content-layout>
     <app-field-title header [title]="'Pool Id'"></app-field-title>
-    <app-select-field
+    <app-autocomplete
       [title]="'Pool Id'"
-      [list]="poolList | async"
+      [list]="(poolList | async)!"
       [selected]="formData.poolId"
       (emitter)="events($event, 'poolId')"
       content
-    ></app-select-field>
+    ></app-autocomplete>
   </app-header-content-layout>
 }
 
@@ -15,14 +15,14 @@
   <div class="row">
     <app-header-content-layout>
       <app-field-title header [title]="'Token In'"></app-field-title>
-      <app-select-field
+      <app-autocomplete
         [title]="'Token In'"
         [list]="poolTokens"
         [selected]="formData.tokenIn"
         [disabled]="true"
         (emitter)="events($event, 'tokenIn')"
         content
-      ></app-select-field>
+      ></app-autocomplete>
     </app-header-content-layout>
 
     <div>
@@ -35,14 +35,14 @@
 
     <app-header-content-layout>
       <app-field-title header [title]="'Token Out'"></app-field-title>
-      <app-select-field
+      <app-autocomplete
         [title]="'Token Out'"
         [list]="poolTokens"
         [selected]="formData.tokenOut"
         [disabled]="true"
         (emitter)="events($event, 'tokenOut')"
         content
-      ></app-select-field>
+      ></app-autocomplete>
     </app-header-content-layout>
   </div>
 } @else if (formData.poolId && poolTokens.length < 0) {

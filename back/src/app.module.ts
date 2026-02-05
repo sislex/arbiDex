@@ -26,6 +26,9 @@ import { QuotesModule } from './quotes/quotes.module';
 import { PairQuoteRelationsModule } from './pair-quote-relations/pair-quote-relations.module';
 import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relations.module';
 import { RpcUrlsModule } from './rpc-urls/rpc-urls.module';
+import { GetFeeModule } from './services/get-fee.module';
+import { SwapRateModule } from './swap-rate/swap-rate.module';
+import { BlockchainModule } from './blockchain/blockchain.module';
 
 @Module({
   imports: [
@@ -74,6 +77,9 @@ import { RpcUrlsModule } from './rpc-urls/rpc-urls.module';
     PairQuoteRelationsModule,
     QuoteJobRelationsModule,
     RpcUrlsModule,
+    GetFeeModule,
+    SwapRateModule,
+    BlockchainModule
   ],
   controllers: [AppController],
   providers: [AppService],

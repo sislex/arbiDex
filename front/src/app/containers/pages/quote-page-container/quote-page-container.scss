@@ -8,10 +8,19 @@
     flex: 1;
     min-height: 0;
 
-    mat-tab-group {
+    .tables-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    app-loader {
       display: flex;
       flex: 1;
-      min-height: 0;
+      loader {
+        display: flex;
+        flex: 1;
+      }
     }
   }
 

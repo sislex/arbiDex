@@ -8,7 +8,8 @@ import {
   ITokensCreate,
   IBotsCreate,
   IServersCreate,
-  IPairsCreate, IRpcUrlCreate,
+  IPairsCreate,
+  IRpcUrlCreate
 } from '../../models/db-config';
 
 export const setServerList = createAction('[DbConfig] setServerList');
@@ -43,6 +44,7 @@ export const deletingToken = createAction(
 //                                                   Pools
 //====================================================================================================================
 
+export const initPoolsPage = createAction('[DbConfig] initPoolsPage');
 export const setPoolsData = createAction('[DbConfig] setPoolsData');
 export const setPoolsDataSuccess = createAction(
   '[DbConfig] setPoolsDataSuccess',
@@ -121,6 +123,7 @@ export const deletingChain = createAction(
 //                                                   Pairs
 //====================================================================================================================
 
+export const initPairsPage = createAction('[DbConfig] initPairsPage');
 export const setPairsData = createAction('[DbConfig] setPairsData');
 export const setPairsDataSuccess = createAction(
   '[DbConfig] setPairsDataSuccess',
@@ -148,6 +151,10 @@ export const deletingPair = createAction(
 //====================================================================================================================
 
 export const setQuotesData = createAction('[DbConfig] setQuotesData');
+export const setOneQuoteData = createAction(
+  '[DbConfig] setOneQuoteData',
+  props<{ id: number }>()
+);
 export const setQuotesDataSuccess = createAction(
   '[DbConfig] setQuotesDataSuccess',
   props<{ response: any }>()

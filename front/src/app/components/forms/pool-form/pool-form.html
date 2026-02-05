@@ -1,58 +1,58 @@
 <app-header-content-layout>
   <app-field-title header [title]="'Select chain'"></app-field-title>
-  <app-select-field
+  <app-autocomplete
     [title]="'Chain name'"
-    [list]="chainsList | async"
+    [list]="(chainsList | async)!"
     [selected]="formData.chainId"
     (emitter)="events($event, 'chainId')"
     content
-  ></app-select-field>
+  ></app-autocomplete>
 </app-header-content-layout>
 
 <app-header-content-layout>
   <app-field-title header [title]="'Select Base Token Id'"></app-field-title>
-  <app-select-field
+  <app-autocomplete
     [title]="'Base Token Id'"
-    [list]="tokensList | async"
+    [list]="(tokensList | async)!"
     [selected]="formData.token"
     [disabled]="tokenDisabled"
     (emitter)="events($event, 'token')"
     content
-  ></app-select-field>
+  ></app-autocomplete>
 </app-header-content-layout>
 
 <app-header-content-layout>
   <app-field-title header [title]="'Select Quote Token Id'"></app-field-title>
-  <app-select-field
+  <app-autocomplete
     [title]="'Quote Token Id'"
-    [list]="tokensList | async"
+    [list]="(tokensList | async)!"
     [selected]="formData.token2"
     [disabled]="tokenDisabled"
     (emitter)="events($event, 'token2')"
     content
-  ></app-select-field>
+  ></app-autocomplete>
 </app-header-content-layout>
 
 <app-header-content-layout>
   <app-field-title header [title]="'Select Dex Id'"></app-field-title>
-  <app-select-field
+  <app-autocomplete
     [title]="'Dex Id'"
-    [list]="dexesList | async"
+    [list]="(dexesList | async)!"
     [selected]="formData.dexId"
     (emitter)="events($event, 'dexId')"
     content
-  ></app-select-field>
+  ></app-autocomplete>
 </app-header-content-layout>
 
 <app-header-content-layout>
   <app-field-title header [title]="'Select Dex Version'"></app-field-title>
-  <app-select-field
+  <app-autocomplete
     [title]="'Dex Version'"
-    [list]="versionsList | async"
+    [list]="(versionsList | async)!"
     [selected]="formData.version"
     (emitter)="events($event, 'version')"
     content
-  ></app-select-field>
+  ></app-autocomplete>
 </app-header-content-layout>
 
 <app-header-content-layout>
