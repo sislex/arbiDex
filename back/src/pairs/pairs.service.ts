@@ -47,7 +47,6 @@ export class PairsService {
           tokenId: true, // Только tokenId из tokenOut
         },
       },
-      take: 115000,
       order: {
         pairId: 'DESC',
       },
