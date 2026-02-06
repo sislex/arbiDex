@@ -111,7 +111,7 @@ export class AgGridJobRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token?.tokenId || '-';
+        return params.data?.pair?.pool?.token0?.tokenId || '-';
       },
     },
     {
@@ -122,7 +122,7 @@ export class AgGridJobRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token2?.tokenId || '-';
+        return params.data?.pair?.pool?.token1?.tokenId || '-';
       },
     },
     {

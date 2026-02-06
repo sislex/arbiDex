@@ -26,15 +26,15 @@ export class SwapRate {
   @Column("integer", { name: "swap_rate_count", default: () => "0" })
   swapRateCount: number;
 
-  @ManyToOne(() => Tokens, (tokens) => tokens.swapRates, {
+  @ManyToOne(() => Tokens, (tokens) => tokens.swapRates0, {
     onDelete: "RESTRICT",
   })
   @JoinColumn([{ name: "swap_rate_token0", referencedColumnName: "tokenId" }])
-  swapRateToken: Tokens;
+  swapRate0: Tokens;
 
-  @ManyToOne(() => Tokens, (tokens) => tokens.swapRates2, {
+  @ManyToOne(() => Tokens, (tokens) => tokens.swapRates1, {
     onDelete: "RESTRICT",
   })
   @JoinColumn([{ name: "swap_rate_token1", referencedColumnName: "tokenId" }])
-  swapRateToken2: Tokens;
+  swapRate1: Tokens;
 }

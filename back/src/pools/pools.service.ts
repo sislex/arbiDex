@@ -19,14 +19,14 @@ export class PoolsService {
 
   async create(poolDto: PoolDto) {
     const chain = await this.chainsService.findOne(poolDto.chainId);
-    const token = await this.tokensService.findOne(poolDto.token);
-    const token2 = await this.tokensService.findOne(poolDto.token2);
+    const token0 = await this.tokensService.findOne(poolDto.token0);
+    const token1 = await this.tokensService.findOne(poolDto.token1);
     const dex = await this.dexesService.findOne(poolDto.dexId);
 
     const pool = this.poolRepository.create({
       chain,
-      token,
-      token2,
+      token0,
+      token1,
       dex,
       version: poolDto.version,
       fee: poolDto.fee,
@@ -38,7 +38,7 @@ export class PoolsService {
 
   async findAll() {
     return await this.poolRepository.find({
-      relations: ['chain', 'token', 'token2', 'dex'],
+      relations: ['chain', 'token0', 'token1', 'dex'],
       order: {
         poolId: 'DESC',
       },
@@ -48,7 +48,7 @@ export class PoolsService {
   async findOne(id: number) {
     const item = await this.poolRepository.findOne({
       where: { poolId: id },
-      relations: ['token', 'token2', 'chain', 'dex'],
+      relations: ['token0', 'token1', 'chain', 'dex'],
     });
     if (!item) {
       throw new Error(`Pool with id ${id} not found`);
@@ -59,8 +59,8 @@ export class PoolsService {
   async update(id: number, poolDto: UpdatePoolDto) {
     const pool = await this.findOne(id);
     const chain = await this.chainsService.findOne(poolDto.chainId);
-    const token = await this.tokensService.findOne(poolDto.token);
-    const token2 = await this.tokensService.findOne(poolDto.token2);
+    const token0 = await this.tokensService.findOne(poolDto.token0);
+    const token1 = await this.tokensService.findOne(poolDto.token1);
     const dex = await this.dexesService.findOne(poolDto.dexId);
 
     pool.poolId = poolDto.poolId;
@@ -68,8 +68,8 @@ export class PoolsService {
     pool.fee = poolDto.fee;
     pool.version = poolDto.version;
     pool.chain = chain;
-    pool.token = token;
-    pool.token2 = token2;
+    pool.token0 = token0;
+    pool.token1 = token1;
     pool.dex = dex;
 
     return await this.poolRepository.save(pool);
@@ -80,7 +80,7 @@ export class PoolsService {
     const poolAddresses = reserves.map(r => r.address);
     const pools = await this.poolRepository.find({
       where: { poolAddress: In(poolAddresses) },
-      relations: ['token', 'token2'],
+      relations: ['token0', 'token1'],
     });
 
     pools.forEach(pool => poolsMap.set(pool.poolAddress!, pool));
@@ -89,12 +89,12 @@ export class PoolsService {
       const pool = poolsMap.get(dto.address);
       if (!pool) continue;
 
-      const token = await this.tokensService.findOneByAddress(dto.token);
-      const token2 = await this.tokensService.findOneByAddress(dto.token2);
+      const token0 = await this.tokensService.findOneByAddress(dto.token0);
+      const token1 = await this.tokensService.findOneByAddress(dto.token1);
 
-      if (!token || !token2) continue;
+      if (!token0 || !token1) continue;
 
-      if (pool.token.tokenId === token.tokenId && pool.token2.tokenId === token2.tokenId) {
+      if (pool.token0.tokenId === token0.tokenId && pool.token1.tokenId === token1.tokenId) {
         pool.reserve0 = dto.reserve0;
         pool.reserve1 = dto.reserve1;
       } else {
@@ -107,8 +107,6 @@ export class PoolsService {
     console.log(`Reserves update completed. Total pools updated: ${updatedPools.length}`);
     return updatedPools;
   }
-
-
 
   async remove(id: number) {
     return await this.poolRepository.delete(id);

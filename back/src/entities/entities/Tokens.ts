@@ -51,20 +51,20 @@ export class Tokens {
   @OneToMany(() => Pairs, (pairs) => pairs.tokenOut)
   pairs2: Pairs[];
 
-  @OneToMany(() => Pools, (pools) => pools.token)
+  @OneToMany(() => Pools, (pools) => pools.token0)
   pools: Pools[];
 
-  @OneToMany(() => Pools, (pools) => pools.token2)
+  @OneToMany(() => Pools, (pools) => pools.token1)
   pools2: Pools[];
 
   @OneToMany(() => Quotes, (quotes) => quotes.token)
   quotes: Quotes[];
 
-  @OneToMany(() => SwapRate, (swapRate) => swapRate.swapRateToken)
-  swapRates: SwapRate[];
+  @OneToMany(() => SwapRate, (swapRate) => swapRate.swapRateToken0)
+  swapRates0: SwapRate[];
 
-  @OneToMany(() => SwapRate, (swapRate) => swapRate.swapRateToken2)
-  swapRates2: SwapRate[];
+  @OneToMany(() => SwapRate, (swapRate) => swapRate.swapRateToken1)
+  swapRates1: SwapRate[];
 
   @ManyToOne(() => Chains, (chains) => chains.tokens, {
     onDelete: "RESTRICT",

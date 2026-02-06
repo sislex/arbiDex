@@ -93,17 +93,16 @@ export class AgGridPoolsContainer implements OnInit {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.token?.tokenName || '-';
+        return params.data?.token0?.tokenName || '-';
       },
     },
     {
-      field: "token2",
       headerName: 'Token 2',
       flex: 1,
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.token2?.tokenName || '-';
+        return params.data?.token1?.tokenName || '-';
       },
     },
     {

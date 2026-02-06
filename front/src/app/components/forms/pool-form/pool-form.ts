@@ -32,7 +32,7 @@ export class PoolForm implements OnInit {
     this.emitter.emit(this.formData);
   }
 
-  events(event: any, field: 'chainId' | 'token' | 'token2' | 'fee' | 'dexId' | 'version' | 'poolAddress') {
+  events(event: any, field: 'chainId' | 'token0' | 'token1' | 'fee' | 'dexId' | 'version' | 'poolAddress') {
     this.formData = {
       ...this.formData,
       [field]: event.data,

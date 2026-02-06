@@ -149,8 +149,8 @@ export class BlockchainService {
       }
 
       const poolDto = {
-        token: token0Id,
-        token2: token1Id,
+        token0: token0Id,
+        token1: token1Id,
         poolAddress,
         fee: pool.fee ?? config.fee,
         version: config.version || null,
@@ -208,8 +208,8 @@ export class BlockchainService {
 
         const dto: UpdateReservesDto = {
           address: reserve.address,
-          token: reserve.token0,
-          token2: reserve.token1,
+          token0: reserve.token0,
+          token1: reserve.token1,
           reserve0: reserve.reserve0?.toString() ?? '0',
           reserve1: reserve.reserve1?.toString() ?? '0',
         };

@@ -1,8 +1,8 @@
 export class PoolDto {
   poolId?: number;
   chainId: number;
-  token: number;
-  token2: number;
+  token0: number;
+  token1: number;
   dexId: number;
   version: 'v2' | 'v3' | 'v4';
   fee: number;
@@ -14,8 +14,8 @@ export class PoolDto {
 export class UpdatePoolDto {
   poolId: number;
   chainId: number;
-  token: number;
-  token2: number;
+  token0: number;
+  token1: number;
   dexId: number;
   version: 'v2' | 'v3' | 'v4';
   fee: number;
@@ -26,16 +26,16 @@ export class UpdatePoolDto {
 
 export class UpdateReservesDto {
   address: string;
-  token: string;
-  token2: string;
+  token0: string;
+  token1: string;
   reserve0: string;
   reserve1: string;
 }
 
 export class CreatePoolDto {
   chainId: number;
-  token: number;
-  token2: number;
+  token0: number;
+  token1: number;
   dexId: number;
   fee: number;
   version: 'v2' | 'v3';

@@ -17,12 +17,12 @@ export function mapQuoteRelation(item: any) {
     dex: qr.pair.pool.dex.name,
     version: qr.pair.pool.version as 'v2' | 'v3' | 'v4',
     token0: {
-      address: qr.pair.pool.token.address,
-      decimals: qr.pair.pool.token.decimals ?? 0
+      address: qr.pair.pool.token0.address,
+      decimals: qr.pair.pool.token0.decimals ?? 0
     },
     token1: {
-      address: qr.pair.pool.token2.address,
-      decimals: qr.pair.pool.token2.decimals ?? 0
+      address: qr.pair.pool.token1.address,
+      decimals: qr.pair.pool.token1.decimals ?? 0
     },
     poolAddress: String(qr.pair.pool.poolAddress),
     feePpm: qr.pair.pool.fee,

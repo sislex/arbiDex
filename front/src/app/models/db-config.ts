@@ -33,8 +33,8 @@ export interface IPools {
   poolId: number;
   chain: IChains;
   poolAddress: string;
-  token: ITokens;
-  token2: ITokens;
+  token0: ITokens;
+  token1: ITokens;
   fee: number;
   dex: IDexes;
   version: 'v2' | 'v3' | 'v4';
@@ -43,8 +43,8 @@ export interface IPoolsCreate {
   poolId: number;
   chainId: number;
   poolAddress: string;
-  token: number;
-  token2: number;
+  token0: number;
+  token1: number;
   fee: number;
   dexId: number;
   version: string;

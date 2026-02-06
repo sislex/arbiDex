@@ -47,8 +47,8 @@ export class QuoteJobRelationsService {
         'quoteRelation.pair.pool',
         'quoteRelation.pair.pool.dex',
         'quoteRelation.pair.pool.chain',
-        'quoteRelation.pair.pool.token',
-        'quoteRelation.pair.pool.token2',
+        'quoteRelation.pair.pool.token0',
+        'quoteRelation.pair.pool.token1',
       ],
     });
 

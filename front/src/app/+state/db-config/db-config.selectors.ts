@@ -314,13 +314,13 @@ export const getFullPoolsData = createSelector(
         ...pool.dex,
         name: dexMap[pool.dex.dexId]
       },
-      token: {
-        ...pool.token,
-        tokenName: tokenMap[pool.token.tokenId!]
+      token0: {
+        ...pool.token0,
+        tokenName: tokenMap[pool.token0.tokenId!]
       },
-      token2: {
-        ...pool.token2,
-        tokenName: tokenMap[pool.token2.tokenId!]
+      token1: {
+        ...pool.token1,
+        tokenName: tokenMap[pool.token1.tokenId!]
       }
     }));
   }

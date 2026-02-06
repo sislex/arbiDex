@@ -39,8 +39,8 @@ export class PairQuoteRelationsService {
         'pair.pool',
         'pair.pool.dex',
         'pair.pool.chain',
-        'pair.pool.token',
-        'pair.pool.token2',
+        'pair.pool.token0',
+        'pair.pool.token1',
         'quote',
       ],
       order: {
@@ -66,8 +66,8 @@ export class PairQuoteRelationsService {
           pool: {
             dex: true,
             chain: true,
-            token: true,
-            token2: true,
+            token0: true,
+            token1: true,
           },
         },
         quote: true,
@@ -88,8 +88,8 @@ export class PairQuoteRelationsService {
         'pair.pool',
         'pair.pool.dex',
         'pair.pool.chain',
-        'pair.pool.token',
-        'pair.pool.token2',
+        'pair.pool.token0',
+        'pair.pool.token1',
         'quote',
       ],
     });
@@ -113,8 +113,8 @@ export class PairQuoteRelationsService {
         'pair.pool',
         'pair.pool.dex',
         'pair.pool.chain',
-        'pair.pool.token',
-        'pair.pool.token2',
+        'pair.pool.token0',
+        'pair.pool.token1',
         'quote',
       ],
     });

@@ -45,15 +45,15 @@ export class PairForm implements OnInit {
 
       if (selectedPool) {
         this.poolTokens = [
-          { id: selectedPool.token.tokenId!, name: selectedPool.token.tokenName! },
-          { id: selectedPool.token2.tokenId!, name: selectedPool.token2.tokenName! },
+          { id: selectedPool.token0.tokenId!, name: selectedPool.token0.tokenName! },
+          { id: selectedPool.token1.tokenId!, name: selectedPool.token1.tokenName! },
         ];
 
         this.formData = {
           ...this.formData,
           poolId: poolId,
-          tokenIn: selectedPool.token.tokenId!,
-          tokenOut: selectedPool.token2.tokenId!,
+          tokenIn: selectedPool.token0.tokenId!,
+          tokenOut: selectedPool.token1.tokenId!,
         };
 
         this.emitter.emit(this.formData);

@@ -49,8 +49,8 @@ export class BotsService {
                 pool: {
                   dex: true,
                   chain: true,
-                  token: true,
-                  token2: true,
+                  token0: true,
+                  token1: true,
                 },
               },
             },
@@ -80,8 +80,8 @@ export class BotsService {
                 pool: {
                   dex: true,
                   chain: true,
-                  token: true,
-                  token2: true,
+                  token0: true,
+                  token1: true,
                 },
               },
             },

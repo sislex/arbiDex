@@ -14,9 +14,9 @@
   <app-autocomplete
     [title]="'Base Token Id'"
     [list]="(tokensList | async)!"
-    [selected]="formData.token"
+    [selected]="formData.token0"
     [disabled]="tokenDisabled"
-    (emitter)="events($event, 'token')"
+    (emitter)="events($event, 'token0')"
     content
   ></app-autocomplete>
 </app-header-content-layout>
@@ -26,9 +26,9 @@
   <app-autocomplete
     [title]="'Quote Token Id'"
     [list]="(tokensList | async)!"
-    [selected]="formData.token2"
+    [selected]="formData.token1"
     [disabled]="tokenDisabled"
-    (emitter)="events($event, 'token2')"
+    (emitter)="events($event, 'token1')"
     content
   ></app-autocomplete>
 </app-header-content-layout>
