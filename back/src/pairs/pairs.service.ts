@@ -31,14 +31,21 @@ export class PairsService {
   async findAll() {
     return await this.pairsRepository.find({
       relations: {
-        pool: {
-          dex: true,
-          chain: true,
-          token: true,
-          token2: true,
-        },
+        pool: true,
         tokenIn: true,
         tokenOut: true,
+      },
+      select: {
+        pairId: true, // ID основной сущности
+        pool: {
+          poolId: true, // Только poolId из pool
+        },
+        tokenIn: {
+          tokenId: true, // Только tokenId из tokenIn
+        },
+        tokenOut: {
+          tokenId: true, // Только tokenId из tokenOut
+        },
       },
       take: 115000,
       order: {
