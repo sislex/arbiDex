@@ -40,6 +40,7 @@ export class PairsService {
         tokenIn: true,
         tokenOut: true,
       },
+      take: 1000,
       order: {
         pairId: 'DESC',
       },
