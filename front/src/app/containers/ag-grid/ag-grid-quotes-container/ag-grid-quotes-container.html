@@ -1,5 +1,5 @@
 <app-header-content-layout>
-  @if ((quotesDataIsLoaded$ | async) && !(quotesDataIsLoading$ | async)) {
+  @if (fullQuotesDataIsReady$ | async) {
     <app-title-table-button
       header
       [title]="'Quotes table'"
@@ -7,7 +7,7 @@
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
   }
-  @if ((quotesDataIsLoaded$ | async) && !(quotesDataIsLoading$ | async)) {
+  @if (fullQuotesDataIsReady$ | async) {
     <app-ag-grid
       content
       [rowData]="(quotesDataResponse$ | async)!"

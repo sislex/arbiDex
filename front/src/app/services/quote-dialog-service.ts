@@ -46,7 +46,7 @@ export class QuoteDialogService {
           side: row.side,
           blockTag: row.blockTag,
           quoteSource: row.quoteSource,
-          token: row.token.tokenId,
+          token: row.tokenId,
         }
       }
     }).afterClosed();

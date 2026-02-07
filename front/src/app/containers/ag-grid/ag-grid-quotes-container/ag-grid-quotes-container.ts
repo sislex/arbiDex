@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
@@ -8,11 +8,15 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { Loader } from '../../../components/loader/loader';
 import {
-  getQuotesDataIsLoaded,
-  getQuotesDataIsLoading,
-  getQuotesDataResponse,
+  getFullQuotesDataIsReady,
+  getQuotesFullDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { createQuote, deletingQuote, editQuote, setQuotesData } from '../../../+state/db-config/db-config.actions';
+import {
+  createQuote,
+  deletingQuote,
+  editQuote,
+  initQuotesListPage,
+} from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { QuoteDialogService } from '../../../services/quote-dialog-service';
 import { Router } from '@angular/router';
@@ -29,15 +33,14 @@ import { Router } from '@angular/router';
   templateUrl: './ag-grid-quotes-container.html',
   styleUrl: './ag-grid-quotes-container.scss',
 })
-export class AgGridQuotesContainer {
+export class AgGridQuotesContainer implements OnInit {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly quoteDialog = inject(QuoteDialogService);
   readonly router = inject(Router);
 
-  quotesDataResponse$ = this.store.select(getQuotesDataResponse);
-  quotesDataIsLoading$ = this.store.select(getQuotesDataIsLoading);
-  quotesDataIsLoaded$ = this.store.select(getQuotesDataIsLoaded);
+  quotesDataResponse$ = this.store.select(getQuotesFullDataResponse);
+  fullQuotesDataIsReady$ = this.store.select(getFullQuotesDataIsReady);
 
   readonly colDefs: ColDef[] = [
     {
@@ -81,7 +84,7 @@ export class AgGridQuotesContainer {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.token?.tokenName || '-';
+        return params.data?.tokenName || '-';
       },
     },
     {
@@ -90,7 +93,7 @@ export class AgGridQuotesContainer {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.pairQuoteRelations?.length || '-';
+        return params.data?.pairsCount || '-';
       },
     },
     {
@@ -113,8 +116,9 @@ export class AgGridQuotesContainer {
     },
   };
 
-  constructor() {
-    this.store.dispatch(setQuotesData());
+  ngOnInit() {
+    this.store.dispatch(initQuotesListPage());
+
   }
 
   onAction($event: any, row: any) {

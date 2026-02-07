@@ -21,7 +21,17 @@ export class QuotesController {
 
   @Get()
   async findAll() {
-    return await this.quotesService.findAll();
+    const quotes = await this.quotesService.findAll();
+
+    return quotes.map(q => ({
+      quoteId: q.quoteId,
+      amount: q.amount,
+      blockTag: q.blockTag,
+      quoteSource: q.quoteSource,
+      side: q.side,
+      tokenId: q.token?.tokenId,
+      pairsCount: q.pairQuoteRelations?.length || 0,
+    }));
   }
 
   @Get(':id')

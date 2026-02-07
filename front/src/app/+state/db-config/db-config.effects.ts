@@ -456,6 +456,16 @@ export class DbConfigEffects {
   //                                                   Quotes
   //====================================================================================================================
 
+  initQuotesListPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.initQuotesListPage),
+      mergeMap(() => [
+        DbConfigActions.setTokensData(),
+        DbConfigActions.setQuotesData(),
+      ])
+    )
+  );
+
   setQuotesData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setQuotesData),

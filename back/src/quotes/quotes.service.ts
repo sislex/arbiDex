@@ -29,9 +29,20 @@ export class QuotesService {
     return await this.quotesRepository.find({
       relations: {
         token: true,
+        pairQuoteRelations: true
+      },
+      select: {
+        quoteId: true,
+        amount: true,
+        blockTag: true,
+        quoteSource: true,
+        side: true,
+        token: {
+          tokenId: true,
+        },
         pairQuoteRelations: {
-          pair: true
-        }
+          pairQuoteRelationId: true,
+        },
       },
       order: {
         quoteId: 'DESC',

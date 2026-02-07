@@ -1,6 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {DB_CONFIG_FEATURE_KEY, DbConfigState} from './db-config.reducer';
-import { IRpcUrl, ITokens } from '../../models/db-config';
+import {IRpcUrl, ITokens} from '../../models/db-config';
 
 export const selectFeature = createFeatureSelector<DbConfigState>(DB_CONFIG_FEATURE_KEY);
 
@@ -368,16 +368,47 @@ export const getPairsFullData = createSelector(
 
       return {
         ...pair,
-          chainName: chainMap.get(fullPoolData?.chainId!),
-          dexName: dexMap.get(fullPoolData?.dexId!),
-          poolAddress: fullPoolData?.poolAddress,
-          tokenInName: fullTokenIn?.tokenName,
-          tokenInAddress: fullTokenIn?.address,
-          tokenOutName: fullTokenOut?.tokenName,
-          tokenOutAddress: fullTokenOut?.address,
+        chainName: chainMap.get(fullPoolData?.chainId!),
+        dexName: dexMap.get(fullPoolData?.dexId!),
+        poolAddress: fullPoolData?.poolAddress,
+        tokenInName: fullTokenIn?.tokenName,
+        tokenInAddress: fullTokenIn?.address,
+        tokenOutName: fullTokenOut?.tokenName,
+        tokenOutAddress: fullTokenOut?.address,
       };
     });
   }
+);
+
+export const getFullPairsDataIsLoading = createSelector(
+  getPoolsDataIsLoading,
+  getTokensDataIsLoading,
+  getPairsDataIsLoading,
+  getDexesDataIsLoading,
+  getChainsDataIsLoading,
+  (pools, tokens, pairs, dexes, chains) =>
+    pools || tokens || pairs || dexes || chains
+);
+export const getFullPairsDataIsLoaded = createSelector(
+  getPoolsDataIsLoaded,
+  getTokensDataIsLoaded,
+  getPairsDataIsLoaded,
+  getDexesDataIsLoaded,
+  getChainsDataIsLoaded,
+  (pools, tokens, pairs, dexes, chains) =>
+    pools && tokens && pairs && dexes && chains
+);
+export const getFullPairsDataIsReady = createSelector(
+  getFullPairsDataIsLoaded,
+  getFullPairsDataIsLoading,
+  (loaded, loading) => loaded && !loading
+);
+
+export const getQuotePageDataIsReady = createSelector(
+  getQuotesDataIsLoaded,
+  getQuotesDataIsLoading,
+  getFullPairsDataIsReady,
+  (loaded, loading, pairs) => loaded && !loading && pairs
 );
 
 export const getTokensFullDataResponse = createSelector(
@@ -413,33 +444,35 @@ export const getFullTokensDataIsReady = createSelector(
   (loaded, loading) => loaded && !loading
 );
 
-export const getFullPairsDataIsLoading = createSelector(
-  getPoolsDataIsLoading,
-  getTokensDataIsLoading,
-  getPairsDataIsLoading,
-  getDexesDataIsLoading,
-  getChainsDataIsLoading,
-  (pools, tokens, pairs, dexes, chains) =>
-    pools || tokens || pairs || dexes || chains
-);
-export const getFullPairsDataIsLoaded = createSelector(
-  getPoolsDataIsLoaded,
-  getTokensDataIsLoaded,
-  getPairsDataIsLoaded,
-  getDexesDataIsLoaded,
-  getChainsDataIsLoaded,
-  (pools, tokens, pairs, dexes, chains) =>
-    pools && tokens && pairs && dexes && chains
-);
-export const getFullPairsDataIsReady = createSelector(
-  getFullPairsDataIsLoaded,
-  getFullPairsDataIsLoading,
-  (loaded, loading) => loaded && !loading
+export const getQuotesFullDataResponse = createSelector(
+  getQuotesDataResponse,
+  getTokenMap,
+  (quotes, tokens) => {
+    return quotes.map(quote => {
+      const fullTokenData = quote.tokenId ? tokens.get(quote.tokenId) : null;
+
+      return {
+        ...quote,
+        tokenName: fullTokenData?.tokenName || quote.tokenName,
+      };
+    });
+  }
 );
 
-export const getQuotePageDataIsReady = createSelector(
-  getQuotesDataIsLoaded,
+export const getFullQuotesDataIsLoading = createSelector(
+  getTokensDataIsLoading,
   getQuotesDataIsLoading,
-  getFullPairsDataIsReady,
-  (loaded, loading, pairs) => loaded && !loading && pairs
+  ( tokens, quotes) =>
+    tokens || quotes
+);
+export const getFullQuotesDataIsLoaded = createSelector(
+  getTokensDataIsLoaded,
+  getQuotesDataIsLoaded,
+  (tokens,  quotes) =>
+    tokens && quotes
+);
+export const getFullQuotesDataIsReady = createSelector(
+  getFullQuotesDataIsLoaded,
+  getFullQuotesDataIsLoading,
+  (loaded, loading) => loaded && !loading
 );

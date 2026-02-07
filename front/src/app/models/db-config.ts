@@ -121,7 +121,9 @@ export interface IQuotes {
   side: string;
   blockTag: string;
   quoteSource: string;
-  token: ITokens;
+  tokenId: number;
+  tokenName?: string;
+  tokenAddress?: string;
   pairQuoteRelations?: IPairQuoteRelation;
 }
 export interface IQuotesCreate {
