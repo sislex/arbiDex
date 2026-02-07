@@ -28,10 +28,7 @@ export class TokensController {
       symbol: token.symbol,
       tokenName: token.tokenName,
       decimals: token.decimals,
-      chain: {
-        chainId: token.chain.chainId,
-        name: token.chain.name,
-      },
+      chainId: token.chain.chainId,
     };
   }
 

@@ -23,9 +23,7 @@ export const getTokensDataResponse = createSelector(
 );
 export const getTokensDataResponseFilterChainId = (chainId: number) => createSelector(
   selectFeature,
-  (state: DbConfigState) => state?.tokens?.response
-      ?.filter((token: ITokens) => token.chain?.chainId === chainId)
-    ?? []
+  (state: DbConfigState) => state?.tokens?.response?.filter((token: ITokens) => token.chainId === chainId) ?? []
 );
 export const getTokensDataFailure = createSelector(
   selectFeature,
@@ -407,6 +405,39 @@ export const getPairsFullData = createSelector(
       };
     });
   }
+);
+
+export const getTokensFullDataResponse = createSelector(
+  getChainMap,
+  getTokensDataResponse,
+  (chains, tokens): ITokens[] => {
+    return tokens.map(token => {
+      const fullChainData = token.chainId ? chains.get(token.chainId) : null;
+
+      return {
+        ...token,
+        chainName: fullChainData || token.chainName,
+      };
+    });
+  }
+);
+
+export const getFullTokensDataIsLoading = createSelector(
+  getTokensDataIsLoading,
+  getChainsDataIsLoading,
+  ( tokens, chains) =>
+    tokens || chains
+);
+export const getFullTokensDataIsLoaded = createSelector(
+  getTokensDataIsLoaded,
+  getChainsDataIsLoaded,
+  (tokens,  chains) =>
+    tokens && chains
+);
+export const getFullTokensDataIsReady = createSelector(
+  getFullTokensDataIsLoaded,
+  getFullTokensDataIsLoading,
+  (loaded, loading) => loaded && !loading
 );
 
 export const getFullPairsDataIsLoading = createSelector(

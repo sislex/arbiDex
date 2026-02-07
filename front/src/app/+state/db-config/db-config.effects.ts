@@ -6,8 +6,6 @@ import * as DbConfigSelectors from './db-config.selectors';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {initPairsPage, initPoolsPage} from './db-config.actions';
-
 
 @Injectable()
 export class DbConfigEffects {
@@ -16,10 +14,19 @@ export class DbConfigEffects {
   private store = inject(Store);
   private _snackBar = inject(MatSnackBar);
 
-
   //====================================================================================================================
   //                                                   Tokens
   //====================================================================================================================
+
+  initTokensListPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.initTokensListPage),
+      mergeMap(() => [
+        DbConfigActions.setTokensData(),
+        DbConfigActions.setChainsData(),
+      ])
+    )
+  );
 
   setTokensData$ = createEffect(() =>
     this.actions$.pipe(
@@ -103,7 +110,7 @@ export class DbConfigEffects {
 
   initPoolsPage$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(initPoolsPage),
+      ofType(DbConfigActions.initPoolsPage),
       mergeMap(() => [
         DbConfigActions.setPoolsData(),
         DbConfigActions.setTokensData(),
@@ -355,7 +362,7 @@ export class DbConfigEffects {
 
   initPairsPage$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(initPairsPage),
+      ofType(DbConfigActions.initPairsPage),
       mergeMap(() => [
         DbConfigActions.setPairsData(),
         DbConfigActions.setPoolsData(),

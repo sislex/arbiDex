@@ -5,7 +5,8 @@ export interface ITokensAPI extends API {
 }
 export interface ITokens {
   tokenId: number | null;
-  chain: IChains;
+  chainId: number | null;
+  chainName: string;
   address: string;
   symbol: string;
   tokenName: string;
@@ -14,6 +15,7 @@ export interface ITokens {
   isChecked: boolean | null;
   balance: boolean | null;
 }
+
 export interface ITokensCreate {
   tokenId: number;
   chainId: number;

@@ -57,7 +57,14 @@ export class TokensService {
 
   async findAll() {
     return await this.tokensRepository.find({
-      relations: ['chain'],
+      relations: {
+        chain: true,
+      },
+      select: {
+        chain: {
+          chainId: true,
+        }
+      },
       order: {
         tokenId: 'DESC',
       },

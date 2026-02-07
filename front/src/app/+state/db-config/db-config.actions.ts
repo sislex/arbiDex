@@ -19,6 +19,7 @@ export const setServerList = createAction('[DbConfig] setServerList');
 //====================================================================================================================
 
 export const setTokensData = createAction('[DbConfig] setTokensData');
+export const initTokensListPage = createAction('[DbConfig] initTokensListPage');
 export const setTokensDataSuccess = createAction(
   '[DbConfig] setTokensDataSuccess',
   props<{ response: any }>()

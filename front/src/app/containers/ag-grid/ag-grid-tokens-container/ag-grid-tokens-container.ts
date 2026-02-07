@@ -1,11 +1,16 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
-import { createToken, deletingToken, editToken, setTokensData } from '../../../+state/db-config/db-config.actions';
 import {
-  getChainsDataResponse, getTokensDataIsLoaded,
-  getTokensDataIsLoading,
-  getTokensDataResponse,
+  createToken,
+  deletingToken,
+  editToken,
+  initTokensListPage,
+} from '../../../+state/db-config/db-config.actions';
+import {
+  getChainsDataResponse,
+  getFullTokensDataIsReady,
+  getTokensFullDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import {AsyncPipe} from '@angular/common';
 import {Store} from '@ngrx/store';
@@ -29,14 +34,13 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
   templateUrl: './ag-grid-tokens-container.html',
   styleUrl: './ag-grid-tokens-container.scss',
 })
-export class AgGridTokensContainer {
+export class AgGridTokensContainer implements OnInit {
   private store = inject(Store);
   readonly tokenDialog = inject(TokenDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  tokensDataResponse$ = this.store.select(getTokensDataResponse);
-  getTokensDataIsLoading$ = this.store.select(getTokensDataIsLoading);
-  getTokensDataIsLoaded$ = this.store.select(getTokensDataIsLoaded);
+  tokensFullDataResponse$ = this.store.select(getTokensFullDataResponse);
+  getFullTokensDataIsReady$ = this.store.select(getFullTokensDataIsReady);
 
   list$ = this.store.select(getChainsDataResponse).pipe(
     map(chains =>
@@ -46,9 +50,6 @@ export class AgGridTokensContainer {
       }))
     )
   );
-  constructor() {
-    this.store.dispatch(setTokensData());
-  }
 
   readonly colDefs: ColDef[] = [
     {
@@ -71,7 +72,7 @@ export class AgGridTokensContainer {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.chain?.name || '-';
+        return params.data?.chainName || '-';
       },
     },
     {
@@ -138,6 +139,10 @@ export class AgGridTokensContainer {
     headerClass: 'align-center',
   };
 
+  ngOnInit() {
+    this.store.dispatch(initTokensListPage());
+  }
+
   onAction($event: any, row: any) {
     if ($event.event === 'Actions:ACTION_CLICKED') {
       if ($event.actionType === 'delete') {
@@ -148,7 +153,7 @@ export class AgGridTokensContainer {
     }
   }
 
-  actions($event: any, note: any) {
+  actions(_: any, note: any) {
     if (note === 'add' ) {
       this.openCreateDialog();
     }

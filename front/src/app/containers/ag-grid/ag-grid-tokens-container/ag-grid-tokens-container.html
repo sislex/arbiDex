@@ -1,5 +1,5 @@
 <app-header-content-layout>
-  @if ((getTokensDataIsLoaded$ | async) && !(getTokensDataIsLoading$ | async)) {
+  @if (getFullTokensDataIsReady$ | async) {
     <app-title-table-button
       [title]="'Tokens table'"
       [icon]="'add'"
@@ -7,9 +7,9 @@
       header
     ></app-title-table-button>
   }
-  @if ((getTokensDataIsLoaded$ | async) && !(getTokensDataIsLoading$ | async)) {
+  @if (getFullTokensDataIsReady$ | async) {
     <app-ag-grid
-      [rowData]="(tokensDataResponse$ | async)!"
+      [rowData]="(tokensFullDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
       content
