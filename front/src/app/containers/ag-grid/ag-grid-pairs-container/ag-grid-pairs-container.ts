@@ -67,7 +67,7 @@ export class AgGridPairsContainer implements OnInit {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.pool?.poolAddress || '-';
+        return params.data?.poolAddress || '-';
       },
     },
     {
@@ -76,7 +76,7 @@ export class AgGridPairsContainer implements OnInit {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.tokenIn?.tokenName || '-';
+        return params.data?.tokenInName || '-';
       },
     },
     {
@@ -85,7 +85,7 @@ export class AgGridPairsContainer implements OnInit {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.tokenOut?.tokenName || '-';
+        return params.data?.tokenOutName || '-';
       },
     },
     {

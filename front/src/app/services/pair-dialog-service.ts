@@ -51,9 +51,9 @@ export class PairDialogService {
         buttons: ['save', 'cancel'],
         form: {
           pairId: row.pairId,
-          poolId: row.pool.poolId,
-          tokenIn: row.tokenIn.tokenId,
-          tokenOut: row.tokenOut.tokenId,
+          poolId: row.poolId,
+          tokenInId: row.tokenInId,
+          tokenOutId: row.tokenOutId,
         },
         poolList: poolList$,
         poolsListResponse: poolsListResponse$,

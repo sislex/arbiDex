@@ -362,21 +362,19 @@ export const getPairsFullData = createSelector(
   getDexMap,
   (pairsData, poolInfoMap, tokenMap, chainMap, dexMap) => {
     return pairsData.map(pair => {
-      const fullPoolData = poolInfoMap.get(pair.pool.poolId);
-      const fullTokenIn = tokenMap.get(pair.tokenIn.tokenId);
-      const fullTokenOut = tokenMap.get(pair.tokenOut.tokenId);
+      const fullPoolData = poolInfoMap.get(pair.poolId);
+      const fullTokenIn = tokenMap.get(pair.tokenInId);
+      const fullTokenOut = tokenMap.get(pair.tokenOutId);
 
       return {
         ...pair,
-        pool: {
-          ...pair.pool,
           chainName: chainMap.get(fullPoolData?.chainId!),
           dexName: dexMap.get(fullPoolData?.dexId!),
-          token0Name: fullTokenIn?.tokenName,
-          token0Address: fullTokenIn?.address,
-          token1Name: fullTokenOut?.tokenName,
-          token1Address: fullTokenOut?.address,
-        }
+          poolAddress: fullPoolData?.poolAddress,
+          tokenInName: fullTokenIn?.tokenName,
+          tokenInAddress: fullTokenIn?.address,
+          tokenOutName: fullTokenOut?.tokenName,
+          tokenOutAddress: fullTokenOut?.address,
       };
     });
   }

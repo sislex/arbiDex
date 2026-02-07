@@ -36,15 +36,15 @@ export class PairsService {
         tokenOut: true,
       },
       select: {
-        pairId: true, // ID основной сущности
+        pairId: true,
         pool: {
-          poolId: true, // Только poolId из pool
+          poolId: true,
         },
         tokenIn: {
-          tokenId: true, // Только tokenId из tokenIn
+          tokenId: true,
         },
         tokenOut: {
-          tokenId: true, // Только tokenId из tokenOut
+          tokenId: true,
         },
       },
       order: {

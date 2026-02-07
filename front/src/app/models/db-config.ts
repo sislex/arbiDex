@@ -96,9 +96,14 @@ export interface IPairsAPI extends API {
 }
 export interface IPairs {
   pairId: number;
-  pool: IPools;
-  tokenIn: ITokens;
-  tokenOut: ITokens;
+  poolId: number;
+  poolAddress: string;
+  tokenInId: number;
+  tokenInName: string;
+  tokenInAddress: string;
+  tokenOutId: number;
+  tokenOutName: string;
+  tokenOutAddress: string;
 }
 export interface IPairsCreate {
   pairId: number;

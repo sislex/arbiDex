@@ -27,9 +27,9 @@ export class PairsController {
   private toDto(pair: any) {
     return {
       pairId: pair.pairId,
-      pool: {poolId: pair.pool.poolId},
-      tokenIn: {tokenId: pair.tokenIn.tokenId},
-      tokenOut: {tokenId: pair.tokenOut.tokenId},
+      poolId: pair.pool.poolId,
+      tokenInId: pair.tokenIn.tokenId,
+      tokenOutId: pair.tokenOut.tokenId,
     };
   }
 
