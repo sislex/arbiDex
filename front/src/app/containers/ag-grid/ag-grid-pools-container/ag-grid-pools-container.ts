@@ -61,7 +61,7 @@ export class AgGridPoolsContainer implements OnInit {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.chain?.name || '-';
+        return params.data?.chainName || '-';
       },
     },
     {
@@ -70,7 +70,7 @@ export class AgGridPoolsContainer implements OnInit {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.dex?.name || '-';
+        return params.data?.dexName || '-';
       },
     },
     {
@@ -93,7 +93,7 @@ export class AgGridPoolsContainer implements OnInit {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.token0?.tokenName || '-';
+        return params.data?.token0Name || '-';
       },
     },
     {
@@ -102,7 +102,7 @@ export class AgGridPoolsContainer implements OnInit {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.token1?.tokenName || '-';
+        return params.data?.token1Name || '-';
       },
     },
     {

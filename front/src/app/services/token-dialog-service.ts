@@ -47,7 +47,7 @@ export class TokenDialogService {
         list: list$,
         form: {
           tokenId: row.tokenId,
-          chainId: row.chain.chainId,
+          chainId: row.chainId,
           address: row.address,
           symbol: row.symbol,
           tokenName: row.tokenName,

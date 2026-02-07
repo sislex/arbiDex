@@ -33,13 +33,22 @@ export interface IPoolsAPI extends API {
 }
 export interface IPools {
   poolId: number;
-  chain: IChains;
   poolAddress: string;
-  token0: ITokens;
-  token1: ITokens;
-  fee: number;
-  dex: IDexes;
+  reserve0: string;
+  reserve1: string;
   version: 'v2' | 'v3' | 'v4';
+  fee: number;
+  chainId: number;
+  dexId: number;
+
+  token0Id: number;
+  token1Id: number;
+  chainName?: string;
+  dexName?: string;
+  token0Symbol?: string;
+  token1Symbol?: string;
+  token0Name?: string;
+  token1Name?: string;
 }
 export interface IPoolsCreate {
   poolId: number;

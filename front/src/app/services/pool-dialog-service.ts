@@ -45,11 +45,11 @@ export class PoolDialogService {
         buttons: ['save', 'cancel'],
         form: {
           poolId: row.poolId,
-          chainId: row.chain.chainId,
+          chainId: row.chainId,
           version: row.version,
-          token0: row.token0.tokenId,
-          token1: row.token1.tokenId,
-          dexId: row.dex.dexId,
+          token0: row.token0Id,
+          token1: row.token1Id,
+          dexId: row.dexId,
           fee: row.fee,
           poolAddress: row.poolAddress,
         }

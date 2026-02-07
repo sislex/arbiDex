@@ -38,12 +38,30 @@ export class PoolsService {
 
   async findAll() {
     return await this.poolRepository.find({
-      relations: ['chain', 'token0', 'token1', 'dex'],
+      relations: {
+        chain: true,
+        dex: true,
+        token0: true,
+        token1: true,
+      },
+      select: {
+        poolId: true,
+        poolAddress: true,
+        reserve0: true,
+        reserve1: true,
+        version: true,
+        fee: true,
+        chain: { chainId: true },
+        dex: { dexId: true },
+        token0: { tokenId: true },
+        token1: { tokenId: true },
+      },
       order: {
         poolId: 'DESC',
       },
     });
   }
+
 
   async findOne(id: number) {
     const item = await this.poolRepository.findOne({

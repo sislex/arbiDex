@@ -148,6 +148,7 @@ export class AgGridTokensContainer implements OnInit {
       if ($event.actionType === 'delete') {
         this.openDeleteDialog(row);
       } else if ($event.actionType === 'edit') {
+        console.log('edit', row);
         this.openEditDialog(row);
       }
     }
