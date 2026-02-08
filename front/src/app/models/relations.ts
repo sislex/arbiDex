@@ -1,13 +1,13 @@
 import {API} from './api';
-import { IJobs, IPairs, IQuotes } from './db-config';
+import { IJobs } from './db-config';
 
 export interface IQuoteRelationsAPI extends API {
   response: IQuoteRelations[];
 }
 export interface IQuoteRelations {
   pairQuoteRelationId: number;
-  pair: IPairs;
-  quote: IQuotes;
+  pairId: number;
+  quoteId?: number;
 }
 export interface IQuoteRelationsCreate {
   pairQuoteRelationsId?: number;

@@ -1,6 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {DB_CONFIG_FEATURE_KEY, DbConfigState} from './db-config.reducer';
-import {IRpcUrl, ITokens} from '../../models/db-config';
+import {IQuotes, IRpcUrl, ITokens} from '../../models/db-config';
 
 export const selectFeature = createFeatureSelector<DbConfigState>(DB_CONFIG_FEATURE_KEY);
 
@@ -375,6 +375,8 @@ export const getPairsFullData = createSelector(
         tokenInAddress: fullTokenIn?.address,
         tokenOutName: fullTokenOut?.tokenName,
         tokenOutAddress: fullTokenOut?.address,
+        fee: fullPoolData?.fee,
+        version: fullPoolData?.version,
       };
     });
   }
@@ -475,4 +477,19 @@ export const getFullQuotesDataIsReady = createSelector(
   getFullQuotesDataIsLoaded,
   getFullQuotesDataIsLoading,
   (loaded, loading) => loaded && !loading
+);
+
+
+
+export const getQuoteFullDataResponse = createSelector(
+  getQuotesDataResponse,
+  getTokenMap,
+  (quotes: unknown, tokens) => {
+    const quote = quotes as IQuotes;
+    const fullTokenData = quote.tokenId ? tokens.get(quote.tokenId) : null;
+    return {
+      ...quote,
+      tokenName: fullTokenData?.tokenName || quote.tokenName,
+    };
+  }
 );

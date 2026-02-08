@@ -106,17 +106,18 @@ export class PairQuoteRelationsService {
           quoteId: id,
         },
       },
-      relations: [
-        'pair',
-        'pair.tokenIn',
-        'pair.tokenOut',
-        'pair.pool',
-        'pair.pool.dex',
-        'pair.pool.chain',
-        'pair.pool.token0',
-        'pair.pool.token1',
-        'quote',
-      ],
+      relations: {
+        pair: true,
+        quote: true,
+      },
+      select: {
+        pair: {
+          pairId: true
+        },
+        quote: {
+          quoteId: true
+        },
+      }
     });
     if (!item) {
       throw new Error(`Pair-Quote Relation with id ${id} not found`);

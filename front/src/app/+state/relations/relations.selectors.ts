@@ -41,7 +41,7 @@ const getPairsWithActivityFlag = createSelector(
   getPairsFullData,
   (quoteRelations, pairsList) => {
     const activeIds = new Set(
-      quoteRelations?.map(relation => relation.pair?.pairId) || []
+      quoteRelations?.map(relation => relation.pairId) || []
     );
 
     return pairsList.map(pair => ({

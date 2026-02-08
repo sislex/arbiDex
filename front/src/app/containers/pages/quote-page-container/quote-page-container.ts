@@ -86,8 +86,8 @@ export class QuotePageContainer implements OnInit {
           .subscribe((data: any) => {
             const mappedOldRelations = data.map((relation: IQuoteRelations) => ({
               pairQuoteRelationId: relation.pairQuoteRelationId,
-              pairId: relation.pair.pairId,
-              quoteId: relation.quote.quoteId
+              pairId: relation.pairId,
+              quoteId: relation.quoteId
             }));
             this.setCreateAndRemoveLists(mappedOldRelations, this.relatedPairsIds);
           });

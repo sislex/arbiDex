@@ -45,8 +45,16 @@ export class PairQuoteRelationsController {
 
   @Get('by-quote-id/:id')
   async findByQuoteId(@Param('id') id: string) {
-    return await this.pairQuoteRelationsService.findByQuoteId(id);
+    const relationByQuoteId = await this.pairQuoteRelationsService.findByQuoteId(id);
+
+    return relationByQuoteId.map((relation) => ({
+      pairQuoteRelationId: relation.pairQuoteRelationId,
+      pairId: relation.pair.pairId,
+      quoteId: relation.quote.quoteId,
+
+    }));
   }
+
 
   @Delete()
   remove(@Body() id: string[]) {

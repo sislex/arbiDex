@@ -38,7 +38,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.chain?.name || '-';
+        return params.data?.chainName || '-';
       },
     },
     {
@@ -49,7 +49,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.dex?.name || '-';
+        return params.data?.dexName || '-';
       },
     },
     {
@@ -60,7 +60,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.poolAddress || '-';
+        return params.data?.poolAddress || '-';
       },
     },
     {
@@ -71,18 +71,17 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.version || '-';
+        return params.data?.version || '-';
       },
     },
     {
       headerName: 'Fee',
-
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pool?.fee || '-';
+        return params.data?.fee || '-';
       },
     },
     {
@@ -93,7 +92,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.tokenIn?.tokenName || '-';
+        return params.data?.tokenInName || '-';
       },
     },
     {
@@ -104,7 +103,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.tokenOut?.tokenName || '-';
+        return params.data?.tokenOutName || '-';
       },
     },
     {
@@ -115,7 +114,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.tokenIn?.address || '-';
+        return params.data?.tokenInAddress || '-';
       },
     },
     {
@@ -126,7 +125,7 @@ export class AgGridQuoteRelationsContainer {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.tokenOut?.address || '-';
+        return params.data?.tokenOutAddress || '-';
       },
     },
   ];

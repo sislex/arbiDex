@@ -55,10 +55,21 @@ export class QuotesService {
       where: { quoteId: id.toString() },
       relations: {
         token: true,
-        pairQuoteRelations: {
-          pair: true
-        }
+        pairQuoteRelations: true,
       },
+      select: {
+        quoteId: true,
+        amount: true,
+        blockTag: true,
+        quoteSource: true,
+        side: true,
+        token: {
+          tokenId: true
+        },
+        pairQuoteRelations: {
+          pairQuoteRelationId: true,
+        }
+      }
     });
     if (!quote) {
       throw new Error(`Quote with id ${id} not found`);

@@ -35,8 +35,18 @@ export class QuotesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.quotesService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const quote = await this.quotesService.findOne(+id);
+
+    return {
+      quoteId: quote.quoteId,
+      amount: quote.amount,
+      blockTag: quote.blockTag,
+      quoteSource: quote.quoteSource,
+      side: quote.side,
+      tokenId: quote.token?.tokenId,
+      pairsCount: quote.pairQuoteRelations?.length || 0,
+    };
   }
 
   @Put(':id')

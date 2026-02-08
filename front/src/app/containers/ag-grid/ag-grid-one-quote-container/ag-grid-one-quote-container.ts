@@ -6,7 +6,7 @@ import {TitleTableButton} from '../../../components/title-table-button/title-tab
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import {AsyncPipe} from '@angular/common';
 import {
-  getQuotesDataResponse
+  getQuoteFullDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 
 @Component({
@@ -25,7 +25,7 @@ export class AgGridOneQuoteContainer {
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
 
-  quotesDataResponse$ = this.store.select(getQuotesDataResponse);
+  quoteFullDataResponse$ = this.store.select(getQuoteFullDataResponse);
 
   readonly colDefs: ColDef[] = [
     {
@@ -57,14 +57,14 @@ export class AgGridOneQuoteContainer {
       headerName: 'Quote Token',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.token?.tokenName || '-';
+        return params.data?.tokenName || '-';
       },
     },
     {
       headerName: 'Pairs count',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.pairQuoteRelations?.length || '-';
+        return params.data?.pairsCount || '-';
       },
     }
   ];
