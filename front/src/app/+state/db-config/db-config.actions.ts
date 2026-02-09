@@ -210,6 +210,8 @@ export const deletingJob = createAction(
 //====================================================================================================================
 
 export const setBotsData = createAction('[DbConfig] setBotsData');
+export const initBotsListPage = createAction('[DbConfig] initBotsListPage');
+
 export const setBotsDataSuccess = createAction(
   '[DbConfig] setBotsDataSuccess',
   props<{ response: any }>()

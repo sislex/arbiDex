@@ -1,5 +1,5 @@
 <app-header-content-layout>
-  @if ((botsDataIsLoaded$ | async) && !(botsDataIsLoading$ | async)) {
+  @if (fullBotsDataIsReady$ | async) {
     <app-title-table-button
       header
       [title]="'Bots table'"
@@ -7,10 +7,10 @@
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
   }
-  @if ((botsDataIsLoaded$ | async) && !(botsDataIsLoading$ | async)) {
+  @if (fullBotsDataIsReady$ | async) {
     <app-ag-grid
       content
-      [rowData]="(botsDataResponse$ | async)!"
+      [rowData]="(fullBotsDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
       (emitter)="actions($event)"

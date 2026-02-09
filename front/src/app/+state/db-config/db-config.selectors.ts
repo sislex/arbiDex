@@ -357,6 +357,14 @@ const getRpcUrlsMap = createSelector(
   getRpcUrlDataResponse,
   (rpcUrls) => new Map(rpcUrls.map(r => [r.rpcUrlId, r.rpcUrl]))
 );
+const getJobsMap = createSelector(
+  getJobsDataResponse,
+  (jobs) => new Map(jobs.map(j => [j.jobId, j.jobType]))
+);
+const getServersMap = createSelector(
+  getServersDataResponse,
+  (servers) => new Map(servers.map(s => [s.serverId, s.serverName]))
+);
 
 export const getPairsFullData = createSelector(
   getPairsDataResponse,
@@ -530,5 +538,43 @@ export const getFullJobsDataIsLoaded = createSelector(
 export const getFullJobsDataIsReady = createSelector(
   getFullJobsDataIsLoaded,
   getFullJobsDataIsLoading,
+  (loaded, loading) => loaded && !loading
+);
+
+export const getFullBotsDataResponse = createSelector(
+  getBotsDataResponse,
+  getJobsMap,
+  getServersMap,
+  (bots, jobs, servers) => {
+    return bots.map(bot => {
+      const fullJobsData = bot.jobId ? jobs.get(bot.jobId) : null;
+      const fullServersData = bot.serverId ? servers.get(bot.serverId) : null;
+      return {
+        ...bot,
+        jobType: fullJobsData,
+        serverName: fullServersData,
+      };
+    });
+  }
+);
+
+export const getFullBotsDataIsLoading = createSelector(
+  getBotsDataIsLoading,
+  getJobsDataIsLoading,
+  getServersDataIsLoading,
+  (bots, jobs, servers) =>
+    bots || jobs || servers
+);
+
+export const getFullBotsDataIsLoaded = createSelector(
+  getBotsDataIsLoaded,
+  getJobsDataIsLoaded,
+  getServersDataIsLoaded,
+  (bots, jobs, servers) =>
+    bots && jobs && servers
+);
+export const getFullBotsDataIsReady = createSelector(
+  getFullBotsDataIsLoaded,
+  getFullBotsDataIsLoading,
   (loaded, loading) => loaded && !loading
 );

@@ -178,8 +178,10 @@ export interface IBots {
   botId: number;
   botName: string;
   description: string;
-  server: IServers;
-  job: IJobs;
+  serverId: number;
+  serverName: string;
+  jobId: number;
+  jobType: string;
   pairs: number;
   paused: boolean;
   isRepeat: boolean;

@@ -660,6 +660,17 @@ export class DbConfigEffects {
 //                                                   Bots
 //====================================================================================================================
 
+  initBotsListPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.initBotsListPage),
+      mergeMap(() => [
+        DbConfigActions.setBotsData(),
+        DbConfigActions.setJobsData(),
+        DbConfigActions.setServersData(),
+      ])
+    )
+  );
+
   setBotsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setBotsData),

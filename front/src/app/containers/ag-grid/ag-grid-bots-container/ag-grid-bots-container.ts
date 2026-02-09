@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
@@ -9,12 +9,17 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import {
-  getBotsDataIsLoaded,
-  getBotsDataIsLoading,
-  getBotsDataResponse, getJobsDataResponse,
+  getFullBotsDataIsReady,
+  getFullBotsDataResponse,
+  getJobsDataResponse,
   getServersDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { createBot, deletingBot, editBot, setBotsData } from '../../../+state/db-config/db-config.actions';
+import {
+  createBot,
+  deletingBot,
+  editBot,
+  initBotsListPage,
+} from '../../../+state/db-config/db-config.actions';
 import { BotDialogService } from '../../../services/bot-dialog-service';
 import { map } from 'rxjs';
 import { Router } from '@angular/router';
@@ -31,15 +36,14 @@ import { Router } from '@angular/router';
   templateUrl: './ag-grid-bots-container.html',
   styleUrl: './ag-grid-bots-container.scss',
 })
-export class AgGridBotsContainer {
+export class AgGridBotsContainer implements OnInit {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly botDialog = inject(BotDialogService);
   readonly router = inject(Router);
 
-  botsDataResponse$ = this.store.select(getBotsDataResponse);
-  botsDataIsLoading$ = this.store.select(getBotsDataIsLoading);
-  botsDataIsLoaded$ = this.store.select(getBotsDataIsLoaded);
+  fullBotsDataResponse$ = this.store.select(getFullBotsDataResponse);
+  fullBotsDataIsReady$ = this.store.select(getFullBotsDataIsReady);
 
   serversList$ = this.store.select(getServersDataResponse).pipe(
     map(item =>
@@ -87,7 +91,7 @@ export class AgGridBotsContainer {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.job?.jobType || '-';
+        return params.data?.jobType || '-';
       },
     },
     {
@@ -96,7 +100,7 @@ export class AgGridBotsContainer {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.server?.serverId || '-';
+        return params.data?.serverName || '-';
       },
     },
     {
@@ -105,7 +109,7 @@ export class AgGridBotsContainer {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.job?.quoteJobRelations.length || '-';
+        return params.data?.pairsCount || '-';
       },
     },
     {
@@ -129,8 +133,8 @@ export class AgGridBotsContainer {
     },
   };
 
-  constructor() {
-    this.store.dispatch(setBotsData());
+  ngOnInit() {
+    this.store.dispatch(initBotsListPage());
   }
 
   onAction($event: any, row: any) {
