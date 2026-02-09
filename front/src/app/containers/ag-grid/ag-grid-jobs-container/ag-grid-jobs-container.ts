@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
@@ -7,11 +7,15 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import {
-  getJobsDataIsLoaded,
-  getJobsDataIsLoading,
-  getJobsDataResponse,
+  getFullJobsDataIsReady,
+  getJobsFullDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
-import { createJob, deletingJob, editJob, setJobsData } from '../../../+state/db-config/db-config.actions';
+import {
+  createJob,
+  deletingJob,
+  editJob,
+  initJobsListPage,
+} from '../../../+state/db-config/db-config.actions';
 import { Loader } from '../../../components/loader/loader';
 import { AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
@@ -29,15 +33,14 @@ import { JobDialogService } from '../../../services/job-dialog-service';
   templateUrl: './ag-grid-jobs-container.html',
   styleUrl: './ag-grid-jobs-container.scss',
 })
-export class AgGridJobsContainer {
+export class AgGridJobsContainer implements OnInit {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly jobDialog = inject(JobDialogService);
   readonly router = inject(Router);
 
-  jobsDataResponse$ = this.store.select(getJobsDataResponse);
-  jobsDataIsLoading$ = this.store.select(getJobsDataIsLoading);
-  jobsDataIsLoaded$ = this.store.select(getJobsDataIsLoaded);
+  getJobsFullDataResponse$ = this.store.select(getJobsFullDataResponse);
+  fullJobsDataIsReady$ = this.store.select(getFullJobsDataIsReady);
 
   readonly colDefs: ColDef[] = [
     {
@@ -62,12 +65,12 @@ export class AgGridJobsContainer {
       sortable: true,
     },
     {
-      headerName: 'Chain Id',
+      headerName: 'Chain',
       flex: 1,
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.chain?.chainId || '-';
+        return params.data?.chainName || '-';
       },
     },
     {
@@ -76,7 +79,7 @@ export class AgGridJobsContainer {
       filter: true,
       sortable: true,
       valueGetter: (params) => {
-        return params.data?.rpcUrl?.rpcUrlId || '-';
+        return params.data?.rpcUrl || '-';
       },
     },
     {
@@ -103,11 +106,13 @@ export class AgGridJobsContainer {
     cellStyle: {
       textAlign: 'center',
       cursor: 'pointer',
+      userSelect: 'text'
     },
   };
 
-  constructor() {
-    this.store.dispatch(setJobsData());
+  ngOnInit() {
+    this.store.dispatch(initJobsListPage());
+
   }
 
   onAction($event: any, row: any) {

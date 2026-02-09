@@ -7,7 +7,10 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import {
   getJobRelationsIsLoaded,
-  getJobRelationsIsLoading, getQuoteRelationsIsLoaded, getQuoteRelationsIsLoading, getQuoteRelationsWithStatus,
+  getJobRelationsIsLoading,
+  getQuoteRelationsIsLoaded,
+  getQuoteRelationsIsLoading,
+  getQuoteRelationsWithStatus,
 } from '../../../+state/relations/relations.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
@@ -207,7 +210,7 @@ export class AgGridJobRelationsContainer {
   readonly defaultColDef: ColDef = {
     filter: true,
     sortable: true,
-    cellStyle: { textAlign: 'center'},
+    cellStyle: { textAlign: 'center', userSelect: 'text'},
     suppressMovable: true,
     headerClass: 'align-center',
   };

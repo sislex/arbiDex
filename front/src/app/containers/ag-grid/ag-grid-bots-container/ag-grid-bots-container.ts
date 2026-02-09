@@ -125,6 +125,7 @@ export class AgGridBotsContainer {
     cellStyle: {
       textAlign: 'center',
       cursor: 'pointer',
+      userSelect: 'text'
     },
   };
 

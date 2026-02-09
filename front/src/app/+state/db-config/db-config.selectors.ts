@@ -353,6 +353,10 @@ const getDexMap = createSelector(
   getDexesDataResponse,
   (dexes) => new Map(dexes.map(d => [d.dexId, d.name]))
 );
+const getRpcUrlsMap = createSelector(
+  getRpcUrlDataResponse,
+  (rpcUrls) => new Map(rpcUrls.map(r => [r.rpcUrlId, r.rpcUrl]))
+);
 
 export const getPairsFullData = createSelector(
   getPairsDataResponse,
@@ -479,8 +483,6 @@ export const getFullQuotesDataIsReady = createSelector(
   (loaded, loading) => loaded && !loading
 );
 
-
-
 export const getQuoteFullDataResponse = createSelector(
   getQuotesDataResponse,
   getTokenMap,
@@ -492,4 +494,41 @@ export const getQuoteFullDataResponse = createSelector(
       tokenName: fullTokenData?.tokenName || quote.tokenName,
     };
   }
+);
+
+export const getJobsFullDataResponse = createSelector(
+  getJobsDataResponse,
+  getChainMap,
+  getRpcUrlsMap,
+  (jobs, chains, rpcUrls) => {
+    return jobs.map(job => {
+      const fullChainsData = job.chainId ? chains.get(job.chainId) : null;
+      const fullRpcUrlsData = job.rpcUrlId ? rpcUrls.get(job.rpcUrlId) : null;
+      return {
+        ...job,
+        chainName: fullChainsData,
+        rpcUrl: fullRpcUrlsData,
+      };
+    });
+  }
+);
+
+export const getFullJobsDataIsLoading = createSelector(
+  getJobsDataIsLoading,
+  getChainsDataIsLoading,
+  getRpcUrlsDataIsLoading,
+  (jobs, chains, rpcUrls) =>
+    jobs || chains || rpcUrls
+);
+export const getFullJobsDataIsLoaded = createSelector(
+  getJobsDataIsLoaded,
+  getChainsDataIsLoaded,
+  getRpcUrlsDataIsLoaded,
+  (jobs, chains, rpcUrls) =>
+    jobs && chains && rpcUrls
+);
+export const getFullJobsDataIsReady = createSelector(
+  getFullJobsDataIsLoaded,
+  getFullJobsDataIsLoading,
+  (loaded, loading) => loaded && !loading
 );

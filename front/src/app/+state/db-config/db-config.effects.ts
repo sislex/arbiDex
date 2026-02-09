@@ -565,6 +565,17 @@ export class DbConfigEffects {
 //                                                   Jobs
 //====================================================================================================================
 
+  initJobsListPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.initJobsListPage),
+      mergeMap(() => [
+        DbConfigActions.setJobsData(),
+        DbConfigActions.setChainsData(),
+        DbConfigActions.setRpcUrlsData(),
+      ])
+    )
+  );
+
   setJobsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setJobsData),

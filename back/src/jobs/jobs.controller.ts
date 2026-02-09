@@ -20,8 +20,16 @@ export class JobsController {
   }
 
   @Get()
-  findAll() {
-    return this.jobsService.findAll();
+  async findAll() {
+    const jobs = await this.jobsService.findAll();
+    return jobs.map(j => ({
+      jobId: j.jobId,
+      jobType: j.jobType,
+      description: j.description,
+      chainId: j.chain.chainId,
+      rpcUrlId: j.rpcUrl.rpcUrlId,
+      pairsCount: j.quoteJobRelations?.length,
+    }))
   }
 
   @Get(':id')

@@ -1,5 +1,5 @@
 <app-header-content-layout>
-  @if ((jobsDataIsLoaded$ | async) && !(jobsDataIsLoading$ | async)) {
+  @if (fullJobsDataIsReady$ | async) {
     <app-title-table-button
       header
       [title]="'Jobs table'"
@@ -7,10 +7,10 @@
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
   }
-  @if ((jobsDataIsLoaded$ | async) && !(jobsDataIsLoading$ | async)) {
+  @if (fullJobsDataIsReady$ | async) {
     <app-ag-grid
       content
-      [rowData]="(jobsDataResponse$ | async)!"
+      [rowData]="(getJobsFullDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
       (emitter)="actions($event)"

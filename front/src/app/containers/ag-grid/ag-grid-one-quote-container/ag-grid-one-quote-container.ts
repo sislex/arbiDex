@@ -74,6 +74,7 @@ export class AgGridOneQuoteContainer {
     cellStyle: {
       textAlign: 'center',
       cursor: 'pointer',
+      userSelect: 'text'
     },
   };
 

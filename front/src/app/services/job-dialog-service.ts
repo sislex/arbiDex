@@ -44,8 +44,8 @@ export class JobDialogService {
           jobId: row.jobId,
           jobType: row.jobType,
           description: row.description,
-          chainId: row.chain.chainId,
-          rpcUrlId: row.rpcUrl.rpcUrlId,
+          chainId: row.chainId,
+          rpcUrlId: row.rpcUrlId,
         }
       }
     }).afterClosed();

@@ -147,8 +147,9 @@ export interface IJobsAPI extends API {
 export interface IJobs {
   jobId: number;
   jobType: string;
-  chainId: string;
-  rpcUrl: IRpcUrl;
+  chainId: number;
+  rpcUrlId: number;
+  chainName: string;
   pairs: number;
 }
 export interface IJobsCreate {

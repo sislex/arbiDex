@@ -134,7 +134,7 @@ export class AgGridTokensContainer implements OnInit {
   ];
 
   readonly defaultColDef: ColDef = {
-    cellStyle: { textAlign: 'center'},
+    cellStyle: { textAlign: 'center', userSelect: 'text'},
     suppressMovable: true,
     headerClass: 'align-center',
   };

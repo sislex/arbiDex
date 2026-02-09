@@ -36,21 +36,18 @@ export class JobsService {
       relations: {
         chain: true,
         rpcUrl: true,
-        quoteJobRelations: {
-          quoteRelation: {
-            quote: true,
-            pair: {
-              tokenIn: true,
-              tokenOut: true,
-              pool: {
-                dex: true,
-                chain: true,
-                token0: true,
-                token1: true,
-              },
-            },
-          },
+        quoteJobRelations: true,
+      },
+      select: {
+        chain: {
+          chainId: true,
         },
+        quoteJobRelations: {
+          quoteJobRelationId: true,
+        },
+        rpcUrl: {
+          rpcUrlId: true,
+        }
       },
       order: { jobId: 'DESC' },
     });

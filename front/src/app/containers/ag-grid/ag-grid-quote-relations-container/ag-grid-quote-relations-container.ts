@@ -135,7 +135,7 @@ export class AgGridQuoteRelationsContainer {
     sortable: true,
     flex: 1,
     minWidth: 150,
-    cellStyle: { textAlign: 'center'},
+    cellStyle: { textAlign: 'center', userSelect: 'text'},
     suppressMovable: true,
     headerClass: 'align-center',
   };

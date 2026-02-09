@@ -113,6 +113,7 @@ export class AgGridQuotesContainer implements OnInit {
     cellStyle: {
       textAlign: 'center',
       cursor: 'pointer',
+      userSelect: 'text'
     },
   };
 

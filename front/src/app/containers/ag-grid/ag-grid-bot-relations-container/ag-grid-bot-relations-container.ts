@@ -87,7 +87,7 @@ export class AgGridBotRelationsContainer {
   readonly defaultColDef: ColDef = {
     filter: true,
     sortable: true,
-    cellStyle: { textAlign: 'center'},
+    cellStyle: { textAlign: 'center', userSelect: 'text'},
     suppressMovable: true,
     headerClass: 'align-center',
   };

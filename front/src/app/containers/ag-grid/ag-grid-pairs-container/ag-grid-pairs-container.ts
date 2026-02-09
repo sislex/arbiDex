@@ -104,6 +104,7 @@ export class AgGridPairsContainer implements OnInit {
     headerClass: 'align-center',
     cellStyle: {
       textAlign: 'center',
+      userSelect: 'text'
     },
   };
 
