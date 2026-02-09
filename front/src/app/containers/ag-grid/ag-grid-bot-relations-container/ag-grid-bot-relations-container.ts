@@ -67,14 +67,14 @@ export class AgGridBotRelationsContainer {
       headerName: 'Chain Id',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.chain?.chainId || '-';
+        return params.data?.chainId || '-';
       },
     },
     {
       headerName: 'Rpc Url',
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.rpcUrl?.rpcUrlId || '-';
+        return params.data?.rpcUrlId || '-';
       },
     },
     {
