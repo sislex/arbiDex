@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as MainActions from './main.actions';
-import {catchError, EMPTY, from, switchMap, tap} from 'rxjs';
+import {catchError, EMPTY, from, lastValueFrom, map, of, switchMap, tap} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfigDialogService } from '../../services/config-dialog-service';
 import { ApiService } from '../../services/api-service';
@@ -9,35 +9,40 @@ import { concatLatestFrom } from '@ngrx/operators';
 import {Store} from '@ngrx/store';
 import {getBotsByServerIdResponse} from '../db-config/db-config.selectors';
 import * as DbConfigSelectors from '../db-config/db-config.selectors';
+import * as RelationsActions from '../relations/relations.actions';
 
 export function mapQuoteRelation(item: any) {
   const qr = item.quoteRelation ?? item;
 
+  const pair = qr.pair;
+  const pool = pair?.pool;
+  const quote = qr.quote;
+
   return {
-    dex: qr.pair.pool.dex.name,
-    version: qr.pair.pool.version as 'v2' | 'v3' | 'v4',
+    dex: pool?.dex?.name || '-',
+    version: (pool?.version as 'v2' | 'v3' | 'v4') || '-',
     token0: {
-      address: qr.pair.pool.token0.address,
-      decimals: qr.pair.pool.token0.decimals ?? 0
+      address: pool?.token0?.address || '-',
+      decimals: pool?.token0?.decimals ?? 0
     },
     token1: {
-      address: qr.pair.pool.token1.address,
-      decimals: qr.pair.pool.token1.decimals ?? 0
+      address: pool?.token1?.address || '-',
+      decimals: pool?.token1?.decimals ?? 0
     },
-    poolAddress: String(qr.pair.pool.poolAddress),
-    feePpm: qr.pair.pool.fee,
+    poolAddress: String(pool?.poolAddress || '-'),
+    feePpm: pool?.fee || 0,
     tokenIn: {
-      address: qr.pair.tokenIn.address,
-      decimals: qr.pair.tokenIn.decimals ?? 0
+      address: pair?.tokenIn?.address || '-',
+      decimals: pair?.tokenIn?.decimals ?? 0
     },
     tokenOut: {
-      address: qr.pair.tokenOut.address,
-      decimals: qr.pair.tokenOut.decimals ?? 0
+      address: pair?.tokenOut?.address || '-',
+      decimals: pair?.tokenOut?.decimals ?? 0
     },
-    side: qr.quote.side,
-    amount: String(qr.quote.amount),
-    blockTag: qr.quote.blockTag,
-    quoteSource: qr.quote.quoteSource,
+    side: quote?.side || '-',
+    amount: String(quote?.amount || '0'),
+    blockTag: quote?.blockTag || 0,
+    quoteSource: quote?.quoteSource || '-',
   };
 }
 
@@ -116,10 +121,43 @@ export class MainEffects {
         ofType(MainActions.setBotPreConfig),
         switchMap((action: any) =>
           from(this.apiService.setBotById(action.botId)).pipe(
-            tap((botData: any) => {
+            tap(async (botData: any) => {
+
+              const quoteJobRelations = await lastValueFrom(this.apiService.getJobRelationsByJobId(botData.job.jobId).pipe(
+                map((response: any[]) => {
+                  const formattedData = response.map(item => ({
+                    quoteJobRelationId: item.quoteJobRelationId,
+                    job: item.job,
+                    quoteRelation : item.quoteRelation
+                  }));
+
+                  return RelationsActions.setJobRelationsDataListSuccess({
+                    response: formattedData
+                  });
+                }),
+                catchError(error => {
+                  this._snackBar.open(
+                    error.error?.message ?? 'Error loading links',
+                    '',
+                    { duration: 5000 }
+                  );
+                  return of(
+                    RelationsActions.setJobRelationsDataListFailure({
+                      error: error.error?.message ?? 'Unknown error',
+                    })
+                  );
+                })
+              ));
+
+              const actionConfig = {
+                ...action.data[0],
+                quoteJobRelations: (quoteJobRelations as any).response || [],
+              };
+
+
               const botConfig = {
                 ...mapBotParams(botData),
-                jobParams: mapJobParams(action.data[0])
+                jobParams: mapJobParams(actionConfig)
               };
 
               this.configDialogService.openConfig(
