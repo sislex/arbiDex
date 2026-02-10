@@ -8,7 +8,7 @@
     ) {
     <app-title-table-button
       header
-      [title]="'Bot ID:' + currentBotId + ' relations table'"
+      [title]="'Bot ID:' + currentBotId + ' relations table (' + ((botRelation$ | async)!.length === filteredItemCount ? (botRelation$ | async)!.length : filteredItemCount + ' / ' + (botRelation$ | async)!.length) + ')'"
     ></app-title-table-button>
   }
   @if (

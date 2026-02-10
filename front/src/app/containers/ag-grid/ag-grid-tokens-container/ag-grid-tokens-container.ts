@@ -39,6 +39,8 @@ export class AgGridTokensContainer implements OnInit {
   readonly tokenDialog = inject(TokenDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
+  filteredItemCount: number = 0;
+
   tokensFullDataResponse$ = this.store.select(getTokensFullDataResponse);
   getFullTokensDataIsReady$ = this.store.select(getFullTokensDataIsReady);
 
@@ -141,6 +143,9 @@ export class AgGridTokensContainer implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(initTokensListPage());
+    this.store.select(getTokensFullDataResponse).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -182,5 +187,11 @@ export class AgGridTokensContainer implements OnInit {
         this.store.dispatch(deletingToken({ tokenId: row.tokenId }));
       }
     });
+  }
+
+  events($event: any) {
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
+    }
   }
 }

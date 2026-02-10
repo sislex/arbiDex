@@ -41,6 +41,7 @@ export class AgGridJobsContainer implements OnInit {
 
   getJobsFullDataResponse$ = this.store.select(getJobsFullDataResponse);
   fullJobsDataIsReady$ = this.store.select(getFullJobsDataIsReady);
+  filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
     {
@@ -112,7 +113,9 @@ export class AgGridJobsContainer implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(initJobsListPage());
-
+    this.store.select(getJobsFullDataResponse).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -132,6 +135,10 @@ export class AgGridJobsContainer implements OnInit {
       }
     } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
       this.router.navigate([`/data-view/jobs/${$event.row.data.jobId}`]);
+    }
+
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
     }
   }
 

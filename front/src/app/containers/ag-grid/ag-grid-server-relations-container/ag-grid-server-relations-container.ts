@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
 import { Loader } from '../../../components/loader/loader';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -29,7 +29,7 @@ import {
   templateUrl: './ag-grid-server-relations-container.html',
   styleUrl: './ag-grid-server-relations-container.scss',
 })
-export class AgGridServerRelationsContainer {
+export class AgGridServerRelationsContainer implements OnInit {
   @Input() currentServerId: any;
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
@@ -41,6 +41,7 @@ export class AgGridServerRelationsContainer {
   activeServerIsLoaded$ = this.store.select(getActiveServerIsLoaded);
 
   serverRelation$ = this.store.select(getBotsByServerIdResponse);
+  filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
     {
@@ -96,4 +97,10 @@ export class AgGridServerRelationsContainer {
     suppressMovable: true,
     headerClass: 'align-center',
   };
+
+  ngOnInit() {
+    this.store.select(getBotsByServerIdResponse).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
+  }
 }

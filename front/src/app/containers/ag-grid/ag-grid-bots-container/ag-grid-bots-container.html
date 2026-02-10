@@ -2,7 +2,7 @@
   @if (fullBotsDataIsReady$ | async) {
     <app-title-table-button
       header
-      [title]="'Bots table'"
+      [title]="'Bots table (' + ((fullBotsDataResponse$ | async)!.length === filteredItemCount ? (fullBotsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (fullBotsDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>

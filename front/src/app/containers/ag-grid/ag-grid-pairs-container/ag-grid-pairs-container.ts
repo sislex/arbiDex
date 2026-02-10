@@ -45,6 +45,7 @@ export class AgGridPairsContainer implements OnInit {
 
   pairsDataResponse$ = this.store.select(getPairsFullData);
   pairsDataIsReady$ = this.store.select(getFullPairsDataIsReady);
+  filteredItemCount: number = 0;
 
   readonly poolsList$ = this.poolsListResponse$.pipe(
     map(items => items.map(item => ({
@@ -110,6 +111,9 @@ export class AgGridPairsContainer implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(initPairsPage());
+    this.store.select(getPairsFullData).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -154,5 +158,11 @@ export class AgGridPairsContainer implements OnInit {
         this.store.dispatch(deletingPair({ pairId: row.pairId }));
       }
     });
+  }
+
+  events($event: any) {
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
+    }
   }
 }

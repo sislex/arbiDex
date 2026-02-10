@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { ColDef } from 'ag-grid-community';
@@ -27,7 +27,7 @@ import { Loader } from '../../../components/loader/loader';
   templateUrl: './ag-grid-job-relations-container.html',
   styleUrl: './ag-grid-job-relations-container.scss',
 })
-export class AgGridJobRelationsContainer {
+export class AgGridJobRelationsContainer implements OnInit {
   @Input() currentJobId: number = 0;
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
@@ -38,6 +38,7 @@ export class AgGridJobRelationsContainer {
   quoteRelationsIsLoaded$ = this.store.select(getQuoteRelationsIsLoaded);
   jobRelationsIsLoading$ = this.store.select(getJobRelationsIsLoading);
   jobRelationsIsLoaded$ = this.store.select(getJobRelationsIsLoaded);
+  filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
     {
@@ -214,12 +215,23 @@ export class AgGridJobRelationsContainer {
     suppressMovable: true,
     headerClass: 'align-center',
   };
+  ngOnInit() {
+    this.store.select(getQuoteRelationsWithStatus).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
+  }
 
   events($event: any) {
-    this.emitter.emit({
-      event: 'AgGridJobRelationsContainer:ACTIVE_RELATIONS',
-      data: $event.row.selectedNodes.map((item: any) => item.data.pairQuoteRelationId),
-      fullData: $event.row.selectedNodes.map((item: any) => item.data),
-    });
+    if ($event.event === 'AgGrid:SET_CHECKBOX_ROW') {
+      this.emitter.emit({
+        event: 'AgGridJobRelationsContainer:ACTIVE_RELATIONS',
+        data: $event.row.selectedNodes.map((item: any) => item.data.pairQuoteRelationId),
+        fullData: $event.row.selectedNodes.map((item: any) => item.data),
+      });
+    }
+
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
+    }
   }
 }

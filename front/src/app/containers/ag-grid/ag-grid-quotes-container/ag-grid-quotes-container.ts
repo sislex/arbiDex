@@ -41,6 +41,7 @@ export class AgGridQuotesContainer implements OnInit {
 
   quotesDataResponse$ = this.store.select(getQuotesFullDataResponse);
   fullQuotesDataIsReady$ = this.store.select(getFullQuotesDataIsReady);
+  filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
     {
@@ -119,7 +120,9 @@ export class AgGridQuotesContainer implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(initQuotesListPage());
-
+    this.store.select(getQuotesFullDataResponse).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -139,6 +142,10 @@ export class AgGridQuotesContainer implements OnInit {
       }
     } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
       this.router.navigate([`/data-view/quotes/${$event.row.data.quoteId}`]);
+    }
+
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
     }
   }
 

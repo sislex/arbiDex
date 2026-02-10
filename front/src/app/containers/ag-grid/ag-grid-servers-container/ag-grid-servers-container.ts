@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
@@ -29,7 +29,7 @@ import { Router } from '@angular/router';
   templateUrl: './ag-grid-servers-container.html',
   styleUrl: './ag-grid-servers-container.scss',
 })
-export class AgGridServersContainer {
+export class AgGridServersContainer implements OnInit {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly serverDialog = inject(ServerDialogService);
@@ -38,6 +38,7 @@ export class AgGridServersContainer {
   serversDataResponse$ = this.store.select(getServersDataResponse);
   serversDataIsLoading$ = this.store.select(getServersDataIsLoading);
   serversDataIsLoaded$ = this.store.select(getServersDataIsLoaded);
+  filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
     {
@@ -89,8 +90,11 @@ export class AgGridServersContainer {
     },
   };
 
-  constructor() {
+  ngOnInit() {
     this.store.dispatch(setServersData());
+    this.store.select(getServersDataResponse).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -110,6 +114,10 @@ export class AgGridServersContainer {
       }
     } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
       this.router.navigate([`/data-view/servers/${$event.row.data.serverId}`]);
+    }
+
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
     }
   }
 

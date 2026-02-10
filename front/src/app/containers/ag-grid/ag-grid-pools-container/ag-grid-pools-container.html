@@ -2,7 +2,7 @@
   @if (poolsDataIsReady$ | async) {
     <app-title-table-button
       header
-      [title]="'Pools table'"
+      [title]="'Pools table (' + ((poolsDataResponse$ | async)!.length === filteredItemCount ? (poolsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (poolsDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
@@ -13,6 +13,7 @@
       [rowData]="(poolsDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
+      (emitter)="events($event)"
     ></app-ag-grid>
   } @else {
     <app-loader header></app-loader>

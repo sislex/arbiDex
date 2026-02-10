@@ -7,7 +7,7 @@
     ) {
     <app-title-table-button
       header
-      [title]="'Job ID:' + currentJobId + ' relations table'"
+      [title]="'Job ID:' + currentJobId + ' relations table  (' + ((jobRelations$ | async)!.length === filteredItemCount ? (jobRelations$ | async)!.length : filteredItemCount + ' / ' + (jobRelations$ | async)!.length) + ')'"
     ></app-title-table-button>
   }
   @if (

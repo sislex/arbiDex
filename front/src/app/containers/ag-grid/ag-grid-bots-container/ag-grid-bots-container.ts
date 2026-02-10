@@ -44,6 +44,7 @@ export class AgGridBotsContainer implements OnInit {
 
   fullBotsDataResponse$ = this.store.select(getFullBotsDataResponse);
   fullBotsDataIsReady$ = this.store.select(getFullBotsDataIsReady);
+  filteredItemCount: number = 0;
 
   serversList$ = this.store.select(getServersDataResponse).pipe(
     map(item =>
@@ -135,6 +136,9 @@ export class AgGridBotsContainer implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(initBotsListPage());
+    this.store.select(getFullBotsDataResponse).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -154,6 +158,10 @@ export class AgGridBotsContainer implements OnInit {
       }
     } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
       this.router.navigate([`/data-view/bots/${$event.row.data.botId}`]);
+    }
+
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
     }
   }
 

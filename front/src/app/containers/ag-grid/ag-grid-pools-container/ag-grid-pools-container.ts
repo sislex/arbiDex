@@ -39,6 +39,7 @@ export class AgGridPoolsContainer implements OnInit {
 
   poolsDataResponse$ = this.store.select(getFullPoolsData);
   poolsDataIsReady$ = this.store.select(getFullPoolsDataIsReady);
+  filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
     {
@@ -142,6 +143,9 @@ export class AgGridPoolsContainer implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(initPoolsPage());
+    this.store.select(getFullPoolsData).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -182,5 +186,11 @@ export class AgGridPoolsContainer implements OnInit {
         this.store.dispatch(deletingPools({ poolId: row.poolId }));
       }
     });
+  }
+
+  events($event: any) {
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
+    }
   }
 }

@@ -2,7 +2,7 @@
   @if ((dexesDataIsLoaded$ | async) && !(dexesDataIsLoading$ | async)) {
     <app-title-table-button
       header
-      [title]="'Dexes table'"
+      [title]="'Dexes table (' + ((dexesDataResponse$ | async)!.length === filteredItemCount ? (dexesDataResponse$ | async)!.length : filteredItemCount + ' / ' + (dexesDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
@@ -13,6 +13,7 @@
       [rowData]="(dexesDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
+      (emitter)="events($event)"
     ></app-ag-grid>
   } @else {
     <app-loader header></app-loader>

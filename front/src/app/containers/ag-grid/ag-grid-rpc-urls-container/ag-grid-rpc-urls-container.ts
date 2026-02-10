@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { AgGrid } from '../../../components/ag-grid/ag-grid';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -15,7 +15,12 @@ import { ColDef } from 'ag-grid-community';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { RpcUrlsDialogService } from '../../../services/rpc-urls-dialog-service';
 import { map } from 'rxjs';
-import { createRpcUrl, deletingRpcUrl, editRpcUrl, setRpcUrlsData } from '../../../+state/db-config/db-config.actions';
+import {
+  createRpcUrl,
+  deletingRpcUrl,
+  editRpcUrl,
+  setRpcUrlsData
+} from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 
@@ -31,7 +36,7 @@ import { Loader } from '../../../components/loader/loader';
   templateUrl: './ag-grid-rpc-urls-container.html',
   styleUrl: './ag-grid-rpc-urls-container.scss',
 })
-export class AgGridRpcUrlsContainer {
+export class AgGridRpcUrlsContainer implements OnInit {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
   readonly rpcUrlDialog = inject(RpcUrlsDialogService);
@@ -40,7 +45,7 @@ export class AgGridRpcUrlsContainer {
   rpcUrlsDataResponse$ = this.store.select(getRpcUrlDataResponse);
   rpcUrlsDataIsLoading$ = this.store.select(getRpcUrlsDataIsLoading);
   rpcUrlsDataIsLoaded$ = this.store.select(getRpcUrlsDataIsLoaded);
-
+  filteredItemCount: number = 0;
 
   chainsList$ = this.store.select(getChainsDataResponse).pipe(
     map(item =>
@@ -86,8 +91,11 @@ export class AgGridRpcUrlsContainer {
     headerClass: 'align-center',
   };
 
-  constructor() {
+  ngOnInit() {
     this.store.dispatch(setRpcUrlsData());
+    this.store.select(getRpcUrlDataResponse).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -130,6 +138,12 @@ export class AgGridRpcUrlsContainer {
         this.store.dispatch(deletingRpcUrl({ rpcUrlId: row.rpcUrlId }));
       }
     });
+  }
+
+  events($event: any) {
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
+    }
   }
 
 }

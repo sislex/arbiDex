@@ -2,7 +2,7 @@
   @if ((chainsDataIsLoaded$ | async) && !(chainsDataIsLoading$ | async)) {
     <app-title-table-button
       header
-      [title]="'Chains table'"
+      [title]="'Chains table (' + ((chainsDataResponse$ | async)!.length === filteredItemCount ? (chainsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (chainsDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
@@ -13,6 +13,7 @@
       [rowData]="(chainsDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
+      (emitter)="events($event)"
     ></app-ag-grid>
   } @else {
     <app-loader header></app-loader>

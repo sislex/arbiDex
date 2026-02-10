@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
@@ -28,7 +28,7 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
   templateUrl: './ag-grid-dexes-container.html',
   styleUrl: './ag-grid-dexes-container.scss',
 })
-export class AgGridDexesContainer {
+export class AgGridDexesContainer implements OnInit {
   private store = inject(Store);
   readonly dexDialog = inject(DexDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
@@ -37,6 +37,7 @@ export class AgGridDexesContainer {
   dexesDataResponse$ = this.store.select(getDexesDataResponse);
   dexesDataIsLoading$ = this.store.select(getDexesDataIsLoading);
   dexesDataIsLoaded$ = this.store.select(getDexesDataIsLoaded);
+  filteredItemCount: number = 0;
 
 
   readonly colDefs: ColDef[] = [
@@ -67,8 +68,11 @@ export class AgGridDexesContainer {
     headerClass: 'align-center',
   };
 
-  constructor() {
+  ngOnInit() {
     this.store.dispatch(setDexesData());
+    this.store.select(getDexesDataResponse).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -109,5 +113,11 @@ export class AgGridDexesContainer {
         this.store.dispatch(deletingDex({ dexId: row.dexId }));
       }
     });
+  }
+
+  events($event: any) {
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
+    }
   }
 }

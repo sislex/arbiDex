@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { ColDef } from 'ag-grid-community';
@@ -12,7 +12,10 @@ import {
 } from '../../../+state/relations/relations.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
-import { getJobsDataIsLoaded, getJobsDataIsLoading } from '../../../+state/db-config/db-config.selectors';
+import {
+  getJobsDataIsLoaded,
+  getJobsDataIsLoading
+} from '../../../+state/db-config/db-config.selectors';
 
 @Component({
   selector: 'app-ag-grid-bot-relations-container',
@@ -27,7 +30,7 @@ import { getJobsDataIsLoaded, getJobsDataIsLoading } from '../../../+state/db-co
   styleUrl: './ag-grid-bot-relations-container.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgGridBotRelationsContainer {
+export class AgGridBotRelationsContainer implements OnInit {
   @Input() currentBotId: number = 0;
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
@@ -39,6 +42,7 @@ export class AgGridBotRelationsContainer {
   activeBotIsLoaded$ = this.store.select(getActiveBotIsLoaded);
 
   botRelation$ = this.store.select(getBotRelation);
+  filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
     {
@@ -92,11 +96,23 @@ export class AgGridBotRelationsContainer {
     headerClass: 'align-center',
   };
 
-  events($event: any) {
-    this.emitter.emit({
-      event: 'AgGridBotRelationsContainer:ACTIVE_RELATIONS',
-      data: $event.row.selectedNodes.map((item: any) => item.data.jobId),
-      fullData: $event.row.selectedNodes.map((item: any) => item.data),
+  ngOnInit() {
+    this.store.select(getBotRelation).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
     });
+  }
+
+  events($event: any) {
+    if ($event.event === 'AgGrid:SET_CHECKBOX_ROW') {
+      this.emitter.emit({
+        event: 'AgGridBotRelationsContainer:ACTIVE_RELATIONS',
+        data: $event.row.selectedNodes.map((item: any) => item.data.jobId),
+        fullData: $event.row.selectedNodes.map((item: any) => item.data),
+      });
+    }
+
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
+    }
   }
 }

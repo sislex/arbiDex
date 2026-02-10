@@ -2,7 +2,7 @@
   @if (pairsDataIsReady$ | async) {
     <app-title-table-button
       header
-      [title]="'Pairs table'"
+      [title]="'Pairs table (' + ((pairsDataResponse$ | async)!.length === filteredItemCount ? (pairsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (pairsDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
@@ -13,6 +13,7 @@
       [rowData]="(pairsDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
+      (emitter)="events($event)"
     ></app-ag-grid>
   } @else {
     <app-loader header></app-loader>

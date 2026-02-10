@@ -2,7 +2,7 @@
   @if (fullQuotesDataIsReady$ | async) {
     <app-title-table-button
       header
-      [title]="'Quotes table'"
+      [title]="'Quotes table (' + ((quotesDataResponse$ | async)!.length === filteredItemCount ? (quotesDataResponse$ | async)!.length : filteredItemCount + ' / ' + (quotesDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>

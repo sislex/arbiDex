@@ -1,7 +1,11 @@
 <app-header-content-layout>
   <app-title-table-button
     header
-    [title]="`It's relations`"
+    [title]="'It\'s relations (' +
+  ((activePairs$ | async)?.length === filteredItemCount
+    ? (activePairs$ | async)?.length
+    : filteredItemCount + ' / ' + (activePairs$ | async)?.length)
+  + ')'"
   ></app-title-table-button>
   <app-ag-grid
     content

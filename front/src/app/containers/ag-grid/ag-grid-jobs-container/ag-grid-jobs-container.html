@@ -2,7 +2,7 @@
   @if (fullJobsDataIsReady$ | async) {
     <app-title-table-button
       header
-      [title]="'Jobs table'"
+      [title]="'Jobs table (' + ((getJobsFullDataResponse$ | async)!.length === filteredItemCount ? (getJobsFullDataResponse$ | async)!.length : filteredItemCount + ' / ' + (getJobsFullDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>

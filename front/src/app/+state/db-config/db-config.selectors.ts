@@ -462,9 +462,12 @@ export const getQuotesFullDataResponse = createSelector(
   getQuotesDataResponse,
   getTokenMap,
   (quotes, tokens) => {
+    if (!quotes || !Array.isArray(quotes)) {
+      return [];
+    }
+
     return quotes.map(quote => {
       const fullTokenData = quote.tokenId ? tokens.get(quote.tokenId) : null;
-
       return {
         ...quote,
         tokenName: fullTokenData?.tokenName || quote.tokenName,
@@ -472,6 +475,7 @@ export const getQuotesFullDataResponse = createSelector(
     });
   }
 );
+
 
 export const getFullQuotesDataIsLoading = createSelector(
   getTokensDataIsLoading,

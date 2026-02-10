@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { ColDef } from 'ag-grid-community';
@@ -21,13 +21,14 @@ import { AsyncPipe } from '@angular/common';
   templateUrl: './ag-grid-quote-relations-container.html',
   styleUrl: './ag-grid-quote-relations-container.scss',
 })
-export class AgGridQuoteRelationsContainer {
+export class AgGridQuoteRelationsContainer implements OnInit {
   @Input() currentQuoteId: number = 0;
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
   activePairs$ = this.store.select(getActivePairs);
+  filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
     {
@@ -140,10 +141,22 @@ export class AgGridQuoteRelationsContainer {
     headerClass: 'align-center',
   };
 
-  events($event: any) {
-    this.emitter.emit({
-      event: 'AgGridQuoteRelationsContainer:ACTIVE_RELATIONS',
-      data: $event.row.selectedNodes.map((item: any) => item.data.pairId),
+  ngOnInit() {
+    this.store.select(getActivePairs).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
     });
+  }
+
+  events($event: any) {
+    if ($event.event === 'AgGrid:SET_CHECKBOX_ROW') {
+      this.emitter.emit({
+        event: 'AgGridQuoteRelationsContainer:ACTIVE_RELATIONS',
+        data: $event.row.selectedNodes.map((item: any) => item.data.pairId),
+      });
+    }
+
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
+    }
   }
 }

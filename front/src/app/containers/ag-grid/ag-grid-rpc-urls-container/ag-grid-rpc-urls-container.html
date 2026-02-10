@@ -2,7 +2,7 @@
   @if ((rpcUrlsDataIsLoaded$ | async) && !(rpcUrlsDataIsLoading$ | async)) {
     <app-title-table-button
       header
-      [title]="'Rpc urls table'"
+      [title]="'Rpc urls table (' + ((rpcUrlsDataResponse$ | async)!.length === filteredItemCount ? (rpcUrlsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (rpcUrlsDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
@@ -13,6 +13,7 @@
       [rowData]="(rpcUrlsDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
+      (emitter)="events($event)"
     ></app-ag-grid>
   } @else {
     <app-loader header></app-loader>

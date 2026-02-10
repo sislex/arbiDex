@@ -2,7 +2,7 @@
   @if ((serversDataIsLoaded$ | async) && !(serversDataIsLoading$ | async)) {
     <app-title-table-button
       header
-      [title]="'Servers table'"
+      [title]="'Servers table (' + ((serversDataResponse$ | async)!.length === filteredItemCount ? (serversDataResponse$ | async)!.length : filteredItemCount + ' / ' + (serversDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>

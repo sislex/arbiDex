@@ -1,11 +1,16 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {ColDef} from 'ag-grid-community';
 import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import { ChainDialogService } from '../../../services/chain-dialog-service';
-import { createChain, deletingChain, editChain, setChainsData } from '../../../+state/db-config/db-config.actions';
+import {
+  createChain,
+  deletingChain,
+  editChain,
+  setChainsData,
+} from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { Loader } from '../../../components/loader/loader';
 import {
@@ -28,7 +33,7 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
   templateUrl: './ag-grid-chains-container.html',
   styleUrl: './ag-grid-chains-container.scss',
 })
-export class AgGridChainsContainer {
+export class AgGridChainsContainer implements OnInit {
   private store = inject(Store);
   readonly chainDialog = inject(ChainDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
@@ -36,6 +41,7 @@ export class AgGridChainsContainer {
   chainsDataResponse$ = this.store.select(getChainsDataResponse);
   chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
   chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
+  filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
     {
@@ -64,9 +70,11 @@ export class AgGridChainsContainer {
     suppressMovable: true,
     headerClass: 'align-center',
   };
-
-  constructor() {
+  ngOnInit() {
     this.store.dispatch(setChainsData());
+    this.store.select(getChainsDataResponse).subscribe(data => {
+      this.filteredItemCount = data?.length || 0;
+    });
   }
 
   onAction($event: any, row: any) {
@@ -107,5 +115,11 @@ export class AgGridChainsContainer {
         this.store.dispatch(deletingChain({ chainId: row.chainId }));
       }
     });
+  }
+
+  events($event: any) {
+    if ($event.event === 'AgGrid:MODEL_UPDATED') {
+      this.filteredItemCount = $event.rowsDisplayed;
+    }
   }
 }

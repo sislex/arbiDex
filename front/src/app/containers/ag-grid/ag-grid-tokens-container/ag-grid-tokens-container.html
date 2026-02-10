@@ -1,7 +1,7 @@
 <app-header-content-layout>
   @if (getFullTokensDataIsReady$ | async) {
     <app-title-table-button
-      [title]="'Tokens table'"
+      [title]="'Tokens table (' + ((tokensFullDataResponse$ | async)!.length === filteredItemCount ? (tokensFullDataResponse$ | async)!.length : filteredItemCount + ' / ' + (tokensFullDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
       header
@@ -12,6 +12,7 @@
       [rowData]="(tokensFullDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
+      (emitter)="events($event)"
       content
     ></app-ag-grid>
   } @else {

@@ -1,7 +1,11 @@
 <app-header-content-layout>
   <app-title-table-button
     header
-    [title]="'Is not relations'"
+    [title]="'Is not relations (' +
+  ((inactivePairs$ | async)?.length === filteredItemCount
+    ? (inactivePairs$ | async)?.length
+    : filteredItemCount + ' / ' + (inactivePairs$ | async)?.length)
+  + ')'"
   ></app-title-table-button>
   <app-ag-grid
     content
