@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {catchError, EMPTY, map, mergeMap, of, switchMap, tap, withLatestFrom} from 'rxjs';
+import {catchError, EMPTY, exhaustMap, map, mergeMap, of, switchMap, tap, withLatestFrom} from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
 import * as DbConfigSelectors from './db-config.selectors';
 import {ApiService} from '../../services/api-service';
@@ -32,7 +32,7 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setTokensData),
       withLatestFrom(this.store.select(DbConfigSelectors.getTokensDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setTokensDataSuccess({ response: cachedResponse }));
         }
@@ -124,7 +124,7 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setPoolsData),
       withLatestFrom(this.store.select(DbConfigSelectors.getPoolsDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setPoolsDataSuccess({ response: cachedResponse }));
         }
@@ -204,7 +204,7 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setDexesData),
       withLatestFrom(this.store.select(DbConfigSelectors.getDexesDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setDexesDataSuccess({ response: cachedResponse }));
         }
@@ -284,7 +284,7 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setChainsData),
       withLatestFrom(this.store.select(DbConfigSelectors.getChainsDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setChainsDataSuccess({ response: cachedResponse }));
         }
@@ -373,25 +373,25 @@ export class DbConfigEffects {
     )
   );
 
+
+
   setPairsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setPairsData),
       withLatestFrom(this.store.select(DbConfigSelectors.getPairsDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setPairsDataSuccess({ response: cachedResponse }));
         }
 
         return this.apiService.getPairs().pipe(
-          // tap(response => {
-          //   console.log('Pairs response:', response);
-          // }),
           map(response => DbConfigActions.setPairsDataSuccess({ response })),
           catchError(error => of(DbConfigActions.setPairsDataFailure({ error })))
         );
       })
     )
   );
+
 
   createPair$ = createEffect(() =>
       this.actions$.pipe(
@@ -470,21 +470,19 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setQuotesData),
       withLatestFrom(this.store.select(DbConfigSelectors.getQuotesDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setQuotesDataSuccess({ response: cachedResponse }));
         }
 
         return this.apiService.getQuotes().pipe(
-          // tap(response => {
-          //   console.log('Quotes response:', response);
-          // }),
           map(response => DbConfigActions.setQuotesDataSuccess({ response })),
           catchError(error => of(DbConfigActions.setQuotesDataFailure({ error })))
         );
       })
     )
   );
+
 
   setOneQuoteData$ = createEffect(() =>
     this.actions$.pipe(
@@ -580,15 +578,12 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setJobsData),
       withLatestFrom(this.store.select(DbConfigSelectors.getJobsDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setJobsDataSuccess({ response: cachedResponse }));
         }
 
         return this.apiService.getJobs().pipe(
-          // tap(response => {
-          //   console.log('Jobs response:', response);
-          // }),
           map(response => DbConfigActions.setJobsDataSuccess({ response })),
           catchError(error => of(DbConfigActions.setJobsDataFailure({ error })))
         );
@@ -675,15 +670,12 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setBotsData),
       withLatestFrom(this.store.select(DbConfigSelectors.getBotsDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setBotsDataSuccess({ response: cachedResponse }));
         }
 
         return this.apiService.getBots().pipe(
-          // tap(response => {
-          //   console.log('Bots response:', response);
-          // }),
           map(response => DbConfigActions.setBotsDataSuccess({ response })),
           catchError(error => of(DbConfigActions.setBotsDataFailure({ error })))
         );
@@ -778,15 +770,12 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setServersData),
       withLatestFrom(this.store.select(DbConfigSelectors.getServersDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setServersDataSuccess({ response: cachedResponse }));
         }
 
         return this.apiService.getServers().pipe(
-          // tap(response => {
-          //   console.log('Servers response:', response);
-          // }),
           map(response => DbConfigActions.setServersDataSuccess({ response })),
           catchError(error => of(DbConfigActions.setServersDataFailure({ error })))
         );
@@ -861,7 +850,7 @@ export class DbConfigEffects {
     this.actions$.pipe(
       ofType(DbConfigActions.setRpcUrlsData),
       withLatestFrom(this.store.select(DbConfigSelectors.getRpcUrlDataResponse)),
-      switchMap(([_, cachedResponse]) => {
+      exhaustMap(([_, cachedResponse]) => {
         if (cachedResponse && cachedResponse.length > 0) {
           return of(DbConfigActions.setRpcUrlsDataSuccess({ response: cachedResponse }));
         }

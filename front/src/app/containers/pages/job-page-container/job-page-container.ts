@@ -71,7 +71,6 @@ export class JobPageContainer {
         this.store.select(getJobRelations)
           .pipe(take(1))
           .subscribe((data: any) => {
-            console.log('data', data);
             const mappedOldRelations = data.map((relation: IJobRelation) => ({
               quoteJobRelationId: relation.quoteJobRelationId,
               jobId: relation.job.jobId,
