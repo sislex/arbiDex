@@ -12,7 +12,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
   templateUrl: './ag-grid.html',
   styleUrl: './ag-grid.scss'
 })
-export class AgGrid implements OnChanges{
+export class AgGrid implements OnChanges {
   @Input() rowData: any[] = [];
   @Input() colDefs: ColDef[] = [];
   @Input() defaultColDef: ColDef = {};
@@ -55,5 +55,14 @@ export class AgGrid implements OnChanges{
       event: 'AgGrid:SET_CHECKBOX_ROW',
       row: $event
     });
+  }
+
+  onModelUpdated() {
+    if (this.gridApi) {
+      this.emitter.emit({
+        event: 'AgGrid:MODEL_UPDATED',
+        rowsDisplayed: this.gridApi.getDisplayedRowCount(),
+      });
+    }
   }
 }
