@@ -36,14 +36,15 @@ export class Autocomplete implements OnInit, OnChanges {
       startWith(''),
       debounceTime(300),
       map(value => {
-        let name = '';
+        let filterString = '';
+
         if (typeof value === 'string') {
-          name = value;
+          filterString = value;
         } else if (value && typeof value === 'object') {
-          name = value.name;
+          filterString = value.name;
         }
 
-        return name ? this._filter(name) : this.list.slice(0, 100);
+        return filterString ? this._filter(filterString) : this.list.slice(0, 100);
       })
     );
   }
@@ -68,10 +69,16 @@ export class Autocomplete implements OnInit, OnChanges {
     return item.address ? `${item.name} (${item.address})` : item.name;
   }
 
-  private _filter(name: string): ISelectMenu[] {
-    const filterValue = name.toLowerCase();
+  private _filter(value: string): ISelectMenu[] {
+    const filterValue = value.toLowerCase();
     return this.list
-      .filter(option => option.name.toLowerCase().includes(filterValue))
+      .filter(option => {
+        const nameMatch = option.name.toLowerCase().includes(filterValue);
+        const addressMatch = option.address?.toLowerCase().includes(filterValue);
+        const fullNameMatch = `${option.name} ${option.address || ''}`.toLowerCase().includes(filterValue);
+
+        return nameMatch || addressMatch || fullNameMatch;
+      })
       .slice(0, 100);
   }
 
