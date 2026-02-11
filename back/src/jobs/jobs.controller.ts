@@ -26,6 +26,7 @@ export class JobsController {
       jobId: j.jobId,
       jobType: j.jobType,
       description: j.description,
+      extraSettings: j.extraSettings,
       chainId: j.chain.chainId,
       rpcUrlId: j.rpcUrl.rpcUrlId,
       pairsCount: j.quoteJobRelations?.length,

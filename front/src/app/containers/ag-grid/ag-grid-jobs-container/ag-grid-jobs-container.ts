@@ -91,6 +91,13 @@ export class AgGridJobsContainer implements OnInit {
       sortable: true,
     },
     {
+      field: "extraSettings",
+      headerName: 'Additional data',
+      flex: 1,
+      filter: true,
+      sortable: true,
+    },
+    {
       headerName: 'Actions',
       cellRenderer: ActionsContainer,
       width: 125,

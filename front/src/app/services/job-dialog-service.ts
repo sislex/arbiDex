@@ -46,6 +46,7 @@ export class JobDialogService {
           description: row.description,
           chainId: row.chainId,
           rpcUrlId: row.rpcUrlId,
+          extraSettings: row.extraSettings,
         }
       }
     }).afterClosed();

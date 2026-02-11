@@ -25,6 +25,7 @@ export class JobsService {
     const job = this.jobRepository.create({
       jobType: createJobDto.jobType,
       description: createJobDto.description,
+      extraSettings: createJobDto.extraSettings,
       chain,
       rpcUrl,
     });
@@ -102,6 +103,7 @@ export class JobsService {
 
     job.jobType = updateJobDto.jobType;
     job.description = updateJobDto.description;
+    job.extraSettings = updateJobDto.extraSettings;
     job.chain = chain;
     job.rpcUrl = rpcUrl;
 

@@ -28,6 +28,9 @@ export class Jobs {
   @Column("text", { name: "description", nullable: true })
   description: string | null;
 
+  @Column("text", { name: "extra_settings", nullable: true })
+  extraSettings: string | null;
+
   @OneToMany(() => Bots, (bots) => bots.job)
   bots: Bots[];
 

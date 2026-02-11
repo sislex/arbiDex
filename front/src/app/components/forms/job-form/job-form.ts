@@ -29,7 +29,7 @@ export class JobForm implements OnInit {
     this.emitter.emit(this.formData);
   }
 
-  events(event: any, field: 'jobType' | 'chainId' | 'rpcUrlId' | 'description') {
+  events(event: any, field: 'jobType' | 'chainId' | 'rpcUrlId' | 'description' | 'extraSettings') {
     this.formData = {
       ...this.formData,
       [field]: event.data,

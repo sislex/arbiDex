@@ -150,6 +150,7 @@ export interface IJobs {
   chainId: number;
   rpcUrlId: number;
   chainName: string;
+  extraSettings: string;
   pairs: number;
 }
 export interface IJobsCreate {

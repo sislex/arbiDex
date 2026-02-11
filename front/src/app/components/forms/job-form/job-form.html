@@ -38,3 +38,12 @@
     content
   ></app-input-field>
 </app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Additional data'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.extraSettings"
+    (emitter)="events($event, 'extraSettings')"
+    content
+  ></app-input-field>
+</app-header-content-layout>
