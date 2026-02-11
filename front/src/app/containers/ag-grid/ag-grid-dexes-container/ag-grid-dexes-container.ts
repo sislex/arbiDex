@@ -42,6 +42,14 @@ export class AgGridDexesContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
+    },
+    {
       field: "dexId",
       headerName: 'Dex ID',
       flex: 1,
@@ -51,19 +59,12 @@ export class AgGridDexesContainer implements OnInit {
       headerName: 'Dex Name',
       flex: 1,
     },
-    {
-      headerName: 'Actions',
-      width: 125,
-      cellRenderer: ActionsContainer,
-      cellRendererParams: {
-        onAction: this.onAction.bind(this),
-      },
-    },
   ];
 
   readonly defaultColDef: ColDef = {
     sortable: false,
     cellStyle: { textAlign: 'center', userSelect: 'text'},
+    minWidth: 110,
     suppressMovable: true,
     headerClass: 'align-center',
   };

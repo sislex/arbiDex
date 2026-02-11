@@ -288,55 +288,9 @@ export const getRpcUrlsDataIsLoaded = createSelector(
 );
 
 //====================================================================================================================
-//                                                   Pools_full_data
+//                                                   MAPS
 //====================================================================================================================
 
-export const getFullPoolsData = createSelector(
-  getPoolsDataResponse,
-  getTokensDataResponse,
-  getDexesDataResponse,
-  getChainsDataResponse,
-  (poolsData, tokensData, dexesData, chainsData) => {
-
-    const tokenMap = Object.fromEntries(tokensData.map(t => [t.tokenId, t.tokenName]));
-    const dexMap = Object.fromEntries(dexesData.map(d => [d.dexId, d.name]));
-    const chainMap = Object.fromEntries(chainsData.map(c => [c.chainId, c.name]));
-
-    return poolsData.map(pool => ({
-      ...pool,
-      chainName: chainMap[pool.chainId],
-      dexName: dexMap[pool.dexId],
-      token0Name: tokenMap[pool.token0Id!],
-      token1Name: tokenMap[pool.token1Id!],
-    }));
-  }
-);
-
-export const getFullPoolsDataIsLoading = createSelector(
-  getPoolsDataIsLoading,
-  getTokensDataIsLoading,
-  getDexesDataIsLoading,
-  getChainsDataIsLoading,
-  (pools, tokens, dexes, chains) =>
-    pools || tokens || dexes || chains
-);
-export const getFullPoolsDataIsLoaded = createSelector(
-  getPoolsDataIsLoaded,
-  getTokensDataIsLoaded,
-  getDexesDataIsLoaded,
-  getChainsDataIsLoaded,
-  (pools, tokens, dexes, chains) =>
-    pools && tokens && dexes && chains
-);
-export const getFullPoolsDataIsReady = createSelector(
-  getFullPoolsDataIsLoaded,
-  getFullPoolsDataIsLoading,
-  (loaded, loading) => loaded && !loading
-);
-
-//====================================================================================================================
-//                                                   Pairs_full_data
-//====================================================================================================================
 const getTokenMap = createSelector(
   getTokensDataResponse,
   (tokens) => new Map(tokens.map(t => [t.tokenId, t]))
@@ -365,6 +319,62 @@ const getServersMap = createSelector(
   getServersDataResponse,
   (servers) => new Map(servers.map(s => [s.serverId, s.serverName]))
 );
+
+//====================================================================================================================
+//                                                   Pools_full_data
+//====================================================================================================================
+
+export const getFullPoolsData = createSelector(
+  getPoolsDataResponse,
+  getTokenMap,
+  getDexMap,
+  getChainMap,
+  (poolsData, tokenMap, dexMap, chainMap) => {
+    return poolsData.map(pool => {
+      const t0 = tokenMap.get(pool.token0Id!);
+      const t1 = tokenMap.get(pool.token1Id!);
+
+      return {
+        ...pool,
+        chainName: chainMap.get(pool.chainId),
+        dexName: dexMap.get(pool.dexId),
+        token0Name: t0?.tokenName,
+        token1Name: t1?.tokenName,
+        token0Address: t0?.address,
+        token1Address: t1?.address,
+      };
+    });
+  }
+);
+
+
+
+export const getFullPoolsDataIsLoading = createSelector(
+  getPoolsDataIsLoading,
+  getTokensDataIsLoading,
+  getDexesDataIsLoading,
+  getChainsDataIsLoading,
+  (pools, tokens, dexes, chains) =>
+    pools || tokens || dexes || chains
+);
+export const getFullPoolsDataIsLoaded = createSelector(
+  getPoolsDataIsLoaded,
+  getTokensDataIsLoaded,
+  getDexesDataIsLoaded,
+  getChainsDataIsLoaded,
+  (pools, tokens, dexes, chains) =>
+    pools && tokens && dexes && chains
+);
+export const getFullPoolsDataIsReady = createSelector(
+  getFullPoolsDataIsLoaded,
+  getFullPoolsDataIsLoading,
+  (loaded, loading) => loaded && !loading
+);
+
+//====================================================================================================================
+//                                                   Pairs_full_data
+//====================================================================================================================
+
 
 export const getPairsFullData = createSelector(
   getPairsDataResponse,

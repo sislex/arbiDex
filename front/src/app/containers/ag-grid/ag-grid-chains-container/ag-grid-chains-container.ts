@@ -45,6 +45,14 @@ export class AgGridChainsContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
+    },
+    {
       field: "chainId",
       headerName: 'Chain ID',
       flex: 1,
@@ -54,19 +62,12 @@ export class AgGridChainsContainer implements OnInit {
       headerName: 'Chain Name',
       flex: 1,
     },
-    {
-      headerName: 'Actions',
-      width: 125,
-      cellRenderer: ActionsContainer,
-      cellRendererParams: {
-        onAction: this.onAction.bind(this),
-      },
-    },
   ];
 
   readonly defaultColDef: ColDef = {
     sortable: false,
     cellStyle: { textAlign: 'center', userSelect: 'text'},
+    minWidth: 110,
     suppressMovable: true,
     headerClass: 'align-center',
   };

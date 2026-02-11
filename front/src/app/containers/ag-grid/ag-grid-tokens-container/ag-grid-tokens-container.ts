@@ -55,6 +55,14 @@ export class AgGridTokensContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
+    },
+    {
       field: "tokenId",
       headerName: 'ID',
       flex: 1,
@@ -125,18 +133,11 @@ export class AgGridTokensContainer implements OnInit {
         return params.data?.balance || '-';
       },
     },
-    {
-      headerName: 'Actions',
-      width: 125,
-      cellRenderer: ActionsContainer,
-      cellRendererParams: {
-        onAction: this.onAction.bind(this),
-      },
-    },
   ];
 
   readonly defaultColDef: ColDef = {
     cellStyle: { textAlign: 'center', userSelect: 'text'},
+    minWidth: 110,
     suppressMovable: true,
     headerClass: 'align-center',
   };

@@ -42,14 +42,14 @@ export class AgGridJobRelationsContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
-      headerName: 'Chain Name',
+      headerName: 'Quote ID',
       width: 150,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.chain?.name || '-';
+        return params.data?.quote?.quoteId || '-';
       },
     },
     {
@@ -64,17 +64,6 @@ export class AgGridJobRelationsContainer implements OnInit {
       },
     },
     {
-      headerName: 'Pool Address',
-      width: 150,
-      filter: 'agTextColumnFilter',
-      filterParams: {
-        defaultToNothingSelected: true,
-      },
-      valueGetter: (params) => {
-        return params.data?.pair?.pool?.poolAddress || '-';
-      },
-    },
-    {
       headerName: 'Dex version',
       width: 150,
       filter: 'agTextColumnFilter',
@@ -86,29 +75,7 @@ export class AgGridJobRelationsContainer implements OnInit {
       },
     },
     {
-      headerName: 'Fee',
-      width: 150,
-      filter: 'agTextColumnFilter',
-      filterParams: {
-        defaultToNothingSelected: true,
-      },
-      valueGetter: (params) => {
-        return params.data?.pair?.pool?.fee || '-';
-      },
-    },
-    {
-      headerName: 'Pair ID',
-      width: 150,
-      filter: 'agTextColumnFilter',
-      filterParams: {
-        defaultToNothingSelected: true,
-      },
-      valueGetter: (params) => {
-        return params.data?.pair?.pairId || '-';
-      },
-    },
-    {
-      headerName: 'Token 1',
+      headerName: 'Token 0',
       width: 150,
       filter: 'agTextColumnFilter',
       filterParams: {
@@ -119,7 +86,7 @@ export class AgGridJobRelationsContainer implements OnInit {
       },
     },
     {
-      headerName: 'Token 2',
+      headerName: 'Token 1',
       width: 150,
       filter: 'agTextColumnFilter',
       filterParams: {
@@ -163,47 +130,36 @@ export class AgGridJobRelationsContainer implements OnInit {
       },
     },
     {
-      headerName: 'Side',
+      headerName: 'Fee',
       width: 150,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.quote?.side || '-';
+        return params.data?.pair?.pool?.fee || '-';
       },
     },
     {
-      headerName: 'Block Tag',
+      headerName: 'Pair ID',
       width: 150,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.quote?.blockTag || '-';
+        return params.data?.pair?.pairId || '-';
       },
     },
     {
-      headerName: 'Quote Source',
+      headerName: 'Chain Name',
       width: 150,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.quote?.quoteSource || '-';
-      },
-    },
-    {
-      headerName: 'Quote ID',
-      width: 150,
-      filter: 'agTextColumnFilter',
-      filterParams: {
-        defaultToNothingSelected: true,
-      },
-      valueGetter: (params) => {
-        return params.data?.quote?.quoteId || '-';
+        return params.data?.pair?.pool?.chain?.name || '-';
       },
     },
   ];

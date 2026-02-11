@@ -58,6 +58,14 @@ export class AgGridRpcUrlsContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
+    },
+    {
       field: "rpcUrlId",
       headerName: 'Rpc Url Id',
       flex: 1,
@@ -74,19 +82,12 @@ export class AgGridRpcUrlsContainer implements OnInit {
         return params.data?.chain?.chainId || '-';
       },
     },
-    {
-      headerName: 'Actions',
-      width: 125,
-      cellRenderer: ActionsContainer,
-      cellRendererParams: {
-        onAction: this.onAction.bind(this),
-      },
-    },
   ];
 
   readonly defaultColDef: ColDef = {
     sortable: false,
     cellStyle: { textAlign: 'center', userSelect: 'text'},
+    minWidth: 110,
     suppressMovable: true,
     headerClass: 'align-center',
   };

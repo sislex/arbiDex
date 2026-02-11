@@ -45,6 +45,14 @@ export class AgGridJobsContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
+      headerName: 'Actions',
+      cellRenderer: ActionsContainer,
+      width: 125,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
+    },
+    {
       field: "jobId",
       headerName: 'Job ID',
       flex: 1,
@@ -91,18 +99,12 @@ export class AgGridJobsContainer implements OnInit {
       sortable: true,
     },
     {
-      field: "extraSettings",
       headerName: 'Additional data',
       flex: 1,
       filter: true,
       sortable: true,
-    },
-    {
-      headerName: 'Actions',
-      cellRenderer: ActionsContainer,
-      width: 125,
-      cellRendererParams: {
-        onAction: this.onAction.bind(this),
+      valueGetter: (params) => {
+        return params.data?.extraSettings || '-';
       },
     },
   ];
@@ -111,6 +113,7 @@ export class AgGridJobsContainer implements OnInit {
     sortable: false,
     suppressMovable: true,
     headerClass: 'align-center',
+    minWidth: 110,
     cellStyle: {
       textAlign: 'center',
       cursor: 'pointer',

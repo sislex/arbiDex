@@ -54,17 +54,6 @@ export class AgGridQuoteRelationsContainer implements OnInit {
       },
     },
     {
-      headerName: 'Pool Address',
-
-      filter: 'agTextColumnFilter',
-      filterParams: {
-        defaultToNothingSelected: true,
-      },
-      valueGetter: (params) => {
-        return params.data?.poolAddress || '-';
-      },
-    },
-    {
       headerName: 'Dex version',
 
       filter: 'agTextColumnFilter',

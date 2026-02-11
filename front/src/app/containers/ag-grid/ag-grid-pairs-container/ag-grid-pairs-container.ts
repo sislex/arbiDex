@@ -56,20 +56,19 @@ export class AgGridPairsContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
+    },
+    {
       field: "pairId",
       headerName: 'Pair ID',
       flex: 1,
       filter: true,
       sortable: true,
-    },
-    {
-      headerName: 'Pool ID',
-      flex: 1,
-      filter: true,
-      sortable: true,
-      valueGetter: (params) => {
-        return params.data?.poolAddress || '-';
-      },
     },
     {
       headerName: 'Token In',
@@ -90,11 +89,21 @@ export class AgGridPairsContainer implements OnInit {
       },
     },
     {
-      headerName: 'Actions',
-      width: 125,
-      cellRenderer: ActionsContainer,
-      cellRendererParams: {
-        onAction: this.onAction.bind(this),
+      headerName: 'Token In Address',
+      flex: 1,
+      filter: true,
+      sortable: true,
+      valueGetter: (params) => {
+        return params.data?.tokenInAddress || '-';
+      },
+    },
+    {
+      headerName: 'Token Out Address',
+      flex: 1,
+      filter: true,
+      sortable: true,
+      valueGetter: (params) => {
+        return params.data?.tokenOutAddress || '-';
       },
     },
   ];
@@ -103,6 +112,7 @@ export class AgGridPairsContainer implements OnInit {
     sortable: false,
     suppressMovable: true,
     headerClass: 'align-center',
+    minWidth: 110,
     cellStyle: {
       textAlign: 'center',
       userSelect: 'text'

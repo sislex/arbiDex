@@ -42,6 +42,14 @@ export class AgGridServersContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
+    },
+    {
       field: "serverId",
       headerName: 'Server ID',
       flex: 1,
@@ -69,20 +77,13 @@ export class AgGridServersContainer implements OnInit {
       filter: true,
       sortable: true,
     },
-    {
-      headerName: 'Actions',
-      width: 125,
-      cellRenderer: ActionsContainer,
-      cellRendererParams: {
-        onAction: this.onAction.bind(this),
-      },
-    },
   ];
 
   readonly defaultColDef: ColDef = {
     sortable: false,
     suppressMovable: true,
     headerClass: 'align-center',
+    minWidth: 110,
     cellStyle: {
       textAlign: 'center',
       cursor: 'pointer',

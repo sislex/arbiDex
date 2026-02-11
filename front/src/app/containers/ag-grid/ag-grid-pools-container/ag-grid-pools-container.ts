@@ -43,88 +43,6 @@ export class AgGridPoolsContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
-      field: "poolId",
-      headerName: 'Pool ID',
-      flex: 1,
-      filter: true,
-      sortable: true,
-    },
-    {
-      field: "poolAddress",
-      headerName: 'Pool Address',
-      flex: 1,
-      filter: true,
-      sortable: true,
-    },
-    {
-      headerName: 'Chain ID',
-      flex: 1,
-      filter: true,
-      sortable: true,
-      valueGetter: (params) => {
-        return params.data?.chainName || '-';
-      },
-    },
-    {
-      headerName: 'Dex Name',
-      flex: 1,
-      filter: true,
-      sortable: true,
-      valueGetter: (params) => {
-        return params.data?.dexName || '-';
-      },
-    },
-    {
-      field: "version",
-      headerName: 'Dex version',
-      flex: 1,
-      filter: true,
-      sortable: true,
-    },
-    {
-      field: "fee",
-      headerName: 'Fee',
-      flex: 1,
-      filter: true,
-      sortable: true,
-    },
-    {
-      headerName: 'Token 1',
-      flex: 1,
-      filter: true,
-      sortable: true,
-      valueGetter: (params) => {
-        return params.data?.token0Name || '-';
-      },
-    },
-    {
-      headerName: 'Token 2',
-      flex: 1,
-      filter: true,
-      sortable: true,
-      valueGetter: (params) => {
-        return params.data?.token1Name || '-';
-      },
-    },
-    {
-      headerName: 'Reserve 1',
-      flex: 1,
-      filter: true,
-      sortable: true,
-      valueGetter: (params) => {
-        return params.data?.reserve0 || '-';
-      },
-    },
-    {
-      headerName: 'Reserve 2',
-      flex: 1,
-      filter: true,
-      sortable: true,
-      valueGetter: (params) => {
-        return params.data?.reserve1 || '-';
-      },
-    },
-    {
       headerName: 'Actions',
       width: 125,
       cellRenderer: ActionsContainer,
@@ -132,11 +50,112 @@ export class AgGridPoolsContainer implements OnInit {
         onAction: this.onAction.bind(this),
       },
     },
+    {
+      field: "poolId",
+      headerName: 'Pool ID',
+      filter: true,
+      sortable: true,
+      flex: 1,
+    },
+    {
+      field: "poolAddress",
+      headerName: 'Pool Address',
+      filter: true,
+      sortable: true,
+      flex: 1,
+    },
+    {
+      headerName: 'Chain ID',
+      filter: true,
+      sortable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.chainName || '-';
+      },
+    },
+    {
+      headerName: 'Dex Name',
+      filter: true,
+      sortable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.dexName || '-';
+      },
+    },
+    {
+      field: "version",
+      headerName: 'Dex version',
+      filter: true,
+      sortable: true,
+      flex: 1,
+    },
+    {
+      field: "fee",
+      headerName: 'Fee',
+      filter: true,
+      sortable: true,
+      flex: 1,
+    },
+    {
+      headerName: 'Token 0',
+      filter: true,
+      sortable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.token0Name || '-';
+      },
+    },
+    {
+      headerName: 'Token 1',
+      filter: true,
+      sortable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.token1Name || '-';
+      },
+    },
+    {
+      headerName: 'Token 0 Address',
+      filter: true,
+      sortable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.token0Address || '-';
+      },
+    },
+    {
+      headerName: 'Token 1 Address',
+      filter: true,
+      sortable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.token1Address || '-';
+      },
+    },
+    {
+      headerName: 'Reserve 1',
+      filter: true,
+      sortable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.reserve0 || '-';
+      },
+    },
+    {
+      headerName: 'Reserve 2',
+      filter: true,
+      sortable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data?.reserve1 || '-';
+      },
+    },
   ];
 
   readonly defaultColDef: ColDef = {
     sortable: false,
     cellStyle: { textAlign: 'center', userSelect: 'text',},
+    minWidth: 110,
     suppressMovable: true,
     headerClass: 'align-center',
   };

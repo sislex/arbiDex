@@ -45,6 +45,14 @@ export class AgGridQuotesContainer implements OnInit {
 
   readonly colDefs: ColDef[] = [
     {
+      headerName: 'Actions',
+      width: 125,
+      cellRenderer: ActionsContainer,
+      cellRendererParams: {
+        onAction: this.onAction.bind(this),
+      },
+    },
+    {
       field: "quoteId",
       headerName: 'Quote ID',
       flex: 1,
@@ -97,20 +105,13 @@ export class AgGridQuotesContainer implements OnInit {
         return params.data?.pairsCount || '-';
       },
     },
-    {
-      headerName: 'Actions',
-      width: 125,
-      cellRenderer: ActionsContainer,
-      cellRendererParams: {
-        onAction: this.onAction.bind(this),
-      },
-    },
   ];
 
   readonly defaultColDef: ColDef = {
     sortable: false,
     suppressMovable: true,
     headerClass: 'align-center',
+    minWidth: 110,
     cellStyle: {
       textAlign: 'center',
       cursor: 'pointer',
