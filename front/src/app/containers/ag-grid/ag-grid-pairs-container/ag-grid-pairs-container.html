@@ -1,22 +1,49 @@
-<app-header-content-layout>
-  @if (pairsDataIsReady$ | async) {
-    <app-title-table-button
-      header
-      [title]="'Pairs table (' + ((pairsDataResponse$ | async)!.length === filteredItemCount ? (pairsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (pairsDataResponse$ | async)!.length) + ')'"
-      [icon]="'add'"
-      (emitter)="actions($event, 'add')"
-    ></app-title-table-button>
-  }
-  @if (pairsDataIsReady$ | async) {
-    <app-ag-grid
-      content
-      [rowData]="(pairsDataResponse$ | async)!"
-      [colDefs]="colDefs"
-      [defaultColDef]="defaultColDef"
-      (emitter)="events($event)"
-    ></app-ag-grid>
-  } @else {
-    <app-loader header></app-loader>
-  }
-</app-header-content-layout>
+<mat-tab-group>
+  <mat-tab label="Pairs">
+    <app-header-content-layout>
+      @if (pairsDataIsReady$ | async) {
+        <app-title-table-button
+          header
+          [title]="'Pairs table (' + ((pairsDataResponse$ | async)!.length === filteredItemCount ? (pairsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (pairsDataResponse$ | async)!.length) + ')'"
+          [icon]="'add'"
+          (emitter)="actions($event, 'add')"
+        ></app-title-table-button>
+      }
+      @if (pairsDataIsReady$ | async) {
+        <app-ag-grid
+          content
+          [rowData]="(pairsDataResponse$ | async)!"
+          [colDefs]="colDefs"
+          [defaultColDef]="defaultColDef"
+          (emitter)="events($event)"
+        ></app-ag-grid>
+      } @else {
+        <app-loader header></app-loader>
+      }
+    </app-header-content-layout>
+  </mat-tab>
 
+  @if (tokenInList$) {
+    <mat-tab label="Pair ratings">
+      <div class="tab-rating">
+
+        <div class="selector-ratings">
+          <app-header-content-layout>
+            <app-field-title header [title]="'Token In'"></app-field-title>
+            <app-autocomplete
+              [title]="'Token In'"
+              [list]="(tokensIn$ | async)!"
+              [selected]="(selectedTokenIn | async)!"
+              (emitter)="events($event)"
+              content
+            ></app-autocomplete>
+          </app-header-content-layout>
+        </div>
+        @if ((selectedTokenIn | async)) {
+          <app-ag-grid-pair-ratings></app-ag-grid-pair-ratings>
+        }
+      </div>
+    </mat-tab>
+  }
+
+</mat-tab-group>

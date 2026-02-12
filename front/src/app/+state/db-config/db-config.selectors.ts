@@ -393,14 +393,81 @@ export const getPairsFullData = createSelector(
         chainName: chainMap.get(fullPoolData?.chainId!),
         dexName: dexMap.get(fullPoolData?.dexId!),
         poolAddress: fullPoolData?.poolAddress,
+        tokenInId: pair.tokenInId,
         tokenInName: fullTokenIn?.tokenName,
         tokenInAddress: fullTokenIn?.address,
+        tokenOutId: pair.tokenOutId,
         tokenOutName: fullTokenOut?.tokenName,
         tokenOutAddress: fullTokenOut?.address,
         fee: fullPoolData?.fee,
         version: fullPoolData?.version,
       };
     });
+  }
+);
+
+export const getPairsRatingId = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.pairIdForRating
+);
+
+export const getPairsBySelectedTokenIn = createSelector(
+  getPairsFullData,
+  getPairsRatingId,
+  (allPairs, selectedId) => {
+    if (!selectedId || !allPairs.length) return [];
+    return allPairs.filter(pair => pair.tokenInId === selectedId);
+  }
+);
+
+export const getPairsRating = createSelector(
+  getPairsBySelectedTokenIn,
+  (filteredPairs) => {
+    if (!filteredPairs.length) return [];
+
+    const ratingMap = new Map<number, { data: any, count: number }>();
+
+    filteredPairs.forEach(pair => {
+      const outId = pair.tokenOutId;
+      const entry = ratingMap.get(outId);
+      if (entry) {
+        entry.count++;
+      } else {
+        ratingMap.set(outId, { data: pair, count: 1 });
+      }
+    });
+
+    return Array.from(ratingMap.values())
+      .map(({ data, count }) => ({
+        tokenInId: data.tokenInId,
+        tokenInName: data.tokenInName,
+        tokenInAddress: data.tokenInAddress,
+        tokenOutId: data.tokenOutId,
+        tokenOutName: data.tokenOutName,
+        tokenOutAddress: data.tokenOutAddress,
+        countRating: count
+      }))
+      .sort((a, b) => b.countRating - a.countRating);
+  }
+);
+
+
+export const getTokenInList = createSelector(
+  getPairsFullData,
+  (pairsData) => {
+    const uniqueMap = new Map<number, { tokenInId: number, tokenInName: string, tokenInAddress: string }>();
+
+    pairsData.forEach(pair => {
+      if (pair.tokenInId && !uniqueMap.has(pair.tokenInId)) {
+        uniqueMap.set(pair.tokenInId, {
+          tokenInId: pair.tokenInId,
+          tokenInName: pair.tokenInName || 'Unknown',
+          tokenInAddress: pair.tokenInAddress || '',
+        });
+      }
+    });
+
+    return Array.from(uniqueMap.values());
   }
 );
 

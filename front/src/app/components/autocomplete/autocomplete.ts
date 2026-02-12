@@ -86,7 +86,8 @@ export class Autocomplete implements OnInit, OnChanges {
     const id = event.option.value.id;
     this.emitter.emit({
       event: 'SelectField:ITEM_SELECTED',
-      data: id
+      data: id,
+      address: event.option.value.address,
     });
   }
 

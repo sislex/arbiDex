@@ -126,6 +126,11 @@ export const deletingChain = createAction(
 
 export const initPairsPage = createAction('[DbConfig] initPairsPage');
 export const setPairsData = createAction('[DbConfig] setPairsData');
+export const setPairsRatingData = createAction(
+  '[DbConfig] setPairsRatingData',
+  props<{ pairIdForRating: number }>()
+
+);
 export const setPairsDataSuccess = createAction(
   '[DbConfig] setPairsDataSuccess',
   props<{ response: any }>()

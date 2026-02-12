@@ -360,6 +360,19 @@ export class DbConfigEffects {
 //                                                   Pairs
 //====================================================================================================================
 
+  // setPairsRatingData$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(DbConfigActions.setPairsRatingData),
+  //     mergeMap(() => [
+  //       DbConfigActions.setPairsData(),
+  //       DbConfigActions.setPoolsData(),
+  //       DbConfigActions.setTokensData(),
+  //       DbConfigActions.setDexesData(),
+  //       DbConfigActions.setChainsData(),
+  //     ])
+  //   )
+  // );
+
   initPairsPage$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.initPairsPage),
@@ -372,8 +385,6 @@ export class DbConfigEffects {
       ])
     )
   );
-
-
 
   setPairsData$ = createEffect(() =>
     this.actions$.pipe(

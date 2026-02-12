@@ -8,19 +8,23 @@ import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import {
   getFullPairsDataIsReady,
-  getPairsFullData,
-  getPoolsDataResponse,
+  getPairsFullData, getPairsRatingId,
+  getPoolsDataResponse, getTokenInList,
 } from '../../../+state/db-config/db-config.selectors';
 import {
   createPair,
   deletingPair,
-  editPair, initPairsPage,
+  editPair, initPairsPage, setPairsRatingData,
 } from '../../../+state/db-config/db-config.actions';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 import { PairDialogService } from '../../../services/pair-dialog-service';
 import {map, take} from 'rxjs';
 import { Router } from '@angular/router';
+import {MatTabsModule} from '@angular/material/tabs';
+import {Autocomplete} from '../../../components/autocomplete/autocomplete';
+import {FieldTitle} from '../../../components/field-title/field-title';
+import {AgGridPairRatings} from '../ag-grid-pair-ratings/ag-grid-pair-ratings';
 
 @Component({
   selector: 'app-ag-grid-pairs-container',
@@ -30,6 +34,10 @@ import { Router } from '@angular/router';
     TitleTableButton,
     AsyncPipe,
     Loader,
+    MatTabsModule,
+    Autocomplete,
+    FieldTitle,
+    AgGridPairRatings
   ],
   templateUrl: './ag-grid-pairs-container.html',
   styleUrl: './ag-grid-pairs-container.scss',
@@ -42,15 +50,25 @@ export class AgGridPairsContainer implements OnInit {
   readonly router = inject(Router);
 
   poolsListResponse$ = this.store.select(getPoolsDataResponse)
+  tokenInList$ = this.store.select(getTokenInList);
 
   pairsDataResponse$ = this.store.select(getPairsFullData);
   pairsDataIsReady$ = this.store.select(getFullPairsDataIsReady);
+  selectedTokenIn = this.store.select(getPairsRatingId);
   filteredItemCount: number = 0;
 
   readonly poolsList$ = this.poolsListResponse$.pipe(
     map(items => items.map(item => ({
       id: item.poolId,
       name: item.poolAddress.toString(),
+    })))
+  );
+
+  readonly tokensIn$ = this.tokenInList$.pipe(
+    map(items => items.map(item => ({
+      id: item.tokenInId,
+      name: item.tokenInName!,
+      address: item.tokenInAddress,
     })))
   );
 
@@ -173,6 +191,8 @@ export class AgGridPairsContainer implements OnInit {
   events($event: any) {
     if ($event.event === 'AgGrid:MODEL_UPDATED') {
       this.filteredItemCount = $event.rowsDisplayed;
+    } else if ($event.event === 'SelectField:ITEM_SELECTED') {
+      this.store.dispatch(setPairsRatingData({pairIdForRating: $event.data}));
     }
   }
 }

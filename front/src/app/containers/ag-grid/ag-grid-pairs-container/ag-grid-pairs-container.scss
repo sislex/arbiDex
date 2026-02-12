@@ -3,21 +3,48 @@
   flex: 1;
   min-height: 0;
 
-  app-header-content-layout {
+  mat-tab-group {
     display: flex;
     flex: 1;
     min-height: 0;
 
-    app-ag-grid {
+    mat-tab {
       display: flex;
       flex: 1;
       min-height: 0;
     }
 
-    app-loader {
+    app-header-content-layout {
       display: flex;
       flex: 1;
       min-height: 0;
+
+      app-ag-grid {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
+
+      app-loader {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
     }
+
+    .selector-ratings {
+      flex: 1;
+      max-height: 100px;
+    }
+  }
+
+  .tab-rating {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  app-ag-grid-pair-ratings {
+    flex: 1;
   }
 }

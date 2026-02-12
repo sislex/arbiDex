@@ -31,6 +31,7 @@ export interface DbConfigState {
   rpcUrls: IRpcUrlApi;
 
   versions: string[];
+  pairIdForRating: number | null;
 }
 
 export interface DbConfigPartialState {
@@ -52,6 +53,7 @@ export const initialState: DbConfigState = {
   rpcUrls: emptyAsyncResponse([]),
 
   versions: ['v2', 'v3', 'v4'],
+  pairIdForRating: null,
 }
 
 export const dbConfigReducer = createReducer(
@@ -385,5 +387,9 @@ export const dbConfigReducer = createReducer(
       isLoaded: true,
       error
     }
+  })),
+  on(DbConfigActions.setPairsRatingData, (state, {pairIdForRating}) => ({
+    ...state,
+   pairIdForRating
   })),
 )

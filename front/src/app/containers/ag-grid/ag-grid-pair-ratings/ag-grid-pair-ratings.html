@@ -1,0 +1,11 @@
+<div>
+  <app-title-table-button
+    [title]="'Pairs rating (' + ((pairsRating$ | async)!.length === filteredItemCount ? (pairsRating$ | async)!.length : filteredItemCount + ' / ' + (pairsRating$ | async)!.length) + ')'"
+  ></app-title-table-button>
+  <app-ag-grid
+    [rowData]="(pairsRating$ | async)!"
+    [colDefs]="colDefs"
+    [defaultColDef]="defaultColDef"
+    (emitter)="events($event)"
+  ></app-ag-grid>
+</div>
