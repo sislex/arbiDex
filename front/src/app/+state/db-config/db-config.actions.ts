@@ -189,6 +189,10 @@ export const deletingQuote = createAction(
 
 export const setJobsData = createAction('[DbConfig] setJobsData');
 export const initJobsListPage = createAction('[DbConfig] initJobsListPage');
+export const setOneJobData = createAction(
+  '[DbConfig] setOneJobData',
+  props<{ jobId: number }>()
+);
 export const setJobsDataSuccess = createAction(
   '[DbConfig] setJobsDataSuccess',
   props<{ response: any }>()

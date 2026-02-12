@@ -9,17 +9,36 @@
   >
   </app-actions>
   <app-content-footer-layout content>
-    <app-ag-grid-job-relations-container
-      content
-      [currentJobId]="currentJobId"
-      (emitter)="events($event)"
-    ></app-ag-grid-job-relations-container>
+<!--    <app-ag-grid-job-relations-container-->
+<!--      content-->
+<!--      [currentJobId]="currentJobId"-->
+<!--      (emitter)="events($event)"-->
+<!--    ></app-ag-grid-job-relations-container>-->
+    <div class="tables-group" content>
+      <app-ag-grid-one-job-container
+        [currentJobId]="currentJobId"
+      >
+      </app-ag-grid-one-job-container>
+
+      <app-ag-grid-job-relations-container
+        content
+        [currentJobId]="currentJobId"
+        (emitter)="events($event)"
+      ></app-ag-grid-job-relations-container>
+
+      <app-ag-grid-job-not-relations-container
+        content
+        [currentJobId]="currentJobId"
+        (emitter)="events($event)"
+      ></app-ag-grid-job-not-relations-container>
+    </div>
     <app-button-panel
       footer
       [buttons]="footerButtons"
       [disabled]="false"
       (emitter)="events($event)"
     ></app-button-panel>
+
   </app-content-footer-layout>
 </app-title-content-layout>
 

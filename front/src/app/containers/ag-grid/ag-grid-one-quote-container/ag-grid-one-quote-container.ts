@@ -77,13 +77,4 @@ export class AgGridOneQuoteContainer {
       userSelect: 'text'
     },
   };
-
-  events($event: any) {
-    this.emitter.emit({
-      event: 'AgGridJobRelationsContainer:ACTIVE_RELATIONS',
-      data: $event.row.selectedNodes.map((item: any) => item.data.pairQuoteRelationId),
-      fullData: $event.row.selectedNodes.map((item: any) => item.data),
-    });
-  }
-
 }

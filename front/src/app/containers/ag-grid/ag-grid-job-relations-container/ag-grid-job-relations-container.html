@@ -7,7 +7,7 @@
     ) {
     <app-title-table-button
       header
-      [title]="'Job ID:' + currentJobId + ' relations table  (' + ((jobRelations$ | async)!.length === filteredItemCount ? (jobRelations$ | async)!.length : filteredItemCount + ' / ' + (jobRelations$ | async)!.length) + ')'"
+      [title]="'Job ID:' + currentJobId + ' relations table  (' + ((activeQuoteRelations$ | async)!.length === filteredItemCount ? (activeQuoteRelations$ | async)!.length : filteredItemCount + ' / ' + (activeQuoteRelations$ | async)!.length) + ')'"
     ></app-title-table-button>
   }
   @if (
@@ -18,7 +18,7 @@
     ) {
     <app-ag-grid
       content
-      [rowData]="(jobRelations$ | async)!"
+      [rowData]="(activeQuoteRelations$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
       [isRowSelection]="{

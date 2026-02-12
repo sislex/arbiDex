@@ -494,7 +494,6 @@ export class DbConfigEffects {
     )
   );
 
-
   setOneQuoteData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.setOneQuoteData),
@@ -582,6 +581,22 @@ export class DbConfigEffects {
         DbConfigActions.setChainsData(),
         DbConfigActions.setRpcUrlsData(),
       ])
+    )
+  );
+
+  setOneJobData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setOneJobData),
+      switchMap((action) =>
+        this.apiService.getJobById(action.jobId).pipe(
+          map(response =>
+            DbConfigActions.setJobsDataSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setJobsDataFailure({ error }))
+          )
+        )
+      )
     )
   );
 

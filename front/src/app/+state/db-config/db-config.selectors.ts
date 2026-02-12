@@ -1,6 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {DB_CONFIG_FEATURE_KEY, DbConfigState} from './db-config.reducer';
-import {IQuotes, IRpcUrl, ITokens} from '../../models/db-config';
+import {IJobs, IQuotes, IRpcUrl, ITokens} from '../../models/db-config';
 
 export const selectFeature = createFeatureSelector<DbConfigState>(DB_CONFIG_FEATURE_KEY);
 
@@ -599,6 +599,25 @@ export const getJobsFullDataResponse = createSelector(
         rpcUrl: fullRpcUrlsData,
       };
     });
+  }
+);
+
+export const getJobFullDataResponse = createSelector(
+  getJobsDataResponse,
+  getChainMap,
+  getRpcUrlsMap,
+  (jobs: unknown, chains, rpcUrls) => {
+    const job = jobs as IJobs;
+    const fullChainsData = job.chainId ? chains.get(job.chainId) : null;
+    const fullRpcUrlsData = job.rpcUrlId ? rpcUrls.get(job.rpcUrlId) : null;
+    console.log(job)
+    console.log(fullChainsData)
+    console.log(fullRpcUrlsData)
+    return {
+      ...job,
+      chainName: fullChainsData,
+      rpcUrl: fullRpcUrlsData,
+    };
   }
 );
 

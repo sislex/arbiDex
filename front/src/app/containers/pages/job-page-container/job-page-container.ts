@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
   AgGridJobRelationsContainer
 } from '../../ag-grid/ag-grid-job-relations-container/ag-grid-job-relations-container';
@@ -23,6 +23,11 @@ import { ButtonPanel } from '../../../components/button-panel/button-panel';
 import { ContentFooterLayout } from '../../../components/layouts/content-footer-layout/content-footer-layout';
 import { getActiveSidebarItem } from '../../../+state/view/view.selectors';
 import { setJobPreConfig } from '../../../+state/main/main.actions';
+import {AgGridOneJobContainer} from '../../ag-grid/ag-grid-one-job-container/ag-grid-one-job-container';
+import {
+  AgGridJobNotRelationsContainer
+} from '../../ag-grid/ag-grid-job-not-relations-container/ag-grid-job-not-relations-container';
+import {initPairsPage, setOneJobData} from '../../../+state/db-config/db-config.actions';
 
 @Component({
   selector: 'app-job-page-container',
@@ -33,11 +38,13 @@ import { setJobPreConfig } from '../../../+state/main/main.actions';
     AsyncPipe,
     ButtonPanel,
     ContentFooterLayout,
+    AgGridOneJobContainer,
+    AgGridJobNotRelationsContainer,
   ],
   templateUrl: './job-page-container.html',
   styleUrl: './job-page-container.scss',
 })
-export class JobPageContainer {
+export class JobPageContainer implements OnInit {
   private router = inject(Router);
   private store = inject(Store);
   private route = inject(ActivatedRoute);
@@ -48,14 +55,19 @@ export class JobPageContainer {
   relatedJobRelationsIds: number[] = [];
   relatedFullJobData: any[] = [];
   currentJobId: number;
+  oldJobRelations: any[] = [];
+  newJobRelations: any[] = [];
 
   constructor() {
     this.currentJobId = Number(this.route.snapshot.paramMap.get('id'));
+    this.store.dispatch(setJobRelationsDataList({ jobId: this.currentJobId }));
     this.store.dispatch(setQuoteRelations({jobId: this.currentJobId}));
-    this.store.dispatch(
-      setJobRelationsDataList({ jobId: this.currentJobId }),
-    );
+    this.store.dispatch(setOneJobData({jobId: this.currentJobId}))
   };
+
+  ngOnInit() {
+    this.store.dispatch(initPairsPage());
+  }
 
   onAction($event: any, note: string) {
     if ($event.event === 'Actions:ACTION_CLICKED') {
@@ -84,8 +96,19 @@ export class JobPageContainer {
         console.log('cancelTO')
       }
     } else if ($event.event === 'AgGridJobRelationsContainer:ACTIVE_RELATIONS') {
-      this.relatedJobRelationsIds = $event.data
-      this.relatedFullJobData = $event.fullData
+      this.oldJobRelations = $event.data;
+      this.relatedJobRelationsIds = [
+        ...(this.newJobRelations),
+        ...(this.oldJobRelations)
+      ];
+      this.relatedFullJobData = $event.fullData;
+
+    } else if ($event.event === 'AgGridJobNotRelationsContainer:ACTIVE_RELATIONS') {
+      this.newJobRelations = $event.data;
+      this.relatedJobRelationsIds = [
+        ...(this.newJobRelations),
+        ...(this.oldJobRelations)
+      ];
     }
   };
 

@@ -80,7 +80,6 @@ export const getQuoteRelationsWithStatus = createSelector(
   getJobRelations,
   getQuoteRelations,
   (jobRelations, quoteRelations) => {
-
     const activeIds = new Set(
       jobRelations?.map(relation => relation.quote?.pairQuoteRelationId) || []
     );
@@ -91,6 +90,17 @@ export const getQuoteRelationsWithStatus = createSelector(
     }));
   }
 );
+
+export const getActiveQuoteRelations = createSelector(
+  getQuoteRelationsWithStatus,
+  (quotes) => quotes.filter(quote => quote.active)
+);
+
+export const getInactiveQuoteRelations = createSelector(
+  getQuoteRelationsWithStatus,
+  (quotes) => quotes.filter(quote => !quote.active)
+);
+
 
 //====================================================================================================================
 //                                                   Bot Relations

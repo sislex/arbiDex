@@ -1,43 +1,31 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { DeleteDialogService } from '../../../services/delete-dialog-service';
-import { ColDef } from 'ag-grid-community';
-import { AgGrid } from '../../../components/ag-grid/ag-grid';
-import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
-import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
-import {
-  getActiveQuoteRelations,
-  getJobRelationsIsLoaded,
-  getJobRelationsIsLoading,
-  getQuoteRelationsIsLoaded,
-  getQuoteRelationsIsLoading,
-} from '../../../+state/relations/relations.selectors';
-import { AsyncPipe } from '@angular/common';
-import { Loader } from '../../../components/loader/loader';
+import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
+import {AgGrid} from "../../../components/ag-grid/ag-grid";
+import {AsyncPipe} from "@angular/common";
+import {HeaderContentLayout} from "../../../components/layouts/header-content-layout/header-content-layout";
+import {TitleTableButton} from "../../../components/title-table-button/title-table-button";
+import {Store} from '@ngrx/store';
+import {DeleteDialogService} from '../../../services/delete-dialog-service';
+import {getInactiveQuoteRelations} from '../../../+state/relations/relations.selectors';
+import {ColDef} from 'ag-grid-community';
 
 @Component({
-  selector: 'app-ag-grid-job-relations-container',
-  imports: [
-    AgGrid,
-    HeaderContentLayout,
-    TitleTableButton,
-    AsyncPipe,
-    Loader,
-  ],
-  templateUrl: './ag-grid-job-relations-container.html',
-  styleUrl: './ag-grid-job-relations-container.scss',
+  selector: 'app-ag-grid-job-not-relations-container',
+    imports: [
+        AgGrid,
+        AsyncPipe,
+        HeaderContentLayout,
+        TitleTableButton
+    ],
+  templateUrl: './ag-grid-job-not-relations-container.html',
+  styleUrl: './ag-grid-job-not-relations-container.scss',
 })
-export class AgGridJobRelationsContainer implements OnInit {
+export class AgGridJobNotRelationsContainer implements OnInit {
   @Input() currentJobId: number = 0;
   @Output() emitter = new EventEmitter();
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  activeQuoteRelations$ = this.store.select(getActiveQuoteRelations);
-  quoteRelationsIsLoading$ = this.store.select(getQuoteRelationsIsLoading);
-  quoteRelationsIsLoaded$ = this.store.select(getQuoteRelationsIsLoaded);
-  jobRelationsIsLoading$ = this.store.select(getJobRelationsIsLoading);
-  jobRelationsIsLoaded$ = this.store.select(getJobRelationsIsLoaded);
+  inactiveQuoteRelations$ = this.store.select(getInactiveQuoteRelations);
   filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
@@ -172,8 +160,9 @@ export class AgGridJobRelationsContainer implements OnInit {
     suppressMovable: true,
     headerClass: 'align-center',
   };
+
   ngOnInit() {
-    this.store.select(getActiveQuoteRelations).subscribe(data => {
+    this.store.select(getInactiveQuoteRelations).subscribe(data => {
       this.filteredItemCount = data?.length || 0;
     });
   }
@@ -181,9 +170,9 @@ export class AgGridJobRelationsContainer implements OnInit {
   events($event: any) {
     if ($event.event === 'AgGrid:SET_CHECKBOX_ROW') {
       this.emitter.emit({
-        event: 'AgGridJobRelationsContainer:ACTIVE_RELATIONS',
+        event: 'AgGridJobNotRelationsContainer:ACTIVE_RELATIONS',
         data: $event.row.selectedNodes.map((item: any) => item.data.pairQuoteRelationId),
-        fullData: $event.row.selectedNodes.map((item: any) => item.data),
+        fullData: $event.row.selectedNodes.map((item: any) => item.data)
       });
     }
 
