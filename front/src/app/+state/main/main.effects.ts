@@ -70,7 +70,8 @@ export function mapJobParams(job: any) {
   return {
     jobType: job.jobType,
     rpcUrl: 'https://arb1.arbitrum.io/rpc',
-    pairsToQuote: job.quoteJobRelations.map(mapQuoteRelation)
+    pairsToQuote: job.quoteJobRelations.map(mapQuoteRelation),
+    extraSettings: job.extraSettings,
   };
 }
 
@@ -78,7 +79,8 @@ export function mapJobPreConfig(jobData: any, relations: any[]) {
   return {
     jobType: jobData.jobType,
     rpcUrl: 'https://arb1.arbitrum.io/rpc',
-    pairsToQuote: relations.map(mapQuoteRelation)
+    pairsToQuote: relations.map(mapQuoteRelation),
+    extraSettings: jobData.extraSettings,
   };
 }
 

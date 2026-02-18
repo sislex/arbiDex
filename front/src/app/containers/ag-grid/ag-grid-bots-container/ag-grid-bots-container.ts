@@ -60,6 +60,7 @@ export class AgGridBotsContainer implements OnInit {
       item.map(item => ({
         id: item.jobId,
         name: item.jobType,
+        address: item.description.toString(),
       }))
     )
   );

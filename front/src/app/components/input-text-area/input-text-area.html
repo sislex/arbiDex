@@ -1,0 +1,21 @@
+<div class="input-component">
+  @if (title) {
+    <div class="title">{{ title }}</div>
+  }
+  <mat-form-field class="wide-textarea">
+    @if (label) {
+      <mat-label>{{ label }}</mat-label>
+    }
+    <textarea matInput
+              [rows]="rowsCount"
+              [placeholder]="placeholder"
+              [(ngModel)]="inputValue"
+              (ngModelChange)="onInputChange($event)">
+    </textarea>
+    @if (inputValue && !disabled) {
+      <button matSuffix matIconButton class="top-aligned-button" (click)="clearInput()">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+</div>

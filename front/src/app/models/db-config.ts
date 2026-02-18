@@ -152,6 +152,7 @@ export interface IJobs {
   chainName: string;
   rpcUrlAddress: string;
   extraSettings: string;
+  description: string;
   pairs: number;
 }
 export interface IJobsCreate {
