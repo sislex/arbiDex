@@ -29,8 +29,15 @@ export class JobForm implements OnInit {
   extraSettings: string = '';
   ngOnInit() {
     this.emitter.emit(this.formData);
-    this.extraSettings = JSON.stringify(JSON.parse(this.formData.extraSettings), null, 2);
+    if (this.formData?.extraSettings) {
+      try {
+        this.extraSettings = JSON.stringify(JSON.parse(this.formData.extraSettings), null, 2);
+      } catch (e) {
+        this.extraSettings = this.formData.extraSettings;
+      }
+    }
   }
+
 
   events(event: any, field: 'jobType' | 'chainId' | 'rpcUrlId' | 'description' | 'extraSettings') {
     this.formData = {
