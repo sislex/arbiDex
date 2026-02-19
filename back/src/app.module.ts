@@ -8,19 +8,8 @@ import { ChainsModule } from './chains/chains.module';
 import { PoolsModule } from './pools/pools.module';
 import { ServersModule } from './servers/servers.module';
 import { DexesModule } from './dexes/dexes.module';
-import { Tokens } from './entities/entities/Tokens';
-import { Pools } from './entities/entities/Pools';
-import { Chains } from './entities/entities/Chains';
-import { Dexes } from './entities/entities/Dexes';
-import { Servers } from './entities/entities/Servers';
 import { JobsModule } from './jobs/jobs.module';
 import { BotsModule } from './bots/bots.module';
-import { Jobs } from './entities/entities/Jobs';
-import { Bots } from './entities/entities/Bots';
-import { Quotes } from './entities/entities/Quotes';
-import { QuoteJobRelations } from './entities/entities/QuoteJobRelations';
-import { Pairs } from './entities/entities/Pairs';
-import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
 import { PairsModule } from './pairs/pairs.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { PairQuoteRelationsModule } from './pair-quote-relations/pair-quote-relations.module';
@@ -45,17 +34,8 @@ import { BlockchainModule } from './blockchain/blockchain.module';
         password: cfg.get<string>('POSTGRES_PASSWORD'),
         database: cfg.get<string>('POSTGRES_DB'),
         entities: [
-          Tokens,
-          Pools,
-          Chains,
-          Dexes,
-          Servers,
-          Jobs,
-          Bots,
-          Quotes,
-          QuoteJobRelations,
-          Pairs,
-          PairQuoteRelations,
+          __dirname + '/src/**/*.entity{.ts,.js}',
+          './src/entities/entities/*.ts',
         ],
         autoLoadEntities: true,
         synchronize: false,
@@ -79,7 +59,7 @@ import { BlockchainModule } from './blockchain/blockchain.module';
     RpcUrlsModule,
     GetFeeModule,
     SwapRateModule,
-    BlockchainModule
+    BlockchainModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -18,7 +18,11 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "generate-entities": "typeorm-model-generator -h localhost -p 5432 -d config_info_db -u user_secret -x pass_secret -e postgres -o src/entities"
+    "generate-entities": "typeorm-model-generator -h 45.135.182.251 -p 5432 -d config_info_db_2 -u user_secret -x pass_secret -e postgres -o src/entities",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "npm run typeorm migration:generate -- -d data-source.ts",
+    "migration:run": "npm run typeorm migration:run -- -d data-source.ts",
+    "migration:revert": "npm run typeorm migration:revert -- -d data-source.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -27,6 +31,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.0",
+    "dotenv": "^17.3.1",
     "ethers": "^6.16.0",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
