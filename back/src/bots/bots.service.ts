@@ -38,26 +38,25 @@ export class BotsService {
       relations: {
         server: true,
         job: {
-          quoteJobRelations: true
+          quoteJobRelations: true,
         },
       },
       select: {
         job: {
           jobId: true,
           quoteJobRelations: {
-            quoteJobRelationId: true
-          }
+            quoteJobRelationId: true,
+          },
         },
         server: {
-          serverId: true
-        }
+          serverId: true,
+        },
       },
       order: {
         botId: 'DESC',
       },
     });
   }
-
 
   async findAllByServerId(serverId: string) {
     return await this.botRepository.find({

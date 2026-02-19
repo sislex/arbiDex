@@ -20,7 +20,7 @@ export class QuotesService {
       side: 'exactIn',
       blockTag: 'latest',
       quoteSource: createQuoteDto.quoteSource,
-      token
+      token,
     });
     return await this.quotesRepository.save(quote);
   }
@@ -29,7 +29,7 @@ export class QuotesService {
     return await this.quotesRepository.find({
       relations: {
         token: true,
-        pairQuoteRelations: true
+        pairQuoteRelations: true,
       },
       select: {
         quoteId: true,
@@ -64,12 +64,12 @@ export class QuotesService {
         quoteSource: true,
         side: true,
         token: {
-          tokenId: true
+          tokenId: true,
         },
         pairQuoteRelations: {
           pairQuoteRelationId: true,
-        }
-      }
+        },
+      },
     });
     if (!quote) {
       throw new Error(`Quote with id ${id} not found`);

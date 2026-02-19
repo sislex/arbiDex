@@ -19,14 +19,14 @@ export class PairQuoteRelationsService {
   ) {}
 
   async createMany(pairQuoteRelationDto: PairQuoteRelationDto[]) {
-    const data = await Promise.all(
-      pairQuoteRelationDto.map(async (dto) => {
-        const pair = await this.pairsService.findOne(dto.pairId);
-        const quote = await this.quotesService.findOne(dto.quoteId);
-        return { pair, quote };
-      }),
-    );
+    // Не делаем findOne, просто мапим данные из DTO
+    const data = pairQuoteRelationDto.map((dto) => ({
+      // Используем напрямую то, что пришло из сети
+      pairId: String(dto.pairId),
+      quoteId: String(dto.quoteId),
+    }));
 
+    // Сохраняем "плоский" массив
     return await this.pairQuoteRelationsRepository.save(data);
   }
 
@@ -112,12 +112,12 @@ export class PairQuoteRelationsService {
       },
       select: {
         pair: {
-          pairId: true
+          pairId: true,
         },
         quote: {
-          quoteId: true
+          quoteId: true,
         },
-      }
+      },
     });
     if (!item) {
       throw new Error(`Pair-Quote Relation with id ${id} not found`);
