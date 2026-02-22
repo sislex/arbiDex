@@ -19,12 +19,11 @@ services:
       - "3001:3001"
     env_file:
       - ./back/.env
-    #    volumes:
-    #      - .:/app
-    #      - /app/node_modules
+    command: node dist/src/main.js
     depends_on:
       arbi-postgres:
         condition: service_healthy
+
 
   arbi-postgres:
     image: postgres:16
