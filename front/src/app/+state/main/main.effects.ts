@@ -21,27 +21,27 @@ export function mapQuoteRelation(item: any) {
   return {
     dex: pool?.dex?.name || '-',
     version: (pool?.version as 'v2' | 'v3' | 'v4') || '-',
-    token0: {
-      address: pool?.token0?.address || '-',
-      decimals: pool?.token0?.decimals ?? 0
-    },
-    token1: {
-      address: pool?.token1?.address || '-',
-      decimals: pool?.token1?.decimals ?? 0
-    },
+    // token0: {
+    //   address: pool?.token0?.address || '-',
+    //   decimals: pool?.token0?.decimals ?? 0
+    // },
+    // token1: {
+    //   address: pool?.token1?.address || '-',
+    //   decimals: pool?.token1?.decimals ?? 0
+    // },
     poolAddress: String(pool?.poolAddress || '-'),
-    feePpm: pool?.fee || 0,
+    // feePpm: pool?.fee || 0,
     tokenIn: {
       address: pair?.tokenIn?.address || '-',
-      decimals: pair?.tokenIn?.decimals ?? 0
+      // decimals: pair?.tokenIn?.decimals ?? 0
     },
     tokenOut: {
       address: pair?.tokenOut?.address || '-',
-      decimals: pair?.tokenOut?.decimals ?? 0
+      // decimals: pair?.tokenOut?.decimals ?? 0
     },
-    side: quote?.side || '-',
+    // side: quote?.side || '-',
     amount: String(quote?.amount || '0'),
-    blockTag: quote?.blockTag || 0,
+    // blockTag: quote?.blockTag || 0,
     quoteSource: quote?.quoteSource || '-',
   };
 }
@@ -69,7 +69,7 @@ export function mapBotToRule(botData: any) {
 export function mapJobParams(job: any) {
   return {
     jobType: job.jobType,
-    rpcUrl: 'https://arb1.arbitrum.io/rpc',
+    rpcUrl: 'https://arb1.arbitrum.io/rpc', //поменять на ссылку
     pairsToQuote: job.quoteJobRelations.map(mapQuoteRelation),
     extraSettings: job.extraSettings,
   };
@@ -78,7 +78,7 @@ export function mapJobParams(job: any) {
 export function mapJobPreConfig(jobData: any, relations: any[]) {
   return {
     jobType: jobData.jobType,
-    rpcUrl: 'https://arb1.arbitrum.io/rpc',
+    rpcUrl: 'https://arb1.arbitrum.io/rpc', //поменять на ссылку
     pairsToQuote: relations.map(mapQuoteRelation),
     extraSettings: jobData.extraSettings,
   };
