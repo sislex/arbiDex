@@ -33,10 +33,9 @@ export class TokensController {
   }
 
   @Get('get-one-token-by-address')
-  async findOne(@Query('tokenAddress') tokenAddress: string) {
-    return this.tokensService.findOneByAddress(tokenAddress);
+  async findOne(@Query('tokenAddress') tokenAddress: string, chainId: number) {
+    return this.tokensService.findOneByAddress(tokenAddress, chainId);
   }
-
 
   @Post()
   create(@Body() tokenDto: CreateTokenDto) {

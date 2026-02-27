@@ -69,7 +69,7 @@ export function mapBotToRule(botData: any) {
 export function mapJobParams(job: any) {
   return {
     jobType: job.jobType,
-    rpcUrl: 'https://arb1.arbitrum.io/rpc', //поменять на ссылку
+    rpcUrl: job.rpcUrl.rpcUrl,
     pairsToQuote: job.quoteJobRelations.map(mapQuoteRelation),
     extraSettings: job.extraSettings,
   };
@@ -78,7 +78,7 @@ export function mapJobParams(job: any) {
 export function mapJobPreConfig(jobData: any, relations: any[]) {
   return {
     jobType: jobData.jobType,
-    rpcUrl: 'https://arb1.arbitrum.io/rpc', //поменять на ссылку
+    rpcUrl: jobData.rpcUrl.rpcUrl,
     pairsToQuote: relations.map(mapQuoteRelation),
     extraSettings: jobData.extraSettings,
   };

@@ -59,7 +59,7 @@ export class BlockchainService {
 
     await this.createPools(pools, tokenMap, existingPools, configData);
 
-    await this.setReserves()
+    await this.setReserves( 42161 )
   }
 
   async saveTokensIfNotExist(
@@ -189,7 +189,7 @@ export class BlockchainService {
     return result;
   }
 
-  async setReserves() {
+  async setReserves(chainId: number) {
     const pools = await this.poolsService.findAll();
 
     const filteredPools = pools.filter(
@@ -208,6 +208,7 @@ export class BlockchainService {
 
         const dto: UpdateReservesDto = {
           address: reserve.address,
+          chainId,
           token0: reserve.token0,
           token1: reserve.token1,
           reserve0: reserve.reserve0?.toString() ?? '0',

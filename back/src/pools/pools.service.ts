@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PoolDto, UpdatePoolDto, UpdateReservesDto } from '../dtos/pools-dto/pool.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Pools } from '../entities/entities/Pools';
 import { TokensService } from '../tokens/tokens.service';
-import { ChainsService } from '../chains/chains.service';
-import { DexesService } from '../dexes/dexes.service';
 
 @Injectable()
 export class PoolsService {
@@ -13,24 +11,17 @@ export class PoolsService {
     @InjectRepository(Pools)
     private poolRepository: Repository<Pools>,
     private tokensService: TokensService,
-    private chainsService: ChainsService,
-    private dexesService: DexesService,
   ) {}
 
   async create(poolDto: PoolDto) {
-    const chain = await this.chainsService.findOne(poolDto.chainId);
-    const token0 = await this.tokensService.findOne(poolDto.token0);
-    const token1 = await this.tokensService.findOne(poolDto.token1);
-    const dex = await this.dexesService.findOne(poolDto.dexId);
-
     const pool = this.poolRepository.create({
-      chain,
-      token0,
-      token1,
-      dex,
-      version: poolDto.version,
-      fee: poolDto.fee,
       poolAddress: poolDto.poolAddress,
+      fee: poolDto.fee,
+      version: poolDto.version,
+      chain: { chainId: poolDto.chainId },
+      token0: { tokenId: poolDto.token0 },
+      token1: { tokenId: poolDto.token1 },
+      dex: { dexId: poolDto.dexId },
     });
 
     return await this.poolRepository.save(pool);
@@ -76,39 +67,42 @@ export class PoolsService {
 
   async update(id: number, poolDto: UpdatePoolDto) {
     const pool = await this.findOne(id);
-    const chain = await this.chainsService.findOne(poolDto.chainId);
-    const token0 = await this.tokensService.findOne(poolDto.token0);
-    const token1 = await this.tokensService.findOne(poolDto.token1);
-    const dex = await this.dexesService.findOne(poolDto.dexId);
 
-    pool.poolId = poolDto.poolId;
     pool.poolAddress = poolDto.poolAddress;
     pool.fee = poolDto.fee;
     pool.version = poolDto.version;
-    pool.chain = chain;
-    pool.token0 = token0;
-    pool.token1 = token1;
-    pool.dex = dex;
+    pool.chain = { chainId: poolDto.chainId } as any;
+    pool.token0 = { tokenId: poolDto.token0 } as any;
+    pool.token1 = { tokenId: poolDto.token1 } as any;
+    pool.dex = { dexId: poolDto.dexId } as any;
 
     return await this.poolRepository.save(pool);
   }
 
   async updateReserves(reserves: UpdateReservesDto[]) {
     const poolsMap = new Map<string, Pools>();
-    const poolAddresses = reserves.map(r => r.address);
+
     const pools = await this.poolRepository.find({
-      where: { poolAddress: In(poolAddresses) },
-      relations: ['token0', 'token1'],
+      where: reserves.map(r => ({
+        poolAddress: r.address,
+        chain: { chainId: r.chainId }
+      })),
+      relations: ['token0', 'token1', 'chain'],
     });
 
-    pools.forEach(pool => poolsMap.set(pool.poolAddress!, pool));
+    pools.forEach(pool => {
+      const key = `${pool.poolAddress}-${pool.chain.chainId}`;
+      poolsMap.set(key, pool);
+    });
 
     for (const dto of reserves) {
-      const pool = poolsMap.get(dto.address);
+      const key = `${dto.address}-${dto.chainId}`;
+      const pool = poolsMap.get(key);
+
       if (!pool) continue;
 
-      const token0 = await this.tokensService.findOneByAddress(dto.token0);
-      const token1 = await this.tokensService.findOneByAddress(dto.token1);
+      const token0 = await this.tokensService.findOneByAddress(dto.token0, pool.chain.chainId);
+      const token1 = await this.tokensService.findOneByAddress(dto.token1, pool.chain.chainId);
 
       if (!token0 || !token1) continue;
 
@@ -119,10 +113,12 @@ export class PoolsService {
         pool.reserve0 = dto.reserve1;
         pool.reserve1 = dto.reserve0;
       }
+
+      pool.reserves_updated_at = new Date();
     }
 
     const updatedPools = await this.poolRepository.save(Array.from(poolsMap.values()));
-    console.log(`Reserves update completed. Total pools updated: ${updatedPools.length}`);
+    // console.log(`Reserves update completed. Total pools updated: ${updatedPools.length}`);
     return updatedPools;
   }
 

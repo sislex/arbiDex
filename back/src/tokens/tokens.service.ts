@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tokens } from '../entities/entities/Tokens';
-import { Repository } from 'typeorm';
+import { Raw, Repository } from 'typeorm';
 import { CreateTokenDto } from '../dtos/token-dto/token.dto';
 import { Chains } from '../entities/entities/Chains';
 import { ChainsService } from '../chains/chains.service';
@@ -25,9 +25,7 @@ export class TokensService {
     const existingToken = await this.tokensRepository.findOne({
       where: {
         address: tokenDto.address,
-        chain: {
-          chainId: tokenDto.chainId
-        }
+        chain: { chainId: tokenDto.chainId }
       }
     });
 
@@ -61,9 +59,12 @@ export class TokensService {
         chain: true,
       },
       select: {
-        chain: {
-          chainId: true,
-        }
+        tokenId: true,
+        address: true,
+        symbol: true,
+        tokenName: true,
+        decimals: true,
+        chain: { chainId: true }
       },
       order: {
         tokenId: 'DESC',
@@ -73,7 +74,11 @@ export class TokensService {
 
   async findAllWithFilter(filter: TokenFilter) {
     const where: any = {};
-    if (filter.address) where.address = filter.address.toLowerCase();
+    if (filter.address) {
+      where.address = Raw((alias) => `LOWER(${alias}) = LOWER(:address)`, {
+        address: filter.address
+      });
+    }
     if (filter.chainId) where.chain = { chainId: filter.chainId };
 
     return this.tokensRepository.find({
@@ -94,16 +99,17 @@ export class TokensService {
     return token;
   }
 
-  async findOneByAddress(tokenAddress: string) {
+  async findOneByAddress(tokenAddress: string, chainId: number) {
 
     const token = await this.tokensRepository
       .createQueryBuilder('token')
       .leftJoinAndSelect('token.chain', 'chain')
       .where('LOWER(token.address) = LOWER(:address)', { address: tokenAddress })
+      .andWhere('chain.chain_id = :chainId', { chainId })
       .getOne();
 
     if (!token) {
-      throw new Error(`Token with address ${tokenAddress} not found`);
+      throw new Error(`Token ${tokenAddress} not found in chain ${chainId}`);
     }
     return token;
   }
@@ -115,12 +121,11 @@ export class TokensService {
     token.address = tokenDto.address;
     token.symbol = tokenDto.symbol;
     token.tokenName = tokenDto.tokenName;
-    token.decimals = tokenDto.decimals;
+    token.decimals = +tokenDto.decimals;
     token.isActive = null;
     token.isChecked = null;
     token.balance = null;
     token.chain = chain;
-
 
     return await this.tokensRepository.save(token);
   }
