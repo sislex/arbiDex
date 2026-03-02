@@ -56,6 +56,17 @@ export class AgGridServerRelationsContainer implements OnInit {
       },
     },
     {
+      headerName: 'Bot Description',
+      flex: 1,
+      filter: 'agTextColumnFilter',
+      filterParams: {
+        defaultToNothingSelected: true,
+      },
+      valueGetter: (params) => {
+        return params.data?.description || '-';
+      },
+    },
+    {
       headerName: 'Chain Id',
       flex: 1,
       filter: 'agTextColumnFilter',
