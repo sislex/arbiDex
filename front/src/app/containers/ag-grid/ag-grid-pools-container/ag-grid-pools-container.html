@@ -5,7 +5,18 @@
       [title]="'Pools table (' + ((poolsDataResponse$ | async)!.length === filteredItemCount ? (poolsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (poolsDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
-    ></app-title-table-button>
+    >
+      <div class="custom-small-field">
+        <span>Convert to: </span>
+        <app-autocomplete
+          [list]="(swapRateDataResponse$ | async)!"
+          [selected]=""
+          (emitter)="events($event)"
+          content
+        ></app-autocomplete>
+      </div>
+
+    </app-title-table-button>
   }
   @if (poolsDataIsReady$ | async) {
     <app-ag-grid

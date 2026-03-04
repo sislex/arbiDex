@@ -86,9 +86,9 @@ export interface IChainsCreate {
 }
 
 export interface ISelectMenu {
-  id: number | string;
-  name: string;
-  address?: string;
+  id: any;
+  name: any;
+  address?: any;
 }
 
 export interface IPairsAPI extends API {
@@ -172,6 +172,16 @@ export interface IRpcUrlCreate {
   rpcUrlId: number;
   rpcUrl: string;
   chainId: number;
+}
+
+export interface ISwapRateApi extends API {
+  response: ISwapRate[];
+}
+export interface ISwapRate {
+  swapRateId: number;
+  swapRate0: number;
+  swapRate1: number;
+  swapRateCount: number;
 }
 
 export interface IBotsAPI extends API {

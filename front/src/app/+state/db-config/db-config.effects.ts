@@ -116,6 +116,7 @@ export class DbConfigEffects {
         DbConfigActions.setTokensData(),
         DbConfigActions.setDexesData(),
         DbConfigActions.setChainsData(),
+        DbConfigActions.setSwapRate(),
       ])
     )
   );
@@ -946,6 +947,27 @@ export class DbConfigEffects {
         })
       ),
     { dispatch: false }
+  );
+
+//====================================================================================================================
+//                                                   Swap Rate
+//====================================================================================================================
+
+  setSwapRateData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setSwapRate),
+      withLatestFrom(this.store.select(DbConfigSelectors.getSwapRateDataResponse)),
+      exhaustMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setSwapRateDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getSwapRates().pipe(
+          map(response => DbConfigActions.setSwapRateDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setSwapRateDataFailure({ error })))
+        );
+      })
+    )
   );
 
 }

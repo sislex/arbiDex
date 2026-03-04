@@ -288,6 +288,15 @@ export const getRpcUrlsDataIsLoaded = createSelector(
 );
 
 //====================================================================================================================
+//                                                   Swap Rate
+//====================================================================================================================
+
+export const getSwapRateDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.swapRate.response
+);
+
+//====================================================================================================================
 //                                                   MAPS
 //====================================================================================================================
 
@@ -677,4 +686,24 @@ export const getFullBotsDataIsReady = createSelector(
   getFullBotsDataIsLoaded,
   getFullBotsDataIsLoading,
   (loaded, loading) => loaded && !loading
+);
+
+export const getUniqueTokensFromSwapRates = createSelector(
+  getSwapRateDataResponse,
+  getTokensFullDataResponse,
+  (swapRates, tokens): ITokens[] => {
+    if (!swapRates || !tokens) return [];
+
+    const uniqueTokenIds = new Set<number>();
+    swapRates.forEach(rate => {
+      if (rate.swapRate0) uniqueTokenIds.add(rate.swapRate0);
+      if (rate.swapRate1) uniqueTokenIds.add(rate.swapRate1);
+    });
+
+    const tokensMap = new Map(tokens.map(t => [t.tokenId, t]));
+
+    return Array.from(uniqueTokenIds)
+      .map(id => tokensMap.get(id))
+      .filter((token): token is ITokens => !!token);
+  }
 );

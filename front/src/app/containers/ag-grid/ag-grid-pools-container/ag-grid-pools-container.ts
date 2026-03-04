@@ -8,6 +8,7 @@ import { PoolDialogService } from '../../../services/pool-dialog-service';
 import {
   getFullPoolsData,
   getFullPoolsDataIsReady,
+  getUniqueTokensFromSwapRates,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
@@ -15,10 +16,13 @@ import {
   createPool,
   deletingPools,
   editPool,
-  initPoolsPage
+  initPoolsPage,
+  conversionTo,
 } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
+import {Autocomplete} from '../../../components/autocomplete/autocomplete';
+import {map} from 'rxjs';
 
 @Component({
   selector: 'app-ag-grid-pools-container',
@@ -28,6 +32,7 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
     TitleTableButton,
     AsyncPipe,
     Loader,
+    Autocomplete,
   ],
   templateUrl: './ag-grid-pools-container.html',
   styleUrl: './ag-grid-pools-container.scss',
@@ -40,6 +45,16 @@ export class AgGridPoolsContainer implements OnInit {
   poolsDataResponse$ = this.store.select(getFullPoolsData);
   poolsDataIsReady$ = this.store.select(getFullPoolsDataIsReady);
   filteredItemCount: number = 0;
+
+  swapRateDataResponse$ = this.store.select(getUniqueTokensFromSwapRates).pipe(
+    map(tokens =>
+      tokens.map(token => ({
+        id: token.tokenId,
+        name: token.tokenName,
+        address: `${token.address} "${token.chainName}"`,
+      }))
+    )
+  );
 
   readonly colDefs: ColDef[] = [
     {
@@ -210,6 +225,8 @@ export class AgGridPoolsContainer implements OnInit {
   events($event: any) {
     if ($event.event === 'AgGrid:MODEL_UPDATED') {
       this.filteredItemCount = $event.rowsDisplayed;
+    } else if ($event.event === '"SelectField:ITEM_SELECTED"') {
+      this.store.dispatch(conversionTo({id: $event.data}))
     }
   }
 }

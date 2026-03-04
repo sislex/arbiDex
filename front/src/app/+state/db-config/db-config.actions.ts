@@ -307,3 +307,21 @@ export const deletingRpcUrl = createAction(
   '[DbConfig] deletingRpcUrl',
   props<{ rpcUrlId: number }>()
 );
+
+//====================================================================================================================
+//                                                   Swap Rate
+//====================================================================================================================
+
+export const setSwapRate = createAction('[DbConfig] setSwapRate');
+export const setSwapRateDataSuccess = createAction(
+  '[DbConfig] setSwapRateDataSuccess',
+  props<{ response: any }>()
+);
+export const setSwapRateDataFailure = createAction(
+  '[DbConfig] setSwapRateDataFailure',
+  props<{ error: string }>()
+);
+export const conversionTo = createAction(
+  '[DbConfig] conversionTo',
+  props<{ id: number }>()
+);
