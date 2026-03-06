@@ -15,3 +15,7 @@ export const getActiveSidebarItem = createSelector(
   selectFeature,
   (state: ViewState) => state.activeSidebarItem
 );
+export const displayInWei = createSelector(
+  selectFeature,
+  (state: ViewState) => state.displayInWei
+);

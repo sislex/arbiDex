@@ -349,6 +349,8 @@ export const getFullPoolsData = createSelector(
         dexName: dexMap.get(pool.dexId),
         token0Name: t0?.tokenName,
         token1Name: t1?.tokenName,
+        token0Decimal: t0?.decimals,
+        token1Decimal: t1?.decimals,
         token0Address: t0?.address,
         token1Address: t1?.address,
       };
@@ -702,8 +704,24 @@ export const getUniqueTokensFromSwapRates = createSelector(
 
     const tokensMap = new Map(tokens.map(t => [t.tokenId, t]));
 
-    return Array.from(uniqueTokenIds)
+    const nativeToken = {
+      tokenId: 0,
+      tokenName: 'Native',
+      chainId: null,
+      chainName: 'allChains',
+      address: '-',
+      symbol: '-',
+      decimals: null,
+      isActive: null,
+      isChecked: null,
+      balance: null,
+    };
+
+    const mappedTokens = Array.from(uniqueTokenIds)
       .map(id => tokensMap.get(id))
       .filter((token): token is ITokens => !!token);
+
+    // Возвращаем нативный токен первым, а за ним остальные
+    return [nativeToken, ...mappedTokens];
   }
 );

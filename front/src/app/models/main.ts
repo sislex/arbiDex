@@ -23,3 +23,7 @@ export interface ITokenInfo {
   address: string;
   decimals: number;
 }
+
+export interface ExchangeRates {
+  [source: string]: { [target: string]: number };
+}

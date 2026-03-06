@@ -325,3 +325,24 @@ export const conversionTo = createAction(
   '[DbConfig] conversionTo',
   props<{ id: number }>()
 );
+
+export const setReservesInCurrentToken = createAction(
+  '[DbConfig] setReservesInCurrentToken',
+  props<{ currentToken: number }>()
+);
+export const setReservesInCurrentTokenSuccess = createAction(
+  '[DbConfig] setReservesInCurrentTokenSuccess',
+  props<{ response: any }>()
+);
+export const setReservesInCurrentTokenFailure = createAction(
+  '[DbConfig] setReservesInCurrentTokenFailure',
+  props<{ error: string }>()
+);
+export const updateFullPoolsDataSuccess = createAction(
+  '[DbConfig] updateFullPoolsDataSuccess',
+  props<{ pools: any }>()
+);
+export const updateFullPoolsDataFailure = createAction(
+  '[DbConfig] updateFullPoolsDataFailure',
+  props<{ error: string }>()
+);

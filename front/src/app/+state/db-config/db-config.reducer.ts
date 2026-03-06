@@ -424,4 +424,34 @@ export const dbConfigReducer = createReducer(
       error
     }
   })),
+
+  on(DbConfigActions.setReservesInCurrentToken, (state) => ({
+    ...state,
+    pools: {
+      ...state.pools,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.updateFullPoolsDataSuccess, (state, {pools}) => ({
+    ...state,
+    pools: {
+      ...state.pools,
+      loadingTime: Date.now() - state.pools.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response: pools
+    }
+  })),
+  on(DbConfigActions.updateFullPoolsDataFailure, (state, {error}) => ({
+    ...state,
+    pools: {
+      ...state.pools,
+      loadingTime: Date.now() - state.pools.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
 )
