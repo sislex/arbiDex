@@ -5,3 +5,7 @@ export const setActiveSidebarItem = createAction(
   '[View] setActiveSidebarItem',
   props<{ item: string }>()
 );
+export const setDisplayInWei = createAction(
+  '[View] setDisplayInWei',
+  props<{ item: boolean }>()
+);

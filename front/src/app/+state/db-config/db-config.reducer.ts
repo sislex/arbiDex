@@ -10,7 +10,7 @@ import {
   IServersAPI,
   ITokensAPI,
   IPairsAPI,
-  IRpcUrlApi,
+  IRpcUrlApi, ISwapRateApi,
 } from '../../models/db-config';
 import {emptyAsyncResponse} from './configs';
 
@@ -29,6 +29,7 @@ export interface DbConfigState {
   botsByServerId: IBotsAPI;
   servers: IServersAPI;
   rpcUrls: IRpcUrlApi;
+  swapRate: ISwapRateApi;
 
   versions: string[];
   pairIdForRating: number | null;
@@ -51,6 +52,7 @@ export const initialState: DbConfigState = {
   botsByServerId: emptyAsyncResponse([]),
   servers: emptyAsyncResponse([]),
   rpcUrls: emptyAsyncResponse([]),
+  swapRate: emptyAsyncResponse([]),
 
   versions: ['v2', 'v3', 'v4'],
   pairIdForRating: null,
@@ -390,6 +392,66 @@ export const dbConfigReducer = createReducer(
   })),
   on(DbConfigActions.setPairsRatingData, (state, {pairIdForRating}) => ({
     ...state,
-   pairIdForRating
+    pairIdForRating
+  })),
+
+  on(DbConfigActions.setSwapRate, (state) => ({
+    ...state,
+    swapRate: {
+      ...state.swapRate,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setSwapRateDataSuccess, (state, {response}) => ({
+    ...state,
+    swapRate: {
+      ...state.swapRate,
+      loadingTime: Date.now() - state.swapRate.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setSwapRateDataFailure, (state, {error}) => ({
+    ...state,
+    swapRate: {
+      ...state.swapRate,
+      loadingTime: Date.now() - state.swapRate.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  on(DbConfigActions.setReservesInCurrentToken, (state) => ({
+    ...state,
+    pools: {
+      ...state.pools,
+      startTime:  Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.updateFullPoolsDataSuccess, (state, {pools}) => ({
+    ...state,
+    pools: {
+      ...state.pools,
+      loadingTime: Date.now() - state.pools.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response: pools
+    }
+  })),
+  on(DbConfigActions.updateFullPoolsDataFailure, (state, {error}) => ({
+    ...state,
+    pools: {
+      ...state.pools,
+      loadingTime: Date.now() - state.pools.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
   })),
 )

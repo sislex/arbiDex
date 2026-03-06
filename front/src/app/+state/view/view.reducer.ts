@@ -7,6 +7,7 @@ export interface ViewState {
   isSidebarOpen: boolean;
   sidebarList: string[];
   activeSidebarItem: string;
+  displayInWei: boolean;
 }
 
 export interface ViewPartialState {
@@ -29,6 +30,7 @@ export const initialState: ViewState = {
     'Imports',
   ],
   activeSidebarItem: '',
+  displayInWei: true,
 };
 
 export const viewReducer = createReducer(
@@ -40,5 +42,9 @@ export const viewReducer = createReducer(
   on(ViewActions.setActiveSidebarItem, (state, {item}) => ({
     ...state,
     activeSidebarItem: item
+  })),
+  on(ViewActions.setDisplayInWei, (state, {item}) => ({
+    ...state,
+    displayInWei: item
   })),
 );

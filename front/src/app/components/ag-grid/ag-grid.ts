@@ -17,6 +17,8 @@ export class AgGrid implements OnChanges {
   @Input() colDefs: ColDef[] = [];
   @Input() defaultColDef: ColDef = {};
   @Input() isRowSelection: any = undefined;
+  @Input() context: any;
+  @Input() isWei: boolean = false;
 
   @Output() emitter = new EventEmitter();
 
@@ -24,12 +26,22 @@ export class AgGrid implements OnChanges {
 
   onGridReady(params: GridReadyEvent) {
     this.gridApi = params.api;
+    this.gridApi.refreshCells({ force: true });
     this.selectRows();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['rowData'] && this.gridApi) {
       setTimeout(() => this.selectRows());
+    }
+
+    if (changes['context'] && this.gridApi) {
+      this.gridApi.refreshCells({ force: true });
+    }
+
+    if (changes['isWei'] && this.gridApi) {
+      this.gridApi.setGridOption('context', { isWei: this.isWei });
+      this.gridApi.refreshCells({ force: true });
     }
   }
 

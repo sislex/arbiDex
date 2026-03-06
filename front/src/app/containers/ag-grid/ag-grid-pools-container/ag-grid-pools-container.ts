@@ -8,6 +8,7 @@ import { PoolDialogService } from '../../../services/pool-dialog-service';
 import {
   getFullPoolsData,
   getFullPoolsDataIsReady,
+  getUniqueTokensFromSwapRates,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
@@ -15,10 +16,17 @@ import {
   createPool,
   deletingPools,
   editPool,
-  initPoolsPage
+  initPoolsPage,
+  setReservesInCurrentToken,
 } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
+import {Autocomplete} from '../../../components/autocomplete/autocomplete';
+import {map} from 'rxjs';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {FormsModule} from '@angular/forms';
+import {displayInWei} from '../../../+state/view/view.selectors';
+import {setDisplayInWei} from '../../../+state/view/view.actions';
 
 @Component({
   selector: 'app-ag-grid-pools-container',
@@ -28,6 +36,9 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
     TitleTableButton,
     AsyncPipe,
     Loader,
+    Autocomplete,
+    MatCheckboxModule,
+    FormsModule
   ],
   templateUrl: './ag-grid-pools-container.html',
   styleUrl: './ag-grid-pools-container.scss',
@@ -38,8 +49,19 @@ export class AgGridPoolsContainer implements OnInit {
   readonly deleteDialog = inject(DeleteDialogService);
 
   poolsDataResponse$ = this.store.select(getFullPoolsData);
+  displayInWei$ = this.store.select(displayInWei);
   poolsDataIsReady$ = this.store.select(getFullPoolsDataIsReady);
   filteredItemCount: number = 0;
+
+  swapRateDataResponse$ = this.store.select(getUniqueTokensFromSwapRates).pipe(
+    map(tokens =>
+      tokens.map(token => ({
+        id: token.tokenId,
+        name: token.tokenName,
+        address: `${token.address} "${token.chainName}"`,
+      }))
+    )
+  );
 
   readonly colDefs: ColDef[] = [
     {
@@ -133,22 +155,46 @@ export class AgGridPoolsContainer implements OnInit {
       },
     },
     {
+      headerName: 'Reserve 0',
+      filter: true,
+      sortable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        const { convertedReserve0, reserve0, token0Decimal } = params.data || {};
+        const isWei = params.context.isWei;
+
+        if (!isWei) {
+          return reserve0 && token0Decimal
+            ? reserve0 / Math.pow(10, token0Decimal)
+            : reserve0 ?? '-';
+        }
+
+        if (typeof convertedReserve0 === 'number' && !Number.isNaN(convertedReserve0)) {
+          return convertedReserve0;
+        }
+        return convertedReserve0 !== undefined ? '-' : (reserve0 ?? '-');
+      }
+    },
+    {
       headerName: 'Reserve 1',
       filter: true,
       sortable: true,
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.reserve0 || '-';
-      },
-    },
-    {
-      headerName: 'Reserve 2',
-      filter: true,
-      sortable: true,
-      flex: 1,
-      valueGetter: (params) => {
-        return params.data?.reserve1 || '-';
-      },
+        const { convertedReserve1, reserve1, token1Decimal } = params.data || {};
+        const isWei = params.context.isWei;
+
+        if (!isWei) {
+          return reserve1 && token1Decimal
+            ? reserve1 / Math.pow(10, token1Decimal)
+            : reserve1 ?? '-';
+        }
+
+        if (typeof convertedReserve1 === 'number' && !Number.isNaN(convertedReserve1)) {
+          return convertedReserve1;
+        }
+        return convertedReserve1 !== undefined ? '-' : (reserve1 ?? '-');
+      }
     },
   ];
 
@@ -165,6 +211,10 @@ export class AgGridPoolsContainer implements OnInit {
     this.store.select(getFullPoolsData).subscribe(data => {
       this.filteredItemCount = data?.length || 0;
     });
+  }
+
+  onToggleWei($event: any) {
+    this.store.dispatch(setDisplayInWei({item: $event }))
   }
 
   onAction($event: any, row: any) {
@@ -210,6 +260,12 @@ export class AgGridPoolsContainer implements OnInit {
   events($event: any) {
     if ($event.event === 'AgGrid:MODEL_UPDATED') {
       this.filteredItemCount = $event.rowsDisplayed;
+    } else if ($event.event === 'SelectField:ITEM_SELECTED') {
+      if ($event.data === 0) {
+        this.store.dispatch(initPoolsPage());
+      } else {
+        this.store.dispatch(setReservesInCurrentToken({currentToken: $event.data}))
+      }
     }
   }
 }

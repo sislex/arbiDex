@@ -6,6 +6,8 @@ import * as DbConfigSelectors from './db-config.selectors';
 import {ApiService} from '../../services/api-service';
 import { Store } from '@ngrx/store';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {ExchangeRates} from '../../models/main';
+import {CurrencyConverterService} from '../../services/currency-converter-service';
 
 @Injectable()
 export class DbConfigEffects {
@@ -13,6 +15,7 @@ export class DbConfigEffects {
   private apiService = inject(ApiService);
   private store = inject(Store);
   private _snackBar = inject(MatSnackBar);
+  private currencyConverterService = inject(CurrencyConverterService);
 
   //====================================================================================================================
   //                                                   Tokens
@@ -116,6 +119,7 @@ export class DbConfigEffects {
         DbConfigActions.setTokensData(),
         DbConfigActions.setDexesData(),
         DbConfigActions.setChainsData(),
+        DbConfigActions.setSwapRate(),
       ])
     )
   );
@@ -948,4 +952,97 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
+//====================================================================================================================
+//                                                   Swap Rate
+//====================================================================================================================
+
+  setSwapRateData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setSwapRate),
+      withLatestFrom(this.store.select(DbConfigSelectors.getSwapRateDataResponse)),
+      exhaustMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setSwapRateDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getSwapRates().pipe(
+          map(response => DbConfigActions.setSwapRateDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setSwapRateDataFailure({ error })))
+        );
+      })
+    )
+  );
+
+  setReservesInCurrentToken$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setReservesInCurrentToken),
+      withLatestFrom(
+        this.store.select(DbConfigSelectors.getFullPoolsData),
+        this.store.select(DbConfigSelectors.getSwapRateDataResponse)
+      ),
+      map(([action, pools, costs]) => {
+        const targetId = action.currentToken;
+
+        const rates = costs.reduce((acc, item) => {
+          if (!acc[item.swapRate0]) acc[item.swapRate0] = {};
+          acc[item.swapRate0][item.swapRate1] = item.swapRateCount;
+
+          if (!acc[item.swapRate1]) acc[item.swapRate1] = {};
+          acc[item.swapRate1][item.swapRate0] = 1 / item.swapRateCount;
+          return acc;
+        }, {} as ExchangeRates);
+
+        const allBalances = pools.flatMap(pool => [
+          { amount: pool.reserve0, currency: pool.token0Id, poolId: pool.poolId },
+          { amount: pool.reserve1, currency: pool.token1Id, poolId: pool.poolId }
+        ]);
+
+        const resultList = allBalances.map(item => {
+          const converted = this.currencyConverterService.convert(
+            Number(item.amount),
+            item.currency,
+            targetId,
+            rates
+          );
+
+          return {
+            poolId: item.poolId,
+            originalAmount: item.amount,
+            originalTokenId: item.currency,
+            convertedAmount: converted ?? 0,
+            targetTokenId: targetId,
+            hasPrice: converted !== null
+          };
+        }).filter(item => item.convertedAmount !== null && item.convertedAmount > 0 && (item.originalTokenId !== item.targetTokenId));
+        return DbConfigActions.setReservesInCurrentTokenSuccess({ response: resultList });
+      }),
+      catchError(error => of(DbConfigActions.setReservesInCurrentTokenFailure({ error })))
+    )
+  );
+
+  updatePoolsWithConvertedReserves$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setReservesInCurrentTokenSuccess),
+      withLatestFrom(this.store.select(DbConfigSelectors.getFullPoolsData)),
+      map(([{ response }, pools]) => {
+        const convertedMap = response.reduce((acc: any, item: any) => {
+          if (!acc[item.poolId]) acc[item.poolId] = {};
+          acc[item.poolId][item.originalTokenId] = item.convertedAmount;
+          return acc;
+        }, {} as Record<string, Record<string, number>>);
+
+        const updatedPools = pools.map(pool => {
+          const poolConversions = convertedMap[pool.poolId] || {};
+          const round = (val: number | string) => Number(Number(val).toFixed(2));
+          return {
+            ...pool,
+            convertedReserve0: round(poolConversions[pool.token0Id]) ?? "-",
+            convertedReserve1: round(poolConversions[pool.token1Id]) ?? "-"
+          };
+        });
+        return DbConfigActions.updateFullPoolsDataSuccess({ pools: updatedPools });
+      }),
+      catchError(error => of(DbConfigActions.updateFullPoolsDataFailure({ error })))
+    )
+  );
 }

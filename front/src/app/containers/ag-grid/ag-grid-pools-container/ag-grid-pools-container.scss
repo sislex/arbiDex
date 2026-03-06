@@ -21,3 +21,24 @@
     }
   }
 }
+
+.custom-small-field {
+  background: #cccbcb;
+  padding: 4px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
+
+  section {
+    margin-right: 10px;
+  }
+
+  span {
+    margin-right: 4px;
+    align-self: center;
+  }
+  app-autocomplete {
+    flex: 1;
+  }
+}

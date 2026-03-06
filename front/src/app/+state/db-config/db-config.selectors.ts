@@ -288,6 +288,15 @@ export const getRpcUrlsDataIsLoaded = createSelector(
 );
 
 //====================================================================================================================
+//                                                   Swap Rate
+//====================================================================================================================
+
+export const getSwapRateDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.swapRate.response
+);
+
+//====================================================================================================================
 //                                                   MAPS
 //====================================================================================================================
 
@@ -340,6 +349,8 @@ export const getFullPoolsData = createSelector(
         dexName: dexMap.get(pool.dexId),
         token0Name: t0?.tokenName,
         token1Name: t1?.tokenName,
+        token0Decimal: t0?.decimals,
+        token1Decimal: t1?.decimals,
         token0Address: t0?.address,
         token1Address: t1?.address,
       };
@@ -677,4 +688,40 @@ export const getFullBotsDataIsReady = createSelector(
   getFullBotsDataIsLoaded,
   getFullBotsDataIsLoading,
   (loaded, loading) => loaded && !loading
+);
+
+export const getUniqueTokensFromSwapRates = createSelector(
+  getSwapRateDataResponse,
+  getTokensFullDataResponse,
+  (swapRates, tokens): ITokens[] => {
+    if (!swapRates || !tokens) return [];
+
+    const uniqueTokenIds = new Set<number>();
+    swapRates.forEach(rate => {
+      if (rate.swapRate0) uniqueTokenIds.add(rate.swapRate0);
+      if (rate.swapRate1) uniqueTokenIds.add(rate.swapRate1);
+    });
+
+    const tokensMap = new Map(tokens.map(t => [t.tokenId, t]));
+
+    const nativeToken = {
+      tokenId: 0,
+      tokenName: 'Native',
+      chainId: null,
+      chainName: 'allChains',
+      address: '-',
+      symbol: '-',
+      decimals: null,
+      isActive: null,
+      isChecked: null,
+      balance: null,
+    };
+
+    const mappedTokens = Array.from(uniqueTokenIds)
+      .map(id => tokensMap.get(id))
+      .filter((token): token is ITokens => !!token);
+
+    // Возвращаем нативный токен первым, а за ним остальные
+    return [nativeToken, ...mappedTokens];
+  }
 );

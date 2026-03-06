@@ -13,9 +13,17 @@ export class SwapRateController {
   }
 
   @Get()
-  findAll() {
-    return this.swapRateService.findAll();
+  async findAll() {
+    const rates = await this.swapRateService.findAll();
+
+    return rates.map(rate => ({
+      swapRateId: rate.swapRateId,
+      swapRateCount: rate.swapRateCount,
+      swapRate0: rate.swapRate0?.tokenId,
+      swapRate1: rate.swapRate1?.tokenId,
+    }));
   }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {

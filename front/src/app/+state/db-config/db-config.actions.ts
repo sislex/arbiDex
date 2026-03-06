@@ -307,3 +307,42 @@ export const deletingRpcUrl = createAction(
   '[DbConfig] deletingRpcUrl',
   props<{ rpcUrlId: number }>()
 );
+
+//====================================================================================================================
+//                                                   Swap Rate
+//====================================================================================================================
+
+export const setSwapRate = createAction('[DbConfig] setSwapRate');
+export const setSwapRateDataSuccess = createAction(
+  '[DbConfig] setSwapRateDataSuccess',
+  props<{ response: any }>()
+);
+export const setSwapRateDataFailure = createAction(
+  '[DbConfig] setSwapRateDataFailure',
+  props<{ error: string }>()
+);
+export const conversionTo = createAction(
+  '[DbConfig] conversionTo',
+  props<{ id: number }>()
+);
+
+export const setReservesInCurrentToken = createAction(
+  '[DbConfig] setReservesInCurrentToken',
+  props<{ currentToken: number }>()
+);
+export const setReservesInCurrentTokenSuccess = createAction(
+  '[DbConfig] setReservesInCurrentTokenSuccess',
+  props<{ response: any }>()
+);
+export const setReservesInCurrentTokenFailure = createAction(
+  '[DbConfig] setReservesInCurrentTokenFailure',
+  props<{ error: string }>()
+);
+export const updateFullPoolsDataSuccess = createAction(
+  '[DbConfig] updateFullPoolsDataSuccess',
+  props<{ pools: any }>()
+);
+export const updateFullPoolsDataFailure = createAction(
+  '[DbConfig] updateFullPoolsDataFailure',
+  props<{ error: string }>()
+);
