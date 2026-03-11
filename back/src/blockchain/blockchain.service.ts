@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { TokensService } from '../tokens/tokens.service';
-import { PoolsService } from '../pools/pools.service';
+import { TokensService } from '../main/tokens/tokens.service';
+import { PoolsService } from '../main/pools/pools.service';
 import { CreateTokenDto } from '../dtos/token-dto/token.dto';
 import { fetchTokensData, getUniqueTokens } from '../-helpers/getTokensData';
 import { Tokens } from '../entities/main/entities/Tokens';

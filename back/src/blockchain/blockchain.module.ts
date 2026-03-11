@@ -4,8 +4,8 @@ import { BlockchainController } from './blockchain.controller';
 import { Pools } from '../entities/main/entities/Pools';
 import { Tokens } from '../entities/main/entities/Tokens';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PoolsModule } from '../pools/pools.module';
-import { TokensModule } from 'src/tokens/tokens.module';
+import { PoolsModule } from '../main/pools/pools.module';
+import { TokensModule } from 'src/main/tokens/tokens.module';
 import { GetV2ReservesHelper } from '../-helpers/getV2Reserves';
 import { GetV3ReservesHelper } from '../-helpers/getV3Reserves';
 

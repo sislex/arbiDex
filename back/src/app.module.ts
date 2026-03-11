@@ -3,21 +3,22 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TokensModule } from './tokens/tokens.module';
-import { ChainsModule } from './chains/chains.module';
-import { PoolsModule } from './pools/pools.module';
-import { ServersModule } from './servers/servers.module';
-import { DexesModule } from './dexes/dexes.module';
-import { JobsModule } from './jobs/jobs.module';
-import { BotsModule } from './bots/bots.module';
-import { PairsModule } from './pairs/pairs.module';
-import { QuotesModule } from './quotes/quotes.module';
-import { PairQuoteRelationsModule } from './pair-quote-relations/pair-quote-relations.module';
-import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relations.module';
-import { RpcUrlsModule } from './rpc-urls/rpc-urls.module';
-import { GetFeeModule } from './services/get-fee.module';
-import { SwapRateModule } from './swap-rate/swap-rate.module';
+import { TokensModule } from './main/tokens/tokens.module';
+import { ChainsModule } from './main/chains/chains.module';
+import { PoolsModule } from './main/pools/pools.module';
+import { ServersModule } from './main/servers/servers.module';
+import { DexesModule } from './main/dexes/dexes.module';
+import { JobsModule } from './main/jobs/jobs.module';
+import { BotsModule } from './main/bots/bots.module';
+import { PairsModule } from './main/pairs/pairs.module';
+import { QuotesModule } from './main/quotes/quotes.module';
+import { PairQuoteRelationsModule } from './main/pair-quote-relations/pair-quote-relations.module';
+import { QuoteJobRelationsModule } from './main/quote-job-relations/quote-job-relations.module';
+import { RpcUrlsModule } from './main/rpc-urls/rpc-urls.module';
+import { GetFeeModule } from './main/services/get-fee.module';
+import { SwapRateModule } from './main/swap-rate/swap-rate.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
+import { QuotesGraphModule } from './graph/quotes_graph/quotes_graph.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { BlockchainModule } from './blockchain/blockchain.module';
     GetFeeModule,
     SwapRateModule,
     BlockchainModule,
+    QuotesGraphModule,
   ],
   controllers: [AppController],
   providers: [AppService],
