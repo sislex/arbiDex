@@ -24,7 +24,6 @@ services:
       arbi-postgres:
         condition: service_healthy
 
-
   arbi-postgres:
     image: postgres:16
     container_name: arbi-postgres
@@ -46,6 +45,27 @@ services:
       timeout: 3s
       retries: 20
 
+  arbi-postgres-analytics:
+    image: postgres:16
+    container_name: arbi-postgres-analytics
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_ANALYTICS}
+    ports:
+      - "${DB_PORT_ANALYTICS}:5432"
+    volumes:
+      - pg_data_analytics:/var/lib/postgresql/data
+      - ./db/backups:/backups
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_ANALYTICS} -h localhost" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
   arbi-pgadmin:
     image: dpage/pgadmin4:8
     container_name: arbi-pgadmin
@@ -62,6 +82,8 @@ services:
     depends_on:
       arbi-postgres:
         condition: service_healthy
+      arbi-postgres-analytics:
+        condition: service_healthy
     volumes:
       - ./db/pgadmin_storage:/var/lib/pgadmin
       - ./db/pgadmin4/servers.json:/db/pgadmin4/servers.json:ro
@@ -69,3 +91,5 @@ services:
 volumes:
   pg_data:
     name: arbidex_pg_data
+  pg_data_analytics:
+    name: arbidex_pg_analytics_data
