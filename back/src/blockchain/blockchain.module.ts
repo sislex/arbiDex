@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { BlockchainController } from './blockchain.controller';
-import { Pools } from '../entities/entities/Pools';
-import { Tokens } from '../entities/entities/Tokens';
+import { Pools } from '../entities/main/entities/Pools';
+import { Tokens } from '../entities/main/entities/Tokens';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PoolsModule } from '../pools/pools.module';
 import { TokensModule } from 'src/tokens/tokens.module';

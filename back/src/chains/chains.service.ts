@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ChainDto, UpdateChainDto } from '../dtos/chains-dto/chain.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Chains } from '../entities/entities/Chains';
+import { Chains } from '../entities/main/entities/Chains';
 
 @Injectable()
 export class ChainsService {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PairDto } from '../dtos/pairs-dto/pair.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Pairs } from '../entities/entities/Pairs';
+import { Pairs } from '../entities/main/entities/Pairs';
 import { Repository } from 'typeorm';
 import { PoolsService } from '../pools/pools.service';
 import { TokensService } from '../tokens/tokens.service';

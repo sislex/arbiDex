@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PairQuoteRelationDto } from '../dtos/pair-quote-relations-dto/pair-quote-relation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PairQuoteRelations } from '../entities/entities/PairQuoteRelations';
+import { PairQuoteRelations } from '../entities/main/entities/PairQuoteRelations';
 import { Repository } from 'typeorm';
 import { PairsService } from '../pairs/pairs.service';
 import { QuotesService } from '../quotes/quotes.service';

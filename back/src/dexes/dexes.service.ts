@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DexDto } from '../dtos/dexes-dto/dex.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Dexes } from '../entities/entities/Dexes';
+import { Dexes } from '../entities/main/entities/Dexes';
 
 @Injectable()
 export class DexesService {

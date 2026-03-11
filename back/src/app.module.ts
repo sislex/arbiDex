@@ -18,17 +18,6 @@ import { RpcUrlsModule } from './rpc-urls/rpc-urls.module';
 import { GetFeeModule } from './services/get-fee.module';
 import { SwapRateModule } from './swap-rate/swap-rate.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
-import { Tokens } from './entities/entities/Tokens';
-import { Pools } from './entities/entities/Pools';
-import { Chains } from './entities/entities/Chains';
-import { Dexes } from './entities/entities/Dexes';
-import { Servers } from './entities/entities/Servers';
-import { Jobs } from './entities/entities/Jobs';
-import { Bots } from './entities/entities/Bots';
-import { Quotes } from './entities/entities/Quotes';
-import { QuoteJobRelations } from './entities/entities/QuoteJobRelations';
-import { Pairs } from './entities/entities/Pairs';
-import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
 
 @Module({
   imports: [
@@ -44,19 +33,25 @@ import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
         username: cfg.get<string>('POSTGRES_USER'),
         password: cfg.get<string>('POSTGRES_PASSWORD'),
         database: cfg.get<string>('POSTGRES_DB'),
-        entities: [
-          Tokens,
-          Pools,
-          Chains,
-          Dexes,
-          Servers,
-          Jobs,
-          Bots,
-          Quotes,
-          QuoteJobRelations,
-          Pairs,
-          PairQuoteRelations,
-        ],
+        entities: [__dirname + '/entities/main/entities/*.{.ts,.js}'],
+        autoLoadEntities: true,
+        synchronize: false,
+        ssl:
+          cfg.get<string>('DB_SSL') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
+      }),
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (cfg: ConfigService) => ({
+        type: 'postgres',
+        host: cfg.get<string>('DB_HOST'),
+        port: Number(cfg.get<string>('DB_PORT_ANALYTICS') ?? 6543),
+        username: cfg.get<string>('POSTGRES_USER'),
+        password: cfg.get<string>('POSTGRES_PASSWORD'),
+        database: cfg.get<string>('POSTGRES_DB_ANALYTICS'),
+        entities: [__dirname + '/entities/analytics/*.entity{.ts,.js}'],
         autoLoadEntities: true,
         synchronize: false,
         ssl:

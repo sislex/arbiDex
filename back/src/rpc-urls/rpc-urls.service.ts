@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { RpcUrlsDto } from '../dtos/rpc-urls-dto/rpc-urls.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Chains } from '../entities/entities/Chains';
+import { Chains } from '../entities/main/entities/Chains';
 import { ChainsService } from '../chains/chains.service';
-import { RpcUrls } from '../entities/entities/RpcUrls';
+import { RpcUrls } from '../entities/main/entities/RpcUrls';
 
 @Injectable()
 export class RpcUrlsService {

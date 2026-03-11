@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Tokens } from '../entities/entities/Tokens';
+import { Tokens } from '../entities/main/entities/Tokens';
 import { Raw, Repository } from 'typeorm';
 import { CreateTokenDto } from '../dtos/token-dto/token.dto';
-import { Chains } from '../entities/entities/Chains';
+import { Chains } from '../entities/main/entities/Chains';
 import { ChainsService } from '../chains/chains.service';
 
 interface TokenFilter {

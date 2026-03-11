@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PoolDto, UpdatePoolDto, UpdateReservesDto } from '../dtos/pools-dto/pool.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Pools } from '../entities/entities/Pools';
+import { Pools } from '../entities/main/entities/Pools';
 import { TokensService } from '../tokens/tokens.service';
 
 @Injectable()

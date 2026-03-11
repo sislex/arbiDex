@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JobsService } from '../jobs/jobs.service';
-import { QuoteJobRelations } from '../entities/entities/QuoteJobRelations';
+import { QuoteJobRelations } from '../entities/main/entities/QuoteJobRelations';
 import { QuoteJobRelationDto } from '../dtos/quote-job-relations-dto/quote-job-relation.dto';
 import { PairQuoteRelationsService } from '../pair-quote-relations/pair-quote-relations.service';
 

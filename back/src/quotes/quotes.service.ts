@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { QuoteDto } from '../dtos/quotes-dto/quote.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Quotes } from '../entities/entities/Quotes';
+import { Quotes } from '../entities/main/entities/Quotes';
 import { Repository } from 'typeorm';
 import { TokensService } from '../tokens/tokens.service';
 

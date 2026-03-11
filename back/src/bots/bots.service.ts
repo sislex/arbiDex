@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BotDto } from '../dtos/bots-dto/bot.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Bots } from '../entities/entities/Bots';
+import { Bots } from '../entities/main/entities/Bots';
 import { Repository } from 'typeorm';
 import { ServersService } from '../servers/servers.service';
 import { JobsService } from '../jobs/jobs.service';

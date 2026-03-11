@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Jobs } from '../entities/entities/Jobs';
+import { Jobs } from '../entities/main/entities/Jobs';
 import { Repository } from 'typeorm';
 import { JobDto } from '../dtos/jobs-dto/job.dto';
 import { QuoteJobRelationsService } from '../quote-job-relations/quote-job-relations.service';

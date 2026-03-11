@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { BotsService } from './bots.service';
 import { BotsController } from './bots.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Bots } from '../entities/entities/Bots';
+import { Bots } from '../entities/main/entities/Bots';
 import { ServersModule } from '../servers/servers.module';
 import { JobsModule } from '../jobs/jobs.module';
 

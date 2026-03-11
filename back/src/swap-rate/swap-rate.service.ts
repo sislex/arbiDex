@@ -4,7 +4,7 @@ import { UpdateSwapRateDto } from '../dtos/swap-rate/update-swap-rate.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TokensService } from '../tokens/tokens.service';
-import { SwapRate } from '../entities/entities/SwapRate';
+import { SwapRate } from '../entities/main/entities/SwapRate';
 
 @Injectable()
 export class SwapRateService {
