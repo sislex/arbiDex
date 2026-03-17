@@ -21,28 +21,8 @@ export function mapQuoteRelation(item: any) {
   return {
     dex: pool?.dex?.name || '-',
     version: (pool?.version as 'v2' | 'v3' | 'v4') || '-',
-    // token0: {
-    //   address: pool?.token0?.address || '-',
-    //   decimals: pool?.token0?.decimals ?? 0
-    // },
-    // token1: {
-    //   address: pool?.token1?.address || '-',
-    //   decimals: pool?.token1?.decimals ?? 0
-    // },
     poolAddress: String(pool?.poolAddress || '-'),
-    // feePpm: pool?.fee || 0,
-    tokenIn: {
-      address: pair?.tokenIn?.address || '-',
-      // decimals: pair?.tokenIn?.decimals ?? 0
-    },
-    tokenOut: {
-      address: pair?.tokenOut?.address || '-',
-      // decimals: pair?.tokenOut?.decimals ?? 0
-    },
-    // side: quote?.side || '-',
-    amount: String(quote?.amount || '0'),
-    // blockTag: quote?.blockTag || 0,
-    quoteSource: quote?.quoteSource || '-',
+    tokens: [pair?.tokenIn?.address.toString() || '-', pair?.tokenOut?.address.toString() || '-'],
   };
 }
 
