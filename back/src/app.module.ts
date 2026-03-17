@@ -26,6 +26,7 @@ import { QuotesGraphModule } from './graph/quotes_graph/quotes_graph.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
+      name: 'default',
       inject: [ConfigService],
       useFactory: (cfg: ConfigService) => ({
         type: 'postgres',
@@ -35,24 +36,6 @@ import { QuotesGraphModule } from './graph/quotes_graph/quotes_graph.module';
         password: cfg.get<string>('POSTGRES_PASSWORD'),
         database: cfg.get<string>('POSTGRES_DB'),
         entities: [__dirname + '/entities/main/entities/*.{.ts,.js}'],
-        autoLoadEntities: true,
-        synchronize: false,
-        ssl:
-          cfg.get<string>('DB_SSL') === 'true'
-            ? { rejectUnauthorized: false }
-            : false,
-      }),
-    }),
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (cfg: ConfigService) => ({
-        type: 'postgres',
-        host: cfg.get<string>('DB_HOST'),
-        port: Number(cfg.get<string>('DB_PORT_ANALYTICS') ?? 6543),
-        username: cfg.get<string>('POSTGRES_USER'),
-        password: cfg.get<string>('POSTGRES_PASSWORD'),
-        database: cfg.get<string>('POSTGRES_DB_ANALYTICS'),
-        entities: [__dirname + '/entities/analytics/*.entity{.ts,.js}'],
         autoLoadEntities: true,
         synchronize: false,
         ssl:
