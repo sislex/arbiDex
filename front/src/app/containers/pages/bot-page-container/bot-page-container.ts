@@ -14,7 +14,7 @@ import { setBotPreConfig } from '../../../+state/main/main.actions';
 import {
   AgGridBotRelationsContainer
 } from '../../ag-grid/ag-grid-bot-relations-container/ag-grid-bot-relations-container';
-import { setJobsData } from '../../../+state/db-config/db-config.actions';
+import {setJobsData, setRpcUrlsData} from '../../../+state/db-config/db-config.actions';
 
 @Component({
   selector: 'app-bot-page-container',
@@ -45,6 +45,7 @@ export class BotPageContainer {
     this.currentBotId = Number(this.route.snapshot.paramMap.get('id'));
     this.store.dispatch(setActiveBot({ botId: this.currentBotId }));
     this.store.dispatch(setJobsData());
+    this.store.dispatch(setRpcUrlsData());
   };
 
   onAction($event: any, note: string) {
