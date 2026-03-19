@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import * as MainActions from './main.actions';
-import {catchError, EMPTY, from, lastValueFrom, map, of, switchMap, tap} from 'rxjs';
+import {catchError, EMPTY, from, lastValueFrom, map, of, switchMap, tap, withLatestFrom} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfigDialogService } from '../../services/config-dialog-service';
 import { ApiService } from '../../services/api-service';
 import { concatLatestFrom } from '@ngrx/operators';
 import {Store} from '@ngrx/store';
-import {getBotsByServerIdResponse} from '../db-config/db-config.selectors';
+import {getBotsByServerIdResponse, getRpcUrlDataResponse} from '../db-config/db-config.selectors';
 import * as DbConfigSelectors from '../db-config/db-config.selectors';
 import * as RelationsActions from '../relations/relations.actions';
 
@@ -19,10 +19,12 @@ export function mapQuoteRelation(item: any) {
   const quote = qr.quote;
 
   return {
-    dex: pool?.dex?.name || '-',
+    dex: pool?.dex?.dexId || '-',
     version: (pool?.version as 'v2' | 'v3' | 'v4') || '-',
     poolAddress: String(pool?.poolAddress || '-'),
-    tokens: [pair?.tokenIn?.address.toString() || '-', pair?.tokenOut?.address.toString() || '-'],
+    token0: pool?.token0?.address || '-',
+    token1: pool?.token1?.address || '-',
+    feePpm: pool?.fee || 0,
   };
 }
 
@@ -101,7 +103,8 @@ export class MainEffects {
     () =>
       this.actions$.pipe(
         ofType(MainActions.setBotPreConfig),
-        switchMap((action: any) =>
+        withLatestFrom(this.store.select(getRpcUrlDataResponse)),
+        switchMap(([action, rpcList]) =>
           from(this.apiService.setBotById(action.botId)).pipe(
             tap(async (botData: any) => {
 
@@ -131,14 +134,17 @@ export class MainEffects {
                 })
               ));
 
+              const rpcUrlId = action.data[0].rpcUrlId;
+              const foundRpc = rpcList.find(rpc => rpc.rpcUrlId === rpcUrlId);
+
               const actionConfig = {
                 ...action.data[0],
+                rpcUrl: {rpcUrl: foundRpc?.rpcUrl},
                 quoteJobRelations: (quoteJobRelations as any).response || [],
               };
 
-
               const botConfig = {
-                ...mapBotParams(botData),
+                botParams: {...mapBotParams(botData)},
                 jobParams: mapJobParams(actionConfig)
               };
 
