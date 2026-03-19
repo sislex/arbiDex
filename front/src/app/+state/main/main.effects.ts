@@ -19,10 +19,12 @@ export function mapQuoteRelation(item: any) {
   const quote = qr.quote;
 
   return {
-    dex: pool?.dex?.name || '-',
+    dex: pool?.dex?.dexId || '-',
     version: (pool?.version as 'v2' | 'v3' | 'v4') || '-',
     poolAddress: String(pool?.poolAddress || '-'),
-    tokens: [pair?.tokenIn?.address.toString() || '-', pair?.tokenOut?.address.toString() || '-'],
+    token0: pool?.token0?.address || '-',
+    token1: pool?.token1?.address || '-',
+    feePpm: pool?.fee || 0,
   };
 }
 
