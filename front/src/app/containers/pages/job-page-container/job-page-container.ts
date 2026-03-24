@@ -91,8 +91,6 @@ export class JobPageContainer implements OnInit {
             this.setCreateAndRemoveLists(mappedOldRelations, this.relatedJobRelationsIds);
           });
       } else if ($event.data === 'get config') {
-        console.log(this.relatedFullJobData)
-        console.log(this.currentJobId)
         this.store.dispatch(setJobPreConfig({ data: this.relatedFullJobData, jobId: this.currentJobId}))
       }
     } else if ($event.event === 'AgGridJobRelationsContainer:ACTIVE_RELATIONS') {

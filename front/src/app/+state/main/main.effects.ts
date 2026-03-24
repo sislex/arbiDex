@@ -58,8 +58,6 @@ export function mapJobParams(job: any) {
 }
 
 export function mapJobPreConfig(jobData: any, relations: any[]) {
-  console.log('jobData', jobData)
-  console.log('relations', relations)
   return {
     jobType: jobData.jobType,
     rpcUrl: jobData.rpcUrl.rpcUrl,
@@ -115,7 +113,7 @@ export class MainEffects {
         switchMap(([action, rpcList]) =>
           from(this.apiService.setBotById(action.botId)).pipe(
             tap(async (botData: any) => {
-              const quoteJobRelations = await lastValueFrom(this.apiService.getJobRelationsByJobId(botData.job.jobId).pipe(
+              const quoteJobRelations = await lastValueFrom(this.apiService.getJobRelationsByJobId(action.data[0].jobId).pipe(
                 map((response: any[]) => {
                   const formattedData = response.map(item => ({
                     quoteJobRelationId: item.quoteJobRelationId,

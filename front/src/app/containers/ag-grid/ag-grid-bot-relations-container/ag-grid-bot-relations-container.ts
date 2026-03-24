@@ -110,7 +110,6 @@ export class AgGridBotRelationsContainer implements OnInit {
         fullData: $event.row.selectedNodes.map((item: any) => item.data),
       });
     }
-
     if ($event.event === 'AgGrid:MODEL_UPDATED') {
       this.filteredItemCount = $event.rowsDisplayed;
     }
