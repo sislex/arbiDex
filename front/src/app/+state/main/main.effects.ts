@@ -58,6 +58,8 @@ export function mapJobParams(job: any) {
 }
 
 export function mapJobPreConfig(jobData: any, relations: any[]) {
+  console.log('jobData', jobData)
+  console.log('relations', relations)
   return {
     jobType: jobData.jobType,
     rpcUrl: jobData.rpcUrl.rpcUrl,
@@ -79,10 +81,16 @@ export class MainEffects {
     () =>
       this.actions$.pipe(
         ofType(MainActions.setJobPreConfig),
-        switchMap((action: any) =>
+        withLatestFrom(this.store.select(getRpcUrlDataResponse)),
+        switchMap(([action, rpcList]) =>
           from(this.apiService.getJobById(action.jobId)).pipe(
             tap((jobData) => {
-              const jobConfig = mapJobPreConfig(jobData, action.data);
+              const foundRpc = rpcList.find(rpc => rpc.rpcUrlId === jobData.rpcUrlId);
+              const jobConfigWithRpc = {
+                ...jobData,
+                rpcUrl: {rpcUrl: foundRpc?.rpcUrl},
+              };
+              const jobConfig = mapJobPreConfig(jobConfigWithRpc, action.data);
 
               this.configDialogService.openConfig(
                 'Copy Job config',
@@ -107,7 +115,6 @@ export class MainEffects {
         switchMap(([action, rpcList]) =>
           from(this.apiService.setBotById(action.botId)).pipe(
             tap(async (botData: any) => {
-
               const quoteJobRelations = await lastValueFrom(this.apiService.getJobRelationsByJobId(botData.job.jobId).pipe(
                 map((response: any[]) => {
                   const formattedData = response.map(item => ({

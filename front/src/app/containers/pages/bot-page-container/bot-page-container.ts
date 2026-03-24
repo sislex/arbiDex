@@ -34,7 +34,7 @@ export class BotPageContainer {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
 
-  footerButtons = ['create for server', 'get config', 'cancel'];
+  footerButtons = ['create for server', 'get config'];
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
   relatedBotRelationsIds: number[] = [];
@@ -62,8 +62,6 @@ export class BotPageContainer {
         this.store.dispatch(setBotPreConfig({ data: this.relatedFullBotData, botId: this.currentBotId }))
       } else if ($event.data === 'create for server') {
         console.log('create for server', $event)
-      } else if ($event.data === 'cancel') {
-        console.log('cancelTO')
       }
     } else if ($event.event === 'AgGridBotRelationsContainer:ACTIVE_RELATIONS') {
       this.relatedBotRelationsIds = $event.data

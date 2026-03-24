@@ -386,6 +386,7 @@ export class DbConfigEffects {
         DbConfigActions.setTokensData(),
         DbConfigActions.setDexesData(),
         DbConfigActions.setChainsData(),
+        DbConfigActions.setRpcUrlsData(),
       ])
     )
   );

@@ -33,7 +33,7 @@ export class ServerPageContainer {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
 
-  footerButtons = ['reset server', 'get config', 'cancel'];
+  footerButtons = ['reset server', 'get config'];
   currentServerId: number;
   relatedServerRelationsIds: number[] = [];
   relatedFullServerData: any[] = [];
@@ -58,8 +58,6 @@ export class ServerPageContainer {
     if ($event.event === 'ButtonPanel:BUTTON_CLICKED') {
       if ($event.data === 'get config') {
         this.store.dispatch(setServerPreConfig({ data: this.relatedFullServerData, serverId: this.currentServerId }))
-      } else if ($event.data === 'cancel') {
-        console.log('cancelTO')
       } else if ($event.data === 'reset server') {
         this.store.dispatch(resetServerSettings({data: [], serverId: this.currentServerId}))
       }

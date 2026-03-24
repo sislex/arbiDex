@@ -49,7 +49,7 @@ export class JobPageContainer implements OnInit {
   private store = inject(Store);
   private route = inject(ActivatedRoute);
 
-  footerButtons = ['save', 'get config', 'cancel'];
+  footerButtons = ['save', 'get config'];
   activeSidebarItem$ = this.store.select(getActiveSidebarItem);
 
   relatedJobRelationsIds: number[] = [];
@@ -91,9 +91,9 @@ export class JobPageContainer implements OnInit {
             this.setCreateAndRemoveLists(mappedOldRelations, this.relatedJobRelationsIds);
           });
       } else if ($event.data === 'get config') {
+        console.log(this.relatedFullJobData)
+        console.log(this.currentJobId)
         this.store.dispatch(setJobPreConfig({ data: this.relatedFullJobData, jobId: this.currentJobId}))
-      } else if ($event.data === 'cancel') {
-        console.log('cancelTO')
       }
     } else if ($event.event === 'AgGridJobRelationsContainer:ACTIVE_RELATIONS') {
       this.oldJobRelations = $event.data;
