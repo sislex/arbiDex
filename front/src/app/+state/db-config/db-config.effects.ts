@@ -1014,7 +1014,7 @@ export class DbConfigEffects {
             targetTokenId: targetId,
             hasPrice: converted !== null
           };
-        }).filter(item => item.convertedAmount !== null && item.convertedAmount > 0 && (item.originalTokenId !== item.targetTokenId));
+        }).filter(item => item.convertedAmount !== null && item.convertedAmount > 0 );
         return DbConfigActions.setReservesInCurrentTokenSuccess({ response: resultList });
       }),
       catchError(error => of(DbConfigActions.setReservesInCurrentTokenFailure({ error })))

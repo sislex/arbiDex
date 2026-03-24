@@ -47,6 +47,7 @@ export const deletingToken = createAction(
 
 export const initPoolsPage = createAction('[DbConfig] initPoolsPage');
 export const setPoolsData = createAction('[DbConfig] setPoolsData');
+export const resetPoolsData = createAction('[DbConfig] resetPoolsData');
 export const setPoolsDataSuccess = createAction(
   '[DbConfig] setPoolsDataSuccess',
   props<{ response: any }>()

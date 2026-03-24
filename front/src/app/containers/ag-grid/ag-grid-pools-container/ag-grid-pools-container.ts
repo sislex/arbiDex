@@ -16,7 +16,7 @@ import {
   createPool,
   deletingPools,
   editPool,
-  initPoolsPage,
+  initPoolsPage, resetPoolsData,
   setReservesInCurrentToken,
 } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
@@ -164,9 +164,15 @@ export class AgGridPoolsContainer implements OnInit {
         const isWei = params.context.isWei;
 
         if (!isWei) {
-          return reserve0 && token0Decimal
-            ? reserve0 / Math.pow(10, token0Decimal)
-            : reserve0 ?? '-';
+          if (convertedReserve0 !== undefined) {
+            return convertedReserve0 && token0Decimal
+              ? convertedReserve0 / Math.pow(10, token0Decimal)
+              : convertedReserve0 ?? '-';
+          } else {
+            return reserve0 && token0Decimal
+              ? reserve0 / Math.pow(10, token0Decimal)
+              : reserve0 ?? '-';
+          }
         }
 
         if (typeof convertedReserve0 === 'number' && !Number.isNaN(convertedReserve0)) {
@@ -185,9 +191,16 @@ export class AgGridPoolsContainer implements OnInit {
         const isWei = params.context.isWei;
 
         if (!isWei) {
-          return reserve1 && token1Decimal
-            ? reserve1 / Math.pow(10, token1Decimal)
-            : reserve1 ?? '-';
+          if (convertedReserve1 !== undefined) {
+            return convertedReserve1 && token1Decimal
+              ? convertedReserve1 / Math.pow(10, token1Decimal)
+              : convertedReserve1 ?? '-';
+          } else {
+            return reserve1 && token1Decimal
+              ? reserve1 / Math.pow(10, token1Decimal)
+              : reserve1 ?? '-';
+          }
+
         }
 
         if (typeof convertedReserve1 === 'number' && !Number.isNaN(convertedReserve1)) {
@@ -262,7 +275,7 @@ export class AgGridPoolsContainer implements OnInit {
       this.filteredItemCount = $event.rowsDisplayed;
     } else if ($event.event === 'SelectField:ITEM_SELECTED') {
       if ($event.data === 0) {
-        this.store.dispatch(initPoolsPage());
+        this.store.dispatch(resetPoolsData());
       } else {
         this.store.dispatch(setReservesInCurrentToken({currentToken: $event.data}))
       }

@@ -454,4 +454,15 @@ export const dbConfigReducer = createReducer(
       error
     }
   })),
+  on(DbConfigActions.resetPoolsData, (state) => ({
+    ...state,
+    pools: {
+      ...state.pools,
+      response: state.pools.response.map(row => ({
+        ...row,
+        convertedReserve0: undefined,
+        convertedReserve1: undefined
+      }))
+    }
+  })),
 )
