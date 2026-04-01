@@ -1,0 +1,25 @@
+<app-header-content-layout>
+  @if (poolsDataIsReady$ | async) {
+    <app-title-table-button
+      header
+      [title]="'Dex pools table (' + ((poolsDataResponse$ | async)!.length === filteredItemCount ? (poolsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (poolsDataResponse$ | async)!.length) + ')'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+    >
+    </app-title-table-button>
+  }
+  @if (poolsDataIsReady$ | async) {
+    <app-ag-grid
+      content
+      [rowData]="(poolsDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      [isWei]="(displayInWei$ | async)!"
+      [context]="{ isWei: true }"
+      (emitter)="events($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
+</app-header-content-layout>
+

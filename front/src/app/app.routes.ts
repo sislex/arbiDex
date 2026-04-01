@@ -15,6 +15,8 @@ import { BotPageContainer } from './containers/pages/bot-page-container/bot-page
 import { AgGridRpcUrlsContainer } from './containers/ag-grid/ag-grid-rpc-urls-container/ag-grid-rpc-urls-container';
 import { ServerPageContainer } from './containers/pages/server-page-container/server-page-container';
 import {ImportsPage} from './containers/pages/imports-page/imports-page';
+import {AgGridCexJobsContainer} from './containers/ag-grid/ag-grid-cex-jobs-container/ag-grid-cex-jobs-container';
+import {AgGridCexPoolsContainer} from './containers/ag-grid/ag-grid-cex-pools-container/ag-grid-cex-pools-container';
 
 export const routes: Routes = [
   {
@@ -42,9 +44,14 @@ export const routes: Routes = [
         data: { feature: 'rpc-urls' },
       },
       {
-        path: 'jobs',
+        path: 'dex-jobs',
         component: AgGridJobsContainer,
-        data: { feature: 'jobs' },
+        data: { feature: 'dex-jobs' },
+      },
+      {
+        path: 'cex-jobs',
+        component: AgGridCexJobsContainer,
+        data: { feature: 'cex-jobs' },
       },
       {
         path: 'quotes',
@@ -67,9 +74,14 @@ export const routes: Routes = [
         data: { feature: 'dexes' },
       },
       {
-        path: 'pools',
+        path: 'dex-pools',
         component: AgGridPoolsContainer,
-        data: { feature: 'pools' },
+        data: { feature: 'dex-pools' },
+      },
+      {
+        path: 'cex-pools',
+        component: AgGridCexPoolsContainer,
+        data: { feature: 'cex-pools' },
       },
       {
         path: 'tokens',
