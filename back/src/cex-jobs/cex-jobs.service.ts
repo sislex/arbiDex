@@ -1,25 +1,69 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CexPoolsService } from '../cex-pools/cex-pools.service';
+import { CexJob } from '../entities/entities/cex-job.entity';
 import { CexJobDto } from '../dtos/cex-jobs-dto/cex-job.dto';
 
 @Injectable()
 export class CexJobsService {
-  create(createCexJobDto: CexJobDto) {
-    return 'This action adds a new cexJob';
+  constructor(
+    @InjectRepository(CexJob)
+    private readonly cexJobRepository: Repository<CexJob>,
+    private readonly cexPoolsService: CexPoolsService,
+  ) {}
+
+  async create(dto: CexJobDto) {
+    const pool = await this.cexPoolsService.findOne(dto.cex_pool_id);
+
+    const job = this.cexJobRepository.create({
+      job_type: dto.jobType,
+      description: dto.description,
+      cex_pool_id: pool.id,
+    });
+
+    return await this.cexJobRepository.save(job);
   }
 
-  findAll() {
-    return `This action returns all cexJobs`;
+  async findAll() {
+    return await this.cexJobRepository.find({
+      relations: {
+        pool: {
+          chain: true,
+        },
+      },
+      order: { id: 'DESC' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cexJob`;
+  async findOne(id: number) {
+    const job = await this.cexJobRepository.findOne({
+      where: { id },
+      relations: ['pool', 'pool.chain'],
+    });
+
+    if (!job) {
+      throw new NotFoundException(`CexJob with id ${id} not found`);
+    }
+    return job;
   }
 
-  update(id: number, updateCexJobDto: CexJobDto) {
-    return `This action updates a #${id} cexJob`;
+  async update(id: number, dto: CexJobDto) {
+    const job = await this.findOne(id);
+    const pool = await this.cexPoolsService.findOne(dto.cex_pool_id);
+
+    job.job_type = dto.jobType;
+    job.description = dto.description || '';
+    job.cex_pool_id = pool.id;
+
+    return await this.cexJobRepository.save(job);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cexJob`;
+  async remove(id: number) {
+    const result = await this.cexJobRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Job ${id} not found`);
+    }
+    return { deleted: true };
   }
 }
