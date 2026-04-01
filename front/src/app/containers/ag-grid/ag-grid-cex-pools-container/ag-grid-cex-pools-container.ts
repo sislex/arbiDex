@@ -4,7 +4,6 @@ import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
-import { PoolDialogService } from '../../../services/pool-dialog-service';
 import {
   getFullPoolsData,
   getFullPoolsDataIsReady,
@@ -26,6 +25,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
 import {displayInWei} from '../../../+state/view/view.selectors';
 import {setDisplayInWei} from '../../../+state/view/view.actions';
+import {CexPoolDialogService} from '../../../services/cex-pool-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-cex-pools-container',
@@ -43,7 +43,7 @@ import {setDisplayInWei} from '../../../+state/view/view.actions';
 })
 export class AgGridCexPoolsContainer implements OnInit {
   private store = inject(Store);
-  readonly poolDialog = inject(PoolDialogService);
+  readonly poolDialog = inject(CexPoolDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
   poolsDataResponse$ = this.store.select(getFullPoolsData);

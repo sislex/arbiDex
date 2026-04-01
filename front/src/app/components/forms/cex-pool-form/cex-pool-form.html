@@ -1,0 +1,34 @@
+<app-header-content-layout>
+  <app-field-title header [title]="'Select chain'"></app-field-title>
+  <app-autocomplete
+    [title]="'Source'"
+    [list]="(chainsList | async)!"
+    [selected]="formData.chainId"
+    (emitter)="events($event, 'source')"
+    content
+  ></app-autocomplete>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Select Token 0 symbol'"></app-field-title>
+  <app-autocomplete
+    [title]="'Token 0'"
+    [list]="(tokensList | async)!"
+    [selected]="formData.token0"
+    [disabled]="tokenDisabled"
+    (emitter)="events($event, 'token0')"
+    content
+  ></app-autocomplete>
+</app-header-content-layout>
+
+<app-header-content-layout>
+  <app-field-title header [title]="'Select Token 1 symbol'"></app-field-title>
+  <app-autocomplete
+    [title]="'Token 1'"
+    [list]="(tokensList | async)!"
+    [selected]="formData.token1"
+    [disabled]="tokenDisabled"
+    (emitter)="events($event, 'token1')"
+    content
+  ></app-autocomplete>
+</app-header-content-layout>
