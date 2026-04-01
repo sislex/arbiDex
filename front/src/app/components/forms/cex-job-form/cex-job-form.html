@@ -1,22 +1,10 @@
 <app-header-content-layout>
-  <app-field-title header [title]="'Select chain'"></app-field-title>
+  <app-field-title header [title]="'Select cex pool'"></app-field-title>
   <app-autocomplete
-    [title]="'Chain name'"
+    [title]="'pool'"
     [list]="(chainsList | async)!"
     [selected]="formData.chainId"
-    (emitter)="events($event, 'chainId')"
-    content
-  ></app-autocomplete>
-</app-header-content-layout>
-
-<app-header-content-layout>
-  <app-field-title header [title]="'Select Rpc Url'"></app-field-title>
-  <app-autocomplete
-    [title]="'Rpc Url'"
-    [list]="(rpcUrlList | async)!"
-    [selected]="formData.rpcUrlId"
-    [disabled]="rpcUrlDisabled"
-    (emitter)="events($event, 'rpcUrlId')"
+    (emitter)="events($event, 'pool')"
     content
   ></app-autocomplete>
 </app-header-content-layout>
@@ -38,25 +26,3 @@
     content
   ></app-input-field>
 </app-header-content-layout>
-
-<!--<app-header-content-layout>-->
-<!--  <app-field-title header [title]="'Symbol'"></app-field-title>-->
-<!--  <app-input-field-->
-<!--    [inputValue]="formData.description"-->
-<!--    (emitter)="events($event, 'symbol')"-->
-<!--    content-->
-<!--  ></app-input-field>-->
-<!--</app-header-content-layout>-->
-
-<!--    <app-header-content-layout>-->
-<!--      <app-field-title header [title]="'Additional data'"></app-field-title>-->
-<!--      <app-input-text-area-->
-<!--        [label]="'Additional data'"-->
-<!--        [placeholder]="'Enter additional data parameters JSON'"-->
-<!--        [inputValue]="extraSettings"-->
-<!--        [rowsCount]="20"-->
-<!--        (emitter)="events($event, 'extraSettings')"-->
-<!--        content-->
-<!--      >-->
-<!--      </app-input-text-area>-->
-<!--    </app-header-content-layout>-->

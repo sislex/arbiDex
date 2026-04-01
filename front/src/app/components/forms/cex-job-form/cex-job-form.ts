@@ -37,7 +37,7 @@ export class CexJobForm implements OnInit {
   }
 
 
-  events(event: any, field: 'jobType' | 'chainId' | 'rpcUrlId' | 'description' | 'extraSettings') {
+  events(event: any, field: 'jobType' | 'pool' | 'description') {
     this.formData = {
       ...this.formData,
       [field]: event.data,

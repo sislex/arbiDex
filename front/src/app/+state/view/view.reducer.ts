@@ -18,7 +18,8 @@ export const initialState: ViewState = {
   isSidebarOpen: true,
   sidebarList: [
     'Dexes',
-    'Chains',
+    'Dex-chains',
+    'Cex-chains',
     'Rpc-urls',
     'Tokens',
     'Dex-pools',

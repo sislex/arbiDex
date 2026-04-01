@@ -17,6 +17,7 @@ import { ServerPageContainer } from './containers/pages/server-page-container/se
 import {ImportsPage} from './containers/pages/imports-page/imports-page';
 import {AgGridCexJobsContainer} from './containers/ag-grid/ag-grid-cex-jobs-container/ag-grid-cex-jobs-container';
 import {AgGridCexPoolsContainer} from './containers/ag-grid/ag-grid-cex-pools-container/ag-grid-cex-pools-container';
+import {AgGridCexChainsContainer} from './containers/ag-grid/ag-grid-cex-chains-container/ag-grid-cex-chains-container';
 
 export const routes: Routes = [
   {
@@ -64,9 +65,14 @@ export const routes: Routes = [
         data: { feature: 'pairs' },
       },
       {
-        path: 'chains',
+        path: 'dex-chains',
         component: AgGridChainsContainer,
-        data: { feature: 'chains' },
+        data: { feature: 'dex-chains' },
+      },
+      {
+        path: 'cex-chains',
+        component: AgGridCexChainsContainer,
+        data: { feature: 'cex-chains' },
       },
       {
         path: 'dexes',

@@ -19,7 +19,7 @@ import {
 import { Loader } from '../../../components/loader/loader';
 import { AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { JobDialogService } from '../../../services/job-dialog-service';
+import {CexJobDialogService} from '../../../services/cex-job-form-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-cex-jobs-container',
@@ -36,7 +36,7 @@ import { JobDialogService } from '../../../services/job-dialog-service';
 export class AgGridCexJobsContainer implements OnInit {
   private store = inject(Store);
   readonly deleteDialog = inject(DeleteDialogService);
-  readonly jobDialog = inject(JobDialogService);
+  readonly jobDialog = inject(CexJobDialogService);
   readonly router = inject(Router);
 
   getJobsFullDataResponse$ = this.store.select(getJobsFullDataResponse);
