@@ -7,14 +7,14 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import {
-  getFullJobsDataIsReady,
-  getJobsFullDataResponse,
+  getCexFullJobsDataIsReady,
+  getCexJobsFullDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import {
-  createJob,
-  deletingJob,
-  editJob,
-  initJobsListPage,
+  createCexJob,
+  deletingCexJob,
+  editCexJob,
+  initCexJobsListPage,
 } from '../../../+state/db-config/db-config.actions';
 import { Loader } from '../../../components/loader/loader';
 import { AsyncPipe } from '@angular/common';
@@ -39,8 +39,8 @@ export class AgGridCexJobsContainer implements OnInit {
   readonly jobDialog = inject(CexJobDialogService);
   readonly router = inject(Router);
 
-  getJobsFullDataResponse$ = this.store.select(getJobsFullDataResponse);
-  fullJobsDataIsReady$ = this.store.select(getFullJobsDataIsReady);
+  getCexJobsFullDataResponse$ = this.store.select(getCexJobsFullDataResponse);
+  fullCexJobsDataIsReady$ = this.store.select(getCexFullJobsDataIsReady);
   filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
@@ -53,14 +53,14 @@ export class AgGridCexJobsContainer implements OnInit {
       },
     },
     {
-      field: "jobId",
+      field: "id",
       headerName: 'Job ID',
       flex: 1,
       filter: true,
       sortable: true,
     },
     {
-      field: "jobType",
+      field: "job_type",
       headerName: 'Job Type',
       flex: 1,
       filter: true,
@@ -78,21 +78,27 @@ export class AgGridCexJobsContainer implements OnInit {
       flex: 1,
       filter: true,
       sortable: true,
-      valueGetter: () => '-'
+      valueGetter: (params) => {
+        return params.data?.chainName || '-';
+      },
     },
     {
       headerName: 'Token 0',
       flex: 1,
       filter: true,
       sortable: true,
-      valueGetter: () => '-'
+      valueGetter: (params) => {
+        return params.data?.token0 || '-';
+      },
     },
     {
       headerName: 'Token 1',
       flex: 1,
       filter: true,
       sortable: true,
-      valueGetter: () => '-'
+      valueGetter: (params) => {
+        return params.data?.token1 || '-';
+      },
     },
   ];
 
@@ -109,8 +115,8 @@ export class AgGridCexJobsContainer implements OnInit {
   };
 
   ngOnInit() {
-    this.store.dispatch(initJobsListPage());
-    this.store.select(getJobsFullDataResponse).subscribe(data => {
+    this.store.dispatch(initCexJobsListPage());
+    this.store.select(getCexJobsFullDataResponse).subscribe(data => {
       this.filteredItemCount = data?.length || 0;
     });
   }
@@ -130,10 +136,7 @@ export class AgGridCexJobsContainer implements OnInit {
       if (note === 'add') {
         this.openCreateDialog();
       }
-    } else if ($event.event === 'AgGrid:DOUBLE_CLICKED_ROW') {
-      this.router.navigate([`/data-view/jobs/${$event.row.data.jobId}`]);
     }
-
     if ($event.event === 'AgGrid:MODEL_UPDATED') {
       this.filteredItemCount = $event.rowsDisplayed;
     }
@@ -142,7 +145,7 @@ export class AgGridCexJobsContainer implements OnInit {
   openCreateDialog() {
     this.jobDialog.openCreate().subscribe(result => {
       if (result?.data === 'add') {
-        this.store.dispatch(createJob({ data: result.formData }));
+        this.store.dispatch(createCexJob({ data: result.formData }));
       }
     });
   }
@@ -150,7 +153,7 @@ export class AgGridCexJobsContainer implements OnInit {
   openEditDialog(row: any) {
     this.jobDialog.openEdit(row).subscribe(result => {
       if (result?.data === 'save') {
-        this.store.dispatch(editJob({ data: result.formData }));
+        this.store.dispatch(editCexJob({ data: result.formData }));
       }
     });
   }
@@ -158,7 +161,7 @@ export class AgGridCexJobsContainer implements OnInit {
   openDeleteDialog(row: any) {
     this.deleteDialog.openDelete(row.jobId, 'job').subscribe(result => {
       if (result?.data === 'yes') {
-        this.store.dispatch(deletingJob({ jobId: row.jobId }));
+        this.store.dispatch(deletingCexJob({ cexJobId: row.id }));
       }
     });
   }

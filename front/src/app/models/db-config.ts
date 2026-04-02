@@ -252,13 +252,13 @@ export interface ICexPairsAPI extends API {
 }
 export interface ICexPairs {
   id: number;
-  source: string;
+  source: number;
   token0: string;
   token1: string;
 }
 export interface ICexPairsCreate {
   id: number;
-  source: string;
+  source: number;
   token0: string;
   token1: string;
 }
@@ -268,9 +268,9 @@ export interface ICexJobsAPI extends API {
 }
 export interface ICexJobs {
   id: number;
-  jobType: string;
+  job_type: string;
   description: string;
-  cexPairId: number;
+  cex_pair_id: number;
 }
 export interface ICexJobsCreate {
   jobId: number;

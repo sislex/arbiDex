@@ -1,16 +1,16 @@
 <app-header-content-layout>
-  @if (fullJobsDataIsReady$ | async) {
+  @if (fullCexJobsDataIsReady$ | async) {
     <app-title-table-button
       header
-      [title]="'Jobs table (' + ((getJobsFullDataResponse$ | async)!.length === filteredItemCount ? (getJobsFullDataResponse$ | async)!.length : filteredItemCount + ' / ' + (getJobsFullDataResponse$ | async)!.length) + ')'"
+      [title]="'Jobs table (' + ((getCexJobsFullDataResponse$ | async)!.length === filteredItemCount ? (getCexJobsFullDataResponse$ | async)!.length : filteredItemCount + ' / ' + (getCexJobsFullDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     ></app-title-table-button>
   }
-  @if (fullJobsDataIsReady$ | async) {
+  @if (fullCexJobsDataIsReady$ | async) {
     <app-ag-grid
       content
-      [rowData]="(getJobsFullDataResponse$ | async)!"
+      [rowData]="(getCexJobsFullDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
       (emitter)="actions($event)"

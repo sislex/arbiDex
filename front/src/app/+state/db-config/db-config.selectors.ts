@@ -1,6 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {DB_CONFIG_FEATURE_KEY, DbConfigState} from './db-config.reducer';
-import {IJobs, IQuotes, IRpcUrl, ITokens} from '../../models/db-config';
+import {ICexJobs, IJobs, IQuotes, IRpcUrl, ITokens} from '../../models/db-config';
 
 export const selectFeature = createFeatureSelector<DbConfigState>(DB_CONFIG_FEATURE_KEY);
 
@@ -838,5 +838,53 @@ export const getFullCexPairsDataIsLoaded = createSelector(
 export const getFullCexPairsDataIsReady = createSelector(
   getFullCexPairsDataIsLoaded,
   getFullCexPairsDataIsLoading,
+  (loaded, loading) => loaded && !loading
+);
+
+//
+//
+//
+
+const getCexPairsMap = createSelector(
+  getCexPairsDataResponse,
+  (pairs) => new Map(pairs.map(p => [p.id, p]))
+);
+
+export const getCexJobsFullDataResponse = createSelector(
+  getCexPairsMap,
+  getCexJobsDataResponse,
+  getCexChainMap,
+  (pairs, jobs, chainMap, ) => {
+    const jobsArray = (jobs as ICexJobs[]) || [];
+
+    return jobsArray.map((job) => {
+      const fullPairData = job.cex_pair_id ? pairs.get(Number(job.cex_pair_id)) : null;
+      return {
+        ...job,
+        token0: fullPairData?.token0,
+        token1: fullPairData?.token1,
+        chainName: chainMap.get(fullPairData?.source!),
+      };
+    });
+  }
+);
+
+export const getCexFullJobsDataIsLoading = createSelector(
+  getCexJobsDataIsLoading,
+  getCexChainsDataIsLoading,
+  getCexPairsDataIsLoading,
+  (jobs, chains, pairs) =>
+    jobs || chains || pairs
+);
+export const getCexFullJobsDataIsLoaded = createSelector(
+  getCexJobsDataIsLoaded,
+  getCexChainsDataIsLoaded,
+  getCexPairsDataIsLoaded,
+  (jobs, chains, pairs) =>
+    jobs && chains && pairs
+);
+export const getCexFullJobsDataIsReady = createSelector(
+  getCexFullJobsDataIsLoaded,
+  getCexFullJobsDataIsLoading,
   (loaded, loading) => loaded && !loading
 );

@@ -2,7 +2,7 @@ export class CexJobDto {
   id?: number;
   jobType: string;
   description?: string;
-  cex_pool_id: number;
+  cex_pair_id: number;
 
   extraSettings?: string;
 }

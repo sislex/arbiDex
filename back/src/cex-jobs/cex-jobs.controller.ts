@@ -16,15 +16,15 @@ export class CexJobsController {
     return this.cexJobsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cexJobsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCexJobDto: CexJobDto) {
-    return this.cexJobsService.update(+id, updateCexJobDto);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.cexJobsService.findOne(+id);
+  // }
+  //
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateCexJobDto: CexJobDto) {
+  //   return this.cexJobsService.update(+id, updateCexJobDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
