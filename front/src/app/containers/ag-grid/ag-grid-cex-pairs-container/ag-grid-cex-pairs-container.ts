@@ -5,6 +5,7 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import {
+  getCexPairsDataResponse,
   getFullPoolsData,
   getFullPoolsDataIsReady,
   getUniqueTokensFromSwapRates,
@@ -46,7 +47,7 @@ export class AgGridCexPairsContainer implements OnInit {
   readonly poolDialog = inject(CexPairDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  poolsDataResponse$ = this.store.select(getFullPoolsData);
+  poolsDataResponse$ = this.store.select(getCexPairsDataResponse);
   displayInWei$ = this.store.select(displayInWei);
   poolsDataIsReady$ = this.store.select(getFullPoolsDataIsReady);
   filteredItemCount: number = 0;

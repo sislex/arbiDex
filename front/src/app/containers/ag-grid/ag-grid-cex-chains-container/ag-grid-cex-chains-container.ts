@@ -4,22 +4,22 @@ import {AgGrid} from '../../../components/ag-grid/ag-grid';
 import { HeaderContentLayout } from '../../../components/layouts/header-content-layout/header-content-layout';
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
-import { ChainDialogService } from '../../../services/chain-dialog-service';
 import {
-  createChain,
-  deletingChain,
-  editChain,
-  setChainsData,
+  createCexChain,
+  deletingCexChain,
+  editCexChain,
+  setCexChainsData,
 } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { Loader } from '../../../components/loader/loader';
 import {
-  getChainsDataIsLoaded,
-  getChainsDataIsLoading,
-  getChainsDataResponse,
+  getCexChainsDataIsLoaded,
+  getCexChainsDataIsLoading,
+  getCexChainsDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
+import {CexChainDialogService} from '../../../services/cex-chain-dialog-service';
 
 @Component({
   selector: 'app-ag-grid-cex-chains-container',
@@ -35,12 +35,12 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
 })
 export class AgGridCexChainsContainer implements OnInit {
   private store = inject(Store);
-  readonly chainDialog = inject(ChainDialogService);
+  readonly cexChainDialog = inject(CexChainDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  chainsDataResponse$ = this.store.select(getChainsDataResponse);
-  chainsDataIsLoading$ = this.store.select(getChainsDataIsLoading);
-  chainsDataIsLoaded$ = this.store.select(getChainsDataIsLoaded);
+  chainsDataResponse$ = this.store.select(getCexChainsDataResponse);
+  chainsDataIsLoading$ = this.store.select(getCexChainsDataIsLoading);
+  chainsDataIsLoaded$ = this.store.select(getCexChainsDataIsLoaded);
   filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
@@ -53,7 +53,7 @@ export class AgGridCexChainsContainer implements OnInit {
       },
     },
     {
-      field: "chainId",
+      field: "id",
       headerName: 'Chain ID',
       flex: 1,
     },
@@ -72,8 +72,8 @@ export class AgGridCexChainsContainer implements OnInit {
     headerClass: 'align-center',
   };
   ngOnInit() {
-    this.store.dispatch(setChainsData());
-    this.store.select(getChainsDataResponse).subscribe(data => {
+    this.store.dispatch(setCexChainsData());
+    this.store.select(getCexChainsDataResponse).subscribe(data => {
       this.filteredItemCount = data?.length || 0;
     });
   }
@@ -95,17 +95,18 @@ export class AgGridCexChainsContainer implements OnInit {
   }
 
   openCreateDialog() {
-    this.chainDialog.openCreate().subscribe(result => {
+    this.cexChainDialog.openCreate().subscribe(result => {
       if (result?.data === 'add') {
-        this.store.dispatch(createChain({ data: result.formData }));
+        this.store.dispatch(createCexChain({ data: result.formData }));
       }
     });
   }
 
   openEditDialog(row: any) {
-    this.chainDialog.openEdit(row).subscribe(result => {
+    this.cexChainDialog.openEdit(row).subscribe(result => {
       if (result?.data === 'save') {
-        this.store.dispatch(editChain({ data: result.formData }));
+        console.log(result.formData)
+        this.store.dispatch(editCexChain({ data: result.formData }));
       }
     });
   }
@@ -113,7 +114,7 @@ export class AgGridCexChainsContainer implements OnInit {
   openDeleteDialog(row: any) {
     this.deleteDialog.openDelete(row.name, 'chain').subscribe(result => {
       if (result?.data === 'yes') {
-        this.store.dispatch(deletingChain({ chainId: row.chainId }));
+        this.store.dispatch(deletingCexChain({ chainId: row.id }));
       }
     });
   }

@@ -1202,8 +1202,9 @@ export class DbConfigEffects {
         ofType(DbConfigActions.editCexChain),
         switchMap((action) => {
           let data = {...action.data};
-          return this.apiService.editCexChain(data.chainId, data).pipe(
+          return this.apiService.editCexChain(data.id, data).pipe(
             tap(response => {
+              console.log('DELETEEEEEE');
               this.store.dispatch(DbConfigActions.setCexChainsData());
               this._snackBar.open(`CexChain updated: ${response.chainId}`, '', {duration: 5000});
             }),

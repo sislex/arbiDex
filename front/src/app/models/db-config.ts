@@ -243,7 +243,7 @@ export interface ICexChains {
   name: string;
 }
 export interface ICexChainsCreate {
-  chainId: number;
+  id: number;
   name: string;
 }
 
