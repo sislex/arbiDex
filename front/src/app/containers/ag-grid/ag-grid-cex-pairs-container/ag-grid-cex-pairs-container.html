@@ -1,5 +1,5 @@
 <app-header-content-layout>
-  @if (!(cexPairsDataIsLoading$ | async) && (cexPairsDataIsLoaded$ | async)) {
+  @if (fullCexPairsDataIsReady$ | async) {
     <app-title-table-button
       header
       [title]="'Cex pairs table (' + ((pairsDataResponse$ | async)!.length === filteredItemCount ? (pairsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (pairsDataResponse$ | async)!.length) + ')'"
@@ -8,7 +8,7 @@
     >
     </app-title-table-button>
   }
-  @if (!(cexPairsDataIsLoading$ | async) && (cexPairsDataIsLoaded$ | async)) {
+  @if (fullCexPairsDataIsReady$ | async) {
     <app-ag-grid
       content
       [rowData]="(pairsDataResponse$ | async)!"

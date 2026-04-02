@@ -5,9 +5,7 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import {
-  getCexPairsDataIsLoaded,
-  getCexPairsDataIsLoading,
-  getCexPairsDataResponse,
+  getCexPairsDataResponse, getCexPairsFullData, getFullCexPairsDataIsReady,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
@@ -16,7 +14,6 @@ import {
   deletingCexPair,
   editCexPair,
   initCexPairsPage,
-  setCexPairsData,
   setReservesInCurrentToken,
 } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
@@ -44,9 +41,8 @@ export class AgGridCexPairsContainer implements OnInit {
   readonly pairDialog = inject(CexPairDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  pairsDataResponse$ = this.store.select(getCexPairsDataResponse);
-  cexPairsDataIsLoading$ = this.store.select(getCexPairsDataIsLoading);
-  cexPairsDataIsLoaded$ = this.store.select(getCexPairsDataIsLoaded);
+  pairsDataResponse$ = this.store.select(getCexPairsFullData);
+  fullCexPairsDataIsReady$ = this.store.select(getFullCexPairsDataIsReady);
   filteredItemCount: number = 0;
 
   readonly colDefs: ColDef[] = [
@@ -66,7 +62,7 @@ export class AgGridCexPairsContainer implements OnInit {
       flex: 1,
     },
     {
-      field: "source",
+      field: "sourceName",
       headerName: 'Source',
       filter: true,
       sortable: true,
@@ -101,7 +97,7 @@ export class AgGridCexPairsContainer implements OnInit {
   };
 
   ngOnInit() {
-    this.store.dispatch(setCexPairsData());
+    this.store.dispatch(initCexPairsPage());
     this.store.select(getCexPairsDataResponse).subscribe(data => {
       this.filteredItemCount = data?.length || 0;
     });
@@ -142,7 +138,7 @@ export class AgGridCexPairsContainer implements OnInit {
   openDeleteDialog(row: any) {
     this.deleteDialog.openDelete(row.pairAddress, 'pair').subscribe(result => {
       if (result?.data === 'yes') {
-        this.store.dispatch(deletingCexPair({ cexPairId: row.pairId }));
+        this.store.dispatch(deletingCexPair({ cexPairId: row.id }));
       }
     });
   }

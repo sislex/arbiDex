@@ -798,7 +798,45 @@ export const getUniqueTokensFromSwapRates = createSelector(
       .map(id => tokensMap.get(id))
       .filter((token): token is ITokens => !!token);
 
-    // Возвращаем нативный токен первым, а за ним остальные
     return [nativeToken, ...mappedTokens];
   }
+);
+
+//====================================================================================================================
+//                                                   Cex_Pairs_full_data
+//====================================================================================================================
+
+
+const getCexChainMap = createSelector(
+  getCexChainsDataResponse,
+  (chains) => new Map(chains.map(c => [c.id, c.name]))
+);
+export const getCexPairsFullData = createSelector(
+  getCexPairsDataResponse,
+  getCexChainMap,
+  (pairsData, chainMap) => {
+    return pairsData.map(pair => {
+      return {
+        ...pair,
+        sourceName: chainMap.get(pair?.id!),
+      };
+    });
+  }
+);
+export const getFullCexPairsDataIsLoading = createSelector(
+  getCexPairsDataIsLoading,
+  getCexChainsDataIsLoading,
+  ( pairs, chains) =>
+    pairs || chains
+);
+export const getFullCexPairsDataIsLoaded = createSelector(
+  getCexPairsDataIsLoaded,
+  getCexChainsDataIsLoaded,
+  ( pairs, chains) =>
+    pairs  && chains
+);
+export const getFullCexPairsDataIsReady = createSelector(
+  getFullCexPairsDataIsLoaded,
+  getFullCexPairsDataIsLoading,
+  (loaded, loading) => loaded && !loading
 );

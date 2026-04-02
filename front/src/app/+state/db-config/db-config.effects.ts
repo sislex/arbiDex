@@ -1253,19 +1253,16 @@ export class DbConfigEffects {
   //     ])
   //   )
   // );
-  //
-  // initPairsPage$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(DbConfigActions.initPairsPage),
-  //     mergeMap(() => [
-  //       DbConfigActions.setPairsData(),
-  //       DbConfigActions.setPoolsData(),
-  //       DbConfigActions.setTokensData(),
-  //       DbConfigActions.setDexesData(),
-  //       DbConfigActions.setChainsData(),
-  //     ])
-  //   )
-  // );
+
+  initCexPairsPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.initCexPairsPage),
+      mergeMap(() => [
+        DbConfigActions.setCexPairsData(),
+        DbConfigActions.setCexChainsData(),
+      ])
+    )
+  );
 
   setCexPairsData$ = createEffect(() =>
     this.actions$.pipe(
