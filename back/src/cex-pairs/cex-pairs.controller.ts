@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { CexPoolsService } from './cex-pools.service';
-import { CexPoolDto } from '../dtos/cex-pools-dto/cex-pool.dto';
+import { CexPairsService } from './cex-pairs.service';
+import { CexPairDto } from '../dtos/cex-pools-dto/cex-pool.dto';
 
-@Controller('cex-pools')
-export class CexPoolsController {
-  constructor(private readonly cexPoolsService: CexPoolsService) {}
+@Controller('cex-pairs')
+export class CexPairsController {
+  constructor(private readonly cexPoolsService: CexPairsService) {}
 
   @Post()
-  create(@Body() createCexPoolDto: CexPoolDto) {
+  create(@Body() createCexPoolDto: CexPairDto) {
     return this.cexPoolsService.create(createCexPoolDto);
   }
 
@@ -22,7 +22,7 @@ export class CexPoolsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCexPoolDto: CexPoolDto) {
+  update(@Param('id') id: string, @Body() updateCexPoolDto: CexPairDto) {
     return this.cexPoolsService.update(+id, updateCexPoolDto);
   }
 

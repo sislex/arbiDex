@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CexJobsService } from './cex-jobs.service';
 import { CexJobsController } from './cex-jobs.controller';
-import { CexPoolsModule } from '../cex-pools/cex-pools.module';
+import { CexPairsModule } from '../cex-pairs/cex-pairs.module';
 import { CexJob } from '../entities/entities/cex-job.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([CexJob]),
-    CexPoolsModule
+    CexPairsModule
   ],
   controllers: [CexJobsController],
   providers: [CexJobsService],

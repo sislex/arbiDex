@@ -5,27 +5,24 @@ import { HeaderContentLayout } from '../../../components/layouts/header-content-
 import { TitleTableButton } from '../../../components/title-table-button/title-table-button';
 import { Store } from '@ngrx/store';
 import {
+  getCexPairsDataIsLoaded,
+  getCexPairsDataIsLoading,
   getCexPairsDataResponse,
-  getFullPoolsData,
-  getFullPoolsDataIsReady,
-  getUniqueTokensFromSwapRates,
 } from '../../../+state/db-config/db-config.selectors';
 import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 import {
-  createPool,
-  deletingPools,
-  editPool,
-  initPoolsPage,
+  createCexPair,
+  deletingCexPair,
+  editCexPair,
+  initCexPairsPage,
+  setCexPairsData,
   setReservesInCurrentToken,
 } from '../../../+state/db-config/db-config.actions';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
-import {map} from 'rxjs';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
-import {displayInWei} from '../../../+state/view/view.selectors';
-import {setDisplayInWei} from '../../../+state/view/view.actions';
 import {CexPairDialogService} from '../../../services/cex-pair-dialog-service';
 
 @Component({
@@ -44,23 +41,13 @@ import {CexPairDialogService} from '../../../services/cex-pair-dialog-service';
 })
 export class AgGridCexPairsContainer implements OnInit {
   private store = inject(Store);
-  readonly poolDialog = inject(CexPairDialogService);
+  readonly pairDialog = inject(CexPairDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
-  poolsDataResponse$ = this.store.select(getCexPairsDataResponse);
-  displayInWei$ = this.store.select(displayInWei);
-  poolsDataIsReady$ = this.store.select(getFullPoolsDataIsReady);
+  pairsDataResponse$ = this.store.select(getCexPairsDataResponse);
+  cexPairsDataIsLoading$ = this.store.select(getCexPairsDataIsLoading);
+  cexPairsDataIsLoaded$ = this.store.select(getCexPairsDataIsLoaded);
   filteredItemCount: number = 0;
-
-  swapRateDataResponse$ = this.store.select(getUniqueTokensFromSwapRates).pipe(
-    map(tokens =>
-      tokens.map(token => ({
-        id: token.tokenId,
-        name: token.tokenName,
-        address: `${token.address} "${token.chainName}"`,
-      }))
-    )
-  );
 
   readonly colDefs: ColDef[] = [
     {
@@ -72,8 +59,8 @@ export class AgGridCexPairsContainer implements OnInit {
       },
     },
     {
-      field: "poolId",
-      headerName: 'Pool ID',
+      field: "id",
+      headerName: 'Pair ID',
       filter: true,
       sortable: true,
       flex: 1,
@@ -91,7 +78,7 @@ export class AgGridCexPairsContainer implements OnInit {
       sortable: true,
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.token0Name || '-';
+        return params.data?.token0 || '-';
       },
     },
     {
@@ -100,7 +87,7 @@ export class AgGridCexPairsContainer implements OnInit {
       sortable: true,
       flex: 1,
       valueGetter: (params) => {
-        return params.data?.token1Name || '-';
+        return params.data?.token1 || '-';
       },
     },
   ];
@@ -114,14 +101,10 @@ export class AgGridCexPairsContainer implements OnInit {
   };
 
   ngOnInit() {
-    this.store.dispatch(initPoolsPage());
-    this.store.select(getFullPoolsData).subscribe(data => {
+    this.store.dispatch(setCexPairsData());
+    this.store.select(getCexPairsDataResponse).subscribe(data => {
       this.filteredItemCount = data?.length || 0;
     });
-  }
-
-  onToggleWei($event: any) {
-    this.store.dispatch(setDisplayInWei({item: $event }))
   }
 
   onAction($event: any, row: any) {
@@ -141,25 +124,25 @@ export class AgGridCexPairsContainer implements OnInit {
   }
 
   openCreateDialog() {
-    this.poolDialog.openCreate().subscribe(result => {
+    this.pairDialog.openCreate().subscribe(result => {
       if (result?.data === 'add') {
-        this.store.dispatch(createPool({ data: result.formData }));
+        this.store.dispatch(createCexPair({ data: result.formData }));
       }
     });
   }
 
   openEditDialog(row: any) {
-    this.poolDialog.openEdit(row).subscribe(result => {
+    this.pairDialog.openEdit(row).subscribe(result => {
       if (result?.data === 'save') {
-        this.store.dispatch(editPool({ data: result.formData }));
+        this.store.dispatch(editCexPair({ data: result.formData }));
       }
     });
   }
 
   openDeleteDialog(row: any) {
-    this.deleteDialog.openDelete(row.poolAddress, 'pool').subscribe(result => {
+    this.deleteDialog.openDelete(row.pairAddress, 'pair').subscribe(result => {
       if (result?.data === 'yes') {
-        this.store.dispatch(deletingPools({ poolId: row.poolId }));
+        this.store.dispatch(deletingCexPair({ cexPairId: row.pairId }));
       }
     });
   }
@@ -169,7 +152,7 @@ export class AgGridCexPairsContainer implements OnInit {
       this.filteredItemCount = $event.rowsDisplayed;
     } else if ($event.event === 'SelectField:ITEM_SELECTED') {
       if ($event.data === 0) {
-        this.store.dispatch(initPoolsPage());
+        this.store.dispatch(initCexPairsPage());
       } else {
         this.store.dispatch(setReservesInCurrentToken({currentToken: $event.data}))
       }

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { CexPool } from './cex-pool.entity';
+import { CexPair } from './cex-pair.entity';
 
 @Entity('cex_chains')
 export class CexChain {
@@ -9,6 +9,6 @@ export class CexChain {
   @Column({ length: 255 })
   name: string;
 
-  @OneToMany(() => CexPool, (pool) => pool.chain)
-  pools: CexPool[];
+  @OneToMany(() => CexPair, (pool) => pool.chain)
+  pairs: CexPair[];
 }

@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CexPoolDto } from '../dtos/cex-pools-dto/cex-pool.dto';
-import { CexPool } from '../entities/entities/cex-pool.entity';
+import { CexPairDto } from '../dtos/cex-pools-dto/cex-pool.dto';
+import { CexPair } from '../entities/entities/cex-pair.entity';
 
 @Injectable()
-export class CexPoolsService {
+export class CexPairsService {
   constructor(
-    @InjectRepository(CexPool)
-    private readonly cexPoolRepository: Repository<CexPool>,
+    @InjectRepository(CexPair)
+    private readonly cexPoolRepository: Repository<CexPair>,
   ) {}
 
-  async create(dto: CexPoolDto) {
+  async create(dto: CexPairDto) {
     const pool = this.cexPoolRepository.create({
       source: dto.source,
       token0: dto.token0,
@@ -54,7 +54,7 @@ export class CexPoolsService {
     return pool;
   }
 
-  async update(id: number, dto: CexPoolDto) {
+  async update(id: number, dto: CexPairDto) {
     const pool = await this.findOne(id);
 
     pool.source = dto.source;

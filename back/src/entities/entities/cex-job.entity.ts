@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { CexPool } from './cex-pool.entity';
+import { CexPair } from './cex-pair.entity';
 
 @Entity('cex_jobs')
 export class CexJob {
@@ -15,7 +15,7 @@ export class CexJob {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @ManyToOne(() => CexPool, (pool) => pool.jobs, { onDelete: 'CASCADE' })
+  @ManyToOne(() => CexPair, (pool) => pool.jobs, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'cex_pool_id' })
-  pool: CexPool;
+  pair: CexPair;
 }

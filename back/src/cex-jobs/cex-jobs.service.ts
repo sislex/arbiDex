@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CexPoolsService } from '../cex-pools/cex-pools.service';
+import { CexPairsService } from '../cex-pairs/cex-pairs.service';
 import { CexJob } from '../entities/entities/cex-job.entity';
 import { CexJobDto } from '../dtos/cex-jobs-dto/cex-job.dto';
 
@@ -10,7 +10,7 @@ export class CexJobsService {
   constructor(
     @InjectRepository(CexJob)
     private readonly cexJobRepository: Repository<CexJob>,
-    private readonly cexPoolsService: CexPoolsService,
+    private readonly cexPoolsService: CexPairsService,
   ) {}
 
   async create(dto: CexJobDto) {
@@ -28,7 +28,7 @@ export class CexJobsService {
   async findAll() {
     return await this.cexJobRepository.find({
       relations: {
-        pool: {
+        pair: {
           chain: true,
         },
       },

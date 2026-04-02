@@ -1,21 +1,19 @@
 <app-header-content-layout>
-  @if (poolsDataIsReady$ | async) {
+  @if (!(cexPairsDataIsLoading$ | async) && (cexPairsDataIsLoaded$ | async)) {
     <app-title-table-button
       header
-      [title]="'Dex pairs table (' + ((poolsDataResponse$ | async)!.length === filteredItemCount ? (poolsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (poolsDataResponse$ | async)!.length) + ')'"
+      [title]="'Cex pairs table (' + ((pairsDataResponse$ | async)!.length === filteredItemCount ? (pairsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (pairsDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     >
     </app-title-table-button>
   }
-  @if (poolsDataIsReady$ | async) {
+  @if (!(cexPairsDataIsLoading$ | async) && (cexPairsDataIsLoaded$ | async)) {
     <app-ag-grid
       content
-      [rowData]="(poolsDataResponse$ | async)!"
+      [rowData]="(pairsDataResponse$ | async)!"
       [colDefs]="colDefs"
       [defaultColDef]="defaultColDef"
-      [isWei]="(displayInWei$ | async)!"
-      [context]="{ isWei: true }"
       (emitter)="events($event)"
     ></app-ag-grid>
   } @else {

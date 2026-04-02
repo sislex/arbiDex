@@ -250,16 +250,16 @@ export class ApiService {
   // //====================================================================================================================
   //
   // getCexPools(): Observable<any> {
-  //   return this.http.get(`${this.apiUrl}/cex-pools`);
+  //   return this.http.get(`${this.apiUrl}/cex-pairs`);
   // }
   // createCexPool(data: any): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/cex-pools`, {...data});
+  //   return this.http.post(`${this.apiUrl}/cex-pairs`, {...data});
   // }
   // editCexPool(id: number, data: any): Observable<any> {
-  //   return this.http.put(`${this.apiUrl}/cex-pools/by-id/${id}`, data);
+  //   return this.http.put(`${this.apiUrl}/cex-pairs/by-id/${id}`, data);
   // }
   // deletingCexPool(id: number): Observable<any> {
-  //   return this.http.delete(`${this.apiUrl}/cex-pools/${id}`);
+  //   return this.http.delete(`${this.apiUrl}/cex-pairs/${id}`);
   // }
 
   //====================================================================================================================
