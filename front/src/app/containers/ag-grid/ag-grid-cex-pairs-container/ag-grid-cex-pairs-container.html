@@ -2,7 +2,7 @@
   @if (poolsDataIsReady$ | async) {
     <app-title-table-button
       header
-      [title]="'Dex pools table (' + ((poolsDataResponse$ | async)!.length === filteredItemCount ? (poolsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (poolsDataResponse$ | async)!.length) + ')'"
+      [title]="'Dex pairs table (' + ((poolsDataResponse$ | async)!.length === filteredItemCount ? (poolsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (poolsDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
     >

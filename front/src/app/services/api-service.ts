@@ -244,23 +244,23 @@ export class ApiService {
   deletingRpcUrl(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/rpc-urls/${id}`);
   }
-
-  //====================================================================================================================
-  //                                                  Cex Pools
-  //====================================================================================================================
-
-  getCexPools(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/cex-pools`);
-  }
-  createCexPool(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/cex-pools`, {...data});
-  }
-  editCexPool(id: number, data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/cex-pools/by-id/${id}`, data);
-  }
-  deletingCexPool(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/cex-pools/${id}`);
-  }
+  //
+  // //====================================================================================================================
+  // //                                                  Cex Pools
+  // //====================================================================================================================
+  //
+  // getCexPools(): Observable<any> {
+  //   return this.http.get(`${this.apiUrl}/cex-pools`);
+  // }
+  // createCexPool(data: any): Observable<any> {
+  //   return this.http.post(`${this.apiUrl}/cex-pools`, {...data});
+  // }
+  // editCexPool(id: number, data: any): Observable<any> {
+  //   return this.http.put(`${this.apiUrl}/cex-pools/by-id/${id}`, data);
+  // }
+  // deletingCexPool(id: number): Observable<any> {
+  //   return this.http.delete(`${this.apiUrl}/cex-pools/${id}`);
+  // }
 
   //====================================================================================================================
   //                                                  Cex Jobs
@@ -297,5 +297,22 @@ export class ApiService {
   }
   deletingCexChain(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/cex-chains/${id}`);
+  }
+
+//====================================================================================================================
+//                                                   CexPairs
+//====================================================================================================================
+
+  getCexPairs(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/cex-pairs`);
+  }
+  createCexPair(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/cex-pairs`, { ...data });
+  }
+  editCexPair(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/cex-pairs/${id}`, data);
+  }
+  deletingCexPair(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/cex-pairs/${id}`);
   }
 }

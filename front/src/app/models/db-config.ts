@@ -232,3 +232,47 @@ export interface IServersCreate {
   port: string;
   serverName: string;
 }
+
+
+
+export interface ICexChainsAPI extends API {
+  response: ICexChains[];
+}
+export interface ICexChains {
+  id: number;
+  name: string;
+}
+export interface ICexChainsCreate {
+  chainId: number;
+  name: string;
+}
+
+export interface ICexPairsAPI extends API {
+  response: ICexPairs[];
+}
+export interface ICexPairs {
+  id: number;
+  source: string;
+  token0: string;
+  token1: string;
+}
+export interface ICexPairsCreate {
+  id: number;
+  source: string;
+  token0: string;
+  token1: string;
+}
+
+export interface ICexJobsAPI extends API {
+  response: ICexJobs[];
+}
+export interface ICexJobs {
+  id: number;
+  jobType: string;
+  description: string;
+  cexPairId: number;
+}
+export interface ICexJobsCreate {
+  jobId: number;
+  jobType: string;
+}

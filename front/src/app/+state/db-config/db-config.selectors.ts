@@ -297,6 +297,83 @@ export const getSwapRateDataResponse = createSelector(
 );
 
 //====================================================================================================================
+//                                                   CexChains
+//====================================================================================================================
+
+export const getCexChainsDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexChains.response
+);
+export const getCexChainsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexChains.error
+);
+export const getCexChainsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.cexChains.error
+);
+export const getCexChainsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexChains.isLoading
+);
+export const getCexChainsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexChains.isLoaded
+);
+
+//====================================================================================================================
+//                                                   CexPairs
+//====================================================================================================================
+
+export const getCexPairsDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexPairs.response
+);
+export const getCexPairsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexPairs.error
+);
+export const getCexPairsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.cexPairs.error
+);
+export const getCexPairsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexPairs.isLoading
+);
+export const getCexPairsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexPairs.isLoaded
+);
+
+
+//====================================================================================================================
+//                                                   CexJobs
+//====================================================================================================================
+
+export const getCexJobsDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexJobs.response
+);
+export const getCexJobsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexJobs.error
+);
+export const getCexJobsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.cexJobs.error
+);
+export const getCexJobsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexJobs.isLoading
+);
+export const getCexJobsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexJobs.isLoaded
+);
+
+
+//====================================================================================================================
 //                                                   MAPS
 //====================================================================================================================
 

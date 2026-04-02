@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
 import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
-import { PoolForm } from '../../../components/forms/pool-form/pool-form';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { setChainsData, setDexesData, setTokensData } from '../../../+state/db-config/db-config.actions';
@@ -11,21 +10,20 @@ import {
 import { map, switchMap } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AsyncPipe } from '@angular/common';
-import {CexPoolForm} from '../../../components/forms/cex-pool-form/cex-pool-form';
+import {CexPairForm} from '../../../components/forms/cex-pair-form/cex-pair-form';
 
 @Component({
-  selector: 'app-cex-pool-form-container',
+  selector: 'app-cex-pair-form-container',
   imports: [
     ConfirmationPopUp,
-    PoolForm,
     AsyncPipe,
-    CexPoolForm,
+    CexPairForm,
   ],
-  templateUrl: './cex-pool-form-container.html',
-  styleUrl: './cex-pool-form-container.scss',
+  templateUrl: './cex-pair-form-container.html',
+  styleUrl: './cex-pair-form-container.scss',
 })
-export class CexPoolFormContainer {
-  private dialogRef = inject(MatDialogRef<CexPoolFormContainer>);
+export class CexPairFormContainer {
+  private dialogRef = inject(MatDialogRef<CexPairFormContainer>);
   public data = inject(MAT_DIALOG_DATA);
   private store = inject(Store);
 

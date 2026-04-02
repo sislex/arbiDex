@@ -25,10 +25,10 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
 import {displayInWei} from '../../../+state/view/view.selectors';
 import {setDisplayInWei} from '../../../+state/view/view.actions';
-import {CexPoolDialogService} from '../../../services/cex-pool-dialog-service';
+import {CexPairDialogService} from '../../../services/cex-pair-dialog-service';
 
 @Component({
-  selector: 'app-ag-grid-cex-pools-container',
+  selector: 'app-ag-grid-cex-pairs-container',
   imports: [
     AgGrid,
     HeaderContentLayout,
@@ -38,12 +38,12 @@ import {CexPoolDialogService} from '../../../services/cex-pool-dialog-service';
     MatCheckboxModule,
     FormsModule
   ],
-  templateUrl: './ag-grid-cex-pools-container.html',
-  styleUrl: './ag-grid-cex-pools-container.scss',
+  templateUrl: './ag-grid-cex-pairs-container.html',
+  styleUrl: './ag-grid-cex-pairs-container.scss',
 })
-export class AgGridCexPoolsContainer implements OnInit {
+export class AgGridCexPairsContainer implements OnInit {
   private store = inject(Store);
-  readonly poolDialog = inject(CexPoolDialogService);
+  readonly poolDialog = inject(CexPairDialogService);
   readonly deleteDialog = inject(DeleteDialogService);
 
   poolsDataResponse$ = this.store.select(getFullPoolsData);
@@ -101,20 +101,6 @@ export class AgGridCexPoolsContainer implements OnInit {
       valueGetter: (params) => {
         return params.data?.token1Name || '-';
       },
-    },
-    {
-      headerName: 'Reserve 0',
-      filter: true,
-      sortable: true,
-      flex: 1,
-      valueGetter: () => '-'
-    },
-    {
-      headerName: 'Reserve 1',
-      filter: true,
-      sortable: true,
-      flex: 1,
-      valueGetter: () => '-'
     },
   ];
 

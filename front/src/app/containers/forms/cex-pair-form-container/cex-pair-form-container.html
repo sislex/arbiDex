@@ -4,7 +4,7 @@
   (emitter)="eventClose($event)"
 >
   <div class="scroll" popupContent>
-    <app-cex-pool-form
+    <app-cex-pair-form
       [formData]="data.form"
       [chainsList]="chainsList$"
       [tokensList]="tokensList$"
@@ -12,6 +12,6 @@
       [versionsList]="versionList$"
       [tokenDisabled]="(tokenDisabled$ | async)!"
       (emitter)="eventsForm($event)"
-    ></app-cex-pool-form>
+    ></app-cex-pair-form>
   </div>
 </app-confirmation-pop-up>

@@ -2,23 +2,21 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FieldTitle } from '../../field-title/field-title';
 import { HeaderContentLayout } from '../../layouts/header-content-layout/header-content-layout';
-import { InputField } from '../../input-field/input-field';
 import { IPoolsCreate } from '../../../models/db-config';
 import {Autocomplete} from '../../autocomplete/autocomplete';
 
 @Component({
-  selector: 'app-cex-pool-form',
+  selector: 'app-cex-pair-form',
   imports: [
     AsyncPipe,
     FieldTitle,
     HeaderContentLayout,
-    InputField,
     Autocomplete,
   ],
-  templateUrl: './cex-pool-form.html',
-  styleUrl: './cex-pool-form.scss',
+  templateUrl: './cex-pair-form.html',
+  styleUrl: './cex-pair-form.scss',
 })
-export class CexPoolForm implements OnInit {
+export class CexPairForm implements OnInit {
   @Input() formData!: IPoolsCreate;
   @Input() chainsList: any = [];
   @Input() tokensList: any = [];
