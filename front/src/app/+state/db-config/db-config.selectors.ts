@@ -818,7 +818,7 @@ export const getCexPairsFullData = createSelector(
     return pairsData.map(pair => {
       return {
         ...pair,
-        sourceName: chainMap.get(pair?.id!),
+        sourceName: chainMap.get(pair?.source!),
       };
     });
   }

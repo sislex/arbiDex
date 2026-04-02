@@ -10,25 +10,19 @@
 </app-header-content-layout>
 
 <app-header-content-layout>
-  <app-field-title header [title]="'Select Token 0 symbol'"></app-field-title>
-  <app-autocomplete
-    [title]="'Token 0'"
-    [list]="(tokensList | async)!"
-    [selected]="formData.token0"
-    [disabled]="tokenDisabled"
+  <app-field-title header [title]="'Token 0 symbol'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.token0"
     (emitter)="events($event, 'token0')"
     content
-  ></app-autocomplete>
+  ></app-input-field>
 </app-header-content-layout>
 
 <app-header-content-layout>
-  <app-field-title header [title]="'Select Token 1 symbol'"></app-field-title>
-  <app-autocomplete
-    [title]="'Token 1'"
-    [list]="(tokensList | async)!"
-    [selected]="formData.token1"
-    [disabled]="tokenDisabled"
+  <app-field-title header [title]="'Token 1 symbol'"></app-field-title>
+  <app-input-field
+    [inputValue]="formData.token1"
     (emitter)="events($event, 'token1')"
     content
-  ></app-autocomplete>
+  ></app-input-field>
 </app-header-content-layout>

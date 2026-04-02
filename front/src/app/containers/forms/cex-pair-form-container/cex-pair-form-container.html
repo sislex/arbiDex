@@ -7,10 +7,6 @@
     <app-cex-pair-form
       [formData]="data.form"
       [chainsList]="chainsList$"
-      [tokensList]="tokensList$"
-      [dexesList]="dexesList$"
-      [versionsList]="versionList$"
-      [tokenDisabled]="(tokenDisabled$ | async)!"
       (emitter)="eventsForm($event)"
     ></app-cex-pair-form>
   </div>

@@ -40,10 +40,10 @@ export class CexPairDialogService {
         title: 'Edit pair',
         buttons: ['save', 'cancel'],
         form: {
-          poolId: row.poolId,
-          source: row.chainId,
-          token0: row.token0Id,
-          token1: row.token1Id,
+          id: row.id,
+          source: row.source,
+          token0: row.token0,
+          token1: row.token1,
         }
       }
     }).afterClosed();

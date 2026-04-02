@@ -1,22 +1,16 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { setChainsData, setDexesData, setTokensData } from '../../../+state/db-config/db-config.actions';
-import {
-  getChainsDataResponse, getDexesDataResponse,
-  getTokensDataResponseFilterChainId, getVersionList,
-} from '../../../+state/db-config/db-config.selectors';
-import { map, switchMap } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { AsyncPipe } from '@angular/common';
+import { setCexChainsData } from '../../../+state/db-config/db-config.actions';
+import { getCexChainsDataResponse } from '../../../+state/db-config/db-config.selectors';
+import { map } from 'rxjs';
 import {CexPairForm} from '../../../components/forms/cex-pair-form/cex-pair-form';
 
 @Component({
   selector: 'app-cex-pair-form-container',
   imports: [
     ConfirmationPopUp,
-    AsyncPipe,
     CexPairForm,
   ],
   templateUrl: './cex-pair-form-container.html',
@@ -27,57 +21,25 @@ export class CexPairFormContainer {
   public data = inject(MAT_DIALOG_DATA);
   private store = inject(Store);
 
-  chainId = signal<number | null>(this.data.form.chainId);
-
   formData = {
     ...this.data.form
   }
 
-  tokenDisabled$ = toObservable(this.chainId).pipe(
-    map(id => !id)
-  );
-
-  tokensList$ = toObservable(this.chainId).pipe(
-    switchMap(id => this.store.select(getTokensDataResponseFilterChainId(id || 0))),
-    map(items => items?.map(i => ({ id: i.tokenId, name: i.tokenName, address: i.address })) || [])
-  );
-
-  chainsList$ = this.store.select(getChainsDataResponse).pipe(
+  chainsList$ = this.store.select(getCexChainsDataResponse).pipe(
     map(item =>
       item.map(item => ({
-        id: item.chainId,
+        id: item.id,
         name: item.name,
-      }))
-    )
-  );
-
-  dexesList$ = this.store.select(getDexesDataResponse).pipe(
-    map(item =>
-      item.map(item => ({
-        id: item.dexId,
-        name: item.name,
-      }))
-    )
-  );
-
-  versionList$ = this.store.select(getVersionList).pipe(
-    map(item =>
-      item.map(item => ({
-        id: item,
-        name: item,
       }))
     )
   );
 
   constructor() {
-    this.store.dispatch(setChainsData());
-    this.store.dispatch(setTokensData());
-    this.store.dispatch(setDexesData());
+    this.store.dispatch(setCexChainsData());
   }
 
   eventsForm($event: any) {
     this.formData = { ...$event };
-    this.chainId.set($event.chainId);
   }
 
   eventClose($event: any) {

@@ -310,6 +310,7 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/cex-pairs`, { ...data });
   }
   editCexPair(id: number, data: any): Observable<any> {
+    console.log('data', data)
     return this.http.put(`${this.apiUrl}/cex-pairs/${id}`, data);
   }
   deletingCexPair(id: number): Observable<any> {

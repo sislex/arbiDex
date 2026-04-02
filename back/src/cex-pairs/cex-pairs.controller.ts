@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { CexPairsService } from './cex-pairs.service';
-import { CexPairDto } from '../dtos/cex-pools-dto/cex-pool.dto';
+import { CexPairDto } from '../dtos/cex-pairs-dto/cex-pair.dto';
 
 @Controller('cex-pairs')
 export class CexPairsController {
@@ -21,7 +21,7 @@ export class CexPairsController {
     return this.cexPoolsService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateCexPoolDto: CexPairDto) {
     return this.cexPoolsService.update(+id, updateCexPoolDto);
   }
