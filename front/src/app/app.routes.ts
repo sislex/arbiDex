@@ -60,9 +60,9 @@ export const routes: Routes = [
         data: { feature: 'quotes' },
       },
       {
-        path: 'pairs',
+        path: 'dex-pairs',
         component: AgGridPairsContainer,
-        data: { feature: 'pairs' },
+        data: { feature: 'dex-pairs' },
       },
       {
         path: 'cex-pairs',
@@ -85,9 +85,9 @@ export const routes: Routes = [
         data: { feature: 'dexes' },
       },
       {
-        path: 'dex-pools',
+        path: 'pools',
         component: AgGridPoolsContainer,
-        data: { feature: 'dex-pools' },
+        data: { feature: 'pools' },
       },
       {
         path: 'tokens',
