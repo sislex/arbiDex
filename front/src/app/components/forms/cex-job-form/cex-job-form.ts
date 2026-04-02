@@ -20,8 +20,6 @@ import {Autocomplete} from '../../autocomplete/autocomplete';
 export class CexJobForm implements OnInit {
   @Input() formData!: any;
   @Input() chainsList: any = [];
-  @Input() rpcUrlList: any = [];
-  @Input() rpcUrlDisabled: boolean = true;
 
   @Output() emitter = new EventEmitter();
   extraSettings: string = '';

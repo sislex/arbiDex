@@ -1,13 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
-import { ChainForm } from '../../../components/forms/chain-form/chain-form';
+import { CexChainForm } from '../../../components/forms/cex-chain-form/cex-chain-form';
 
 @Component({
   selector: 'app-cex-chain-form-container',
   imports: [
     ConfirmationPopUp,
-    ChainForm,
+    CexChainForm,
   ],
   templateUrl: './cex-chain-form-container.html',
   styleUrl: './cex-chain-form-container.scss',
@@ -22,6 +22,8 @@ export class CexChainFormContainer {
 
   eventsForm($event: any) {
     this.formData = { ...$event };
+    console.log(this.formData)
+
   }
 
   eventClose($event: any) {

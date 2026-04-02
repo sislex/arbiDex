@@ -9,14 +9,12 @@ import {
 } from '../../../+state/db-config/db-config.selectors';
 import { map, switchMap } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AsyncPipe } from '@angular/common';
 import {CexJobForm} from '../../../components/forms/cex-job-form/cex-job-form';
 
 @Component({
   selector: 'app-cex-job-form-container',
   imports: [
     ConfirmationPopUp,
-    AsyncPipe,
     CexJobForm,
   ],
   templateUrl: './cex-job-form-container.html',

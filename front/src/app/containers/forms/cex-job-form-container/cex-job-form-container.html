@@ -7,8 +7,6 @@
     <app-cex-job-form
       [formData]="data.form"
       [chainsList]="chainsList$"
-      [rpcUrlList]="rpcUrlList$"
-      [rpcUrlDisabled]="(rpcUrlDisabled$ | async)!"
       (emitter)="eventsForm($event)"
     ></app-cex-job-form>
   </div>

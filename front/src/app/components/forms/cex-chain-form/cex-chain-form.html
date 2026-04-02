@@ -1,7 +1,7 @@
 <app-header-content-layout>
   <app-field-title header [title]="'Chain ID'"></app-field-title>
   <app-input-field
-    [inputValue]="formData.chainId"
+    [inputValue]="formData.id"
     (emitter)="events($event, 'newChainId')"
     content
   ></app-input-field>

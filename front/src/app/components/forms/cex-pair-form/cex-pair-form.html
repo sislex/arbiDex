@@ -3,7 +3,7 @@
   <app-autocomplete
     [title]="'Source'"
     [list]="(chainsList | async)!"
-    [selected]="formData.chainId"
+    [selected]="formData.source"
     (emitter)="events($event, 'source')"
     content
   ></app-autocomplete>
