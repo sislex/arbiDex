@@ -27,7 +27,6 @@ export class CexChainDialogService {
   }
 
   openEdit(row: any) {
-    console.log(row)
     return this.dialog.open(CexChainFormContainer, {
       width: '90%',
       height: '90%',

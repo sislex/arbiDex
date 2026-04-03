@@ -35,7 +35,7 @@ export class CexJobForm implements OnInit {
   }
 
 
-  events(event: any, field: 'jobType' | 'pool' | 'description') {
+  events(event: any, field: 'job_type' | 'cex_pair_id' | 'description') {
     this.formData = {
       ...this.formData,
       [field]: event.data,

@@ -3,8 +3,8 @@
   <app-autocomplete
     [title]="'pool'"
     [list]="(chainsList | async)!"
-    [selected]="formData.chainId"
-    (emitter)="events($event, 'pool')"
+    [selected]="formData.source"
+    (emitter)="events($event, 'cex_pair_id')"
     content
   ></app-autocomplete>
 </app-header-content-layout>
@@ -12,8 +12,8 @@
 <app-header-content-layout>
   <app-field-title header [title]="'Type'"></app-field-title>
   <app-input-field
-    [inputValue]="formData.jobType"
-    (emitter)="events($event, 'jobType')"
+    [inputValue]="formData.job_type"
+    (emitter)="events($event, 'job_type')"
     content
   ></app-input-field>
 </app-header-content-layout>

@@ -31,6 +31,7 @@ export class CexJobDialogService {
   }
 
   openEdit(row: any) {
+    console.log(row);
     return this.dialog.open(CexJobFormContainer, {
       width: '90%',
       height: '90%',
@@ -42,10 +43,10 @@ export class CexJobDialogService {
         title: 'Edit job',
         buttons: ['save', 'cancel'],
         form: {
-          jobId: row.jobId,
-          jobType: row.jobType,
+          jobId: row.id,
+          job_type: row.job_type,
           description: row.description,
-          source: row.source,
+          source: row.cex_pair_id,
           token0: row.token0,
           token1: row.token1
         }

@@ -1,14 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
 import { setChainsData, setRpcUrlsData } from '../../../+state/db-config/db-config.actions';
 import { Store } from '@ngrx/store';
-import {
-  getChainsDataResponse,
-  getRpcUrlDataResponseFilterChainId,
-} from '../../../+state/db-config/db-config.selectors';
-import { map, switchMap } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { getCexChainsDataResponse } from '../../../+state/db-config/db-config.selectors';
+import { map } from 'rxjs';
 import {CexJobForm} from '../../../components/forms/cex-job-form/cex-job-form';
 
 @Component({
@@ -25,42 +21,26 @@ export class CexJobFormContainer {
   public data = inject(MAT_DIALOG_DATA);
   public store = inject(Store);
 
-  chainId = signal<number | null>(this.data.form.chainId);
-
   formData = {
     ...this.data.form
   }
 
-  rpcUrlDisabled$ = toObservable(this.chainId).pipe(
-    map(id => !id)
-  );
-
-  chainsList$ = this.store.select(getChainsDataResponse).pipe(
+  chainsList$ = this.store.select(getCexChainsDataResponse).pipe(
     map(item =>
       item.map(item => ({
-        id: item.chainId,
+        id: item.id,
         name: item.name,
       }))
     )
   );
-
-  rpcUrlList$ = toObservable(this.chainId).pipe(
-    switchMap(id => this.store.select(getRpcUrlDataResponseFilterChainId(id || 0))),
-    map(items => items?.map(i => ({
-      id: i.rpcUrlId,
-      name: i.rpcUrl
-    })) || [])
-  );
-
-
   constructor() {
     this.store.dispatch(setChainsData());
     this.store.dispatch(setRpcUrlsData());
   }
 
   eventsForm($event: any) {
+    console.log('eventsForm', $event);
     this.formData = { ...$event };
-    this.chainId.set($event.chainId);
   }
 
   eventClose($event: any) {

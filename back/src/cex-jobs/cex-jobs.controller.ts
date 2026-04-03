@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { CexJobsService } from './cex-jobs.service';
 import { CexJobDto } from '../dtos/cex-jobs-dto/cex-job.dto';
 
@@ -16,15 +24,16 @@ export class CexJobsController {
     return this.cexJobsService.findAll();
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.cexJobsService.findOne(+id);
-  // }
-  //
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateCexJobDto: CexJobDto) {
-  //   return this.cexJobsService.update(+id, updateCexJobDto);
-  // }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.cexJobsService.findOne(+id);
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateCexJobDto: CexJobDto) {
+    console.log(updateCexJobDto);
+    return this.cexJobsService.update(+id, updateCexJobDto);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
