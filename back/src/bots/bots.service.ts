@@ -113,15 +113,16 @@ export class BotsService {
             },
           },
         },
-      },
-      where: {
-        server: {
-          serverId: serverId,
+        cexJob: {
+          pair: {
+            chain: true,
+          },
         },
       },
-      order: {
-        botId: 'DESC',
+      where: {
+        server: { serverId: serverId },
       },
+      order: { botId: 'DESC' },
     });
   }
 

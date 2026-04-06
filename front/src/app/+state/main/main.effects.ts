@@ -44,18 +44,47 @@ export function mapBotToRule(botData: any) {
   return {
     id: botData.botId,
     botParams: mapBotParams(botData),
-    jobParams: mapJobParams(botData.job)
+    jobParams: botData.job ? mapJobParams( botData.job ) : mapCexJobParams(botData.cexJob),
   };
 }
 
+
 export function mapJobParams(job: any) {
+  if (!job) {
+    return {
+      jobType: '-',
+      rpcUrl: null,
+      pairsToQuote: [],
+      extraSettings: {},
+      cexPairId: null
+    };
+  }
+
+  const type = job.jobType || job.job_type || '-';
+  const rpcUrl = job.rpcUrl?.rpcUrl || null;
+
+  const pairsToQuote = job.quoteJobRelations
+    ? job.quoteJobRelations.map(mapQuoteRelation)
+    : [];
+
   return {
-    jobType: job.jobType,
-    rpcUrl: job.rpcUrl.rpcUrl,
-    pairsToQuote: job.quoteJobRelations.map(mapQuoteRelation),
-    extraSettings: job.extraSettings,
+    jobType: type,
+    rpcUrl: rpcUrl,
+    pairsToQuote: pairsToQuote,
+    extraSettings: job.extraSettings || {},
+    cexPairId: job.cex_pair_id || null,
   };
 }
+export function mapCexJobParams(job: any) {
+  return {
+    jobType: job.job_type,
+    source: job.pair.chain.name,
+    token0: job.pair.token0,
+    token1: job.pair.token1,
+  };
+}
+
+
 
 export function mapJobPreConfig(jobData: any, relations: any[]) {
   return {
@@ -168,10 +197,11 @@ export class MainEffects {
         switchMap(([action, bots]) =>
           from(this.apiService.setServerById(action.serverId)).pipe(
             tap(() => {
+              console.log('bot', bots)
               const serverConfig = bots.map((bot: any) => ({
                 id: bot.botId,
                 botParams: mapBotParams(bot),
-                jobParams: mapJobParams(bot.job)
+                jobParams: bot.job ? mapJobParams( bot.job ) : mapCexJobParams(bot.cexJob),
               }));
 
               this.configDialogService.openConfig(
