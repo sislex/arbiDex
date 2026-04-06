@@ -8,9 +8,10 @@ import { CexJob } from '../entities/entities/cex-job.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CexJob]),
-    CexPairsModule
+    CexPairsModule,
   ],
   controllers: [CexJobsController],
   providers: [CexJobsService],
+  exports: [CexJobsService],
 })
 export class CexJobsModule {}

@@ -12,6 +12,7 @@ export class BotDialogService {
   openCreate(
     serversList$: Observable<ISelectMenu[]>,
     jobList$: Observable<ISelectMenu[]>,
+    cexJobList$: Observable<ISelectMenu[]>,
   ) {
     return this.dialog.open(BotFormContainer, {
       width: '90%',
@@ -39,9 +40,11 @@ export class BotDialogService {
           maxJobs: null,
           maxErrors: null,
           timeoutMs: null,
+          cexJob: null,
         },
         serversList: serversList$,
         jobList: jobList$,
+        cexJobList: cexJobList$,
       }
     }).afterClosed();
   }
@@ -50,6 +53,7 @@ export class BotDialogService {
     row: any,
     serversList$: Observable<ISelectMenu[]>,
     jobList$: Observable<ISelectMenu[]>,
+    cexJobList$: Observable<ISelectMenu[]>,
   ) {
     return this.dialog.open(BotFormContainer, {
       width: '90%',
@@ -73,9 +77,11 @@ export class BotDialogService {
           maxJobs: row.maxJobs,
           maxErrors: row.maxErrors,
           timeoutMs: row.timeoutMs,
+          cexJobId: row.cexJobId,
         },
         serversList: serversList$,
         jobList: jobList$,
+        cexJobList: cexJobList$,
       }
     }).afterClosed();
   }

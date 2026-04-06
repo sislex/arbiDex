@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Bots } from '../entities/entities/Bots';
 import { ServersModule } from '../servers/servers.module';
 import { JobsModule } from '../jobs/jobs.module';
+import { CexJobsModule } from '../cex-jobs/cex-jobs.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Bots]), ServersModule, JobsModule],
+  imports: [TypeOrmModule.forFeature([Bots]), ServersModule, JobsModule,  CexJobsModule],
   controllers: [BotsController],
   providers: [BotsService],
   exports: [BotsService],

@@ -2,7 +2,7 @@ export class BotDto {
   botId: number;
   botName: string;
   description: string;
-  jobId: number;
+  jobId: number | null;
   serverId: number;
   paused: boolean;
   isRepeat: boolean;
@@ -10,4 +10,5 @@ export class BotDto {
   maxJobs: number;
   maxErrors: number;
   timeoutMs: number;
+  cexJobId: number | null;
 }

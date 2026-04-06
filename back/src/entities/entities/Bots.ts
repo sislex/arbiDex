@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Jobs } from './Jobs';
 import { Servers } from './Servers';
+import {CexJob} from "./cex-job.entity";
 
 @Index('bots_pkey', ['botId'], { unique: true })
 @Index('idx_bots_name', ['botName'], {})
@@ -57,12 +58,25 @@ export class Bots {
   @Column('integer', { name: 'timeout_ms', nullable: true })
   timeoutMs: number | null;
 
+  @Column('integer', { name: 'cex_job_id', nullable: true })
+  cexJobId: string | null;
+
+  @ManyToOne(() => CexJob, {
+    nullable: true,
+    onDelete: 'RESTRICT'
+  })
+  @JoinColumn([{ name: 'cex_job_id', referencedColumnName: 'id' }])
+  cexJob?: CexJob | null;
+
+
+
   @ManyToOne(() => Jobs, (jobs) => jobs.bots, {
+    nullable: true,
     onDelete: 'RESTRICT',
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'job_id', referencedColumnName: 'jobId' }])
-  job: Jobs;
+  job?: Jobs | null;
 
   @ManyToOne(() => Servers, (servers) => servers.bots, { onDelete: 'RESTRICT' })
   @JoinColumn([{ name: 'server_id', referencedColumnName: 'serverId' }])

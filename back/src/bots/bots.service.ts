@@ -5,6 +5,9 @@ import { Bots } from '../entities/entities/Bots';
 import { Repository } from 'typeorm';
 import { ServersService } from '../servers/servers.service';
 import { JobsService } from '../jobs/jobs.service';
+import { Jobs } from '../entities/entities/Jobs';
+import {CexJob} from "../entities/entities/cex-job.entity";
+import {CexJobsService} from "../cex-jobs/cex-jobs.service";
 
 @Injectable()
 export class BotsService {
@@ -13,15 +16,30 @@ export class BotsService {
     private botRepository: Repository<Bots>,
     private serverService: ServersService,
     private jobService: JobsService,
+    private cexJobService: CexJobsService,
   ) {}
   async create(createBotDto: BotDto) {
     const server = await this.serverService.findOne(createBotDto.serverId);
-    const job = await this.jobService.findOneWithPairs(createBotDto.jobId);
+
+    let job: Jobs | undefined = undefined;
+    let cexJob: CexJob | undefined = undefined;
+
+    if (createBotDto.jobId) {
+      const foundJob = await this.jobService.findOneWithPairs(createBotDto.jobId);
+      job = (foundJob as any) || undefined;
+    }
+
+    if (createBotDto.cexJobId) {
+      const foundCexJob = await this.cexJobService.findOne(createBotDto.cexJobId);
+      cexJob = foundCexJob || undefined;
+    }
+
     const bot = this.botRepository.create({
       botName: createBotDto.botName,
       description: createBotDto.description,
       server: server,
       job: job,
+      cexJob: cexJob,
       paused: createBotDto.paused,
       isRepeat: createBotDto.isRepeat,
       delayBetweenRepeat: createBotDto.delayBetweenRepeat,
@@ -40,8 +58,18 @@ export class BotsService {
         job: {
           quoteJobRelations: true,
         },
+        cexJob: true,
       },
       select: {
+        botId: true,
+        botName: true,
+        description: true,
+        paused: true,
+        isRepeat: true,
+        delayBetweenRepeat: true,
+        maxErrors: true,
+        maxJobs: true,
+        timeoutMs: true,
         job: {
           jobId: true,
           quoteJobRelations: {
@@ -50,6 +78,9 @@ export class BotsService {
         },
         server: {
           serverId: true,
+        },
+        cexJob: {
+          id: true,
         },
       },
       order: {
@@ -108,13 +139,26 @@ export class BotsService {
   async update(id: number, updateBotDto: BotDto) {
     const bot = await this.findOne(id);
 
+    let job: Jobs | null = null;
+    let cexJob: CexJob | null = null;
+
     const server = await this.serverService.findOne(updateBotDto.serverId);
-    const job = await this.jobService.findOne(updateBotDto.jobId);
+
+    if (updateBotDto.jobId) {
+      const foundJob = await this.jobService.findOne(updateBotDto.jobId);
+      job = (foundJob as any) || null;
+    }
+
+    if (updateBotDto.cexJobId) {
+      const foundCexJob = await this.cexJobService.findOne(updateBotDto.cexJobId);
+      cexJob = foundCexJob || null;
+    }
 
     bot.botName = updateBotDto.botName;
     bot.description = updateBotDto.description;
     bot.server = server;
     bot.job = job;
+    bot.cexJob = cexJob;
 
     bot.paused = updateBotDto.paused;
     bot.isRepeat = updateBotDto.isRepeat;

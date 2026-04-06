@@ -729,22 +729,7 @@ export const getFullJobsDataIsReady = createSelector(
   (loaded, loading) => loaded && !loading
 );
 
-export const getFullBotsDataResponse = createSelector(
-  getBotsDataResponse,
-  getJobsMap,
-  getServersMap,
-  (bots, jobs, servers) => {
-    return bots.map(bot => {
-      const fullJobsData = bot.jobId ? jobs.get(bot.jobId) : null;
-      const fullServersData = bot.serverId ? servers.get(bot.serverId) : null;
-      return {
-        ...bot,
-        jobType: fullJobsData,
-        serverName: fullServersData,
-      };
-    });
-  }
-);
+
 
 export const getFullBotsDataIsLoading = createSelector(
   getBotsDataIsLoading,
@@ -887,4 +872,38 @@ export const getCexFullJobsDataIsReady = createSelector(
   getCexFullJobsDataIsLoaded,
   getCexFullJobsDataIsLoading,
   (loaded, loading) => loaded && !loading
+);
+
+const getCexJobsMap = createSelector(
+  getCexJobsDataResponse,
+  (jobs) => {
+    console.log('Данные из CexJobs API:', jobs);
+
+    const map = new Map(jobs.map(j => [j.id, j.job_type]));
+
+    console.log('Созданная карта CexJobsMap:', map);
+    return map;
+  }
+);
+
+export const getFullBotsDataResponse = createSelector(
+  getBotsDataResponse,
+  getJobsMap,
+  getCexJobsMap,
+  getServersMap,
+  (bots, jobs, cexJobs, servers) => {
+    return bots.map(bot => {
+      const dexJobType = bot.jobId ? jobs.get(bot.jobId) : null;
+
+      const cexJobType = bot.cexJobId ? cexJobs.get(bot.cexJobId) : null;
+
+      const fullServersData = bot.serverId ? servers.get(bot.serverId) : null;
+
+      return {
+        ...bot,
+        jobType: dexJobType || cexJobType || '-',
+        serverName: fullServersData,
+      };
+    });
+  }
 );

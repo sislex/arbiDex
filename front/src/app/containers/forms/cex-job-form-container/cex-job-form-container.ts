@@ -3,7 +3,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confirmation-pop-up';
 import { setChainsData, setRpcUrlsData } from '../../../+state/db-config/db-config.actions';
 import { Store } from '@ngrx/store';
-import { getCexChainsDataResponse } from '../../../+state/db-config/db-config.selectors';
+import {
+  getCexPairsFullData
+} from '../../../+state/db-config/db-config.selectors';
 import { map } from 'rxjs';
 import {CexJobForm} from '../../../components/forms/cex-job-form/cex-job-form';
 
@@ -25,11 +27,12 @@ export class CexJobFormContainer {
     ...this.data.form
   }
 
-  chainsList$ = this.store.select(getCexChainsDataResponse).pipe(
+  chainsList$ = this.store.select(getCexPairsFullData).pipe(
     map(item =>
       item.map(item => ({
         id: item.id,
-        name: item.name,
+        name: item.sourceName,
+        address: item.token0 + '/' + item.token1,
       }))
     )
   );

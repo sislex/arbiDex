@@ -16,14 +16,38 @@
   ></app-input-field>
 </app-header-content-layout>
 
-@if (jobList) {
+<app-header-content-layout>
+  <app-field-title header [title]="'Mode'"></app-field-title>
+  <app-autocomplete
+    [title]="'Select Dex or Cex'"
+    [list]="jobTypes"
+    [selected]="formData.selectedType || ''"
+    (emitter)="events($event, 'jobType')"
+    content
+  ></app-autocomplete>
+</app-header-content-layout>
+
+@if (formData.selectedType === 'dex' && jobList) {
   <app-header-content-layout>
-    <app-field-title header [title]="'Job Id'"></app-field-title>
+    <app-field-title header [title]="'Dex Job Id'"></app-field-title>
     <app-autocomplete
       [title]="'Job Id'"
       [list]="(jobList | async)!"
       [selected]="formData.jobId"
       (emitter)="events($event, 'jobId')"
+      content
+    ></app-autocomplete>
+  </app-header-content-layout>
+}
+
+@if (formData.selectedType === 'cex' && cexJobList) {
+  <app-header-content-layout>
+    <app-field-title header [title]="'Cex Job Id'"></app-field-title>
+    <app-autocomplete
+      [title]="'Job Id'"
+      [list]="(cexJobList | async)!"
+      [selected]="formData.cexJobId"
+      (emitter)="events($event, 'cexJobId')"
       content
     ></app-autocomplete>
   </app-header-content-layout>

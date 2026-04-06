@@ -193,7 +193,7 @@ export interface IBots {
   description: string;
   serverId: number;
   serverName: string;
-  jobId: number;
+  jobId: number | null;
   jobType: string;
   pairs: number;
   paused: boolean;
@@ -202,19 +202,22 @@ export interface IBots {
   maxJobs: number;
   maxErrors: number;
   timeoutMs: number;
+  cexJobId: number | null;
 }
 export interface IBotsCreate {
   botId: number;
   botName: string;
   description: string;
   serverId: number;
-  jobId: number;
+  jobId: number | null;
   paused: boolean;
   isRepeat: boolean;
   delayBetweenRepeat: number;
   maxJobs: number;
   maxErrors: number;
   timeoutMs: number;
+  cexJobId: number | null;
+  selectedType?: string;
 }
 
 export interface IServersAPI extends API {
@@ -232,8 +235,6 @@ export interface IServersCreate {
   port: string;
   serverName: string;
 }
-
-
 
 export interface ICexChainsAPI extends API {
   response: ICexChains[];

@@ -692,6 +692,7 @@ export class DbConfigEffects {
         DbConfigActions.setBotsData(),
         DbConfigActions.setJobsData(),
         DbConfigActions.setServersData(),
+        DbConfigActions.setCexJobsData(),
       ])
     )
   );
