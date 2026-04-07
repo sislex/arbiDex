@@ -10,6 +10,7 @@ import {
   getCexJobsFullDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import {
+  checkCexJob,
   createCexJob,
   deletingCexJob,
   editCexJob,
@@ -127,6 +128,8 @@ export class AgGridCexJobsContainer implements OnInit {
         this.openDeleteDialog(row);
       } else if ($event.actionType === 'edit') {
         this.openEditDialog(row);
+      } else if ($event.actionType === 'play') {
+        this.store.dispatch(checkCexJob({cexData: row}));
       }
     }
   }

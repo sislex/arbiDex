@@ -1336,4 +1336,30 @@ export class DbConfigEffects {
     { dispatch: false }
   );
 
+  checkCexJob$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.checkCexJob),
+      switchMap((action) => {
+        const sendData = {
+          source: action.cexData.chainName,
+          token0: action.cexData.token0,
+          token1: action.cexData.token1
+        };
+
+        return this.apiService.checkCexJob(sendData).pipe(
+          map(response => {
+            if (response.ok) {
+              console.log('response.ok', response);
+            } else {
+              console.log('response.NE ok', response);
+            }
+            return DbConfigActions.checkCexJobsSuccess({ response });
+          }),
+          catchError(error =>
+            of(DbConfigActions.checkCexJobsFailure({ error }))
+          )
+        );
+      })
+    )
+  );
 }

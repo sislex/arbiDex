@@ -425,6 +425,7 @@ export const setCexJobsDataFailure = createAction(
   '[DbConfig] setCexJobsDataFailure',
   props<{ error: string }>()
 );
+
 export const createCexJob = createAction(
   '[DbConfig] createCexJob',
   props<{ data: ICexJobsCreate }>()
@@ -437,3 +438,16 @@ export const deletingCexJob = createAction(
   '[DbConfig] deletingCexJob',
   props<{ cexJobId: number }>()
 )
+
+export const checkCexJob = createAction(
+  '[DbConfig] checkCexJob',
+  props<{ cexData: any }>()
+);
+export const checkCexJobsSuccess = createAction(
+  '[DbConfig] checkCexJobsSuccess',
+  props<{ response: any }>()
+);
+export const checkCexJobsFailure = createAction(
+  '[DbConfig] checkCexJobsFailure',
+  props<{ error: string }>()
+);

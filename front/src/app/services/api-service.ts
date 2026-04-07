@@ -269,6 +269,9 @@ export class ApiService {
   getCexJobs(): Observable<any> {
     return this.http.get(`${this.apiUrl}/cex-jobs`);
   }
+  checkCexJob(data: any): Observable<any> {
+    return this.http.post(`http://45.135.182.251:1001/jobs/cex-quotes`, {...data});
+  }
   getCexJobById(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/cex-jobs/${id}`);
   }
