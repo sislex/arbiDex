@@ -10,7 +10,7 @@ import {
   IServersAPI,
   ITokensAPI,
   IPairsAPI,
-  IRpcUrlApi, ISwapRateApi,
+  IRpcUrlApi, ISwapRateApi, ICexChainsAPI, ICexPairsAPI, ICexJobsAPI,
 } from '../../models/db-config';
 import {emptyAsyncResponse} from './configs';
 
@@ -22,6 +22,9 @@ export interface DbConfigState {
   pools: IPoolsAPI;
   dexes: IDexesAPI;
   chains: IChainsAPI;
+  cexChains: ICexChainsAPI;
+  cexPairs: ICexPairsAPI;
+  cexJobs: ICexJobsAPI;
   pairs: IPairsAPI;
   quotes: IQuotesAPI;
   jobs: IJobsAPI;
@@ -45,6 +48,9 @@ export const initialState: DbConfigState = {
   pools: emptyAsyncResponse([]),
   dexes: emptyAsyncResponse([]),
   chains: emptyAsyncResponse([]),
+  cexChains: emptyAsyncResponse([]),
+  cexPairs: emptyAsyncResponse([]),
+  cexJobs: emptyAsyncResponse([]),
   pairs: emptyAsyncResponse([]),
   quotes: emptyAsyncResponse([]),
   jobs: emptyAsyncResponse([]),
@@ -449,6 +455,99 @@ export const dbConfigReducer = createReducer(
     pools: {
       ...state.pools,
       loadingTime: Date.now() - state.pools.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  // --- CexChains ---
+  on(DbConfigActions.setCexChainsData, (state) => ({
+    ...state,
+    cexChains: {
+      ...state.cexChains,
+      startTime: Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setCexChainsDataSuccess, (state, { response }) => ({
+    ...state,
+    cexChains: {
+      ...state.cexChains,
+      loadingTime: Date.now() - state.cexChains.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setCexChainsDataFailure, (state, { error }) => ({
+    ...state,
+    cexChains: {
+      ...state.cexChains,
+      loadingTime: Date.now() - state.cexChains.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  // --- CexPairs ---
+  on(DbConfigActions.setCexPairsData, (state) => ({
+    ...state,
+    cexPairs: {
+      ...state.cexPairs,
+      startTime: Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setCexPairsDataSuccess, (state, { response }) => ({
+    ...state,
+    cexPairs: {
+      ...state.cexPairs,
+      loadingTime: Date.now() - state.cexPairs.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setCexPairsDataFailure, (state, { error }) => ({
+    ...state,
+    cexPairs: {
+      ...state.cexPairs,
+      loadingTime: Date.now() - state.cexPairs.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      error
+    }
+  })),
+
+  // --- CexJobs ---
+  on(DbConfigActions.setCexJobsData, (state) => ({
+    ...state,
+    cexJobs: {
+      ...state.cexJobs,
+      startTime: Date.now(),
+      isLoading: true,
+      isLoaded: false,
+    }
+  })),
+  on(DbConfigActions.setCexJobsDataSuccess, (state, { response }) => ({
+    ...state,
+    cexJobs: {
+      ...state.cexJobs,
+      loadingTime: Date.now() - state.cexJobs.startTime!,
+      isLoading: false,
+      isLoaded: true,
+      response
+    }
+  })),
+  on(DbConfigActions.setCexJobsDataFailure, (state, { error }) => ({
+    ...state,
+    cexJobs: {
+      ...state.cexJobs,
+      loadingTime: Date.now() - state.cexJobs.startTime!,
       isLoading: false,
       isLoaded: true,
       error

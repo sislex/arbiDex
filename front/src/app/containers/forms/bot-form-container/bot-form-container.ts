@@ -3,7 +3,7 @@ import { ConfirmationPopUp } from '../../../components/confirmation-pop-up/confi
 import { BotForm } from '../../../components/forms/bot-form/bot-form';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { setJobsData, setServersData } from '../../../+state/db-config/db-config.actions';
+import {setCexJobsData, setJobsData, setServersData} from '../../../+state/db-config/db-config.actions';
 
 @Component({
   selector: 'app-bot-form-container',
@@ -23,9 +23,15 @@ export class BotFormContainer {
     ...this.data.form
   }
 
+  public jobTypes = [
+    { id: 'dex', name: 'DEX' },
+    { id: 'cex', name: 'CEX' }
+  ];
+
   constructor() {
     this.store.dispatch(setServersData());
     this.store.dispatch(setJobsData());
+    this.store.dispatch(setCexJobsData());
   }
 
   eventsForm($event: any) {

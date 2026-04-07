@@ -1,0 +1,17 @@
+<div class="action-buttons">
+  <app-actions
+    [icon]="'edit'"
+    [type]="'default'"
+    (emitter)="onAction($event, 'edit')"
+  ></app-actions>
+  <app-actions
+    [icon]="'delete'"
+    [type]="'red'"
+    (emitter)="onAction($event, 'delete')"
+  ></app-actions>
+  <app-actions
+    [icon]="'play_arrow'"
+    [type]="'green'"
+    (emitter)="onAction($event, 'play')"
+  ></app-actions>
+</div>

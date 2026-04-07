@@ -29,6 +29,12 @@ import { Quotes } from './entities/entities/Quotes';
 import { QuoteJobRelations } from './entities/entities/QuoteJobRelations';
 import { Pairs } from './entities/entities/Pairs';
 import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
+import { CexPairsModule } from './cex-pairs/cex-pairs.module';
+import { CexChainsModule } from './cex-chains/cex-chains.module';
+import { CexJobsModule } from './cex-jobs/cex-jobs.module';
+import { CexJob } from './entities/entities/cex-job.entity';
+import { CexPair } from './entities/entities/cex-pair.entity';
+import { CexChain } from './entities/entities/cex-chain.entity';
 
 @Module({
   imports: [
@@ -56,6 +62,9 @@ import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
           QuoteJobRelations,
           Pairs,
           PairQuoteRelations,
+          CexChain,
+          CexPair,
+          CexJob
         ],
         autoLoadEntities: true,
         synchronize: false,
@@ -80,6 +89,9 @@ import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
     GetFeeModule,
     SwapRateModule,
     BlockchainModule,
+    CexChainsModule,
+    CexPairsModule,
+    CexJobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

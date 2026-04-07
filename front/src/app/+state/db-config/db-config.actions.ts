@@ -9,7 +9,7 @@ import {
   IBotsCreate,
   IServersCreate,
   IPairsCreate,
-  IRpcUrlCreate
+  IRpcUrlCreate, ICexJobsCreate, ICexPairsCreate, ICexChainsCreate
 } from '../../models/db-config';
 
 export const setServerList = createAction('[DbConfig] setServerList');
@@ -344,5 +344,111 @@ export const updateFullPoolsDataSuccess = createAction(
 );
 export const updateFullPoolsDataFailure = createAction(
   '[DbConfig] updateFullPoolsDataFailure',
+  props<{ error: string }>()
+);
+
+
+//====================================================================================================================
+//                                                   Cex Chains
+//====================================================================================================================
+
+export const setCexChainsData = createAction('[DbConfig] setCexChainsData');
+export const setCexChainsDataSuccess = createAction(
+  '[DbConfig] setCexChainsDataSuccess',
+  props<{ response: any }>()
+);
+export const setCexChainsDataFailure = createAction(
+  '[DbConfig] setCexChainsDataFailure',
+  props<{ error: string }>()
+);
+export const createCexChain = createAction(
+  '[DbConfig] createCexChain',
+  props<{ data: ICexChainsCreate }>()
+);
+export const editCexChain = createAction(
+  '[DbConfig] editCexChain',
+  props<{ data: ICexChainsCreate }>()
+);
+export const deletingCexChain = createAction(
+  '[DbConfig] deletingCexChain',
+  props<{ chainId: number }>()
+);
+
+//====================================================================================================================
+//                                                   Cex Pairs
+//====================================================================================================================
+
+export const initCexPairsPage = createAction('[DbConfig] initCexPairsPage');
+export const setCexPairsData = createAction('[DbConfig] setCexPairsData');
+export const setCexPairsRatingData = createAction(
+  '[DbConfig] setCexPairsRatingData',
+  props<{ cexPairIdForRating: number }>()
+
+);
+export const setCexPairsDataSuccess = createAction(
+  '[DbConfig] setCexPairsDataSuccess',
+  props<{ response: any }>()
+);
+export const setCexPairsDataFailure = createAction(
+  '[DbConfig] setCexPairsDataFailure',
+  props<{ error: string }>()
+);
+export const createCexPair = createAction(
+  '[DbConfig] createCexPair',
+  props<{ data: ICexPairsCreate }>()
+);
+export const editCexPair = createAction(
+  '[DbConfig] editCexPair',
+  props<{ data: ICexPairsCreate }>()
+);
+export const deletingCexPair = createAction(
+  '[DbConfig] deletingCexPair',
+  props<{ cexPairId: number }>()
+);
+
+
+//====================================================================================================================
+//                                                   Cex Jobs
+//====================================================================================================================
+
+export const setCexJobsData = createAction('[DbConfig] setCexJobsData');
+export const refreshCexJobsData = createAction('[DbConfig] refreshCexJobsData');
+export const initCexJobsListPage = createAction('[DbConfig] initCexJobsListPage');
+export const setCexOneJobData = createAction(
+  '[DbConfig] setCexOneJobData',
+  props<{ cexJobId: number }>()
+);
+export const setCexJobsDataSuccess = createAction(
+  '[DbConfig] setCexJobsDataSuccess',
+  props<{ response: any }>()
+);
+export const setCexJobsDataFailure = createAction(
+  '[DbConfig] setCexJobsDataFailure',
+  props<{ error: string }>()
+);
+
+export const createCexJob = createAction(
+  '[DbConfig] createCexJob',
+  props<{ data: ICexJobsCreate }>()
+);
+export const editCexJob = createAction(
+  '[DbConfig] editCexJob',
+  props<{ data: ICexJobsCreate }>()
+);
+export const deletingCexJob = createAction(
+  '[DbConfig] deletingCexJob',
+  props<{ cexJobId: number }>()
+)
+
+export const checkCexJob = createAction(
+  '[DbConfig] checkCexJob',
+  props<{ cexData: any }>()
+);
+export const checkCexJobsSuccess = createAction(
+  '[DbConfig] checkCexJobsSuccess',
+  props<{ response: any }>()
+);
+export const checkCexJobsFailure = createAction(
+  '[DbConfig] checkCexJobsFailure',
   props<{ error: string }>()
 );

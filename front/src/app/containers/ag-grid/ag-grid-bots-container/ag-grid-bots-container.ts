@@ -9,6 +9,7 @@ import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
 import { ActionsContainer } from '../../actions-container/actions-container';
 import {
+  getCexJobsDataResponse,
   getFullBotsDataIsReady,
   getFullBotsDataResponse,
   getJobsDataResponse,
@@ -60,6 +61,16 @@ export class AgGridBotsContainer implements OnInit {
       item.map(item => ({
         id: item.jobId,
         name: item.jobType,
+        address: item.description.toString(),
+      }))
+    )
+  );
+
+  cexJobList$ = this.store.select(getCexJobsDataResponse).pipe(
+    map(item =>
+      item.map(item => ({
+        id: item.id,
+        name: item.job_type,
         address: item.description.toString(),
       }))
     )
@@ -168,7 +179,7 @@ export class AgGridBotsContainer implements OnInit {
   }
 
   openCreateDialog() {
-    this.botDialog.openCreate(this.serversList$, this.jobList$).subscribe(result => {
+    this.botDialog.openCreate(this.serversList$, this.jobList$, this.cexJobList$).subscribe(result => {
       if (result?.data === 'add') {
         this.store.dispatch(createBot({ data: result.formData }));
       }
@@ -176,7 +187,7 @@ export class AgGridBotsContainer implements OnInit {
   }
 
   openEditDialog(row: any) {
-    this.botDialog.openEdit(row, this.serversList$, this.jobList$).subscribe(result => {
+    this.botDialog.openEdit(row, this.serversList$, this.jobList$, this.cexJobList$).subscribe(result => {
       if (result?.data === 'save') {
         this.store.dispatch(editBot({ data: result.formData }));
       }

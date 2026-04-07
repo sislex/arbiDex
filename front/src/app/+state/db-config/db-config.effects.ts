@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {catchError, EMPTY, exhaustMap, map, mergeMap, of, switchMap, tap, withLatestFrom} from 'rxjs';
+import {catchError, EMPTY, exhaustMap, from, map, mergeMap, of, switchMap, tap, withLatestFrom} from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
 import * as DbConfigSelectors from './db-config.selectors';
 import {ApiService} from '../../services/api-service';
@@ -692,6 +692,7 @@ export class DbConfigEffects {
         DbConfigActions.setBotsData(),
         DbConfigActions.setJobsData(),
         DbConfigActions.setServersData(),
+        DbConfigActions.setCexJobsData(),
       ])
     )
   );
@@ -1045,4 +1046,323 @@ export class DbConfigEffects {
       catchError(error => of(DbConfigActions.updateFullPoolsDataFailure({ error })))
     )
   );
+
+//====================================================================================================================
+//                                                   CexJobs
+//====================================================================================================================
+
+  initCexJobsListPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.initCexJobsListPage),
+      mergeMap(() => [
+        DbConfigActions.setCexJobsData(),
+        DbConfigActions.setCexChainsData(),
+        DbConfigActions.setCexPairsData(),
+      ])
+    )
+  );
+
+  setCexOneJobData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setCexOneJobData),
+      switchMap((action) =>
+        this.apiService.getCexJobById(action.cexJobId).pipe(
+          map(response =>
+            DbConfigActions.setCexJobsDataSuccess({ response })
+          ),
+          catchError(error =>
+            of(DbConfigActions.setCexJobsDataFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+
+  setCexJobsData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setCexJobsData),
+      withLatestFrom(this.store.select(DbConfigSelectors.getCexJobsDataResponse)),
+      exhaustMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setCexJobsDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getCexJobs().pipe(
+          map(response => DbConfigActions.setCexJobsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setCexJobsDataFailure({ error })))
+        );
+      })
+    )
+  );
+
+  refreshCexJobsData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.refreshCexJobsData),
+      switchMap(() =>
+        this.apiService.getCexJobs().pipe(
+          map(response => DbConfigActions.setCexJobsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setCexJobsDataFailure({ error })))
+        )
+      )
+    )
+  );
+
+  createCexJob$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createCexJob),
+        switchMap(action =>
+          this.apiService.createCexJob({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(DbConfigActions.refreshCexJobsData());
+              this._snackBar.open(`CexJob is created`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  editCexJob$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editCexJob),
+        switchMap((action) => {
+          let data = { ...action.data };
+          return this.apiService.editCexJob(data.jobId, data).pipe(
+            tap(() => {
+              this.store.dispatch(DbConfigActions.refreshCexJobsData());
+              this._snackBar.open(`CexJob is update`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  deletingCexJob$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingCexJob),
+        switchMap((action) => {
+          return this.apiService.deletingCexJob(action.cexJobId).pipe(
+            tap(_ => {
+              this.store.dispatch(DbConfigActions.refreshCexJobsData());
+              this._snackBar.open(`CexJob is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+
+
+  //====================================================================================================================
+  //                                                   Chains
+  //====================================================================================================================
+
+  setCexChainsData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setCexChainsData),
+      withLatestFrom(this.store.select(DbConfigSelectors.getCexChainsDataResponse)),
+      exhaustMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setCexChainsDataSuccess({response: cachedResponse}));
+        }
+
+        return this.apiService.getCexChainsData().pipe(
+          map(response => DbConfigActions.setCexChainsDataSuccess({response})),
+          catchError(error => of(DbConfigActions.setCexChainsDataFailure({error})))
+        );
+      })
+    )
+  );
+
+  createCexChain$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createCexChain),
+        switchMap(action =>
+          this.apiService.createCexChain({...action.data}).pipe(
+            tap(response => {
+              this.store.dispatch(DbConfigActions.setCexChainsData());
+              this._snackBar.open(`CexChain is created: ${response.name}`, '', {duration: 5000});
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', {duration: 5000});
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    {dispatch: false}
+  );
+
+  editCexChain$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editCexChain),
+        switchMap((action) => {
+          let data = {...action.data};
+          return this.apiService.editCexChain(data.id, data).pipe(
+            tap(response => {
+              console.log('DELETEEEEEE');
+              this.store.dispatch(DbConfigActions.setCexChainsData());
+              this._snackBar.open(`CexChain updated: ${response.chainId}`, '', {duration: 5000});
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', {duration: 5000});
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    {dispatch: false}
+  );
+
+  deletingCexChain$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingCexChain),
+        switchMap((action) =>
+          this.apiService.deletingCexChain(action.chainId).pipe(
+            tap(_ => {
+              this.store.dispatch(DbConfigActions.setCexChainsData());
+              this._snackBar.open(`CexChain deleted`, '', {duration: 5000});
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', {duration: 5000});
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    {dispatch: false}
+  );
+
+//====================================================================================================================
+//                                                   CexPairs
+//====================================================================================================================
+
+
+  initCexPairsPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.initCexPairsPage),
+      mergeMap(() => [
+        DbConfigActions.setCexPairsData(),
+        DbConfigActions.setCexChainsData(),
+      ])
+    )
+  );
+
+  setCexPairsData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.setCexPairsData),
+      withLatestFrom(this.store.select(DbConfigSelectors.getCexPairsDataResponse)),
+      exhaustMap(([_, cachedResponse]) => {
+        if (cachedResponse && cachedResponse.length > 0) {
+          return of(DbConfigActions.setCexPairsDataSuccess({ response: cachedResponse }));
+        }
+
+        return this.apiService.getCexPairs().pipe(
+          map(response => DbConfigActions.setCexPairsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setCexPairsDataFailure({ error })))
+        );
+      })
+    )
+  );
+
+  createCexPair$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.createCexPair),
+        switchMap(action =>
+          this.apiService.createCexPair({ ...action.data }).pipe(
+            tap(response => {
+              this.store.dispatch(DbConfigActions.setCexPairsData());
+              this._snackBar.open(`CexPair is created: ${response.cexPairId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    { dispatch: false }
+  );
+
+  editCexPair$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.editCexPair),
+        switchMap((action) => {
+          let data = { ...action.data };
+          return this.apiService.editCexPair(data.id, data).pipe(
+            tap(response => {
+              this.store.dispatch(DbConfigActions.setCexPairsData());
+              this._snackBar.open(`CexPair is update: ${response.cexPairId}`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  deletingCexPair$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(DbConfigActions.deletingCexPair),
+        switchMap((action) => {
+          return this.apiService.deletingCexPair(action.cexPairId).pipe(
+            tap(_ => {
+              this.store.dispatch(DbConfigActions.setCexPairsData());
+              this._snackBar.open(`CexPair is delete`, '', { duration: 5000 });
+            }),
+            catchError(error => {
+              this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
+              return EMPTY;
+            })
+          );
+        })
+      ),
+    { dispatch: false }
+  );
+
+  checkCexJob$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.checkCexJob),
+      switchMap((action) => {
+        const sendData = {
+          source: action.cexData.chainName,
+          token0: action.cexData.token0,
+          token1: action.cexData.token1
+        };
+
+        return this.apiService.checkCexJob(sendData).pipe(
+          switchMap(response =>
+            this.apiService.updateCexJobStatus(action.cexData.id, response.ok).pipe(
+              switchMap(() => from([
+                DbConfigActions.refreshCexJobsData(),
+                DbConfigActions.checkCexJobsSuccess({ response })
+              ])),
+              catchError(() => of(DbConfigActions.checkCexJobsSuccess({ response })))
+            )
+          ),
+          catchError(error => of(DbConfigActions.checkCexJobsFailure({ error })))
+        );
+      })
+    )
+  );
+
+
+
 }

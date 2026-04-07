@@ -24,28 +24,32 @@ export class BotForm {
   @Input() formData!: IBotsCreate;
   @Input() serversList?: any;
   @Input() jobList?: any;
+  @Input() cexJobList?: any;
+  @Input() jobTypes: any;
 
   @Output() emitter = new EventEmitter();
 
   events(
     event: any,
     field:
-      'botName' |
-      'description' |
-      'jobId' |
-      'serverId' |
-      'paused' |
-      'isRepeat' |
-      'delayBetweenRepeat' |
-      'maxJobs' |
-      'maxErrors' |
-      'timeoutMs'
+      | 'botName' | 'description' | 'jobId' | 'serverId' | 'paused'
+      | 'isRepeat' | 'delayBetweenRepeat' | 'maxJobs' | 'maxErrors'
+      | 'timeoutMs' | 'cexJobId' | 'jobType'
   ) {
-    this.formData = {
-      ...this.formData,
-      [field]: event.data,
-    };
+    if (field === 'jobType') {
+      this.formData = {
+        ...this.formData,
+        selectedType: event.data,
+        jobId: null,
+        cexJobId: null
+      };
+    } else {
+      this.formData = {
+        ...this.formData,
+        [field]: event.data ?? event.id,
+      };
+    }
 
     this.emitter.emit(this.formData);
-  };
+  }
 }

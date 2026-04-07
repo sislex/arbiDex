@@ -1,0 +1,23 @@
+<app-header-content-layout>
+  @if (fullCexPairsDataIsReady$ | async) {
+    <app-title-table-button
+      header
+      [title]="'Cex pairs table (' + ((pairsDataResponse$ | async)!.length === filteredItemCount ? (pairsDataResponse$ | async)!.length : filteredItemCount + ' / ' + (pairsDataResponse$ | async)!.length) + ')'"
+      [icon]="'add'"
+      (emitter)="actions($event, 'add')"
+    >
+    </app-title-table-button>
+  }
+  @if (fullCexPairsDataIsReady$ | async) {
+    <app-ag-grid
+      content
+      [rowData]="(pairsDataResponse$ | async)!"
+      [colDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      (emitter)="events($event)"
+    ></app-ag-grid>
+  } @else {
+    <app-loader header></app-loader>
+  }
+</app-header-content-layout>
+

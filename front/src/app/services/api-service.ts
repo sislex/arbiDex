@@ -244,4 +244,82 @@ export class ApiService {
   deletingRpcUrl(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/rpc-urls/${id}`);
   }
+  //
+  // //====================================================================================================================
+  // //                                                  Cex Pools
+  // //====================================================================================================================
+  //
+  // getCexPools(): Observable<any> {
+  //   return this.http.get(`${this.apiUrl}/cex-pairs`);
+  // }
+  // createCexPool(data: any): Observable<any> {
+  //   return this.http.post(`${this.apiUrl}/cex-pairs`, {...data});
+  // }
+  // editCexPool(id: number, data: any): Observable<any> {
+  //   return this.http.put(`${this.apiUrl}/cex-pairs/by-id/${id}`, data);
+  // }
+  // deletingCexPool(id: number): Observable<any> {
+  //   return this.http.delete(`${this.apiUrl}/cex-pairs/${id}`);
+  // }
+
+  //====================================================================================================================
+  //                                                  Cex Jobs
+  //====================================================================================================================
+
+  getCexJobs(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/cex-jobs`);
+  }
+  checkCexJob(data: any): Observable<any> {
+    return this.http.post(`http://45.135.182.251:1001/jobs/cex-quotes`, {...data});
+  }
+  getCexJobById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/cex-jobs/${id}`);
+  }
+  createCexJob(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/cex-jobs`, {...data});
+  }
+  editCexJob(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/cex-jobs/${id}`, data);
+  }
+  updateCexJobStatus(id: number, checked: boolean | null): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/cex-jobs/${id}/status`, { checked });
+  }
+  deletingCexJob(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/cex-jobs/${id}`);
+  }
+
+  //====================================================================================================================
+  //                                                  Cex Chains
+  //====================================================================================================================
+
+  getCexChainsData(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/cex-chains`);
+  }
+  createCexChain(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/cex-chains`, {...data});
+  }
+  editCexChain(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/cex-chains/${id}`, data);
+  }
+  deletingCexChain(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/cex-chains/${id}`);
+  }
+
+//====================================================================================================================
+//                                                   CexPairs
+//====================================================================================================================
+
+  getCexPairs(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/cex-pairs`);
+  }
+  createCexPair(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/cex-pairs`, { ...data });
+  }
+  editCexPair(id: number, data: any): Observable<any> {
+    console.log('data', data)
+    return this.http.put(`${this.apiUrl}/cex-pairs/${id}`, data);
+  }
+  deletingCexPair(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/cex-pairs/${id}`);
+  }
 }

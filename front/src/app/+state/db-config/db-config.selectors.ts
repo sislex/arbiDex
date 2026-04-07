@@ -1,6 +1,6 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {DB_CONFIG_FEATURE_KEY, DbConfigState} from './db-config.reducer';
-import {IJobs, IQuotes, IRpcUrl, ITokens} from '../../models/db-config';
+import {ICexJobs, IJobs, IQuotes, IRpcUrl, ITokens} from '../../models/db-config';
 
 export const selectFeature = createFeatureSelector<DbConfigState>(DB_CONFIG_FEATURE_KEY);
 
@@ -295,6 +295,83 @@ export const getSwapRateDataResponse = createSelector(
   selectFeature,
   (state: DbConfigState) => state.swapRate.response
 );
+
+//====================================================================================================================
+//                                                   CexChains
+//====================================================================================================================
+
+export const getCexChainsDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexChains.response
+);
+export const getCexChainsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexChains.error
+);
+export const getCexChainsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.cexChains.error
+);
+export const getCexChainsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexChains.isLoading
+);
+export const getCexChainsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexChains.isLoaded
+);
+
+//====================================================================================================================
+//                                                   CexPairs
+//====================================================================================================================
+
+export const getCexPairsDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexPairs.response
+);
+export const getCexPairsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexPairs.error
+);
+export const getCexPairsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.cexPairs.error
+);
+export const getCexPairsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexPairs.isLoading
+);
+export const getCexPairsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexPairs.isLoaded
+);
+
+
+//====================================================================================================================
+//                                                   CexJobs
+//====================================================================================================================
+
+export const getCexJobsDataResponse = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexJobs.response
+);
+export const getCexJobsDataFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexJobs.error
+);
+export const getCexJobsDataIsFailure = createSelector(
+  selectFeature,
+  (state: DbConfigState) => !!state.cexJobs.error
+);
+export const getCexJobsDataIsLoading = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexJobs.isLoading
+);
+export const getCexJobsDataIsLoaded = createSelector(
+  selectFeature,
+  (state: DbConfigState) => state.cexJobs.isLoaded
+);
+
 
 //====================================================================================================================
 //                                                   MAPS
@@ -652,22 +729,7 @@ export const getFullJobsDataIsReady = createSelector(
   (loaded, loading) => loaded && !loading
 );
 
-export const getFullBotsDataResponse = createSelector(
-  getBotsDataResponse,
-  getJobsMap,
-  getServersMap,
-  (bots, jobs, servers) => {
-    return bots.map(bot => {
-      const fullJobsData = bot.jobId ? jobs.get(bot.jobId) : null;
-      const fullServersData = bot.serverId ? servers.get(bot.serverId) : null;
-      return {
-        ...bot,
-        jobType: fullJobsData,
-        serverName: fullServersData,
-      };
-    });
-  }
-);
+
 
 export const getFullBotsDataIsLoading = createSelector(
   getBotsDataIsLoading,
@@ -721,7 +783,127 @@ export const getUniqueTokensFromSwapRates = createSelector(
       .map(id => tokensMap.get(id))
       .filter((token): token is ITokens => !!token);
 
-    // Возвращаем нативный токен первым, а за ним остальные
     return [nativeToken, ...mappedTokens];
+  }
+);
+
+//====================================================================================================================
+//                                                   Cex_Pairs_full_data
+//====================================================================================================================
+
+
+const getCexChainMap = createSelector(
+  getCexChainsDataResponse,
+  (chains) => new Map(chains.map(c => [c.id, c.name]))
+);
+export const getCexPairsFullData = createSelector(
+  getCexPairsDataResponse,
+  getCexChainMap,
+  (pairsData, chainMap) => {
+    return pairsData.map(pair => {
+      return {
+        ...pair,
+        sourceName: chainMap.get(pair?.source!),
+      };
+    });
+  }
+);
+export const getFullCexPairsDataIsLoading = createSelector(
+  getCexPairsDataIsLoading,
+  getCexChainsDataIsLoading,
+  ( pairs, chains) =>
+    pairs || chains
+);
+export const getFullCexPairsDataIsLoaded = createSelector(
+  getCexPairsDataIsLoaded,
+  getCexChainsDataIsLoaded,
+  ( pairs, chains) =>
+    pairs  && chains
+);
+export const getFullCexPairsDataIsReady = createSelector(
+  getFullCexPairsDataIsLoaded,
+  getFullCexPairsDataIsLoading,
+  (loaded, loading) => loaded && !loading
+);
+
+//
+//
+//
+
+const getCexPairsMap = createSelector(
+  getCexPairsDataResponse,
+  (pairs) => new Map(pairs.map(p => [p.id, p]))
+);
+
+export const getCexJobsFullDataResponse = createSelector(
+  getCexPairsMap,
+  getCexJobsDataResponse,
+  getCexChainMap,
+  (pairs, jobs, chainMap, ) => {
+    const jobsArray = (jobs as ICexJobs[]) || [];
+
+    return jobsArray.map((job) => {
+      const fullPairData = job.cex_pair_id ? pairs.get(Number(job.cex_pair_id)) : null;
+      return {
+        ...job,
+        token0: fullPairData?.token0,
+        token1: fullPairData?.token1,
+        chainName: chainMap.get(fullPairData?.source!),
+      };
+    });
+  }
+);
+
+export const getCexFullJobsDataIsLoading = createSelector(
+  getCexJobsDataIsLoading,
+  getCexChainsDataIsLoading,
+  getCexPairsDataIsLoading,
+  (jobs, chains, pairs) =>
+    jobs || chains || pairs
+);
+export const getCexFullJobsDataIsLoaded = createSelector(
+  getCexJobsDataIsLoaded,
+  getCexChainsDataIsLoaded,
+  getCexPairsDataIsLoaded,
+  (jobs, chains, pairs) =>
+    jobs && chains && pairs
+);
+export const getCexFullJobsDataIsReady = createSelector(
+  getCexFullJobsDataIsLoaded,
+  getCexFullJobsDataIsLoading,
+  (loaded, loading) => loaded && !loading
+);
+
+const getCexJobsMap = createSelector(
+  getCexJobsDataResponse,
+  (jobs) => {
+    // console.log('Данные из CexJobs API:', jobs);
+
+    const map = new Map(jobs.map(j => [j.id, j.job_type]));
+
+    // console.log('Созданная карта CexJobsMap:', map);
+    return map;
+  }
+);
+
+export const getFullBotsDataResponse = createSelector(
+  getBotsDataResponse,
+  getJobsMap,
+  getCexJobsMap,
+  getServersMap,
+  (bots, jobs, cexJobs, servers) => {
+    return bots.map(bot => {
+      const dexJobType = bot.jobId ? jobs.get(bot.jobId) : null;
+
+      const cexJobType = bot.cexJobId ? cexJobs.get(bot.cexJobId) : null;
+
+      const fullServersData = bot.serverId ? servers.get(bot.serverId) : null;
+
+      return {
+        ...bot,
+        jobType: dexJobType || cexJobType || '-',
+        serverName: fullServersData,
+      };
+    });
   }
 );

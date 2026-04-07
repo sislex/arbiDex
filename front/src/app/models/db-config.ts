@@ -193,7 +193,7 @@ export interface IBots {
   description: string;
   serverId: number;
   serverName: string;
-  jobId: number;
+  jobId: number | null;
   jobType: string;
   pairs: number;
   paused: boolean;
@@ -202,19 +202,22 @@ export interface IBots {
   maxJobs: number;
   maxErrors: number;
   timeoutMs: number;
+  cexJobId: number | null;
 }
 export interface IBotsCreate {
   botId: number;
   botName: string;
   description: string;
   serverId: number;
-  jobId: number;
+  jobId: number | null;
   paused: boolean;
   isRepeat: boolean;
   delayBetweenRepeat: number;
   maxJobs: number;
   maxErrors: number;
   timeoutMs: number;
+  cexJobId: number | null;
+  selectedType?: string;
 }
 
 export interface IServersAPI extends API {
@@ -231,4 +234,47 @@ export interface IServersCreate {
   ip: string;
   port: string;
   serverName: string;
+}
+
+export interface ICexChainsAPI extends API {
+  response: ICexChains[];
+}
+export interface ICexChains {
+  id: number;
+  name: string;
+}
+export interface ICexChainsCreate {
+  id: number;
+  name: string;
+}
+
+export interface ICexPairsAPI extends API {
+  response: ICexPairs[];
+}
+export interface ICexPairs {
+  id: number;
+  source: number;
+  token0: string;
+  token1: string;
+}
+export interface ICexPairsCreate {
+  id: number;
+  source: number;
+  token0: string;
+  token1: string;
+}
+
+export interface ICexJobsAPI extends API {
+  response: ICexJobs[];
+}
+export interface ICexJobs {
+  id: number;
+  job_type: string;
+  description: string;
+  cex_pair_id: number;
+  checked: boolean | null;
+}
+export interface ICexJobsCreate {
+  jobId: number;
+  jobType: string;
 }

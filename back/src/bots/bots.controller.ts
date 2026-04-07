@@ -23,20 +23,22 @@ export class BotsController {
   @Get()
   async findAll() {
     const bots = await this.botsService.findAll();
-    return bots.map(bots => ({
+    return bots.map(bot => ({
+      botId: bot.botId,
+      botName: bot.botName,
+      delayBetweenRepeat: bot.delayBetweenRepeat,
+      description: bot.description,
+      isRepeat: bot.isRepeat,
+      maxErrors: bot.maxErrors,
+      maxJobs: bot.maxJobs,
+      paused: bot.paused,
+      timeoutMs: bot.timeoutMs,
 
-      botId: bots.botId,
-      botName: bots.botName,
-      delayBetweenRepeat: bots.delayBetweenRepeat,
-      description: bots.description,
-      isRepeat: bots.isRepeat,
-      maxErrors: bots.maxErrors,
-      maxJobs: bots.maxJobs,
-      paused:bots.paused,
-      timeoutMs: bots.timeoutMs,
-      pairsCount: bots.job.quoteJobRelations.length,
-      serverId: bots.server.serverId,
-      jobId: bots.job.jobId,
+      pairsCount: bot.job?.quoteJobRelations?.length ?? 0,
+
+      serverId: bot.server?.serverId,
+      jobId: bot.job?.jobId ?? null,
+      cexJobId: bot.cexJob?.id ?? null,
     }));
   }
 
