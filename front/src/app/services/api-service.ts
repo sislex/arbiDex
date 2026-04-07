@@ -281,6 +281,9 @@ export class ApiService {
   editCexJob(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/cex-jobs/${id}`, data);
   }
+  updateCexJobStatus(id: number, checked: boolean | null): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/cex-jobs/${id}/status`, { checked });
+  }
   deletingCexJob(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/cex-jobs/${id}`);
   }

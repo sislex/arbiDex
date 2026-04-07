@@ -101,6 +101,38 @@ export class AgGridCexJobsContainer implements OnInit {
         return params.data?.token1 || '-';
       },
     },
+    {
+      headerName: 'Is work?',
+      flex: 1,
+      filter: true,
+      sortable: true,
+      valueGetter: (params) => {
+        const status = params.data?.checked;
+        if (status === true) return 'V';
+        if (status === false) return 'X';
+        return '?';
+      },
+      cellStyle: (params) => {
+        const status = params.data?.checked;
+        const baseStyle = {
+          textAlign: 'center',
+          fontSize: '16px',
+          lineHeight: 'normal',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        };
+
+        if (status === true) {
+          return { ...baseStyle, color: 'green', fontWeight: 'bold' };
+        }
+        if (status === false) {
+          return { ...baseStyle, color: 'red', fontWeight: 'bold' };
+        }
+        return { ...baseStyle, color: 'gray', fontWeight: 'normal' };
+      }
+    }
+
   ];
 
   readonly defaultColDef: ColDef = {

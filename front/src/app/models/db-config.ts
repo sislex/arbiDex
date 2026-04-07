@@ -272,6 +272,7 @@ export interface ICexJobs {
   job_type: string;
   description: string;
   cex_pair_id: number;
+  checked: boolean | null;
 }
 export interface ICexJobsCreate {
   jobId: number;

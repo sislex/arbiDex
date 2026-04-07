@@ -5,7 +5,7 @@ import {
   Body,
   Param,
   Delete,
-  Put,
+  Put, Patch,
 } from '@nestjs/common';
 import { CexJobsService } from './cex-jobs.service';
 import { CexJobDto } from '../dtos/cex-jobs-dto/cex-job.dto';
@@ -32,6 +32,14 @@ export class CexJobsController {
   @Put(':id')
   update(@Param('id') id: string, @Body() updateCexJobDto: CexJobDto) {
     return this.cexJobsService.update(+id, updateCexJobDto);
+  }
+
+  @Patch(':id/status')
+  async setStatus(
+    @Param('id') id: string,
+    @Body('checked') checked: boolean | null
+  ) {
+    return this.cexJobsService.setCheckedStatus(+id, checked);
   }
 
   @Delete(':id')

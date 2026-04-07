@@ -15,6 +15,9 @@ export class CexJob {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Column({ type: 'boolean', nullable: true, default: null })
+  checked: boolean | null;
+
   @ManyToOne(() => CexPair, (pair) => pair.jobs, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'cex_pair_id' })
   pair: CexPair;

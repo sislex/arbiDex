@@ -20,6 +20,7 @@ export class CexJobsService {
       job_type: dto.job_type,
       description: dto.description,
       cex_pair_id: pair.id,
+      checked: null,
     });
 
     return await this.cexJobRepository.save(job);
@@ -49,9 +50,14 @@ export class CexJobsService {
       job_type: dto.job_type,
       description: dto.description || '',
       cex_pair_id: dto.cex_pair_id,
+      checked: dto.checked
     }
-
     return await this.cexJobRepository.save(updateJob);
+  }
+
+  async setCheckedStatus(id: number, status: boolean | null) {
+    await this.cexJobRepository.update(id, { checked: status });
+    return this.findOne(id);
   }
 
   async remove(id: number) {

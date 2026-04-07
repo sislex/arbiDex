@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {catchError, EMPTY, exhaustMap, map, mergeMap, of, switchMap, tap, withLatestFrom} from 'rxjs';
+import {catchError, EMPTY, exhaustMap, from, map, mergeMap, of, switchMap, tap, withLatestFrom} from 'rxjs';
 import * as DbConfigActions from './db-config.actions';
 import * as DbConfigSelectors from './db-config.selectors';
 import {ApiService} from '../../services/api-service';
@@ -1095,14 +1095,26 @@ export class DbConfigEffects {
     )
   );
 
+  refreshCexJobsData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.refreshCexJobsData),
+      switchMap(() =>
+        this.apiService.getCexJobs().pipe(
+          map(response => DbConfigActions.setCexJobsDataSuccess({ response })),
+          catchError(error => of(DbConfigActions.setCexJobsDataFailure({ error })))
+        )
+      )
+    )
+  );
+
   createCexJob$ = createEffect(() =>
       this.actions$.pipe(
         ofType(DbConfigActions.createCexJob),
         switchMap(action =>
           this.apiService.createCexJob({ ...action.data }).pipe(
             tap(response => {
-              this.store.dispatch(DbConfigActions.setCexJobsData());
-              this._snackBar.open(`CexJob is created: ${response.jobId}`, '', { duration: 5000 });
+              this.store.dispatch(DbConfigActions.refreshCexJobsData());
+              this._snackBar.open(`CexJob is created`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -1120,9 +1132,9 @@ export class DbConfigEffects {
         switchMap((action) => {
           let data = { ...action.data };
           return this.apiService.editCexJob(data.jobId, data).pipe(
-            tap(response => {
-              this.store.dispatch(DbConfigActions.setCexJobsData());
-              this._snackBar.open(`CexJob is update: ${response.jobId}`, '', { duration: 5000 });
+            tap(() => {
+              this.store.dispatch(DbConfigActions.refreshCexJobsData());
+              this._snackBar.open(`CexJob is update`, '', { duration: 5000 });
             }),
             catchError(error => {
               this._snackBar.open(`${JSON.stringify(error.error.message)}`, '', { duration: 5000 });
@@ -1140,7 +1152,7 @@ export class DbConfigEffects {
         switchMap((action) => {
           return this.apiService.deletingCexJob(action.cexJobId).pipe(
             tap(_ => {
-              this.store.dispatch(DbConfigActions.setCexJobsData());
+              this.store.dispatch(DbConfigActions.refreshCexJobsData());
               this._snackBar.open(`CexJob is delete`, '', { duration: 5000 });
             }),
             catchError(error => {
@@ -1152,6 +1164,7 @@ export class DbConfigEffects {
       ),
     { dispatch: false }
   );
+
 
 
   //====================================================================================================================
@@ -1238,18 +1251,6 @@ export class DbConfigEffects {
 //                                                   CexPairs
 //====================================================================================================================
 
-  // setPairsRatingData$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(DbConfigActions.setPairsRatingData),
-  //     mergeMap(() => [
-  //       DbConfigActions.setPairsData(),
-  //       DbConfigActions.setPoolsData(),
-  //       DbConfigActions.setTokensData(),
-  //       DbConfigActions.setDexesData(),
-  //       DbConfigActions.setChainsData(),
-  //     ])
-  //   )
-  // );
 
   initCexPairsPage$ = createEffect(() =>
     this.actions$.pipe(
@@ -1347,19 +1348,21 @@ export class DbConfigEffects {
         };
 
         return this.apiService.checkCexJob(sendData).pipe(
-          map(response => {
-            if (response.ok) {
-              console.log('response.ok', response);
-            } else {
-              console.log('response.NE ok', response);
-            }
-            return DbConfigActions.checkCexJobsSuccess({ response });
-          }),
-          catchError(error =>
-            of(DbConfigActions.checkCexJobsFailure({ error }))
-          )
+          switchMap(response =>
+            this.apiService.updateCexJobStatus(action.cexData.id, response.ok).pipe(
+              switchMap(() => from([
+                DbConfigActions.refreshCexJobsData(),
+                DbConfigActions.checkCexJobsSuccess({ response })
+              ])),
+              catchError(() => of(DbConfigActions.checkCexJobsSuccess({ response })))
+            )
+          ),
+          catchError(error => of(DbConfigActions.checkCexJobsFailure({ error })))
         );
       })
     )
   );
+
+
+
 }

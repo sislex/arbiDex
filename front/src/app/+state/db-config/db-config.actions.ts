@@ -412,6 +412,7 @@ export const deletingCexPair = createAction(
 //====================================================================================================================
 
 export const setCexJobsData = createAction('[DbConfig] setCexJobsData');
+export const refreshCexJobsData = createAction('[DbConfig] refreshCexJobsData');
 export const initCexJobsListPage = createAction('[DbConfig] initCexJobsListPage');
 export const setCexOneJobData = createAction(
   '[DbConfig] setCexOneJobData',
