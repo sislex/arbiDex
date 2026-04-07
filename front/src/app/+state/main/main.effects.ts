@@ -16,7 +16,6 @@ export function mapQuoteRelation(item: any) {
 
   const pair = qr.pair;
   const pool = pair?.pool;
-  const quote = qr.quote;
 
   return {
     dex: pool?.dex?.dexId || '-',
@@ -189,8 +188,7 @@ export class MainEffects {
     { dispatch: false }
   );
 
-  setServerPreConfig$ = createEffect(
-    () =>
+  setServerPreConfig$ = createEffect(() =>
       this.actions$.pipe(
         ofType(MainActions.setServerPreConfig),
         concatLatestFrom(() => this.store.select(getBotsByServerIdResponse)),

@@ -877,11 +877,11 @@ export const getCexFullJobsDataIsReady = createSelector(
 const getCexJobsMap = createSelector(
   getCexJobsDataResponse,
   (jobs) => {
-    console.log('Данные из CexJobs API:', jobs);
+    // console.log('Данные из CexJobs API:', jobs);
 
     const map = new Map(jobs.map(j => [j.id, j.job_type]));
 
-    console.log('Созданная карта CexJobsMap:', map);
+    // console.log('Созданная карта CexJobsMap:', map);
     return map;
   }
 );

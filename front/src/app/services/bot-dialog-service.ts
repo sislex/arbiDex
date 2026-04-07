@@ -78,6 +78,7 @@ export class BotDialogService {
           maxErrors: row.maxErrors,
           timeoutMs: row.timeoutMs,
           cexJobId: row.cexJobId,
+          selectedType: (row.jobId && !row.cexJobId) ? 'dex' : 'cex'
         },
         serversList: serversList$,
         jobList: jobList$,
