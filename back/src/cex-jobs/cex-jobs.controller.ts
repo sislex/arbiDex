@@ -31,7 +31,6 @@ export class CexJobsController {
 
   @Put(':id')
   update(@Param('id') id: string, @Body() updateCexJobDto: CexJobDto) {
-    console.log(updateCexJobDto);
     return this.cexJobsService.update(+id, updateCexJobDto);
   }
 

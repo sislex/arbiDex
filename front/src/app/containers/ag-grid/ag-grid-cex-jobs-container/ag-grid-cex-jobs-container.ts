@@ -5,7 +5,6 @@ import { TitleTableButton } from '../../../components/title-table-button/title-t
 import { ColDef } from 'ag-grid-community';
 import { DeleteDialogService } from '../../../services/delete-dialog-service';
 import { Store } from '@ngrx/store';
-import { ActionsContainer } from '../../actions-container/actions-container';
 import {
   getCexFullJobsDataIsReady,
   getCexJobsFullDataResponse,
@@ -20,6 +19,7 @@ import { Loader } from '../../../components/loader/loader';
 import { AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import {CexJobDialogService} from '../../../services/cex-job-form-dialog-service';
+import {ActionsContainerCexJob} from '../../actions-container-cex-job/actions-container-cex-job';
 
 @Component({
   selector: 'app-ag-grid-cex-jobs-container',
@@ -46,8 +46,8 @@ export class AgGridCexJobsContainer implements OnInit {
   readonly colDefs: ColDef[] = [
     {
       headerName: 'Actions',
-      cellRenderer: ActionsContainer,
-      width: 125,
+      cellRenderer: ActionsContainerCexJob,
+      width: 160,
       cellRendererParams: {
         onAction: this.onAction.bind(this),
       },

@@ -43,17 +43,15 @@ export class CexJobsService {
     return job;
   }
 
-  async update(id: number, dto: CexJobDto) {
-    console.log(dto);
-    const job = await this.findOne(id);
-    const pair = await this.cexPairsService.findOne(dto.cex_pair_id);
+  async update(jobId: number, dto: CexJobDto) {
+    const updateJob = {
+      id: jobId,
+      job_type: dto.job_type,
+      description: dto.description || '',
+      cex_pair_id: dto.cex_pair_id,
+    }
 
-
-    job.job_type = dto.job_type;
-    job.description = dto.description || '';
-    job.cex_pair_id = pair.id;
-
-    return await this.cexJobRepository.save(job);
+    return await this.cexJobRepository.save(updateJob);
   }
 
   async remove(id: number) {

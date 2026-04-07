@@ -31,7 +31,6 @@ export class CexJobDialogService {
   }
 
   openEdit(row: any) {
-    console.log(row);
     return this.dialog.open(CexJobFormContainer, {
       width: '90%',
       height: '90%',

@@ -42,7 +42,6 @@ export class CexJobFormContainer {
   }
 
   eventsForm($event: any) {
-    console.log('eventsForm', $event);
     this.formData = { ...$event };
   }
 
