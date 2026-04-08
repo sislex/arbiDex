@@ -1340,7 +1340,7 @@ export class DbConfigEffects {
   checkCexJob$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.checkCexJob),
-      switchMap((action) => {
+      mergeMap((action) => {
         const sendData = {
           source: action.cexData.chainName,
           token0: action.cexData.token0,
@@ -1363,6 +1363,22 @@ export class DbConfigEffects {
     )
   );
 
+  checkAllCexJob$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.checkAllCexJob),
+      withLatestFrom(this.store.select(DbConfigSelectors.getCexJobsFullDataResponse)),
+      switchMap(([_, allJobs]) => {
+        const jobsToCheck = allJobs.filter(job => job.checked !== true);
 
+        if (jobsToCheck.length === 0) {
+          this._snackBar.open('No jobs to check', '', { duration: 3000 });
+          return EMPTY;
+        }
 
+        return from(
+          jobsToCheck.map(job => DbConfigActions.checkCexJob({ cexData: job }))
+        );
+      })
+    )
+  );
 }

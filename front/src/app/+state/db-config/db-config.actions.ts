@@ -444,6 +444,7 @@ export const checkCexJob = createAction(
   '[DbConfig] checkCexJob',
   props<{ cexData: any }>()
 );
+export const checkAllCexJob = createAction('[DbConfig] checkAllCexJob');
 export const checkCexJobsSuccess = createAction(
   '[DbConfig] checkCexJobsSuccess',
   props<{ response: any }>()

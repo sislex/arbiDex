@@ -10,6 +10,7 @@ import {
   getCexJobsFullDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import {
+  checkAllCexJob,
   checkCexJob,
   createCexJob,
   deletingCexJob,
@@ -21,6 +22,8 @@ import { AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import {CexJobDialogService} from '../../../services/cex-job-form-dialog-service';
 import {ActionsContainerCexJob} from '../../actions-container-cex-job/actions-container-cex-job';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'app-ag-grid-cex-jobs-container',
@@ -30,6 +33,8 @@ import {ActionsContainerCexJob} from '../../actions-container-cex-job/actions-co
     TitleTableButton,
     Loader,
     AsyncPipe,
+    MatButtonModule,
+    MatIconModule
   ],
   templateUrl: './ag-grid-cex-jobs-container.html',
   styleUrl: './ag-grid-cex-jobs-container.scss',
@@ -160,7 +165,7 @@ export class AgGridCexJobsContainer implements OnInit {
         this.openDeleteDialog(row);
       } else if ($event.actionType === 'edit') {
         this.openEditDialog(row);
-      } else if ($event.actionType === 'play') {
+      } else if ($event.actionType === 'play' && row.checked !== true) {
         this.store.dispatch(checkCexJob({cexData: row}));
       }
     }
@@ -199,5 +204,9 @@ export class AgGridCexJobsContainer implements OnInit {
         this.store.dispatch(deletingCexJob({ cexJobId: row.id }));
       }
     });
+  }
+
+  checkAll() {
+    this.store.dispatch(checkAllCexJob())
   }
 }
