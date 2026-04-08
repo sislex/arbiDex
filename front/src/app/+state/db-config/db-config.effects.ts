@@ -1112,7 +1112,7 @@ export class DbConfigEffects {
         ofType(DbConfigActions.createCexJob),
         switchMap(action =>
           this.apiService.createCexJob({ ...action.data }).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.refreshCexJobsData());
               this._snackBar.open(`CexJob is created`, '', { duration: 5000 });
             }),
