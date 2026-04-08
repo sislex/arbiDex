@@ -24,6 +24,7 @@ import {CexJobDialogService} from '../../../services/cex-job-form-dialog-service
 import {ActionsContainerCexJob} from '../../actions-container-cex-job/actions-container-cex-job';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-ag-grid-cex-jobs-container',
@@ -44,6 +45,7 @@ export class AgGridCexJobsContainer implements OnInit {
   readonly deleteDialog = inject(DeleteDialogService);
   readonly jobDialog = inject(CexJobDialogService);
   readonly router = inject(Router);
+  private _snackBar = inject(MatSnackBar);
 
   getCexJobsFullDataResponse$ = this.store.select(getCexJobsFullDataResponse);
   fullCexJobsDataIsReady$ = this.store.select(getCexFullJobsDataIsReady);
@@ -165,8 +167,12 @@ export class AgGridCexJobsContainer implements OnInit {
         this.openDeleteDialog(row);
       } else if ($event.actionType === 'edit') {
         this.openEditDialog(row);
-      } else if ($event.actionType === 'play' && row.checked !== true) {
-        this.store.dispatch(checkCexJob({cexData: row}));
+      } else if ($event.actionType === 'play') {
+        if( row.checked !== true) {
+          this.store.dispatch(checkCexJob({cexData: row}));
+        } else {
+          this._snackBar.open(`The work has been checked, the result is: it work`, '', { duration: 5000 });
+        }
       }
     }
   }

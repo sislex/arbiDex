@@ -67,11 +67,12 @@ export function mapJobParams(job: any) {
     : [];
 
   return {
+    extraSettings: job.extraSettings || {},
+    cexPairId: job.cex_pair_id || null,
+
     jobType: type,
     rpcUrl: rpcUrl,
     pairsToQuote: pairsToQuote,
-    extraSettings: job.extraSettings || {},
-    cexPairId: job.cex_pair_id || null,
   };
 }
 export function mapCexJobParams(job: any) {
@@ -83,8 +84,6 @@ export function mapCexJobParams(job: any) {
   };
 }
 
-
-
 export function mapJobPreConfig(jobData: any, relations: any[]) {
   return {
     jobType: jobData.jobType,
@@ -93,7 +92,6 @@ export function mapJobPreConfig(jobData: any, relations: any[]) {
     extraSettings: jobData.extraSettings,
   };
 }
-
 
 @Injectable()
 export class MainEffects {
@@ -255,5 +253,4 @@ export class MainEffects {
       ),
     { dispatch: false }
   );
-
 }

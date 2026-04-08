@@ -1350,10 +1350,16 @@ export class DbConfigEffects {
         return this.apiService.checkCexJob(sendData).pipe(
           switchMap(response =>
             this.apiService.updateCexJobStatus(action.cexData.id, response.ok).pipe(
-              switchMap(() => from([
+                tap(() => {
+                  const message = response.ok ? 'it work' : 'it does not work';
+                  this._snackBar.open(`The work has been checked, the result is: ${message}`, '', {
+                    duration: 5000,
+                  });
+                }),
+              switchMap(() => [
                 DbConfigActions.refreshCexJobsData(),
                 DbConfigActions.checkCexJobsSuccess({ response })
-              ])),
+              ]),
               catchError(() => of(DbConfigActions.checkCexJobsSuccess({ response })))
             )
           ),
