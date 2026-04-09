@@ -8,6 +8,13 @@
     flex: 1;
     min-height: 0;
 
+    button {
+      height: 30px;
+      color: black !important;
+      border: 1px solid black;
+      border-radius: 8px;
+    }
+
     app-ag-grid {
       display: flex;
       flex: 1;
@@ -21,3 +28,4 @@
     }
   }
 }
+

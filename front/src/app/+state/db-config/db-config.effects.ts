@@ -1112,7 +1112,7 @@ export class DbConfigEffects {
         ofType(DbConfigActions.createCexJob),
         switchMap(action =>
           this.apiService.createCexJob({ ...action.data }).pipe(
-            tap(response => {
+            tap(_ => {
               this.store.dispatch(DbConfigActions.refreshCexJobsData());
               this._snackBar.open(`CexJob is created`, '', { duration: 5000 });
             }),
@@ -1340,7 +1340,7 @@ export class DbConfigEffects {
   checkCexJob$ = createEffect(() =>
     this.actions$.pipe(
       ofType(DbConfigActions.checkCexJob),
-      switchMap((action) => {
+      mergeMap((action) => {
         const sendData = {
           source: action.cexData.chainName,
           token0: action.cexData.token0,
@@ -1350,10 +1350,16 @@ export class DbConfigEffects {
         return this.apiService.checkCexJob(sendData).pipe(
           switchMap(response =>
             this.apiService.updateCexJobStatus(action.cexData.id, response.ok).pipe(
-              switchMap(() => from([
+                tap(() => {
+                  const message = response.ok ? 'it work' : 'it does not work';
+                  this._snackBar.open(`The work has been checked, the result is: ${message}`, '', {
+                    duration: 5000,
+                  });
+                }),
+              switchMap(() => [
                 DbConfigActions.refreshCexJobsData(),
                 DbConfigActions.checkCexJobsSuccess({ response })
-              ])),
+              ]),
               catchError(() => of(DbConfigActions.checkCexJobsSuccess({ response })))
             )
           ),
@@ -1363,6 +1369,22 @@ export class DbConfigEffects {
     )
   );
 
+  checkAllCexJob$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(DbConfigActions.checkAllCexJob),
+      withLatestFrom(this.store.select(DbConfigSelectors.getCexJobsFullDataResponse)),
+      switchMap(([_, allJobs]) => {
+        const jobsToCheck = allJobs.filter(job => job.checked !== true);
 
+        if (jobsToCheck.length === 0) {
+          this._snackBar.open('No jobs to check', '', { duration: 3000 });
+          return EMPTY;
+        }
 
+        return from(
+          jobsToCheck.map(job => DbConfigActions.checkCexJob({ cexData: job }))
+        );
+      })
+    )
+  );
 }

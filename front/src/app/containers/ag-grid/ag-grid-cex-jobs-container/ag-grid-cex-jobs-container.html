@@ -5,7 +5,12 @@
       [title]="'Jobs table (' + ((getCexJobsFullDataResponse$ | async)!.length === filteredItemCount ? (getCexJobsFullDataResponse$ | async)!.length : filteredItemCount + ' / ' + (getCexJobsFullDataResponse$ | async)!.length) + ')'"
       [icon]="'add'"
       (emitter)="actions($event, 'add')"
-    ></app-title-table-button>
+    >
+      <button mat-stroked-button (click)="checkAll()">
+        Check all jobs
+        <mat-icon>play_arrow</mat-icon>
+      </button>
+    </app-title-table-button>
   }
   @if (fullCexJobsDataIsReady$ | async) {
     <app-ag-grid

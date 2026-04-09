@@ -10,6 +10,7 @@ import {
   getCexJobsFullDataResponse,
 } from '../../../+state/db-config/db-config.selectors';
 import {
+  checkAllCexJob,
   checkCexJob,
   createCexJob,
   deletingCexJob,
@@ -21,6 +22,9 @@ import { AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import {CexJobDialogService} from '../../../services/cex-job-form-dialog-service';
 import {ActionsContainerCexJob} from '../../actions-container-cex-job/actions-container-cex-job';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-ag-grid-cex-jobs-container',
@@ -30,6 +34,8 @@ import {ActionsContainerCexJob} from '../../actions-container-cex-job/actions-co
     TitleTableButton,
     Loader,
     AsyncPipe,
+    MatButtonModule,
+    MatIconModule
   ],
   templateUrl: './ag-grid-cex-jobs-container.html',
   styleUrl: './ag-grid-cex-jobs-container.scss',
@@ -39,6 +45,7 @@ export class AgGridCexJobsContainer implements OnInit {
   readonly deleteDialog = inject(DeleteDialogService);
   readonly jobDialog = inject(CexJobDialogService);
   readonly router = inject(Router);
+  private _snackBar = inject(MatSnackBar);
 
   getCexJobsFullDataResponse$ = this.store.select(getCexJobsFullDataResponse);
   fullCexJobsDataIsReady$ = this.store.select(getCexFullJobsDataIsReady);
@@ -161,7 +168,11 @@ export class AgGridCexJobsContainer implements OnInit {
       } else if ($event.actionType === 'edit') {
         this.openEditDialog(row);
       } else if ($event.actionType === 'play') {
-        this.store.dispatch(checkCexJob({cexData: row}));
+        if( row.checked !== true) {
+          this.store.dispatch(checkCexJob({cexData: row}));
+        } else {
+          this._snackBar.open(`The work has been checked, the result is: it work`, '', { duration: 5000 });
+        }
       }
     }
   }
@@ -199,5 +210,9 @@ export class AgGridCexJobsContainer implements OnInit {
         this.store.dispatch(deletingCexJob({ cexJobId: row.id }));
       }
     });
+  }
+
+  checkAll() {
+    this.store.dispatch(checkAllCexJob())
   }
 }
