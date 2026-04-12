@@ -16,6 +16,7 @@ import { AsyncPipe } from '@angular/common';
 import { Loader } from '../../../components/loader/loader';
 import { ServerDialogService } from '../../../services/server-dialog-service';
 import { Router } from '@angular/router';
+import {StatusIndicator} from '../../../components/status-indicator/status-indicator';
 
 @Component({
   selector: 'app-ag-grid-servers-container',
@@ -55,6 +56,13 @@ export class AgGridServersContainer implements OnInit {
       flex: 1,
       filter: true,
       sortable: true,
+    },
+    {
+      headerName: 'Status',
+      width: 80,
+      cellRenderer: StatusIndicator,
+      sortable: false,
+      filter: false,
     },
     {
       field: "ip",
