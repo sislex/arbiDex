@@ -70,7 +70,7 @@ export class AgGridJobNotRelationsContainer implements OnInit {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token0?.tokenId || '-';
+        return params.data?.pair?.pool?.token0?.address || '-';
       },
     },
     {
@@ -81,29 +81,29 @@ export class AgGridJobNotRelationsContainer implements OnInit {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token1?.tokenId || '-';
+        return params.data?.pair?.pool?.token1?.address || '-';
       },
     },
     {
-      headerName: 'Token In',
+      headerName: 'Token 0 Symbol',
       flex: 1,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.tokenIn?.tokenId || '-';
+        return params.data?.pair?.pool?.token0?.symbol || '-';
       },
     },
     {
-      headerName: 'Token Out',
+      headerName: 'Token 1 Symbol',
       flex: 1,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.tokenOut?.tokenId || '-';
+        return params.data?.pair?.pool?.token1?.symbol || '-';
       },
     },
     {

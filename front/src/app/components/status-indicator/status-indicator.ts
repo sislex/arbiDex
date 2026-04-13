@@ -27,12 +27,10 @@ export class StatusIndicator implements ICellRendererAngularComp {
       return;
     }
 
-    // Формируем URL согласно вашему шаблону
     const url = `http://45.135.182.251:8230/server/${ip}:${port}`;
 
     this.status$ = this.http.get(url, { observe: 'response' }).pipe(
       map(res => {
-        // Если сервер отвечает 200-299, считаем что он Online
         return res.ok ? 'online' : 'offline';
       }),
       catchError(() => of('offline')),
