@@ -36,6 +36,7 @@ export function mapBotParams(botData: any) {
     maxJobs: botData.maxJobs,
     maxErrors: botData.maxErrors,
     timeoutMs: botData.timeoutMs,
+    description: botData.description,
   };
 }
 
@@ -199,8 +200,9 @@ export class MainEffects {
         switchMap(([action, bots]) =>
           from(this.apiService.setServerById(action.serverId)).pipe(
             tap(() => {
+              console.log('bots', bots)
               const serverConfig = bots.map((bot: any) => ({
-                id: bot.botId,
+                id: bot.description,
                 botParams: mapBotParams(bot),
                 jobParams: bot.job ? mapJobParams( bot.job ) : mapCexJobParams(bot.cexJob),
               }));
