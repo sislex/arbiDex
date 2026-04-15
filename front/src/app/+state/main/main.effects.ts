@@ -81,12 +81,6 @@ export function mapJobParams(job: any) {
   };
 }
 
-// "source": "dex:arbitrum",
-//   "jobType": "get_Dex_Quotes_By_Arb_Quoter",
-//   "token0": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
-//   "token1": "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
-//   "rpcUrl": "https://arb1.arbitrum.io/rpc",
-
 export function mapCexJobParams(job: any) {
   return {
     jobType: job.job_type,
@@ -205,7 +199,6 @@ export class MainEffects {
         switchMap(([action, bots]) =>
           from(this.apiService.setServerById(action.serverId)).pipe(
             tap(() => {
-              console.log('bot', bots)
               const serverConfig = bots.map((bot: any) => ({
                 id: bot.botId,
                 botParams: mapBotParams(bot),
