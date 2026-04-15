@@ -18,7 +18,7 @@ export function mapQuoteRelation(item: any) {
   const pool = pair?.pool;
 
   return {
-    dex: pool?.dex?.dexId || '-',
+    dex: pool?.dex?.name.toLowerCase() || '-',
     version: (pool?.version as 'v2' | 'v3' | 'v4') || '-',
     poolAddress: String(pool?.poolAddress || '-'),
     token0: pool?.token0?.address || '-',
@@ -49,6 +49,7 @@ export function mapBotToRule(botData: any) {
 
 
 export function mapJobParams(job: any) {
+
   if (!job) {
     return {
       jobType: '-',
@@ -72,9 +73,20 @@ export function mapJobParams(job: any) {
 
     jobType: type,
     rpcUrl: rpcUrl,
+    source: "dex:" + job.chain.name.toLowerCase() || '',
+    token0: job.quoteJobRelations[0].quoteRelation.pair.pool.token0.address || '',
+    token1: job.quoteJobRelations[0].quoteRelation.pair.pool.token1.address || '',
+
     pairsToQuote: pairsToQuote,
   };
 }
+
+// "source": "dex:arbitrum",
+//   "jobType": "get_Dex_Quotes_By_Arb_Quoter",
+//   "token0": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+//   "token1": "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
+//   "rpcUrl": "https://arb1.arbitrum.io/rpc",
+
 export function mapCexJobParams(job: any) {
   return {
     jobType: job.job_type,
