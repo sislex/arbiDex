@@ -27,7 +27,7 @@ export class StatusIndicator implements ICellRendererAngularComp {
       return;
     }
 
-    const url = `http://45.135.182.251:8230/server/${ip}:${port}`;
+    const url = `http://${ip}:${port}/bots/get-all`;
 
     this.status$ = this.http.get(url, { observe: 'response' }).pipe(
       map(res => {
