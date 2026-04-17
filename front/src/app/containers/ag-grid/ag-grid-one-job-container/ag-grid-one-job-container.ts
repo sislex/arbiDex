@@ -18,6 +18,7 @@ import {ColDef} from 'ag-grid-community';
   templateUrl: './ag-grid-one-job-container.html',
   styleUrl: './ag-grid-one-job-container.scss',
 })
+
 export class AgGridOneJobContainer {
   @Input() currentJobId: number = 0;
   @Output() emitter = new EventEmitter();
@@ -66,13 +67,6 @@ export class AgGridOneJobContainer {
       },
     },
     {
-      field: "pairsCount",
-      headerName: 'Pairs count',
-      flex: 1,
-      filter: true,
-      sortable: true,
-    },
-    {
       headerName: 'Additional data',
       flex: 1,
       filter: true,
@@ -91,5 +85,4 @@ export class AgGridOneJobContainer {
       userSelect: 'text'
     },
   };
-
 }

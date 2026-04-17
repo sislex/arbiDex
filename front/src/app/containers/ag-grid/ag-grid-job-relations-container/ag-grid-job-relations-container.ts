@@ -75,25 +75,25 @@ export class AgGridJobRelationsContainer implements OnInit {
       },
     },
     {
-      headerName: 'Token 0',
+      headerName: 'Token In Symbol',
       flex: 1,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token0?.tokenId || '-';
+        return params.data?.pair?.tokenIn?.symbol || '-';
       },
     },
     {
-      headerName: 'Token 1',
+      headerName: 'Token Out Symbol',
       flex: 1,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token1?.tokenId || '-';
+        return params.data?.pair?.tokenOut?.symbol || '-';
       },
     },
     {

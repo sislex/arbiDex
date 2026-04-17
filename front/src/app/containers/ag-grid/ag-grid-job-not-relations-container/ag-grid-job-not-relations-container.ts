@@ -63,47 +63,47 @@ export class AgGridJobNotRelationsContainer implements OnInit {
       },
     },
     {
-      headerName: 'Token 0',
+      headerName: 'Token In Symbol',
       flex: 1,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token0?.address || '-';
+        return params.data?.pair?.tokenIn?.symbol || '-';
       },
     },
     {
-      headerName: 'Token 1',
+      headerName: 'Token Out Symbol',
       flex: 1,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token1?.address || '-';
+        return params.data?.pair?.tokenOut?.symbol || '-';
       },
     },
     {
-      headerName: 'Token 0 Symbol',
+      headerName: 'Token In',
       flex: 1,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token0?.symbol || '-';
+        return params.data?.pair?.tokenIn?.tokenId || '-';
       },
     },
     {
-      headerName: 'Token 1 Symbol',
+      headerName: 'Token Out',
       flex: 1,
       filter: 'agTextColumnFilter',
       filterParams: {
         defaultToNothingSelected: true,
       },
       valueGetter: (params) => {
-        return params.data?.pair?.pool?.token1?.symbol || '-';
+        return params.data?.pair?.tokenOut?.tokenId || '-';
       },
     },
     {

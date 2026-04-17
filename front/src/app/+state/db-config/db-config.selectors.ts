@@ -678,6 +678,10 @@ export const getJobsFullDataResponse = createSelector(
   getChainMap,
   getRpcUrlsMap,
   (jobs, chains, rpcUrls) => {
+    if (!Array.isArray(jobs)) {
+      return [];
+    }
+
     return jobs.map(job => {
       const fullChainsData = job.chainId ? chains.get(job.chainId) : null;
       const fullRpcUrlsData = job.rpcUrlId ? rpcUrls.get(job.rpcUrlId) : null;
@@ -690,6 +694,7 @@ export const getJobsFullDataResponse = createSelector(
   }
 );
 
+
 export const getJobFullDataResponse = createSelector(
   getJobsDataResponse,
   getChainMap,
@@ -698,9 +703,6 @@ export const getJobFullDataResponse = createSelector(
     const job = jobs as IJobs;
     const fullChainsData = job.chainId ? chains.get(job.chainId) : null;
     const fullRpcUrlsData = job.rpcUrlId ? rpcUrls.get(job.rpcUrlId) : null;
-    console.log(job)
-    console.log(fullChainsData)
-    console.log(fullRpcUrlsData)
     return {
       ...job,
       chainName: fullChainsData,

@@ -72,7 +72,7 @@ export class JobPageContainer implements OnInit {
   onAction($event: any, note: string) {
     if ($event.event === 'Actions:ACTION_CLICKED') {
       if (note === 'reply') {
-        this.router.navigate([`data-view/jobs`]);
+        this.router.navigate([`data-view/dex-jobs`]);
       }
     }
   }
