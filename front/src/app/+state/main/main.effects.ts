@@ -21,8 +21,6 @@ export function mapQuoteRelation(item: any) {
     dex: pool?.dex?.name.toLowerCase() || '-',
     version: (pool?.version as 'v2' | 'v3' | 'v4') || '-',
     poolAddress: String(pool?.poolAddress || '-'),
-    token0: pool?.token0?.address || '-',
-    token1: pool?.token1?.address || '-',
     feePpm: pool?.fee || 0,
   };
 }
@@ -75,9 +73,20 @@ export function mapJobParams(job: any) {
     jobType: type,
     rpcUrl: rpcUrl,
     source: "dex:" + job.chain.name.toLowerCase() || '',
-    token0: job.quoteJobRelations[0].quoteRelation.pair.pool.token0.address || '',
-    token1: job.quoteJobRelations[0].quoteRelation.pair.pool.token1.address || '',
-
+    token0: job.quoteJobRelations[0].quoteRelation.pair.tokenIn.address || '',
+    token1: job.quoteJobRelations[0].quoteRelation.pair.tokenOut.address || '',
+    opts: {
+      tokenIn: {
+        amount: 1,
+        decimals: job.quoteJobRelations[0].quoteRelation.pair.tokenIn.decimals || 0,
+        symbol: job.quoteJobRelations[0].quoteRelation.pair.tokenIn.symbol || '',
+      },
+      tokenOut: {
+        amount: 1,
+        decimals: job.quoteJobRelations[0].quoteRelation.pair.tokenOut.decimals || 0,
+        symbol: job.quoteJobRelations[0].quoteRelation.pair.tokenOut.symbol || '',
+      },
+    },
     pairsToQuote: pairsToQuote,
   };
 }
