@@ -139,7 +139,7 @@ export class AgGridQuoteNotRelationsContainer implements OnInit {
   events($event: any) {
     if ($event.event === 'AgGrid:SET_CHECKBOX_ROW') {
       this.emitter.emit({
-        event: 'AgGridQuoteRelationsContainer:ACTIVE_RELATIONS',
+        event: 'AgGridQuoteNotRelationsContainer:ACTIVE_RELATIONS',
         data: $event.row.selectedNodes.map((item: any) => item.data.pairId),
       });
     }
