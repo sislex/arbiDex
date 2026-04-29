@@ -73,16 +73,16 @@ export function mapJobParams(job: any) {
     jobType: type,
     rpcUrl: rpcUrl,
     source: "dex:" + job.chain.name.toLowerCase() || '',
-    token0: job.quoteJobRelations[0].quoteRelation.pair.tokenIn.address || '',
-    token1: job.quoteJobRelations[0].quoteRelation.pair.tokenOut.address || '',
     opts: {
       tokenIn: {
         decimals: job.quoteJobRelations[0].quoteRelation.pair.tokenIn.decimals || 0,
         symbol: job.quoteJobRelations[0].quoteRelation.pair.tokenIn.symbol || '',
+        address: job.quoteJobRelations[0].quoteRelation.pair.tokenIn.address || '',
       },
       tokenOut: {
         decimals: job.quoteJobRelations[0].quoteRelation.pair.tokenOut.decimals || 0,
         symbol: job.quoteJobRelations[0].quoteRelation.pair.tokenOut.symbol || '',
+        address: job.quoteJobRelations[0].quoteRelation.pair.tokenOut.address || '',
       },
     },
     pairsToQuote: pairsToQuote,
