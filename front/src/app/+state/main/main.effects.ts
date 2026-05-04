@@ -77,12 +77,12 @@ export function mapJobParams(job: any) {
       tokenIn: {
         decimals: job.quoteJobRelations[0]?.quoteRelation?.pair.tokenIn.decimals || 0,
         symbol: job.quoteJobRelations[0]?.quoteRelation?.pair.tokenIn.symbol || '',
-        address: job.quoteJobRelations[0].quoteRelation.pair.tokenIn.address || '',
+        address: job.quoteJobRelations[0]?.quoteRelation?.pair.tokenIn.address || '',
       },
       tokenOut: {
         decimals: job.quoteJobRelations[0]?.quoteRelation?.pair.tokenOut.decimals || 0,
         symbol: job.quoteJobRelations[0]?.quoteRelation?.pair.tokenOut.symbol || '',
-        address: job.quoteJobRelations[0].quoteRelation.pair.tokenOut.address || '',
+        address: job.quoteJobRelations[0]?.quoteRelation?.pair.tokenOut.address || '',
       },
     },
     pairsToQuote: pairsToQuote,
