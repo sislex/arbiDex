@@ -1,57 +1,18 @@
 import { Plus } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Tabs } from '../Tabs';
 import { DataTable, Column } from '../DataTable';
 import { Autocomplete } from '../Autocomplete';
 import { showDeleteToast } from '../../utils/toast';
 import { CexPairForm } from '../forms/CexPairForm';
 import { DexPairForm } from '../forms/DexPairForm';
-
-interface Pair {
-  id: number;
-  tokenInSymbol: string;
-  tokenOutSymbol: string;
-  tokenInAddress: string;
-  tokenOutAddress: string;
-}
-
-const mockPairs: Pair[] = [
-  {
-    id: 1,
-    tokenInSymbol: 'ETH',
-    tokenOutSymbol: 'USDT',
-    tokenInAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-    tokenOutAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-  },
-  {
-    id: 2,
-    tokenInSymbol: 'WBTC',
-    tokenOutSymbol: 'ETH',
-    tokenInAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-    tokenOutAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-  },
-  {
-    id: 3,
-    tokenInSymbol: 'USDC',
-    tokenOutSymbol: 'DAI',
-    tokenInAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-    tokenOutAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-  },
-  {
-    id: 4,
-    tokenInSymbol: 'ETH',
-    tokenOutSymbol: 'USDC',
-    tokenInAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-    tokenOutAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  },
-  {
-    id: 5,
-    tokenInSymbol: 'ETH',
-    tokenOutSymbol: 'DAI',
-    tokenInAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-    tokenOutAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-  },
-];
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
+import {
+  selectPairsFullData,
+  selectPairsRating,
+  selectTokenInList,
+} from '../../store/db-config/dbConfig.selectors';
 
 interface PairsPageProps {
   language: 'en' | 'ru';
@@ -59,11 +20,30 @@ interface PairsPageProps {
 }
 
 export function PairsPage({ language, type }: PairsPageProps) {
+  const dispatch = useAppDispatch();
+  const pairsFromStore = useAppSelector(selectPairsFullData);
+  const pairRatingData = useAppSelector(selectPairsRating);
+  const tokenInList = useAppSelector(selectTokenInList);
   const [activeTab, setActiveTab] = useState('pairs');
-  const [pairs] = useState(mockPairs);
   const [selectedTokenIn, setSelectedTokenIn] = useState('');
-  const [filteredCount, setFilteredCount] = useState(mockPairs.length);
+  const [filteredCount, setFilteredCount] = useState(0);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+
+  useEffect(() => {
+    dispatch(dbConfigActions.initPairsPage());
+  }, [dispatch]);
+
+  const pairs = useMemo(() => {
+    return pairsFromStore.map((pair: any) => ({
+      id: pair.pairId,
+      tokenInId: pair.tokenInId,
+      tokenOutId: pair.tokenOutId,
+      tokenInSymbol: pair.tokenInSymbol,
+      tokenOutSymbol: pair.tokenOutSymbol,
+      tokenInAddress: pair.tokenInAddress,
+      tokenOutAddress: pair.tokenOutAddress,
+    }));
+  }, [pairsFromStore]);
 
   const t = {
     en: {
@@ -141,53 +121,11 @@ export function PairsPage({ language, type }: PairsPageProps) {
   ];
 
   const tokenOptions = useMemo(() => {
-    const uniqueTokens = new Map<string, { symbol: string; address: string }>();
-    pairs.forEach((pair) => {
-      if (!uniqueTokens.has(pair.tokenInAddress)) {
-        uniqueTokens.set(pair.tokenInAddress, {
-          symbol: pair.tokenInSymbol,
-          address: pair.tokenInAddress,
-        });
-      }
-      if (!uniqueTokens.has(pair.tokenOutAddress)) {
-        uniqueTokens.set(pair.tokenOutAddress, {
-          symbol: pair.tokenOutSymbol,
-          address: pair.tokenOutAddress,
-        });
-      }
-    });
-
-    return Array.from(uniqueTokens.values()).map((token) => ({
-      value: token.address,
-      label: `${token.symbol} (${token.address.slice(0, 6)}...${token.address.slice(-4)})`,
+    return tokenInList.map((token) => ({
+      value: String(token.tokenInId),
+      label: `${token.tokenInSymbol} (${token.tokenInAddress.slice(0, 6)}...${token.tokenInAddress.slice(-4)})`,
     }));
-  }, [pairs]);
-
-  const pairRatingData = useMemo(() => {
-    if (!selectedTokenIn) return [];
-
-    const tokenInPairs = pairs.filter((p) => p.tokenInAddress === selectedTokenIn);
-    const ratingMap = new Map<string, number>();
-
-    tokenInPairs.forEach((pair) => {
-      const key = `${pair.tokenOutSymbol}|${pair.tokenOutAddress}`;
-      ratingMap.set(key, (ratingMap.get(key) || 0) + 1);
-    });
-
-    const selectedToken = pairs.find((p) => p.tokenInAddress === selectedTokenIn);
-    const tokenInSymbol = selectedToken?.tokenInSymbol || '';
-
-    return Array.from(ratingMap.entries()).map(([key, count]) => {
-      const [tokenOutSymbol, tokenOutAddress] = key.split('|');
-      return {
-        tokenInSymbol,
-        tokenInAddress: selectedTokenIn,
-        tokenOutSymbol,
-        tokenOutAddress,
-        count,
-      };
-    });
-  }, [selectedTokenIn, pairs]);
+  }, [tokenInList]);
 
   const ratingColumns: Column[] = [
     {
@@ -272,7 +210,11 @@ export function PairsPage({ language, type }: PairsPageProps) {
                 label={t[language].tokenIn}
                 options={tokenOptions}
                 value={selectedTokenIn}
-                onChange={setSelectedTokenIn}
+                onChange={(value) => {
+                  setSelectedTokenIn(value);
+                  const tokenId = value ? Number(value) : null;
+                  dispatch(dbConfigActions.setPairsRatingData(Number.isNaN(tokenId) ? null : tokenId));
+                }}
                 placeholder={t[language].selectToken}
               />
             </div>

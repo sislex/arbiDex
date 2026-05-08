@@ -12,8 +12,11 @@ import { ServersPage } from './components/pages/ServersPage';
 import { ChainsPage } from './components/pages/ChainsPage';
 import { PoolsPage } from './components/pages/PoolsPage';
 import { PairsPage } from './components/pages/PairsPage';
+import { useAppDispatch } from './store/hooks';
+import { dbConfigActions } from './store/db-config/dbConfig.slice';
 
 export default function App() {
+  const dispatch = useAppDispatch();
   const [isDark, setIsDark] = useState(true);
   const [language, setLanguage] = useState<'en' | 'ru'>('en');
   const [activePage, setActivePage] = useState('tokens');
@@ -31,6 +34,36 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+
+  useEffect(() => {
+    switch (activePage) {
+      case 'tokens':
+        dispatch(dbConfigActions.initTokensListPage());
+        break;
+      case 'pools':
+        dispatch(dbConfigActions.initPoolsPage());
+        break;
+      case 'dex-pairs':
+      case 'cex-pairs':
+        dispatch(dbConfigActions.initPairsPage());
+        break;
+      case 'quotes':
+        dispatch(dbConfigActions.initQuotesListPage());
+        break;
+      case 'bots':
+        dispatch(dbConfigActions.initBotsListPage());
+        break;
+      case 'servers':
+        dispatch(dbConfigActions.setServersData());
+        break;
+      case 'dex-chains':
+      case 'cex-chains':
+        dispatch(dbConfigActions.setChainsData());
+        break;
+      default:
+        break;
+    }
+  }, [activePage, dispatch]);
 
   const handleLogin = (login: string, password: string) => {
     setUserLogin(login);

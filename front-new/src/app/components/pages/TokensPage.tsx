@@ -1,19 +1,32 @@
 import { Plus } from 'lucide-react';
 import { DataTable, Column } from '../DataTable';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { showDeleteToast } from '../../utils/toast';
-
-const mockTokens = [
-  { id: 1, symbol: 'BTC', name: 'Bitcoin', address: '0x123...abc', decimals: 8, active: true },
-  { id: 2, symbol: 'ETH', name: 'Ethereum', address: '0x456...def', decimals: 18, active: true },
-  { id: 3, symbol: 'USDT', name: 'Tether USD', address: '0x789...ghi', decimals: 6, active: true },
-  { id: 4, symbol: 'BNB', name: 'Binance Coin', address: '0xabc...123', decimals: 18, active: false },
-  { id: 5, symbol: 'SOL', name: 'Solana', address: '0xdef...456', decimals: 9, active: true },
-];
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
+import { selectTokensFullDataResponse } from '../../store/db-config/dbConfig.selectors';
 
 export function TokensPage({ language }: { language: 'en' | 'ru' }) {
+  const dispatch = useAppDispatch();
+  const tokensFromStore = useAppSelector(selectTokensFullDataResponse);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [tokens, setTokens] = useState(mockTokens);
+  const [tokens, setTokens] = useState<any[]>([]);
+
+  useEffect(() => {
+    dispatch(dbConfigActions.initTokensListPage());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const mappedTokens = tokensFromStore.map((token: any) => ({
+      id: token.tokenId,
+      symbol: token.symbol,
+      name: token.tokenName,
+      address: token.address,
+      decimals: token.decimals,
+      active: token.isActive,
+    }));
+    setTokens(mappedTokens);
+  }, [tokensFromStore]);
 
   const t = {
     en: {

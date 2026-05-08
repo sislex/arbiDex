@@ -8,4 +8,14 @@
   Run `npm i` to install the dependencies.
 
   Run `npm run dev` to start the development server.
-  
+
+  ## State management
+
+  The app now uses `redux` + `redux-saga`.
+
+  - Store: `src/app/store/index.ts`
+  - Db config state (ported from old NgRx flow): `src/app/store/db-config/*`
+
+  ## Tests
+
+  Run `npm run test` to execute reducer/saga tests.
