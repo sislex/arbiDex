@@ -44,8 +44,10 @@ export default function App() {
         dispatch(dbConfigActions.initPoolsPage());
         break;
       case 'dex-pairs':
-      case 'cex-pairs':
         dispatch(dbConfigActions.initPairsPage());
+        break;
+      case 'cex-pairs':
+        dispatch(dbConfigActions.initCexPairsPage());
         break;
       case 'quotes':
         dispatch(dbConfigActions.initQuotesListPage());

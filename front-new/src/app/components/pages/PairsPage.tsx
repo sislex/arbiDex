@@ -9,6 +9,7 @@ import { DexPairForm } from '../forms/DexPairForm';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
+  selectCexPairsDataResponse,
   selectPairsFullData,
   selectPairsRating,
   selectTokenInList,
@@ -21,7 +22,8 @@ interface PairsPageProps {
 
 export function PairsPage({ language, type }: PairsPageProps) {
   const dispatch = useAppDispatch();
-  const pairsFromStore = useAppSelector(selectPairsFullData);
+  const dexPairsFromStore = useAppSelector(selectPairsFullData);
+  const cexPairsFromStore = useAppSelector(selectCexPairsDataResponse);
   const pairRatingData = useAppSelector(selectPairsRating);
   const tokenInList = useAppSelector(selectTokenInList);
   const [activeTab, setActiveTab] = useState('pairs');
@@ -30,11 +32,11 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(dbConfigActions.initPairsPage());
-  }, [dispatch]);
+    dispatch(type === 'cex' ? dbConfigActions.initCexPairsPage() : dbConfigActions.initPairsPage());
+  }, [dispatch, type]);
 
-  const pairs = useMemo(() => {
-    return pairsFromStore.map((pair: any) => ({
+  const dexPairs = useMemo(() => {
+    return dexPairsFromStore.map((pair: any) => ({
       id: pair.pairId,
       tokenInId: pair.tokenInId,
       tokenOutId: pair.tokenOutId,
@@ -43,7 +45,16 @@ export function PairsPage({ language, type }: PairsPageProps) {
       tokenInAddress: pair.tokenInAddress,
       tokenOutAddress: pair.tokenOutAddress,
     }));
-  }, [pairsFromStore]);
+  }, [dexPairsFromStore]);
+
+  const cexPairs = useMemo(() => {
+    return cexPairsFromStore.map((pair: any) => ({
+      id: pair.id ?? pair.pairId ?? pair.cexPairId ?? pair.cex_pair_id,
+      source: pair.source ?? pair.sourceId ?? pair.exchange ?? pair.exchangeName ?? '',
+      token0: pair.token0 ?? pair.token0Symbol ?? pair.baseToken ?? '',
+      token1: pair.token1 ?? pair.token1Symbol ?? pair.quoteToken ?? '',
+    }));
+  }, [cexPairsFromStore]);
 
   const t = {
     en: {
@@ -55,6 +66,9 @@ export function PairsPage({ language, type }: PairsPageProps) {
       tokenOut: 'Token Out',
       tokenInAddress: 'Token In Address',
       tokenOutAddress: 'Token Out Address',
+      source: 'Source',
+      token0: 'Token 0',
+      token1: 'Token 1',
       count: 'Count',
       selectToken: 'Select Token In...',
     },
@@ -67,6 +81,9 @@ export function PairsPage({ language, type }: PairsPageProps) {
       tokenOut: 'Токен выхода',
       tokenInAddress: 'Адрес входа',
       tokenOutAddress: 'Адрес выхода',
+      source: 'Source',
+      token0: 'Token 0',
+      token1: 'Token 1',
       count: 'Кол-во',
       selectToken: 'Выберите токен входа...',
     },
@@ -77,7 +94,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
     { id: 'rating', label: t[language].pairRating },
   ];
 
-  const pairsColumns: Column[] = [
+  const dexPairsColumns: Column[] = [
     {
       key: 'id',
       label: t[language].pairId,
@@ -103,7 +120,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
       filterable: true,
       render: (value) => (
         <span className="font-mono text-xs text-muted-foreground">
-          {value.slice(0, 10)}...{value.slice(-8)}
+          {value ? `${value.slice(0, 10)}...${value.slice(-8)}` : ''}
         </span>
       ),
     },
@@ -114,9 +131,36 @@ export function PairsPage({ language, type }: PairsPageProps) {
       filterable: true,
       render: (value) => (
         <span className="font-mono text-xs text-muted-foreground">
-          {value.slice(0, 10)}...{value.slice(-8)}
+          {value ? `${value.slice(0, 10)}...${value.slice(-8)}` : ''}
         </span>
       ),
+    },
+  ];
+
+  const cexPairsColumns: Column[] = [
+    {
+      key: 'id',
+      label: t[language].pairId,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      key: 'source',
+      label: t[language].source,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      key: 'token0',
+      label: t[language].token0,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      key: 'token1',
+      label: t[language].token1,
+      sortable: true,
+      filterable: true,
     },
   ];
 
@@ -164,17 +208,20 @@ export function PairsPage({ language, type }: PairsPageProps) {
     },
   ];
 
-  const totalCount = pairs.length;
+  const tableData = type === 'cex' ? cexPairs : dexPairs;
+  const tableColumns = type === 'cex' ? cexPairsColumns : dexPairsColumns;
+  const totalCount = tableData.length;
+  const showPairsTable = type === 'cex' || activeTab === 'pairs';
 
   return (
     <div className="flex-1 flex flex-col bg-background">
       <div className="h-14 border-b border-border flex items-center justify-between px-4">
         <h2 className="text-foreground">
-          {activeTab === 'pairs'
+          {showPairsTable
             ? `${t[language].pairs} ${filteredCount !== totalCount ? `(${filteredCount}/${totalCount})` : `(${totalCount})`}`
             : `${t[language].pairRating} ${pairRatingData.length > 0 ? `(${pairRatingData.length})` : ''}`}
         </h2>
-        {activeTab === 'pairs' && (
+        {showPairsTable && (
           <button
             onClick={() => setAddDialogOpen(true)}
             className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
@@ -185,17 +232,17 @@ export function PairsPage({ language, type }: PairsPageProps) {
         )}
       </div>
 
-      <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+      {type === 'dex' && <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />}
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        {activeTab === 'pairs' ? (
+        {showPairsTable ? (
           <DataTable
-            columns={pairsColumns}
-            data={pairs}
+            columns={tableColumns}
+            data={tableData}
             onEdit={(row) => console.log('Edit', row)}
             onDelete={(row) => {
               showDeleteToast({
-                itemName: `${row.tokenInSymbol}/${row.tokenOutSymbol}`,
+                itemName: type === 'cex' ? `${row.token0}/${row.token1}` : `${row.tokenInSymbol}/${row.tokenOutSymbol}`,
                 itemType: language === 'en' ? 'Pair' : 'Пара',
                 onUndo: () => {},
                 language,

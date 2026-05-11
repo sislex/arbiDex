@@ -21,29 +21,17 @@ export function ChainsPage({ language }: { language: 'en' | 'ru' }) {
       add: 'Add Chain',
       id: 'ID',
       name: 'Name',
-      rpc: 'RPC URL',
-      chainId: 'Chain ID',
     },
     ru: {
       add: 'Добавить сеть',
       id: 'ID',
       name: 'Название',
-      rpc: 'RPC URL',
-      chainId: 'Chain ID',
     },
   };
 
   const columns: Column[] = [
     { key: 'id', label: t[language].id, sortable: true, filterable: true },
     { key: 'name', label: t[language].name, sortable: true, filterable: true },
-    {
-      key: 'rpc',
-      label: t[language].rpc,
-      render: (value) => (
-        <span className="font-mono text-xs text-muted-foreground">{value}</span>
-      ),
-    },
-    { key: 'chainId', label: t[language].chainId, sortable: true },
   ];
 
   const handleSave = (data: any) => {
