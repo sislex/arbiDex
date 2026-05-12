@@ -29,6 +29,7 @@ interface DataTableProps {
   data: any[];
   onEdit?: (row: any) => void;
   onDelete?: (row: any) => void;
+  extraActions?: (row: any) => React.ReactNode;
   onRowClick?: (row: any) => void;
   selectedRow?: any;
   selectionMode?: 'none' | 'single' | 'multiple';
@@ -40,6 +41,7 @@ export function DataTable({
   data,
   onEdit,
   onDelete,
+  extraActions,
   onRowClick,
   selectedRow,
   selectionMode = 'none',
@@ -70,27 +72,30 @@ export function DataTable({
       headerName: column.label,
       sortable: Boolean(column.sortable),
       filter: column.filterable ? 'agTextColumnFilter' : false,
-      floatingFilter: Boolean(column.filterable),
+      floatingFilter: false,
       flex: 1,
       minWidth: column.key === 'checkbox' || column.key === 'actions' ? 64 : 120,
-      suppressHeaderMenuButton: !column.filterable,
+      suppressHeaderMenuButton: true,
+      suppressHeaderFilterButton: !column.filterable,
+      menuTabs: column.filterable ? ['filterMenuTab'] : [],
       cellRenderer: column.render
         ? (params: any) => column.render?.(params.value, params.data)
         : undefined,
     }));
 
-    if (onEdit || onDelete) {
+    if (onEdit || onDelete || extraActions) {
       gridColumns.unshift({
         colId: 'actions',
         headerName: 'ACTIONS',
-        width: 96,
-        minWidth: 96,
-        maxWidth: 116,
+        width: extraActions ? 132 : 96,
+        minWidth: extraActions ? 132 : 96,
+        maxWidth: extraActions ? 152 : 116,
         sortable: false,
         filter: false,
         pinned: 'left',
         cellRenderer: (params: any) => (
           <div className="flex h-full items-center gap-2">
+            {extraActions?.(params.data)}
             {onEdit && (
               <button
                 onClick={(event) => {
@@ -121,12 +126,15 @@ export function DataTable({
     }
 
     return gridColumns;
-  }, [columns, onDelete, onEdit]);
+  }, [columns, extraActions, onDelete, onEdit]);
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
       resizable: true,
       filterParams: {
+        defaultOption: 'contains',
+        filterOptions: ['contains'],
+        maxNumConditions: 1,
         buttons: ['reset'],
         debounceMs: 150,
       },

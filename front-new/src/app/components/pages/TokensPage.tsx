@@ -19,66 +19,87 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   useEffect(() => {
     const mappedTokens = tokensFromStore.map((token: any) => ({
       id: token.tokenId,
-      symbol: token.symbol,
       name: token.tokenName,
+      chainName: token.chainName ?? token.chainId ?? '',
       address: token.address,
+      symbol: token.symbol,
       decimals: token.decimals,
-      active: token.isActive,
+      isActive: token.isActive,
+      isChecked: token.isChecked ?? token.is_checked ?? token.checked ?? false,
+      balance: token.balance ?? '',
     }));
     setTokens(mappedTokens);
   }, [tokensFromStore]);
 
   const t = {
     en: {
-      title: 'Tokens',
       add: 'Add Token',
-      symbol: 'Symbol',
+      id: 'ID',
       name: 'Name',
+      chainName: 'Chain Name',
       address: 'Address',
+      symbol: 'Symbol',
       decimals: 'Decimals',
-      status: 'Status',
-      active: 'Active',
-      inactive: 'Inactive',
+      isActive: 'Is Active',
+      isChecked: 'Is Checked',
+      balance: 'Balance',
     },
     ru: {
-      title: 'Токены',
       add: 'Добавить токен',
-      symbol: 'Символ',
-      name: 'Название',
-      address: 'Адрес',
+      id: 'ID',
+      name: 'Name',
+      chainName: 'Chain Name',
+      address: 'Address',
+      symbol: 'Symbol',
       decimals: 'Decimals',
-      status: 'Статус',
-      active: 'Активен',
-      inactive: 'Неактивен',
+      isActive: 'Is Active',
+      isChecked: 'Is Checked',
+      balance: 'Balance',
     },
   };
 
+  const renderBoolean = (value: boolean) => (
+    <span
+      className={`px-2 py-0.5 rounded text-xs ${
+        value
+          ? 'bg-success/20 text-success'
+          : 'bg-destructive/20 text-destructive'
+      }`}
+    >
+      {value ? 'true' : 'false'}
+    </span>
+  );
+
   const columns: Column[] = [
-    { key: 'symbol', label: t[language].symbol, sortable: true, filterable: true },
+    { key: 'id', label: t[language].id, sortable: true, filterable: true },
     { key: 'name', label: t[language].name, sortable: true, filterable: true },
+    { key: 'chainName', label: t[language].chainName, sortable: true, filterable: true },
     {
       key: 'address',
       label: t[language].address,
+      sortable: true,
+      filterable: true,
       render: (value) => (
         <span className="font-mono text-xs text-muted-foreground">{value}</span>
       ),
     },
-    { key: 'decimals', label: t[language].decimals, sortable: true },
+    { key: 'symbol', label: t[language].symbol, sortable: true, filterable: true },
+    { key: 'decimals', label: t[language].decimals, sortable: true, filterable: true },
     {
-      key: 'active',
-      label: t[language].status,
-      render: (value) => (
-        <span
-          className={`px-2 py-0.5 rounded text-xs ${
-            value
-              ? 'bg-success/20 text-success'
-              : 'bg-destructive/20 text-destructive'
-          }`}
-        >
-          {value ? t[language].active : t[language].inactive}
-        </span>
-      ),
+      key: 'isActive',
+      label: t[language].isActive,
+      sortable: true,
+      filterable: true,
+      render: renderBoolean,
     },
+    {
+      key: 'isChecked',
+      label: t[language].isChecked,
+      sortable: true,
+      filterable: true,
+      render: renderBoolean,
+    },
+    { key: 'balance', label: t[language].balance, sortable: true, filterable: true },
   ];
 
   return (
@@ -93,11 +114,10 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       {tokens && tokens.length ? (
         <DataTable
           columns={columns}
-          data={[tokens[0], tokens[1], tokens[2]]}
+          data={tokens}
           onEdit={(row) => console.log('Edit', row)}
           onDelete={(row) => {
-            const deletedToken = { ...row };
-            setTokens(tokens.filter((t) => t.id !== row.id));
+            setTokens(tokens.filter((token) => token.id !== row.id));
             showDeleteToast({
               itemName: row.symbol,
               itemType: language === 'en' ? 'Token' : 'Токен',

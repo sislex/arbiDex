@@ -12,6 +12,9 @@ import { ServersPage } from './components/pages/ServersPage';
 import { ChainsPage } from './components/pages/ChainsPage';
 import { PoolsPage } from './components/pages/PoolsPage';
 import { PairsPage } from './components/pages/PairsPage';
+import { JobsPage } from './components/pages/JobsPage';
+import { RpcUrlsPage } from './components/pages/RpcUrlsPage';
+import { DexesPage } from './components/pages/DexesPage';
 import { useAppDispatch } from './store/hooks';
 import { dbConfigActions } from './store/db-config/dbConfig.slice';
 
@@ -48,6 +51,19 @@ export default function App() {
         break;
       case 'cex-pairs':
         dispatch(dbConfigActions.initCexPairsPage());
+        break;
+      case 'dex-jobs':
+        dispatch(dbConfigActions.initJobsListPage());
+        break;
+      case 'cex-jobs':
+        dispatch(dbConfigActions.initCexJobsListPage());
+        break;
+      case 'dex-rpc-urls':
+        dispatch(dbConfigActions.setRpcUrlsData());
+        dispatch(dbConfigActions.setChainsData());
+        break;
+      case 'dexes':
+        dispatch(dbConfigActions.setDexesData());
         break;
       case 'quotes':
         dispatch(dbConfigActions.initQuotesListPage());
@@ -153,6 +169,14 @@ export default function App() {
         return <PairsPage language={language} type="dex" />;
       case 'cex-pairs':
         return <PairsPage language={language} type="cex" />;
+      case 'dex-jobs':
+        return <JobsPage language={language} type="dex" />;
+      case 'cex-jobs':
+        return <JobsPage language={language} type="cex" />;
+      case 'dex-rpc-urls':
+        return <RpcUrlsPage language={language} />;
+      case 'dexes':
+        return <DexesPage language={language} />;
       case 'quotes':
         return (
           <QuotesListPage

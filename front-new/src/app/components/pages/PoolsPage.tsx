@@ -1,95 +1,112 @@
 import { Plus } from 'lucide-react';
 import { DataTable, Column } from '../DataTable';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PoolForm } from '../forms/PoolForm';
 import { showDeleteToast } from '../../utils/toast';
-
-const mockPools = [
-  {
-    id: 1,
-    chain: 'ethereum',
-    token0: 'eth',
-    token1: 'usdt',
-    dex: 'uniswap-v3',
-    fee: '0.3',
-    poolAddress: '0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801',
-  },
-  {
-    id: 2,
-    chain: 'bsc',
-    token0: 'bnb',
-    token1: 'busd',
-    dex: 'pancakeswap',
-    fee: '0.25',
-    poolAddress: '0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16',
-  },
-];
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
+import { selectFullPoolsData } from '../../store/db-config/dbConfig.selectors';
 
 export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
-  const [pools, setPools] = useState(mockPools);
+  const dispatch = useAppDispatch();
+  const poolsFromStore = useAppSelector(selectFullPoolsData);
   const [formOpen, setFormOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [deletedPoolIds, setDeletedPoolIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    dispatch(dbConfigActions.initPoolsPage());
+  }, [dispatch]);
+
+  const pools = useMemo(() => {
+    return poolsFromStore
+      .map((pool: any) => ({
+        id: pool.poolId ?? pool.id,
+        address: pool.poolAddress ?? pool.address ?? '',
+        chainName: pool.chainName ?? pool.chainId ?? '',
+        dexName: pool.dexName ?? pool.dexId ?? '',
+        dexVersion: pool.version ?? pool.dexVersion ?? pool.dex_version ?? '',
+        fee: pool.fee ?? '',
+        token0Symbol: pool.token0Symbol ?? pool.token0Name ?? pool.token0Id ?? '',
+        token1Symbol: pool.token1Symbol ?? pool.token1Name ?? pool.token1Id ?? '',
+        token0Address: pool.token0Address ?? '',
+        token1Address: pool.token1Address ?? '',
+        reserve0: pool.reserve0 ?? pool.reserve_0 ?? pool.token0Reserve ?? '',
+        reserve1: pool.reserve1 ?? pool.reserve_1 ?? pool.token1Reserve ?? '',
+        raw: pool,
+      }))
+      .filter((pool) => !deletedPoolIds.has(pool.id));
+  }, [deletedPoolIds, poolsFromStore]);
 
   const t = {
     en: {
       add: 'Add Pool',
-      chain: 'Chain',
-      pair: 'Pair',
-      dex: 'DEX',
+      id: 'ID',
+      address: 'Address',
+      chainName: 'Chain Name',
+      dexName: 'Dex Name',
+      dexVersion: 'Dex Version',
       fee: 'Fee',
-      poolAddress: 'Pool Address',
+      token0Symbol: 'Token 0 (symbol)',
+      token1Symbol: 'Token 1 (symbol)',
+      token0Address: 'Token 0 Address',
+      token1Address: 'Token 1 Address',
+      reserve0: 'Reserve 0',
+      reserve1: 'Reserve 1',
     },
     ru: {
       add: 'Добавить пул',
-      chain: 'Сеть',
-      pair: 'Пара',
-      dex: 'DEX',
-      fee: 'Комиссия',
-      poolAddress: 'Адрес пула',
+      id: 'ID',
+      address: 'Address',
+      chainName: 'Chain Name',
+      dexName: 'Dex Name',
+      dexVersion: 'Dex Version',
+      fee: 'Fee',
+      token0Symbol: 'Token 0 (symbol)',
+      token1Symbol: 'Token 1 (symbol)',
+      token0Address: 'Token 0 Address',
+      token1Address: 'Token 1 Address',
+      reserve0: 'Reserve 0',
+      reserve1: 'Reserve 1',
     },
   };
+
+  const renderAddress = (value: string) => (
+    <span className="font-mono text-xs text-muted-foreground">{value}</span>
+  );
 
   const columns: Column[] = [
+    { key: 'id', label: t[language].id, sortable: true, filterable: true },
     {
-      key: 'chain',
-      label: t[language].chain,
+      key: 'address',
+      label: t[language].address,
       sortable: true,
-      render: (value) => <span className="capitalize">{value}</span>,
+      filterable: true,
+      render: renderAddress,
+    },
+    { key: 'chainName', label: t[language].chainName, sortable: true, filterable: true },
+    { key: 'dexName', label: t[language].dexName, sortable: true, filterable: true },
+    { key: 'dexVersion', label: t[language].dexVersion, sortable: true, filterable: true },
+    { key: 'fee', label: t[language].fee, sortable: true, filterable: true },
+    { key: 'token0Symbol', label: t[language].token0Symbol, sortable: true, filterable: true },
+    { key: 'token1Symbol', label: t[language].token1Symbol, sortable: true, filterable: true },
+    {
+      key: 'token0Address',
+      label: t[language].token0Address,
+      sortable: true,
+      filterable: true,
+      render: renderAddress,
     },
     {
-      key: 'pair',
-      label: t[language].pair,
-      render: (_, row) => (
-        <span className="uppercase">
-          {row.token0}/{row.token1}
-        </span>
-      ),
+      key: 'token1Address',
+      label: t[language].token1Address,
+      sortable: true,
+      filterable: true,
+      render: renderAddress,
     },
-    { key: 'dex', label: t[language].dex, sortable: true },
-    {
-      key: 'fee',
-      label: t[language].fee,
-      render: (value) => <span>{value}%</span>,
-    },
-    {
-      key: 'poolAddress',
-      label: t[language].poolAddress,
-      render: (value) => (
-        <span className="font-mono text-xs text-muted-foreground">
-          {value.slice(0, 10)}...{value.slice(-8)}
-        </span>
-      ),
-    },
+    { key: 'reserve0', label: t[language].reserve0, sortable: true, filterable: true },
+    { key: 'reserve1', label: t[language].reserve1, sortable: true, filterable: true },
   ];
-
-  const handleSave = (data: any) => {
-    if (editData) {
-      setPools(pools.map((p) => (p.id === editData.id ? { ...p, ...data } : p)));
-    } else {
-      setPools([...pools, { ...data, id: pools.length + 1 }]);
-    }
-    setEditData(null);
-  };
 
   return (
     <div className="flex-1 flex flex-col bg-background">
@@ -110,16 +127,19 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         columns={columns}
         data={pools}
         onEdit={(row) => {
-          setEditData(row);
+          setEditData(row.raw ?? row);
           setFormOpen(true);
         }}
         onDelete={(row) => {
-          const deletedPool = { ...row };
-          setPools(pools.filter((p) => p.id !== row.id));
+          setDeletedPoolIds(new Set([...deletedPoolIds, row.id]));
           showDeleteToast({
-            itemName: `${row.token0.toUpperCase()}/${row.token1.toUpperCase()}`,
+            itemName: `${row.token0Symbol}/${row.token1Symbol}`,
             itemType: language === 'en' ? 'Pool' : 'Пул',
-            onUndo: () => setPools([...pools]),
+            onUndo: () => {
+              const next = new Set(deletedPoolIds);
+              next.delete(row.id);
+              setDeletedPoolIds(next);
+            },
             language,
           });
         }}
@@ -131,7 +151,7 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
           setFormOpen(false);
           setEditData(null);
         }}
-        onSave={handleSave}
+        onSave={(data) => console.log('Pool saved', data)}
         initialData={editData}
         language={language}
       />

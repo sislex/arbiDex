@@ -1,107 +1,68 @@
 import { DataTable, Column } from '../DataTable';
 import { RefreshCw } from 'lucide-react';
 import { showDeleteToast } from '../../utils/toast';
-import { useState } from 'react';
-
-const mockServers = [
-  { id: 1, name: 'Server-US-1', ip: '192.168.1.10', cpu: '45%', memory: '62%', status: 'Online' },
-  { id: 2, name: 'Server-EU-1', ip: '192.168.1.11', cpu: '78%', memory: '84%', status: 'Online' },
-  { id: 3, name: 'Server-AS-1', ip: '192.168.1.12', cpu: '12%', memory: '31%', status: 'Offline' },
-];
+import { useEffect, useMemo, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
+import { selectServersDataResponse } from '../../store/db-config/dbConfig.selectors';
 
 export function ServersPage({ language }: { language: 'en' | 'ru' }) {
-  const [servers, setServers] = useState(mockServers);
+  const dispatch = useAppDispatch();
+  const serversFromStore = useAppSelector(selectServersDataResponse);
+  const [deletedServerIds, setDeletedServerIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    dispatch(dbConfigActions.setServersData());
+  }, [dispatch]);
+
+  const servers = useMemo(() => {
+    return serversFromStore
+      .map((server: any) => ({
+        id: server.serverId ?? server.id,
+        status: server.status ?? '',
+        ip: server.ip ?? '',
+        port: server.port ?? '',
+        name: server.serverName ?? server.name ?? '',
+        raw: server,
+      }))
+      .filter((server) => !deletedServerIds.has(server.id));
+  }, [deletedServerIds, serversFromStore]);
+
   const t = {
     en: {
-      title: 'Servers',
-      name: 'Name',
-      ip: 'IP Address',
-      cpu: 'CPU',
-      memory: 'Memory',
+      serverId: 'Server ID',
       status: 'Status',
+      ip: 'IP',
+      port: 'Port',
+      serverName: 'Server Name',
       getConfig: 'Get Config',
       restart: 'Restart',
-      online: 'Online',
-      offline: 'Offline',
     },
     ru: {
-      title: 'Серверы',
-      name: 'Название',
-      ip: 'IP-адрес',
-      cpu: 'CPU',
-      memory: 'Память',
-      status: 'Статус',
+      serverId: 'Server ID',
+      status: 'Status',
+      ip: 'IP',
+      port: 'Port',
+      serverName: 'Server Name',
       getConfig: 'Получить конфигурацию',
       restart: 'Перезапустить',
-      online: 'Онлайн',
-      offline: 'Оффлайн',
     },
   };
 
   const columns: Column[] = [
-    { key: 'name', label: t[language].name, sortable: true },
+    { key: 'id', label: t[language].serverId, sortable: true, filterable: true },
+    { key: 'status', label: t[language].status, sortable: true, filterable: true },
     {
       key: 'ip',
       label: t[language].ip,
+      sortable: true,
+      filterable: true,
       render: (value) => (
         <span className="font-mono text-xs text-muted-foreground">{value}</span>
       ),
     },
-    {
-      key: 'cpu',
-      label: t[language].cpu,
-      render: (value) => {
-        const percent = parseInt(value);
-        return (
-          <div className="flex items-center gap-2">
-            <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className={`h-full ${
-                  percent > 70 ? 'bg-destructive' : percent > 50 ? 'bg-warning' : 'bg-success'
-                }`}
-                style={{ width: value }}
-              />
-            </div>
-            <span className="text-xs text-muted-foreground w-10">{value}</span>
-          </div>
-        );
-      },
-    },
-    {
-      key: 'memory',
-      label: t[language].memory,
-      render: (value) => {
-        const percent = parseInt(value);
-        return (
-          <div className="flex items-center gap-2">
-            <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className={`h-full ${
-                  percent > 70 ? 'bg-destructive' : percent > 50 ? 'bg-warning' : 'bg-success'
-                }`}
-                style={{ width: value }}
-              />
-            </div>
-            <span className="text-xs text-muted-foreground w-10">{value}</span>
-          </div>
-        );
-      },
-    },
-    {
-      key: 'status',
-      label: t[language].status,
-      render: (value) => (
-        <span
-          className={`px-2 py-0.5 rounded text-xs ${
-            value === 'Online'
-              ? 'bg-success/20 text-success'
-              : 'bg-destructive/20 text-destructive'
-          }`}
-        >
-          {value === 'Online' ? t[language].online : t[language].offline}
-        </span>
-      ),
-    },
+    { key: 'port', label: t[language].port, sortable: true, filterable: true },
+    { key: 'name', label: t[language].serverName, sortable: true, filterable: true },
   ];
 
   return (
@@ -112,12 +73,15 @@ export function ServersPage({ language }: { language: 'en' | 'ru' }) {
           data={servers}
           onEdit={(row) => console.log('Edit', row)}
           onDelete={(row) => {
-            const deletedServer = { ...row };
-            setServers(servers.filter((s) => s.id !== row.id));
+            setDeletedServerIds(new Set([...deletedServerIds, row.id]));
             showDeleteToast({
               itemName: row.name,
               itemType: language === 'en' ? 'Server' : 'Сервер',
-              onUndo: () => setServers([...servers]),
+              onUndo: () => {
+                const next = new Set(deletedServerIds);
+                next.delete(row.id);
+                setDeletedServerIds(next);
+              },
               language,
             });
           }}

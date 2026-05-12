@@ -1,14 +1,14 @@
-import { DataTable, Column } from '../DataTable';
 import { ChevronRight } from 'lucide-react';
-
-const mockQuotes = [
-  { id: 1, name: 'Binance Spot', type: 'CEX', pairs: 242, status: 'Active', lastUpdate: '2026-05-04 10:23' },
-  { id: 2, name: 'Uniswap V3', type: 'DEX', pairs: 189, status: 'Active', lastUpdate: '2026-05-04 10:22' },
-  { id: 3, name: 'Kraken', type: 'CEX', pairs: 156, status: 'Active', lastUpdate: '2026-05-04 10:21' },
-  { id: 4, name: 'PancakeSwap', type: 'DEX', pairs: 312, status: 'Active', lastUpdate: '2026-05-04 10:20' },
-  { id: 5, name: 'Coinbase Pro', type: 'CEX', pairs: 201, status: 'Inactive', lastUpdate: '2026-05-04 09:15' },
-  { id: 6, name: 'SushiSwap', type: 'DEX', pairs: 98, status: 'Active', lastUpdate: '2026-05-04 10:19' },
-];
+import { useEffect, useMemo, useState } from 'react';
+import { DataTable, Column } from '../DataTable';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
+import {
+  selectPairsDataResponse,
+  selectQuotesDataResponse,
+  selectTokensDataResponse,
+} from '../../store/db-config/dbConfig.selectors';
+import { showDeleteToast } from '../../utils/toast';
 
 interface QuotesListPageProps {
   language: 'en' | 'ru';
@@ -16,100 +16,115 @@ interface QuotesListPageProps {
 }
 
 export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) {
+  const dispatch = useAppDispatch();
+  const quotesFromStore = useAppSelector(selectQuotesDataResponse);
+  const tokens = useAppSelector(selectTokensDataResponse);
+  const pairs = useAppSelector(selectPairsDataResponse);
+  const [deletedQuoteIds, setDeletedQuoteIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    dispatch(dbConfigActions.initQuotesListPage());
+    dispatch(dbConfigActions.setPairsData());
+  }, [dispatch]);
+
+  const tokenById = useMemo(() => {
+    return new Map(tokens.map((token: any) => [token.tokenId ?? token.id, token]));
+  }, [tokens]);
+
+  const pairCountByQuoteId = useMemo(() => {
+    const counts = new Map<number, number>();
+    pairs.forEach((pair: any) => {
+      const quoteId = pair.quoteId ?? pair.quote_id;
+      if (quoteId !== undefined && quoteId !== null) {
+        counts.set(quoteId, (counts.get(quoteId) ?? 0) + 1);
+      }
+    });
+    return counts;
+  }, [pairs]);
+
+  const quotes = useMemo(() => {
+    return quotesFromStore
+      .map((quote: any) => {
+        const id = quote.quoteId ?? quote.id;
+        const token = tokenById.get(quote.tokenId ?? quote.quoteTokenId ?? quote.quote_token_id);
+
+        return {
+          id,
+          amount: quote.amount ?? '',
+          side: quote.side ?? '',
+          blockTag: quote.blockTag ?? quote.block_tag ?? '',
+          quoteSource: quote.quoteSource ?? quote.quote_source ?? quote.source ?? quote.quoteName ?? '',
+          quoteToken: quote.quoteToken ?? quote.quote_token ?? token?.symbol ?? token?.tokenName ?? '',
+          pairsCount: quote.pairsCount ?? quote.pairs_count ?? pairCountByQuoteId.get(id) ?? 0,
+          raw: quote,
+        };
+      })
+      .filter((quote) => !deletedQuoteIds.has(quote.id));
+  }, [deletedQuoteIds, pairCountByQuoteId, quotesFromStore, tokenById]);
+
   const t = {
     en: {
-      name: 'Quote Name',
-      type: 'Type',
-      pairs: 'Pairs',
-      status: 'Status',
-      lastUpdate: 'Last Update',
-      active: 'Active',
-      inactive: 'Inactive',
+      id: 'ID',
+      amount: 'Amount',
+      side: 'Side',
+      blockTag: 'Block Tag',
+      quoteSource: 'Quote source',
+      quoteToken: 'Qouote Token',
+      pairsCount: 'Pairs count',
     },
     ru: {
-      name: 'Название',
-      type: 'Тип',
-      pairs: 'Пары',
-      status: 'Статус',
-      lastUpdate: 'Обновление',
-      active: 'Активна',
-      inactive: 'Неактивна',
+      id: 'ID',
+      amount: 'Amount',
+      side: 'Side',
+      blockTag: 'Block Tag',
+      quoteSource: 'Quote source',
+      quoteToken: 'Qouote Token',
+      pairsCount: 'Pairs count',
     },
   };
 
   const columns: Column[] = [
-    {
-      key: 'name',
-      label: t[language].name,
-      sortable: true,
-      filterable: true,
-    },
-    {
-      key: 'type',
-      label: t[language].type,
-      sortable: true,
-      render: (value) => (
-        <span className={`px-2 py-0.5 rounded text-xs ${
-          value === 'CEX' ? 'bg-secondary/20 text-secondary' : 'bg-accent/50 text-accent-foreground'
-        }`}>
-          {value}
-        </span>
-      ),
-    },
-    {
-      key: 'pairs',
-      label: t[language].pairs,
-      sortable: true,
-      render: (value) => (
-        <span className="font-mono text-sm">{value}</span>
-      ),
-    },
-    {
-      key: 'status',
-      label: t[language].status,
-      render: (value) => (
-        <span
-          className={`px-2 py-0.5 rounded text-xs ${
-            value === 'Active'
-              ? 'bg-success/20 text-success'
-              : 'bg-muted text-muted-foreground'
-          }`}
-        >
-          {value === 'Active' ? t[language].active : t[language].inactive}
-        </span>
-      ),
-    },
-    {
-      key: 'lastUpdate',
-      label: t[language].lastUpdate,
-      render: (value) => (
-        <span className="font-mono text-xs text-muted-foreground">{value}</span>
-      ),
-    },
-    {
-      key: 'actions',
-      label: '',
-      render: (_, row) => (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onQuoteClick(row.id, row.name);
-          }}
-          className="p-1.5 hover:bg-accent rounded transition-colors"
-          title="Edit Relations"
-        >
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </button>
-      ),
-    },
+    { key: 'id', label: t[language].id, sortable: true, filterable: true },
+    { key: 'amount', label: t[language].amount, sortable: true, filterable: true },
+    { key: 'side', label: t[language].side, sortable: true, filterable: true },
+    { key: 'blockTag', label: t[language].blockTag, sortable: true, filterable: true },
+    { key: 'quoteSource', label: t[language].quoteSource, sortable: true, filterable: true },
+    { key: 'quoteToken', label: t[language].quoteToken, sortable: true, filterable: true },
+    { key: 'pairsCount', label: t[language].pairsCount, sortable: true, filterable: true },
   ];
 
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
         columns={columns}
-        data={mockQuotes}
-        onRowClick={(row) => onQuoteClick(row.id, row.name)}
+        data={quotes}
+        onEdit={(row) => console.log('Edit', row)}
+        onDelete={(row) => {
+          setDeletedQuoteIds(new Set([...deletedQuoteIds, row.id]));
+          showDeleteToast({
+            itemName: row.quoteSource || String(row.id),
+            itemType: language === 'en' ? 'Quote' : 'Quote',
+            onUndo: () => {
+              const next = new Set(deletedQuoteIds);
+              next.delete(row.id);
+              setDeletedQuoteIds(next);
+            },
+            language,
+          });
+        }}
+        extraActions={(row) => (
+          <button
+            onClick={(event) => {
+              event.stopPropagation();
+              onQuoteClick(row.id, row.quoteSource || String(row.id));
+            }}
+            className="p-1.5 hover:bg-accent rounded transition-colors"
+            title="Edit Relations"
+          >
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+        )}
+        onRowClick={(row) => onQuoteClick(row.id, row.quoteSource || String(row.id))}
       />
     </div>
   );
