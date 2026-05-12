@@ -4,18 +4,26 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
   selectChainsDataResponse,
+  selectChainsMeta,
   selectRpcUrlDataResponse,
+  selectRpcUrlsMeta,
 } from '../../store/db-config/dbConfig.selectors';
 
 export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
   const rpcUrlsFromStore = useAppSelector(selectRpcUrlDataResponse);
   const chains = useAppSelector(selectChainsDataResponse);
+  const rpcUrlsMeta = useAppSelector(selectRpcUrlsMeta);
+  const chainsMeta = useAppSelector(selectChainsMeta);
 
   useEffect(() => {
-    dispatch(dbConfigActions.setRpcUrlsData());
-    dispatch(dbConfigActions.setChainsData());
-  }, [dispatch]);
+    if ((!rpcUrlsMeta.isLoaded || rpcUrlsMeta.error) && !rpcUrlsMeta.isLoading) {
+      dispatch(dbConfigActions.setRpcUrlsData());
+    }
+    if ((!chainsMeta.isLoaded || chainsMeta.error) && !chainsMeta.isLoading) {
+      dispatch(dbConfigActions.setChainsData());
+    }
+  }, [chainsMeta.error, chainsMeta.isLoaded, chainsMeta.isLoading, dispatch, rpcUrlsMeta.error, rpcUrlsMeta.isLoaded, rpcUrlsMeta.isLoading]);
 
   const chainById = useMemo(() => {
     return new Map(chains.map((chain: any) => [chain.chainId ?? chain.id, chain.name]));

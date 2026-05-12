@@ -3,10 +3,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
+  selectBotsMeta,
   selectBotsDataResponse,
+  selectCexJobsMeta,
   selectCexJobsDataResponse,
+  selectJobsMeta,
   selectJobsDataResponse,
+  selectPairsMeta,
   selectPairsDataResponse,
+  selectServersMeta,
   selectServersDataResponse,
 } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
@@ -14,6 +19,11 @@ import { showDeleteToast } from '../../utils/toast';
 export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBotClick?: (bot: any) => void }) {
   const dispatch = useAppDispatch();
   const botsFromStore = useAppSelector(selectBotsDataResponse);
+  const botsMeta = useAppSelector(selectBotsMeta);
+  const jobsMeta = useAppSelector(selectJobsMeta);
+  const cexJobsMeta = useAppSelector(selectCexJobsMeta);
+  const serversMeta = useAppSelector(selectServersMeta);
+  const pairsMeta = useAppSelector(selectPairsMeta);
   const jobs = useAppSelector(selectJobsDataResponse);
   const cexJobs = useAppSelector(selectCexJobsDataResponse);
   const servers = useAppSelector(selectServersDataResponse);
@@ -22,9 +32,31 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
   const [deletedBotIds, setDeletedBotIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    dispatch(dbConfigActions.initBotsListPage());
-    dispatch(dbConfigActions.setPairsData());
-  }, [dispatch]);
+    if (
+      (!botsMeta.isLoaded || botsMeta.error) &&
+      !botsMeta.isLoading &&
+      !jobsMeta.isLoading &&
+      !cexJobsMeta.isLoading &&
+      !serversMeta.isLoading
+    ) {
+      dispatch(dbConfigActions.initBotsListPage());
+    }
+
+    if ((!pairsMeta.isLoaded || pairsMeta.error) && !pairsMeta.isLoading) {
+      dispatch(dbConfigActions.setPairsData());
+    }
+  }, [
+    botsMeta.error,
+    botsMeta.isLoaded,
+    botsMeta.isLoading,
+    cexJobsMeta.isLoading,
+    dispatch,
+    jobsMeta.isLoading,
+    pairsMeta.error,
+    pairsMeta.isLoaded,
+    pairsMeta.isLoading,
+    serversMeta.isLoading,
+  ]);
 
   const jobById = useMemo(() => {
     return new Map(jobs.map((job: any) => [job.jobId ?? job.id, job]));

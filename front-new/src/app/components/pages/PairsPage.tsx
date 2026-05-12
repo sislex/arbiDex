@@ -9,7 +9,9 @@ import { DexPairForm } from '../forms/DexPairForm';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
+  selectCexPairsMeta,
   selectCexPairsDataResponse,
+  selectPairsMeta,
   selectPairsFullData,
   selectPairsRating,
   selectTokenInList,
@@ -24,6 +26,8 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const dispatch = useAppDispatch();
   const dexPairsFromStore = useAppSelector(selectPairsFullData);
   const cexPairsFromStore = useAppSelector(selectCexPairsDataResponse);
+  const pairsMeta = useAppSelector(selectPairsMeta);
+  const cexPairsMeta = useAppSelector(selectCexPairsMeta);
   const pairRatingData = useAppSelector(selectPairsRating);
   const tokenInList = useAppSelector(selectTokenInList);
   const [activeTab, setActiveTab] = useState('pairs');
@@ -31,8 +35,17 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(type === 'cex' ? dbConfigActions.initCexPairsPage() : dbConfigActions.initPairsPage());
-  }, [dispatch, type]);
+    if (type === 'cex') {
+      if ((!cexPairsMeta.isLoaded || cexPairsMeta.error) && !cexPairsMeta.isLoading) {
+        dispatch(dbConfigActions.initCexPairsPage());
+      }
+      return;
+    }
+
+    if ((!pairsMeta.isLoaded || pairsMeta.error) && !pairsMeta.isLoading) {
+      dispatch(dbConfigActions.initPairsPage());
+    }
+  }, [cexPairsMeta.error, cexPairsMeta.isLoaded, cexPairsMeta.isLoading, dispatch, pairsMeta.error, pairsMeta.isLoaded, pairsMeta.isLoading, type]);
 
   const dexPairs = useMemo(() => {
     return dexPairsFromStore.map((pair: any) => ({

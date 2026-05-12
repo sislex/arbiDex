@@ -5,18 +5,21 @@ import { PoolForm } from '../forms/PoolForm';
 import { showDeleteToast } from '../../utils/toast';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
-import { selectFullPoolsData } from '../../store/db-config/dbConfig.selectors';
+import { selectFullPoolsData, selectPoolsMeta } from '../../store/db-config/dbConfig.selectors';
 
 export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
   const poolsFromStore = useAppSelector(selectFullPoolsData);
+  const poolsMeta = useAppSelector(selectPoolsMeta);
   const [formOpen, setFormOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
   const [deletedPoolIds, setDeletedPoolIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    dispatch(dbConfigActions.initPoolsPage());
-  }, [dispatch]);
+    if ((!poolsMeta.isLoaded || poolsMeta.error) && !poolsMeta.isLoading) {
+      dispatch(dbConfigActions.initPoolsPage());
+    }
+  }, [dispatch, poolsMeta.error, poolsMeta.isLoaded, poolsMeta.isLoading]);
 
   const pools = useMemo(() => {
     return poolsFromStore

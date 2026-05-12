@@ -4,16 +4,19 @@ import { showDeleteToast } from '../../utils/toast';
 import { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
-import { selectServersDataResponse } from '../../store/db-config/dbConfig.selectors';
+import { selectServersDataResponse, selectServersMeta } from '../../store/db-config/dbConfig.selectors';
 
 export function ServersPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
   const serversFromStore = useAppSelector(selectServersDataResponse);
+  const serversMeta = useAppSelector(selectServersMeta);
   const [deletedServerIds, setDeletedServerIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    dispatch(dbConfigActions.setServersData());
-  }, [dispatch]);
+    if ((!serversMeta.isLoaded || serversMeta.error) && !serversMeta.isLoading) {
+      dispatch(dbConfigActions.setServersData());
+    }
+  }, [dispatch, serversMeta.error, serversMeta.isLoaded, serversMeta.isLoading]);
 
   const servers = useMemo(() => {
     return serversFromStore

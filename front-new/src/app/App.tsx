@@ -15,14 +15,11 @@ import { PairsPage } from './components/pages/PairsPage';
 import { JobsPage } from './components/pages/JobsPage';
 import { RpcUrlsPage } from './components/pages/RpcUrlsPage';
 import { DexesPage } from './components/pages/DexesPage';
-import { useAppDispatch } from './store/hooks';
-import { dbConfigActions } from './store/db-config/dbConfig.slice';
 
 export default function App() {
-  const dispatch = useAppDispatch();
   const [isDark, setIsDark] = useState(true);
   const [language, setLanguage] = useState<'en' | 'ru'>('en');
-  const [activePage, setActivePage] = useState('tokens');
+  const [activePage, setActivePage] = useState('dex-chains');
   const [selectedQuote, setSelectedQuote] = useState<{ id: number; name: string } | null>(null);
   const [selectedBot, setSelectedBot] = useState<{ id: number; name: string } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -38,60 +35,18 @@ export default function App() {
     }
   }, [isDark]);
 
-  useEffect(() => {
-    switch (activePage) {
-      case 'tokens':
-        dispatch(dbConfigActions.initTokensListPage());
-        break;
-      case 'pools':
-        dispatch(dbConfigActions.initPoolsPage());
-        break;
-      case 'dex-pairs':
-        dispatch(dbConfigActions.initPairsPage());
-        break;
-      case 'cex-pairs':
-        dispatch(dbConfigActions.initCexPairsPage());
-        break;
-      case 'dex-jobs':
-        dispatch(dbConfigActions.initJobsListPage());
-        break;
-      case 'cex-jobs':
-        dispatch(dbConfigActions.initCexJobsListPage());
-        break;
-      case 'dex-rpc-urls':
-        dispatch(dbConfigActions.setRpcUrlsData());
-        dispatch(dbConfigActions.setChainsData());
-        break;
-      case 'dexes':
-        dispatch(dbConfigActions.setDexesData());
-        break;
-      case 'quotes':
-        dispatch(dbConfigActions.initQuotesListPage());
-        break;
-      case 'bots':
-        dispatch(dbConfigActions.initBotsListPage());
-        break;
-      case 'servers':
-        dispatch(dbConfigActions.setServersData());
-        break;
-      case 'dex-chains':
-      case 'cex-chains':
-        dispatch(dbConfigActions.setChainsData());
-        break;
-      default:
-        break;
-    }
-  }, [activePage, dispatch]);
-
   const handleLogin = (login: string, password: string) => {
     setUserLogin(login);
     setIsAuthenticated(true);
+    setActivePage('dex-chains');
+    setSelectedQuote(null);
+    setSelectedBot(null);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserLogin('');
-    setActivePage('tokens');
+    setActivePage('dex-chains');
     setSelectedQuote(null);
     setSelectedBot(null);
   };

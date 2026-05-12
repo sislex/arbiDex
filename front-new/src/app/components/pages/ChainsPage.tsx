@@ -1,20 +1,35 @@
 import { Plus } from 'lucide-react';
 import { DataTable, Column } from '../DataTable';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChainForm } from '../forms/ChainForm';
 import { showDeleteToast } from '../../utils/toast';
-
-const mockChains = [
-  { id: 'ethereum', name: 'Ethereum', rpc: 'https://eth.llamarpc.com', chainId: 1 },
-  { id: 'bsc', name: 'Binance Smart Chain', rpc: 'https://bsc-dataseed.binance.org', chainId: 56 },
-  { id: 'polygon', name: 'Polygon', rpc: 'https://polygon-rpc.com', chainId: 137 },
-  { id: 'arbitrum', name: 'Arbitrum', rpc: 'https://arb1.arbitrum.io/rpc', chainId: 42161 },
-];
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
+import { selectChainsDataResponse, selectChainsMeta } from '../../store/db-config/dbConfig.selectors';
 
 export function ChainsPage({ language }: { language: 'en' | 'ru' }) {
-  const [chains, setChains] = useState(mockChains);
+  const dispatch = useAppDispatch();
+  const chainsFromStore = useAppSelector(selectChainsDataResponse);
+  const chainsMeta = useAppSelector(selectChainsMeta);
   const [formOpen, setFormOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [deletedChainIds, setDeletedChainIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if ((!chainsMeta.isLoaded || chainsMeta.error) && !chainsMeta.isLoading) {
+      dispatch(dbConfigActions.setChainsData());
+    }
+  }, [chainsMeta.error, chainsMeta.isLoaded, chainsMeta.isLoading, dispatch]);
+
+  const chains = useMemo(() => {
+    return chainsFromStore
+      .map((chain: any) => ({
+        id: chain.chainId ?? chain.id,
+        name: chain.name ?? chain.chainName ?? '',
+        raw: chain,
+      }))
+      .filter((chain) => !deletedChainIds.has(chain.id));
+  }, [chainsFromStore, deletedChainIds]);
 
   const t = {
     en: {
@@ -35,11 +50,7 @@ export function ChainsPage({ language }: { language: 'en' | 'ru' }) {
   ];
 
   const handleSave = (data: any) => {
-    if (editData) {
-      setChains(chains.map((c) => (c.id === editData.id ? { ...c, ...data } : c)));
-    } else {
-      setChains([...chains, { ...data, rpc: '', chainId: 0 }]);
-    }
+    console.log('Chain saved', data);
     setEditData(null);
   };
 
@@ -63,16 +74,19 @@ export function ChainsPage({ language }: { language: 'en' | 'ru' }) {
         columns={columns}
         data={chains}
         onEdit={(row) => {
-          setEditData(row);
+          setEditData(row.raw ?? row);
           setFormOpen(true);
         }}
         onDelete={(row) => {
-          const deletedChain = { ...row };
-          setChains(chains.filter((c) => c.id !== row.id));
+          setDeletedChainIds(new Set([...deletedChainIds, row.id]));
           showDeleteToast({
             itemName: row.name,
             itemType: language === 'en' ? 'Chain' : 'Сеть',
-            onUndo: () => setChains([...chains]),
+            onUndo: () => {
+              const next = new Set(deletedChainIds);
+              next.delete(row.id);
+              setDeletedChainIds(next);
+            },
             language,
           });
         }}

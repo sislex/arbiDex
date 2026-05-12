@@ -4,17 +4,20 @@ import { useEffect, useState } from 'react';
 import { showDeleteToast } from '../../utils/toast';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
-import { selectTokensFullDataResponse } from '../../store/db-config/dbConfig.selectors';
+import { selectTokensFullDataResponse, selectTokensMeta } from '../../store/db-config/dbConfig.selectors';
 
 export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
   const tokensFromStore = useAppSelector(selectTokensFullDataResponse);
+  const tokensMeta = useAppSelector(selectTokensMeta);
   const [selectedRow, setSelectedRow] = useState(null);
   const [tokens, setTokens] = useState<any[]>([]);
 
   useEffect(() => {
-    dispatch(dbConfigActions.initTokensListPage());
-  }, [dispatch]);
+    if ((!tokensMeta.isLoaded || tokensMeta.error) && !tokensMeta.isLoading) {
+      dispatch(dbConfigActions.initTokensListPage());
+    }
+  }, [dispatch, tokensMeta.error, tokensMeta.isLoaded, tokensMeta.isLoading]);
 
   useEffect(() => {
     const mappedTokens = tokensFromStore.map((token: any) => ({

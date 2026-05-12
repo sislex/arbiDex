@@ -4,7 +4,9 @@ import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
+  selectPairsMeta,
   selectPairsDataResponse,
+  selectQuotesMeta,
   selectQuotesDataResponse,
   selectTokensDataResponse,
 } from '../../store/db-config/dbConfig.selectors';
@@ -18,14 +20,21 @@ interface QuotesListPageProps {
 export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) {
   const dispatch = useAppDispatch();
   const quotesFromStore = useAppSelector(selectQuotesDataResponse);
+  const quotesMeta = useAppSelector(selectQuotesMeta);
+  const pairsMeta = useAppSelector(selectPairsMeta);
   const tokens = useAppSelector(selectTokensDataResponse);
   const pairs = useAppSelector(selectPairsDataResponse);
   const [deletedQuoteIds, setDeletedQuoteIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    dispatch(dbConfigActions.initQuotesListPage());
-    dispatch(dbConfigActions.setPairsData());
-  }, [dispatch]);
+    if ((!quotesMeta.isLoaded || quotesMeta.error) && !quotesMeta.isLoading) {
+      dispatch(dbConfigActions.initQuotesListPage());
+    }
+
+    if ((!pairsMeta.isLoaded || pairsMeta.error) && !pairsMeta.isLoading) {
+      dispatch(dbConfigActions.setPairsData());
+    }
+  }, [dispatch, pairsMeta.error, pairsMeta.isLoaded, pairsMeta.isLoading, quotesMeta.error, quotesMeta.isLoaded, quotesMeta.isLoading]);
 
   const tokenById = useMemo(() => {
     return new Map(tokens.map((token: any) => [token.tokenId ?? token.id, token]));

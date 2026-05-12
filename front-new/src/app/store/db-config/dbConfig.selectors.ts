@@ -84,6 +84,66 @@ export const selectCexJobsDataResponse = createSelector(
   (state) => state.cexJobs.response,
 );
 
+export const selectTokensMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.tokens,
+);
+
+export const selectPoolsMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.pools,
+);
+
+export const selectDexesMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.dexes,
+);
+
+export const selectChainsMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.chains,
+);
+
+export const selectPairsMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.pairs,
+);
+
+export const selectQuotesMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.quotes,
+);
+
+export const selectJobsMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.jobs,
+);
+
+export const selectBotsMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.bots,
+);
+
+export const selectServersMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.servers,
+);
+
+export const selectRpcUrlsMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.rpcUrls,
+);
+
+export const selectCexPairsMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.cexPairs,
+);
+
+export const selectCexJobsMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.cexJobs,
+);
+
 const selectTokenMap = createSelector(selectTokensDataResponse, (tokens) => {
   return new Map(tokens.map((token: any) => [token.tokenId, token]));
 });

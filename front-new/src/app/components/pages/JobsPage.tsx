@@ -4,9 +4,11 @@ import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
+  selectCexJobsMeta,
   selectCexPairsDataResponse,
   selectCexJobsDataResponse,
   selectChainsDataResponse,
+  selectJobsMeta,
   selectJobsDataResponse,
   selectPairsDataResponse,
   selectRpcUrlDataResponse,
@@ -30,6 +32,8 @@ export function JobsPage({ language, type }: JobsPageProps) {
   const dispatch = useAppDispatch();
   const dexJobsFromStore = useAppSelector(selectJobsDataResponse);
   const cexJobsFromStore = useAppSelector(selectCexJobsDataResponse);
+  const jobsMeta = useAppSelector(selectJobsMeta);
+  const cexJobsMeta = useAppSelector(selectCexJobsMeta);
   const chains = useAppSelector(selectChainsDataResponse);
   const rpcUrls = useAppSelector(selectRpcUrlDataResponse);
   const pairs = useAppSelector(selectPairsDataResponse);
@@ -37,8 +41,17 @@ export function JobsPage({ language, type }: JobsPageProps) {
   const [cexWorkStatus, setCexWorkStatus] = useState<Record<number, boolean | null>>({});
 
   useEffect(() => {
-    dispatch(type === 'cex' ? dbConfigActions.initCexJobsListPage() : dbConfigActions.initJobsListPage());
-  }, [dispatch, type]);
+    if (type === 'cex') {
+      if ((!cexJobsMeta.isLoaded || cexJobsMeta.error) && !cexJobsMeta.isLoading) {
+        dispatch(dbConfigActions.initCexJobsListPage());
+      }
+      return;
+    }
+
+    if ((!jobsMeta.isLoaded || jobsMeta.error) && !jobsMeta.isLoading) {
+      dispatch(dbConfigActions.initJobsListPage());
+    }
+  }, [cexJobsMeta.error, cexJobsMeta.isLoaded, cexJobsMeta.isLoading, dispatch, jobsMeta.error, jobsMeta.isLoaded, jobsMeta.isLoading, type]);
 
   const chainById = useMemo(() => {
     return new Map(chains.map((chain: any) => [chain.chainId ?? chain.id, chain.name]));

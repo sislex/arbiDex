@@ -2,17 +2,20 @@ import { useEffect, useMemo, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
-import { selectDexesDataResponse } from '../../store/db-config/dbConfig.selectors';
+import { selectDexesDataResponse, selectDexesMeta } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
 
 export function DexesPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
   const dexesFromStore = useAppSelector(selectDexesDataResponse);
+  const dexesMeta = useAppSelector(selectDexesMeta);
   const [deletedDexIds, setDeletedDexIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    dispatch(dbConfigActions.setDexesData());
-  }, [dispatch]);
+    if ((!dexesMeta.isLoaded || dexesMeta.error) && !dexesMeta.isLoading) {
+      dispatch(dbConfigActions.setDexesData());
+    }
+  }, [dexesMeta.error, dexesMeta.isLoaded, dexesMeta.isLoading, dispatch]);
 
   const dexes = useMemo(() => {
     return dexesFromStore
