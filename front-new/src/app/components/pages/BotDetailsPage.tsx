@@ -169,6 +169,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
         <>
           <div className="flex-1 overflow-hidden">
             <DataTable
+              title={`${botName} Jobs`}
               columns={columns}
               data={mockJobs}
               onRowClick={(row) => setSelectedJobId(row.id)}

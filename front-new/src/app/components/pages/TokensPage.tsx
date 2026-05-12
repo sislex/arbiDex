@@ -113,6 +113,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
 
       {tokens && tokens.length ? (
         <DataTable
+          title="Tokens"
           columns={columns}
           data={tokens}
           onEdit={(row) => console.log('Edit', row)}

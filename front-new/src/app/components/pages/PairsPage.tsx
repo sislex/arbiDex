@@ -28,7 +28,6 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const tokenInList = useAppSelector(selectTokenInList);
   const [activeTab, setActiveTab] = useState('pairs');
   const [selectedTokenIn, setSelectedTokenIn] = useState('');
-  const [filteredCount, setFilteredCount] = useState(0);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -210,16 +209,13 @@ export function PairsPage({ language, type }: PairsPageProps) {
 
   const tableData = type === 'cex' ? cexPairs : dexPairs;
   const tableColumns = type === 'cex' ? cexPairsColumns : dexPairsColumns;
-  const totalCount = tableData.length;
   const showPairsTable = type === 'cex' || activeTab === 'pairs';
 
   return (
     <div className="flex-1 flex flex-col bg-background">
       <div className="h-14 border-b border-border flex items-center justify-between px-4">
         <h2 className="text-foreground">
-          {showPairsTable
-            ? `${t[language].pairs} ${filteredCount !== totalCount ? `(${filteredCount}/${totalCount})` : `(${totalCount})`}`
-            : `${t[language].pairRating} ${pairRatingData.length > 0 ? `(${pairRatingData.length})` : ''}`}
+          {showPairsTable ? '' : `${t[language].pairRating} ${pairRatingData.length > 0 ? `(${pairRatingData.length})` : ''}`}
         </h2>
         {showPairsTable && (
           <button
@@ -237,6 +233,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         {showPairsTable ? (
           <DataTable
+            title={type === 'cex' ? 'CEX Pairs' : 'DEX Pairs'}
             columns={tableColumns}
             data={tableData}
             onEdit={(row) => console.log('Edit', row)}
@@ -248,7 +245,6 @@ export function PairsPage({ language, type }: PairsPageProps) {
                 language,
               });
             }}
-            onFilteredDataChange={(filtered) => setFilteredCount(filtered.length)}
           />
         ) : (
           <div className="flex-1 flex flex-col">

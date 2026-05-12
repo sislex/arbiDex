@@ -69,6 +69,7 @@ export function ServersPage({ language }: { language: 'en' | 'ru' }) {
     <div className="flex-1 flex flex-col bg-background">
       <div className="flex-1 border-b border-border">
         <DataTable
+          title="Servers"
           columns={columns}
           data={servers}
           onEdit={(row) => console.log('Edit', row)}

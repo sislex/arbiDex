@@ -71,14 +71,14 @@ export function QuotesPage({ language }: { language: 'en' | 'ru' }) {
           <div className="h-10 bg-muted border-b border-border flex items-center px-4">
             <span className="text-sm text-foreground">{t[language].relations}</span>
           </div>
-          <DataTable columns={relationsColumns} data={relations} />
+          <DataTable title={t[language].relations} columns={relationsColumns} data={relations} />
         </div>
 
         <div className="flex-1 flex flex-col border border-border rounded">
           <div className="h-10 bg-muted border-b border-border flex items-center px-4">
             <span className="text-sm text-foreground">{t[language].noRelations}</span>
           </div>
-          <DataTable columns={noRelationsColumns} data={mockNoRelations} />
+          <DataTable title={t[language].noRelations} columns={noRelationsColumns} data={mockNoRelations} />
         </div>
       </div>
 

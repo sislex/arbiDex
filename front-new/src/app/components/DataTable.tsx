@@ -1,5 +1,5 @@
 import { Edit2, Trash2 } from 'lucide-react';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import {
@@ -25,6 +25,7 @@ export interface Column {
 }
 
 interface DataTableProps {
+  title?: string;
   columns: Column[];
   data: any[];
   onEdit?: (row: any) => void;
@@ -37,6 +38,7 @@ interface DataTableProps {
 }
 
 export function DataTable({
+  title,
   columns,
   data,
   onEdit,
@@ -48,23 +50,33 @@ export function DataTable({
   onFilteredDataChange,
 }: DataTableProps) {
   const gridApiRef = useRef<GridApi | null>(null);
+  const [filteredCount, setFilteredCount] = useState(data.length);
+  const [hasActiveFilters, setHasActiveFilters] = useState(false);
 
   const emitFilteredData = useCallback(
     (api: GridApi) => {
-      if (!onFilteredDataChange) {
-        return;
-      }
-
       const filteredData: any[] = [];
       api.forEachNodeAfterFilterAndSort((node) => {
         if (node.data) {
           filteredData.push(node.data);
         }
       });
-      onFilteredDataChange(filteredData);
+      setFilteredCount(filteredData.length);
+      setHasActiveFilters(Object.keys(api.getFilterModel()).length > 0);
+      onFilteredDataChange?.(filteredData);
     },
     [onFilteredDataChange],
   );
+
+  useEffect(() => {
+    if (gridApiRef.current) {
+      emitFilteredData(gridApiRef.current);
+      return;
+    }
+
+    setFilteredCount(data.length);
+    setHasActiveFilters(false);
+  }, [data, emitFilteredData]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
     const gridColumns: ColDef[] = columns.map((column) => ({
@@ -166,8 +178,20 @@ export function DataTable({
   );
 
   return (
-    <div className="flex-1 min-h-0 overflow-hidden">
-      <div className="ag-theme-quartz arb-dex-grid h-full w-full">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      {title && (
+        <div className="h-11 shrink-0 border-b border-border bg-background flex items-center px-4">
+          <h2 className="text-sm text-foreground">
+            {title}{' '}
+            <span className="text-muted-foreground">
+              {hasActiveFilters
+                ? `(${filteredCount}/${data.length})`
+                : `(${data.length} Все элементы)`}
+            </span>
+          </h2>
+        </div>
+      )}
+      <div className="ag-theme-quartz arb-dex-grid flex-1 min-h-0 w-full">
         <AgGridReact
           rowData={data}
           columnDefs={columnDefs}

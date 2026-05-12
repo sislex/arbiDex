@@ -102,6 +102,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
+        title="Bots"
         columns={columns}
         data={bots}
         onEdit={(row) => console.log('Edit', row)}

@@ -225,6 +225,7 @@ export function QuoteRelationsPage({ quoteName, language, onBack }: QuoteRelatio
     selectedSet: Set<number>,
     onToggle: (id: number) => void,
     columns: Column[],
+    title: string,
     showActions: 'add' | 'remove',
     onFilteredDataChange: (filtered: any[]) => void
   ) => {
@@ -278,6 +279,7 @@ export function QuoteRelationsPage({ quoteName, language, onBack }: QuoteRelatio
 
     return (
       <DataTable
+        title={title}
         columns={columnsWithCheckbox}
         data={data}
         onFilteredDataChange={onFilteredDataChange}
@@ -343,11 +345,6 @@ export function QuoteRelationsPage({ quoteName, language, onBack }: QuoteRelatio
       <PanelGroup direction={layoutMode} className="flex-1">
         <Panel defaultSize={50} minSize={20}>
           <div className="flex flex-col h-full">
-            <div className="h-10 bg-muted border-b border-border flex items-center px-4">
-              <span className="text-sm text-foreground">
-                {t[language].inRelations} {filteredInCount !== inRelations.length ? `(${filteredInCount}/${inRelations.length})` : `(${inRelations.length})`}
-              </span>
-            </div>
             <div className="flex-1 overflow-hidden">
               {renderTableWithCheckbox(
                 inRelations,
@@ -359,6 +356,7 @@ export function QuoteRelationsPage({ quoteName, language, onBack }: QuoteRelatio
                   setSelectedInRelations(newSet);
                 },
                 relationsColumns,
+                t[language].inRelations,
                 'remove',
                 (filtered) => setFilteredInCount(filtered.length)
               )}
@@ -370,11 +368,6 @@ export function QuoteRelationsPage({ quoteName, language, onBack }: QuoteRelatio
 
         <Panel defaultSize={50} minSize={20}>
           <div className="flex flex-col h-full">
-            <div className="h-10 bg-muted border-b border-border flex items-center px-4">
-              <span className="text-sm text-foreground">
-                {t[language].notInRelations} {filteredNotCount !== notInRelations.length ? `(${filteredNotCount}/${notInRelations.length})` : `(${notInRelations.length})`}
-              </span>
-            </div>
             <div className="flex-1 overflow-hidden">
               {renderTableWithCheckbox(
                 notInRelations,
@@ -386,6 +379,7 @@ export function QuoteRelationsPage({ quoteName, language, onBack }: QuoteRelatio
                   setSelectedNotInRelations(newSet);
                 },
                 relationsColumns,
+                t[language].notInRelations,
                 'add',
                 (filtered) => setFilteredNotCount(filtered.length)
               )}

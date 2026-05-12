@@ -201,6 +201,7 @@ export function JobsPage({ language, type }: JobsPageProps) {
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
+        title={type === 'cex' ? 'CEX Jobs' : 'DEX Jobs'}
         columns={type === 'cex' ? cexColumns : dexColumns}
         data={type === 'cex' ? cexJobs : dexJobs}
         onEdit={(row) => console.log('Edit', row)}

@@ -59,6 +59,7 @@ export function ChainsPage({ language }: { language: 'en' | 'ru' }) {
       </div>
 
       <DataTable
+        title="Chains"
         columns={columns}
         data={chains}
         onEdit={(row) => {

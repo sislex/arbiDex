@@ -43,6 +43,7 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
+        title="DEXes"
         columns={columns}
         data={dexes}
         onEdit={(row) => console.log('Edit', row)}

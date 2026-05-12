@@ -124,6 +124,7 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
       </div>
 
       <DataTable
+        title="Pools"
         columns={columns}
         data={pools}
         onEdit={(row) => {

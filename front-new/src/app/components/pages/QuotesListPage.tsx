@@ -96,6 +96,7 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
+        title="Quotes"
         columns={columns}
         data={quotes}
         onEdit={(row) => console.log('Edit', row)}

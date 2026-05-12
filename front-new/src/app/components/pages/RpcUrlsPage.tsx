@@ -58,6 +58,7 @@ export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
+        title="RPC URLs"
         columns={columns}
         data={rpcUrls}
         onEdit={(row) => console.log('Edit', row)}
