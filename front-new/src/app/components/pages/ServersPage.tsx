@@ -5,12 +5,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { selectServersDataResponse, selectServersMeta } from '../../store/db-config/dbConfig.selectors';
+import { apiService } from '../../services/api-service';
 
 export function ServersPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
   const serversFromStore = useAppSelector(selectServersDataResponse);
   const serversMeta = useAppSelector(selectServersMeta);
   const [deletedServerIds, setDeletedServerIds] = useState<Set<number>>(new Set());
+  const [selectedServer, setSelectedServer] = useState<any>(null);
 
   useEffect(() => {
     if ((!serversMeta.isLoaded || serversMeta.error) && !serversMeta.isLoading) {
@@ -94,11 +96,22 @@ export function ServersPage({ language }: { language: 'en' | 'ru' }) {
               language,
             });
           }}
+          onRowDoubleClick={(row) => setSelectedServer(row)}
+          onRowClick={(row) => setSelectedServer(row)}
+          selectedRow={selectedServer}
+          selectionMode="single"
         />
       </div>
 
       <div className="h-16 border-t border-border bg-card flex items-center justify-end gap-3 px-4">
-        <button className="px-6 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity">
+        <button
+          onClick={() => {
+            if (!selectedServer?.id) return;
+            apiService.setServerById(Number(selectedServer.id));
+          }}
+          disabled={!selectedServer?.id}
+          className="px-6 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           {t[language].getConfig}
         </button>
         <button className="px-6 py-2 bg-destructive text-destructive-foreground rounded hover:opacity-90 transition-opacity flex items-center gap-2">

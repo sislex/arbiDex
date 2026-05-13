@@ -1,26 +1,65 @@
 import { Plus } from 'lucide-react';
 import { DataTable, Column } from '../DataTable';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PoolForm } from '../forms/PoolForm';
 import { showDeleteToast } from '../../utils/toast';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
-import { selectFullPoolsData, selectPoolsMeta } from '../../store/db-config/dbConfig.selectors';
+import {
+  selectChainsMeta,
+  selectDexesMeta,
+  selectFullPoolsData,
+  selectPoolsMeta,
+  selectTokensMeta,
+} from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
+
+const DELETE_UNDO_MS = 5000;
 
 export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
   const poolsFromStore = useAppSelector(selectFullPoolsData);
   const poolsMeta = useAppSelector(selectPoolsMeta);
+  const tokensMeta = useAppSelector(selectTokensMeta);
+  const dexesMeta = useAppSelector(selectDexesMeta);
+  const chainsMeta = useAppSelector(selectChainsMeta);
   const [formOpen, setFormOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
-  const [deletedPoolIds, setDeletedPoolIds] = useState<Set<number>>(new Set());
+  const [pendingDeletePoolIds, setPendingDeletePoolIds] = useState<Set<number>>(new Set());
+  const deletePoolTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
-    if ((!poolsMeta.isLoaded || poolsMeta.error) && !poolsMeta.isLoading) {
+    const shouldInit =
+      !poolsMeta.isLoaded ||
+      !tokensMeta.isLoaded ||
+      !dexesMeta.isLoaded ||
+      !chainsMeta.isLoaded ||
+      Boolean(poolsMeta.error || tokensMeta.error || dexesMeta.error || chainsMeta.error);
+
+    const isAnyLoading =
+      poolsMeta.isLoading || tokensMeta.isLoading || dexesMeta.isLoading || chainsMeta.isLoading;
+
+    if (shouldInit && !isAnyLoading) {
       dispatch(dbConfigActions.initPoolsPage());
     }
-  }, [dispatch, poolsMeta.error, poolsMeta.isLoaded, poolsMeta.isLoading]);
+  }, [
+    chainsMeta.error,
+    chainsMeta.isLoaded,
+    chainsMeta.isLoading,
+    dexesMeta.error,
+    dexesMeta.isLoaded,
+    dexesMeta.isLoading,
+    dispatch,
+    poolsMeta.error,
+    poolsMeta.isLoaded,
+    poolsMeta.isLoading,
+    tokensMeta.error,
+    tokensMeta.isLoaded,
+    tokensMeta.isLoading,
+  ]);
+
+  const isPageLoading =
+    poolsMeta.isLoading || tokensMeta.isLoading || dexesMeta.isLoading || chainsMeta.isLoading;
 
   const pools = useMemo(() => {
     return poolsFromStore
@@ -39,8 +78,15 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         reserve1: pool.reserve1 ?? pool.reserve_1 ?? pool.token1Reserve ?? '',
         raw: pool,
       }))
-      .filter((pool) => !deletedPoolIds.has(pool.id));
-  }, [deletedPoolIds, poolsFromStore]);
+      .filter((pool) => !pendingDeletePoolIds.has(pool.id));
+  }, [pendingDeletePoolIds, poolsFromStore]);
+
+  useEffect(() => {
+    return () => {
+      deletePoolTimeoutsRef.current.forEach(clearTimeout);
+      deletePoolTimeoutsRef.current.clear();
+    };
+  }, []);
 
   const t = {
     en: {
@@ -134,21 +180,44 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         columns={columns}
         data={pools}
         language={language}
-        isLoading={poolsMeta.isLoading}
+        isLoading={isPageLoading}
         loadingText="Loading Pools…"
         onEdit={(row) => {
           setEditData(row.raw ?? row);
           setFormOpen(true);
         }}
         onDelete={(row) => {
-          setDeletedPoolIds(new Set([...deletedPoolIds, row.id]));
+          setPendingDeletePoolIds((prev) => new Set(prev).add(row.id));
+          const existing = deletePoolTimeoutsRef.current.get(row.id);
+          if (existing) clearTimeout(existing);
+
+          const tid = setTimeout(async () => {
+            deletePoolTimeoutsRef.current.delete(row.id);
+            try {
+              await apiService.deletingPool(row.id);
+              dispatch(dbConfigActions.refetchPoolsPageResources());
+            } finally {
+              setPendingDeletePoolIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
+            }
+          }, DELETE_UNDO_MS);
+          deletePoolTimeoutsRef.current.set(row.id, tid);
+
           showDeleteToast({
             itemName: `${row.token0Symbol}/${row.token1Symbol}`,
             itemType: language === 'en' ? 'Pool' : 'Пул',
             onUndo: () => {
-              const next = new Set(deletedPoolIds);
-              next.delete(row.id);
-              setDeletedPoolIds(next);
+              const scheduled = deletePoolTimeoutsRef.current.get(row.id);
+              if (scheduled) clearTimeout(scheduled);
+              deletePoolTimeoutsRef.current.delete(row.id);
+              setPendingDeletePoolIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
             },
             language,
           });

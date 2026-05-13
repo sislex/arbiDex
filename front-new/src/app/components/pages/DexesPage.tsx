@@ -1,15 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Plus } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { selectDexesDataResponse, selectDexesMeta } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
+import { apiService } from '../../services/api-service';
+import { DexForm } from '../forms/DexForm';
+
+const DELETE_UNDO_MS = 5000;
 
 export function DexesPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
   const dexesFromStore = useAppSelector(selectDexesDataResponse);
   const dexesMeta = useAppSelector(selectDexesMeta);
-  const [deletedDexIds, setDeletedDexIds] = useState<Set<number>>(new Set());
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingDexRaw, setEditingDexRaw] = useState<any>(null);
+  const [pendingDeleteDexIds, setPendingDeleteDexIds] = useState<Set<number>>(new Set());
+  const deleteDexTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if ((!dexesMeta.isLoaded || dexesMeta.error) && !dexesMeta.isLoading) {
@@ -24,8 +32,15 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
         name: dex.name ?? dex.dexName ?? '',
         raw: dex,
       }))
-      .filter((dex) => !deletedDexIds.has(dex.id));
-  }, [deletedDexIds, dexesFromStore]);
+      .filter((dex) => !pendingDeleteDexIds.has(dex.id));
+  }, [dexesFromStore, pendingDeleteDexIds]);
+
+  useEffect(() => {
+    return () => {
+      deleteDexTimeoutsRef.current.forEach(clearTimeout);
+      deleteDexTimeoutsRef.current.clear();
+    };
+  }, []);
 
   const t = {
     en: {
@@ -47,6 +62,19 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
 
   return (
     <div className="flex-1 flex flex-col bg-background">
+      <div className="h-14 border-b border-border flex items-center justify-end px-4">
+        <button
+          onClick={() => {
+            setEditingDexRaw(null);
+            setFormOpen(true);
+          }}
+          className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="text-sm">{language === 'en' ? 'Add DEX' : 'Добавить DEX'}</span>
+        </button>
+      </div>
+
       <DataTable
         title={t[language].tableTitle}
         columns={columns}
@@ -54,20 +82,72 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
         language={language}
         isLoading={dexesMeta.isLoading}
         loadingText="Loading DEXes…"
-        onEdit={(row) => console.log('Edit', row)}
+        onEdit={(row) => {
+          setEditingDexRaw(row.raw ?? row);
+          setFormOpen(true);
+        }}
         onDelete={(row) => {
-          setDeletedDexIds(new Set([...deletedDexIds, row.id]));
+          setPendingDeleteDexIds((prev) => new Set(prev).add(row.id));
+          const existing = deleteDexTimeoutsRef.current.get(row.id);
+          if (existing) clearTimeout(existing);
+
+          const tid = setTimeout(async () => {
+            deleteDexTimeoutsRef.current.delete(row.id);
+            try {
+              await apiService.deletingDex(row.id);
+              dispatch(dbConfigActions.refetchDexesData());
+            } finally {
+              setPendingDeleteDexIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
+            }
+          }, DELETE_UNDO_MS);
+          deleteDexTimeoutsRef.current.set(row.id, tid);
+
           showDeleteToast({
             itemName: row.name,
             itemType: 'DEX',
             onUndo: () => {
-              const next = new Set(deletedDexIds);
-              next.delete(row.id);
-              setDeletedDexIds(next);
+              const scheduled = deleteDexTimeoutsRef.current.get(row.id);
+              if (scheduled) clearTimeout(scheduled);
+              deleteDexTimeoutsRef.current.delete(row.id);
+              setPendingDeleteDexIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
             },
             language,
           });
         }}
+      />
+
+      <DexForm
+        open={formOpen}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingDexRaw(null);
+        }}
+        onSave={async (data) => {
+          const payload = { name: data.name.trim() };
+          if (editingDexRaw) {
+            const id = Number(editingDexRaw.dexId ?? editingDexRaw.id);
+            await apiService.editDex(id, payload);
+          } else {
+            await apiService.createDex(payload);
+          }
+          dispatch(dbConfigActions.refetchDexesData());
+        }}
+        initialData={
+          editingDexRaw
+            ? {
+                name: editingDexRaw.name ?? editingDexRaw.dexName ?? '',
+              }
+            : undefined
+        }
+        language={language}
       />
     </div>
   );

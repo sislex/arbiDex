@@ -14,10 +14,14 @@ import {
   selectCexChainsDataResponse,
   selectCexPairsMeta,
   selectCexPairsDataResponse,
+  selectChainsMeta,
+  selectDexesMeta,
   selectPairsMeta,
   selectPairsFullData,
+  selectPoolsMeta,
   selectPairsRating,
   selectTokenInList,
+  selectTokensMeta,
 } from '../../store/db-config/dbConfig.selectors';
 
 const DELETE_UNDO_MS = 5000;
@@ -36,6 +40,10 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const cexPairsMeta = useAppSelector(selectCexPairsMeta);
   const pairRatingData = useAppSelector(selectPairsRating);
   const tokenInList = useAppSelector(selectTokenInList);
+  const poolsMeta = useAppSelector(selectPoolsMeta);
+  const tokensMeta = useAppSelector(selectTokensMeta);
+  const dexesMeta = useAppSelector(selectDexesMeta);
+  const chainsMeta = useAppSelector(selectChainsMeta);
   const [activeTab, setActiveTab] = useState('pairs');
   const [selectedTokenIn, setSelectedTokenIn] = useState('');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -279,8 +287,14 @@ export function PairsPage({ language, type }: PairsPageProps) {
       : dexPairs.filter((p) => !pendingDeleteDexPairIds.has(p.id));
   const tableColumns = type === 'cex' ? cexPairsColumns : dexPairsColumns;
   const showPairsTable = type === 'cex' || activeTab === 'pairs';
-  const isTableLoading = type === 'cex' ? cexPairsMeta.isLoading : pairsMeta.isLoading;
-  const isRatingLoading = type === 'dex' && activeTab === 'rating' && pairsMeta.isLoading;
+  const isDexPageLoading =
+    pairsMeta.isLoading ||
+    poolsMeta.isLoading ||
+    tokensMeta.isLoading ||
+    dexesMeta.isLoading ||
+    chainsMeta.isLoading;
+  const isTableLoading = type === 'cex' ? cexPairsMeta.isLoading : isDexPageLoading;
+  const isRatingLoading = type === 'dex' && activeTab === 'rating' && isDexPageLoading;
 
   return (
     <div className="flex-1 flex flex-col bg-background">

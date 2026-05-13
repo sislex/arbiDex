@@ -10,6 +10,7 @@ import {
   type GridApi,
   type ModelUpdatedEvent,
   type RowClickedEvent,
+  type RowDoubleClickedEvent,
   type RowClassParams,
 } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -39,6 +40,7 @@ interface DataTableProps {
   onDelete?: (row: any) => void;
   extraActions?: (row: any) => React.ReactNode;
   onRowClick?: (row: any) => void;
+  onRowDoubleClick?: (row: any) => void;
   selectedRow?: any;
   selectionMode?: 'none' | 'single' | 'multiple';
   onFilteredDataChange?: (filteredData: any[]) => void;
@@ -57,6 +59,7 @@ export function DataTable({
   onDelete,
   extraActions,
   onRowClick,
+  onRowDoubleClick,
   selectedRow,
   selectionMode = 'none',
   onFilteredDataChange,
@@ -205,6 +208,15 @@ export function DataTable({
     [onRowClick],
   );
 
+  const handleRowDoubleClicked = useCallback(
+    (event: RowDoubleClickedEvent) => {
+      if (event.data) {
+        onRowDoubleClick?.(event.data);
+      }
+    },
+    [onRowDoubleClick],
+  );
+
   const getRowClass = useCallback(
     (params: RowClassParams) => {
       return selectedRow && params.data === selectedRow ? 'ag-row-selected-local' : '';
@@ -256,6 +268,7 @@ export function DataTable({
             }}
             onModelUpdated={handleModelUpdated}
             onRowClicked={handleRowClicked}
+            onRowDoubleClicked={handleRowDoubleClicked}
           />
         )}
       </div>

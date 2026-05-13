@@ -1,5 +1,5 @@
-import { ChevronRight } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { ChevronRight, Plus } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
@@ -8,23 +8,32 @@ import {
   selectPairsDataResponse,
   selectQuotesMeta,
   selectQuotesDataResponse,
+  selectTokensMeta,
   selectTokensDataResponse,
 } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
+import { apiService } from '../../services/api-service';
+import { QuoteForm } from '../forms/QuoteForm';
 
 interface QuotesListPageProps {
   language: 'en' | 'ru';
   onQuoteClick: (quoteId: number, quoteName: string) => void;
 }
 
+const DELETE_UNDO_MS = 5000;
+
 export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) {
   const dispatch = useAppDispatch();
   const quotesFromStore = useAppSelector(selectQuotesDataResponse);
   const quotesMeta = useAppSelector(selectQuotesMeta);
   const pairsMeta = useAppSelector(selectPairsMeta);
+  const tokensMeta = useAppSelector(selectTokensMeta);
   const tokens = useAppSelector(selectTokensDataResponse);
   const pairs = useAppSelector(selectPairsDataResponse);
-  const [deletedQuoteIds, setDeletedQuoteIds] = useState<Set<number>>(new Set());
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingQuoteRaw, setEditingQuoteRaw] = useState<any>(null);
+  const [pendingDeleteQuoteIds, setPendingDeleteQuoteIds] = useState<Set<number>>(new Set());
+  const deleteQuoteTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if ((!quotesMeta.isLoaded || quotesMeta.error) && !quotesMeta.isLoading) {
@@ -35,6 +44,19 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
       dispatch(dbConfigActions.setPairsData());
     }
   }, [dispatch, pairsMeta.error, pairsMeta.isLoaded, pairsMeta.isLoading, quotesMeta.error, quotesMeta.isLoaded, quotesMeta.isLoading]);
+
+  useEffect(() => {
+    if ((!tokensMeta.isLoaded || tokensMeta.error) && !tokensMeta.isLoading) {
+      dispatch(dbConfigActions.setTokensData());
+    }
+  }, [dispatch, tokensMeta.error, tokensMeta.isLoaded, tokensMeta.isLoading]);
+
+  useEffect(() => {
+    return () => {
+      deleteQuoteTimeoutsRef.current.forEach(clearTimeout);
+      deleteQuoteTimeoutsRef.current.clear();
+    };
+  }, []);
 
   const tokenById = useMemo(() => {
     return new Map(tokens.map((token: any) => [token.tokenId ?? token.id, token]));
@@ -68,8 +90,8 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
           raw: quote,
         };
       })
-      .filter((quote) => !deletedQuoteIds.has(quote.id));
-  }, [deletedQuoteIds, pairCountByQuoteId, quotesFromStore, tokenById]);
+      .filter((quote) => !pendingDeleteQuoteIds.has(quote.id));
+  }, [pairCountByQuoteId, pendingDeleteQuoteIds, quotesFromStore, tokenById]);
 
   const t = {
     en: {
@@ -106,6 +128,19 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
 
   return (
     <div className="flex-1 flex flex-col bg-background">
+      <div className="h-14 border-b border-border flex items-center justify-end px-4">
+        <button
+          onClick={() => {
+            setEditingQuoteRaw(null);
+            setFormOpen(true);
+          }}
+          className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="text-sm">{language === 'en' ? 'Add Quote' : 'Добавить Quote'}</span>
+        </button>
+      </div>
+
       <DataTable
         title={t[language].tableTitle}
         columns={columns}
@@ -113,16 +148,42 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
         language={language}
         isLoading={quotesMeta.isLoading}
         loadingText="Loading Quotes…"
-        onEdit={(row) => console.log('Edit', row)}
+        onEdit={(row) => {
+          setEditingQuoteRaw(row.raw ?? row);
+          setFormOpen(true);
+        }}
         onDelete={(row) => {
-          setDeletedQuoteIds(new Set([...deletedQuoteIds, row.id]));
+          setPendingDeleteQuoteIds((prev) => new Set(prev).add(row.id));
+          const existing = deleteQuoteTimeoutsRef.current.get(row.id);
+          if (existing) clearTimeout(existing);
+
+          const tid = setTimeout(async () => {
+            deleteQuoteTimeoutsRef.current.delete(row.id);
+            try {
+              await apiService.deletingQuote(row.id);
+              dispatch(dbConfigActions.refetchQuotesListPageResources());
+            } finally {
+              setPendingDeleteQuoteIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
+            }
+          }, DELETE_UNDO_MS);
+          deleteQuoteTimeoutsRef.current.set(row.id, tid);
+
           showDeleteToast({
             itemName: row.quoteSource || String(row.id),
             itemType: language === 'en' ? 'Quote' : 'Quote',
             onUndo: () => {
-              const next = new Set(deletedQuoteIds);
-              next.delete(row.id);
-              setDeletedQuoteIds(next);
+              const scheduled = deleteQuoteTimeoutsRef.current.get(row.id);
+              if (scheduled) clearTimeout(scheduled);
+              deleteQuoteTimeoutsRef.current.delete(row.id);
+              setPendingDeleteQuoteIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
             },
             language,
           });
@@ -139,7 +200,47 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
         )}
-        onRowClick={(row) => onQuoteClick(row.id, row.quoteSource || String(row.id))}
+        onRowDoubleClick={(row) => onQuoteClick(row.id, row.quoteSource || String(row.id))}
+      />
+
+      <QuoteForm
+        open={formOpen}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingQuoteRaw(null);
+        }}
+        onSave={async (data) => {
+          const payload = {
+            amount: data.amount.trim(),
+            blockTag: 'latest',
+            side: 'exactIn',
+            quoteSource: data.quoteSource.trim(),
+            token: Number(data.quoteTokenId),
+          };
+          if (editingQuoteRaw) {
+            const id = Number(editingQuoteRaw.quoteId ?? editingQuoteRaw.id);
+            await apiService.editQuote(id, payload);
+          } else {
+            await apiService.createQuote(payload);
+          }
+          dispatch(dbConfigActions.refetchQuotesListPageResources());
+        }}
+        initialData={
+          editingQuoteRaw
+            ? {
+                amount: String(editingQuoteRaw.amount ?? ''),
+                blockTag: 'latest',
+                side: 'exactIn',
+                quoteSource: String(
+                  editingQuoteRaw.quoteSource ?? editingQuoteRaw.quote_source ?? editingQuoteRaw.source ?? '',
+                ),
+                quoteTokenId: String(
+                  editingQuoteRaw.token ?? editingQuoteRaw.tokenId ?? editingQuoteRaw.quoteTokenId ?? editingQuoteRaw.quote_token_id ?? '',
+                ),
+              }
+            : undefined
+        }
+        language={language}
       />
     </div>
   );

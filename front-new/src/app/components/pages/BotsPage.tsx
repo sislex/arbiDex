@@ -1,5 +1,6 @@
 import { DataTable, Column } from '../DataTable';
-import { useEffect, useMemo, useState } from 'react';
+import { Plus } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
@@ -15,6 +16,10 @@ import {
   selectServersDataResponse,
 } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
+import { apiService } from '../../services/api-service';
+import { BotForm } from '../forms/BotForm';
+
+const DELETE_UNDO_MS = 5000;
 
 export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBotClick?: (bot: any) => void }) {
   const dispatch = useAppDispatch();
@@ -29,7 +34,10 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
   const servers = useAppSelector(selectServersDataResponse);
   const pairs = useAppSelector(selectPairsDataResponse);
   const [selectedBot, setSelectedBot] = useState<any>(null);
-  const [deletedBotIds, setDeletedBotIds] = useState<Set<number>>(new Set());
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingBotRaw, setEditingBotRaw] = useState<any>(null);
+  const [pendingDeleteBotIds, setPendingDeleteBotIds] = useState<Set<number>>(new Set());
+  const deleteBotTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if (
@@ -100,8 +108,15 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
           raw: bot,
         };
       })
-      .filter((bot) => !deletedBotIds.has(bot.id));
-  }, [botsFromStore, cexJobById, deletedBotIds, jobById, pairCountByJobId, serverById]);
+      .filter((bot) => !pendingDeleteBotIds.has(bot.id));
+  }, [botsFromStore, cexJobById, jobById, pairCountByJobId, pendingDeleteBotIds, serverById]);
+
+  useEffect(() => {
+    return () => {
+      deleteBotTimeoutsRef.current.forEach(clearTimeout);
+      deleteBotTimeoutsRef.current.clear();
+    };
+  }, []);
 
   const t = {
     en: {
@@ -135,6 +150,19 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
 
   return (
     <div className="flex-1 flex flex-col bg-background">
+      <div className="h-14 border-b border-border flex items-center justify-end px-4">
+        <button
+          onClick={() => {
+            setEditingBotRaw(null);
+            setFormOpen(true);
+          }}
+          className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="text-sm">{language === 'en' ? 'Add Bot' : 'Добавить Bot'}</span>
+        </button>
+      </div>
+
       <DataTable
         title={t[language].tableTitle}
         columns={columns}
@@ -142,26 +170,102 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
         language={language}
         isLoading={botsMeta.isLoading}
         loadingText="Loading Bots…"
-        onEdit={(row) => console.log('Edit', row)}
+        onEdit={(row) => {
+          setEditingBotRaw(row.raw ?? row);
+          setFormOpen(true);
+        }}
         onDelete={(row) => {
-          setDeletedBotIds(new Set([...deletedBotIds, row.id]));
+          setPendingDeleteBotIds((prev) => new Set(prev).add(row.id));
+          const existing = deleteBotTimeoutsRef.current.get(row.id);
+          if (existing) clearTimeout(existing);
+
+          const tid = setTimeout(async () => {
+            deleteBotTimeoutsRef.current.delete(row.id);
+            try {
+              await apiService.deletingBot(row.id);
+              dispatch(dbConfigActions.refetchBotsListPageResources());
+            } finally {
+              setPendingDeleteBotIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
+            }
+          }, DELETE_UNDO_MS);
+          deleteBotTimeoutsRef.current.set(row.id, tid);
+
           showDeleteToast({
             itemName: row.name,
             itemType: language === 'en' ? 'Bot' : 'Bot',
             onUndo: () => {
-              const next = new Set(deletedBotIds);
-              next.delete(row.id);
-              setDeletedBotIds(next);
+              const scheduled = deleteBotTimeoutsRef.current.get(row.id);
+              if (scheduled) clearTimeout(scheduled);
+              deleteBotTimeoutsRef.current.delete(row.id);
+              setPendingDeleteBotIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
             },
             language,
           });
         }}
-        onRowClick={(row) => {
+        onRowDoubleClick={(row) => {
           setSelectedBot(row);
           onBotClick?.(row);
         }}
         selectedRow={selectedBot}
         selectionMode="single"
+      />
+
+      <BotForm
+        open={formOpen}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingBotRaw(null);
+        }}
+        onSave={async (data) => {
+          const payload = {
+            botName: data.botName.trim(),
+            description: data.description.trim(),
+            jobId: data.mode === 'DEX' ? Number(data.dexJobId) : null,
+            cexJobId: data.mode === 'CEX' ? Number(data.cexJobId) : null,
+            serverId: Number(data.serverId),
+            paused: data.paused,
+            isRepeat: data.isRepeat,
+            delayBetweenRepeat: Number(data.delayBetweenRepeat),
+            maxJobs: Number(data.maxJobs),
+            maxErrors: Number(data.maxErrors),
+            timeoutMs: Number(data.timeoutMs),
+          };
+
+          if (editingBotRaw) {
+            const id = Number(editingBotRaw.botId ?? editingBotRaw.id);
+            await apiService.editBot(id, payload);
+          } else {
+            await apiService.createBot(payload);
+          }
+          dispatch(dbConfigActions.refetchBotsListPageResources());
+        }}
+        initialData={
+          editingBotRaw
+            ? {
+                botName: editingBotRaw.botName ?? editingBotRaw.name ?? '',
+                description: editingBotRaw.description ?? '',
+                mode: editingBotRaw.cexJobId ? 'CEX' : 'DEX',
+                dexJobId: editingBotRaw.jobId ? String(editingBotRaw.jobId) : '',
+                cexJobId: editingBotRaw.cexJobId ? String(editingBotRaw.cexJobId) : '',
+                serverId: String(editingBotRaw.serverId ?? ''),
+                paused: Boolean(editingBotRaw.paused),
+                isRepeat: Boolean(editingBotRaw.isRepeat),
+                delayBetweenRepeat: String(editingBotRaw.delayBetweenRepeat ?? 5000),
+                maxJobs: String(editingBotRaw.maxJobs ?? 99999999),
+                maxErrors: String(editingBotRaw.maxErrors ?? 10),
+                timeoutMs: String(editingBotRaw.timeoutMs ?? 99999999),
+              }
+            : undefined
+        }
+        language={language}
       />
     </div>
   );

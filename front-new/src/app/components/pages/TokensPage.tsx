@@ -1,10 +1,14 @@
 import { Plus } from 'lucide-react';
 import { DataTable, Column } from '../DataTable';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { showDeleteToast } from '../../utils/toast';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { selectTokensFullDataResponse, selectTokensMeta } from '../../store/db-config/dbConfig.selectors';
+import { apiService } from '../../services/api-service';
+import { DexTokenForm } from '../forms/DexTokenForm';
+
+const DELETE_UNDO_MS = 5000;
 
 export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
@@ -12,6 +16,10 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   const tokensMeta = useAppSelector(selectTokensMeta);
   const [selectedRow, setSelectedRow] = useState(null);
   const [tokens, setTokens] = useState<any[]>([]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingTokenRaw, setEditingTokenRaw] = useState<any>(null);
+  const [pendingDeleteTokenIds, setPendingDeleteTokenIds] = useState<Set<number>>(new Set());
+  const deleteTokenTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if ((!tokensMeta.isLoaded || tokensMeta.error) && !tokensMeta.isLoading) {
@@ -34,6 +42,13 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
     setTokens(mappedTokens);
   }, [tokensFromStore]);
 
+  useEffect(() => {
+    return () => {
+      deleteTokenTimeoutsRef.current.forEach(clearTimeout);
+      deleteTokenTimeoutsRef.current.clear();
+    };
+  }, []);
+
   const t = {
     en: {
       add: 'Add Token',
@@ -47,6 +62,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       isChecked: 'Is Checked',
       balance: 'Balance',
       tableTitle: 'Tokens',
+      back: 'BACK',
     },
     ru: {
       add: 'Добавить токен',
@@ -60,6 +76,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       isChecked: 'Is Checked',
       balance: 'Balance',
       tableTitle: 'Токены',
+      back: 'НАЗАД',
     },
   };
 
@@ -110,7 +127,13 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   return (
     <div className="flex-1 flex flex-col bg-background">
       <div className="h-14 border-b border-border flex items-center justify-end px-4">
-        <button className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity">
+        <button
+          onClick={() => {
+            setEditingTokenRaw(null);
+            setFormOpen(true);
+          }}
+          className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+        >
           <Plus className="w-4 h-4" />
           <span className="text-sm">{t[language].add}</span>
         </button>
@@ -119,22 +142,91 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       <DataTable
         title={t[language].tableTitle}
         columns={columns}
-        data={tokens}
+        data={tokens.filter((token) => !pendingDeleteTokenIds.has(token.id))}
         language={language}
         isLoading={tokensMeta.isLoading}
         loadingText="Loading Tokens…"
-        onEdit={(row) => console.log('Edit', row)}
+        onEdit={(row) => {
+          setEditingTokenRaw(
+            tokensFromStore.find((token: any) => Number(token.tokenId ?? token.id) === Number(row.id)) ?? null,
+          );
+          setFormOpen(true);
+        }}
         onDelete={(row) => {
-          setTokens(tokens.filter((token) => token.id !== row.id));
+          setPendingDeleteTokenIds((prev) => new Set(prev).add(row.id));
+          const existing = deleteTokenTimeoutsRef.current.get(row.id);
+          if (existing) clearTimeout(existing);
+
+          const tid = setTimeout(async () => {
+            deleteTokenTimeoutsRef.current.delete(row.id);
+            try {
+              await apiService.deletingToken(row.id);
+              dispatch(dbConfigActions.refetchTokensListPageResources());
+            } finally {
+              setPendingDeleteTokenIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
+            }
+          }, DELETE_UNDO_MS);
+          deleteTokenTimeoutsRef.current.set(row.id, tid);
+
           showDeleteToast({
             itemName: row.symbol,
             itemType: language === 'en' ? 'Token' : 'Токен',
-            onUndo: () => setTokens([...tokens]),
+            onUndo: () => {
+              const scheduled = deleteTokenTimeoutsRef.current.get(row.id);
+              if (scheduled) clearTimeout(scheduled);
+              deleteTokenTimeoutsRef.current.delete(row.id);
+              setPendingDeleteTokenIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
+            },
             language,
           });
         }}
         onRowClick={setSelectedRow}
         selectedRow={selectedRow}
+      />
+
+      <DexTokenForm
+        open={formOpen}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingTokenRaw(null);
+        }}
+        onSave={async (data) => {
+          const payload = {
+            chainId: Number(data.chainId),
+            address: data.address.trim(),
+            symbol: data.symbol.trim(),
+            tokenName: data.tokenName.trim(),
+            decimals: Number(data.decimals),
+          };
+
+          if (editingTokenRaw) {
+            const id = Number(editingTokenRaw.tokenId ?? editingTokenRaw.id);
+            await apiService.editToken(id, payload);
+          } else {
+            await apiService.createToken(payload);
+          }
+          dispatch(dbConfigActions.refetchTokensListPageResources());
+        }}
+        initialData={
+          editingTokenRaw
+            ? {
+                chainId: String(editingTokenRaw.chainId ?? ''),
+                address: editingTokenRaw.address ?? '',
+                symbol: editingTokenRaw.symbol ?? '',
+                tokenName: editingTokenRaw.tokenName ?? '',
+                decimals: String(editingTokenRaw.decimals ?? ''),
+              }
+            : undefined
+        }
+        language={language}
       />
     </div>
   );

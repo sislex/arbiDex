@@ -92,6 +92,7 @@ export default function App() {
     if (activePage === 'quotes' && selectedQuote) {
       return (
         <QuoteRelationsPage
+          quoteId={selectedQuote.id}
           quoteName={selectedQuote.name}
           language={language}
           onBack={() => setSelectedQuote(null)}

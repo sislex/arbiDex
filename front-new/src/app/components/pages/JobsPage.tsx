@@ -2,6 +2,7 @@ import { Play, Plus } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { CexJobForm } from '../forms/CexJobForm';
+import { DexJobForm } from '../forms/DexJobForm';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
@@ -50,7 +51,9 @@ export function JobsPage({ language, type }: JobsPageProps) {
   const [cexWorkStatus, setCexWorkStatus] = useState<Record<number, boolean | null>>({});
   const [jobFormOpen, setJobFormOpen] = useState(false);
   const [editingJobRaw, setEditingJobRaw] = useState<any>(null);
+  const [pendingDeleteDexJobIds, setPendingDeleteDexJobIds] = useState<Set<number>>(new Set());
   const [pendingDeleteCexJobIds, setPendingDeleteCexJobIds] = useState<Set<number>>(new Set());
+  const deleteDexJobTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   const deleteCexJobTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
@@ -75,6 +78,8 @@ export function JobsPage({ language, type }: JobsPageProps) {
 
   useEffect(() => {
     return () => {
+      deleteDexJobTimeoutsRef.current.forEach(clearTimeout);
+      deleteDexJobTimeoutsRef.current.clear();
       deleteCexJobTimeoutsRef.current.forEach(clearTimeout);
       deleteCexJobTimeoutsRef.current.clear();
     };
@@ -106,7 +111,8 @@ export function JobsPage({ language, type }: JobsPageProps) {
   const cexChainNameById = useMemo(() => buildCexChainNameById(cexChains), [cexChains]);
 
   const dexJobs = useMemo(() => {
-    return dexJobsFromStore.map((job: any) => {
+    return dexJobsFromStore
+      .map((job: any) => {
       const jobId = job.jobId ?? job.id;
       return {
         id: jobId,
@@ -115,11 +121,12 @@ export function JobsPage({ language, type }: JobsPageProps) {
         chain: job.chainName ?? chainById.get(job.chainId) ?? job.chainId ?? '',
         rpcUrl: job.rpcUrl ?? rpcById.get(job.rpcUrlId) ?? job.rpcUrlId ?? '',
         pairsCount: job.pairsCount ?? job.pairs_count ?? pairCountByJobId.get(jobId) ?? 0,
-        additionalData: formatExtra(job.additionalData ?? job.additional_data),
+        additionalData: formatExtra(job.extraSettings ?? job.additionalData ?? job.additional_data),
         raw: job,
       };
-    });
-  }, [chainById, dexJobsFromStore, pairCountByJobId, rpcById]);
+      })
+      .filter((row) => !pendingDeleteDexJobIds.has(row.id));
+  }, [chainById, dexJobsFromStore, pairCountByJobId, pendingDeleteDexJobIds, rpcById]);
 
   const cexJobs = useMemo(() => {
     return cexJobsFromStore.map((job: any) => {
@@ -159,10 +166,11 @@ export function JobsPage({ language, type }: JobsPageProps) {
       token0: 'Token 0',
       token1: 'Token 1',
       isWork: 'is work?',
-      addJob: 'Add job',
+      addJob: type === 'cex' ? 'Add CEX job' : 'Add DEX job',
       tableTitleCex: 'CEX jobs',
       tableTitleDex: 'DEX jobs',
       checkAction: 'Check',
+      deleteType: 'Job',
     },
     ru: {
       jobId: 'Job ID',
@@ -176,10 +184,11 @@ export function JobsPage({ language, type }: JobsPageProps) {
       token0: 'Token 0',
       token1: 'Token 1',
       isWork: 'is work?',
-      addJob: 'Добавить джобу',
+      addJob: type === 'cex' ? 'Добавить CEX джобу' : 'Добавить DEX джобу',
       tableTitleCex: 'CEX джобы',
       tableTitleDex: 'DEX джобы',
       checkAction: 'Проверить',
+      deleteType: 'Джоба',
     },
   };
 
@@ -291,23 +300,58 @@ export function JobsPage({ language, type }: JobsPageProps) {
     });
   };
 
+  const handleDeleteDexJob = (row: any) => {
+    setPendingDeleteDexJobIds((prev) => new Set(prev).add(row.id));
+    const existing = deleteDexJobTimeoutsRef.current.get(row.id);
+    if (existing) clearTimeout(existing);
+
+    const tid = setTimeout(async () => {
+      deleteDexJobTimeoutsRef.current.delete(row.id);
+      try {
+        await apiService.deletingJob(row.id);
+        dispatch(dbConfigActions.refetchJobsListPageResources());
+      } finally {
+        setPendingDeleteDexJobIds((prev) => {
+          const next = new Set(prev);
+          next.delete(row.id);
+          return next;
+        });
+      }
+    }, DELETE_UNDO_MS);
+    deleteDexJobTimeoutsRef.current.set(row.id, tid);
+
+    showDeleteToast({
+      itemName: row.jobType ? `${row.jobType} (#${row.id})` : String(row.id),
+      itemType: t[language].deleteType,
+      onUndo: () => {
+        const scheduled = deleteDexJobTimeoutsRef.current.get(row.id);
+        if (scheduled) clearTimeout(scheduled);
+        deleteDexJobTimeoutsRef.current.delete(row.id);
+        setPendingDeleteDexJobIds((prev) => {
+          const next = new Set(prev);
+          next.delete(row.id);
+          return next;
+        });
+      },
+      language,
+    });
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-background">
-      {type === 'cex' && (
-        <div className="h-14 border-b border-border flex items-center justify-end px-4">
-          <button
-            type="button"
-            onClick={() => {
-              setEditingJobRaw(null);
-              setJobFormOpen(true);
-            }}
-            className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="text-sm">{t[language].addJob}</span>
-          </button>
-        </div>
-      )}
+      <div className="h-14 border-b border-border flex items-center justify-end px-4">
+        <button
+          type="button"
+          onClick={() => {
+            setEditingJobRaw(null);
+            setJobFormOpen(true);
+          }}
+          className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="text-sm">{t[language].addJob}</span>
+        </button>
+      </div>
 
       <DataTable
         title={type === 'cex' ? t[language].tableTitleCex : t[language].tableTitleDex}
@@ -316,15 +360,17 @@ export function JobsPage({ language, type }: JobsPageProps) {
         language={language}
         isLoading={type === 'cex' ? cexJobsMeta.isLoading : jobsMeta.isLoading}
         loadingText={type === 'cex' ? 'Loading CEX Jobs…' : 'Loading DEX Jobs…'}
-        onEdit={
-          type === 'cex'
-            ? (row) => {
-                setEditingJobRaw(row.raw);
-                setJobFormOpen(true);
-              }
-            : undefined
-        }
-        onDelete={type === 'cex' ? handleDeleteCexJob : undefined}
+        onEdit={(row) => {
+          setEditingJobRaw(row.raw);
+          setJobFormOpen(true);
+        }}
+        onDelete={type === 'cex' ? handleDeleteCexJob : handleDeleteDexJob}
+        onRowDoubleClick={(row) => {
+          if (type === 'dex') {
+            setEditingJobRaw(row.raw);
+            setJobFormOpen(true);
+          }
+        }}
         extraActions={
           type === 'cex'
             ? (row) => (
@@ -376,6 +422,46 @@ export function JobsPage({ language, type }: JobsPageProps) {
                   ),
                   jobType: editingJobRaw.job_type ?? editingJobRaw.jobType ?? '',
                   description: editingJobRaw.description ?? '',
+                }
+              : undefined
+          }
+          language={language}
+        />
+      )}
+      {type === 'dex' && (
+        <DexJobForm
+          open={jobFormOpen}
+          onClose={() => {
+            setJobFormOpen(false);
+            setEditingJobRaw(null);
+          }}
+          onSave={async (data) => {
+            const payload = {
+              chainId: Number(data.chainId),
+              rpcUrlId: Number(data.rpcUrlId),
+              jobType: data.jobType.trim(),
+              description: data.description.trim(),
+              extraSettings: data.additionalData.trim(),
+            };
+
+            if (editingJobRaw) {
+              const id = Number(editingJobRaw.jobId ?? editingJobRaw.id);
+              await apiService.editJob(id, payload);
+            } else {
+              await apiService.createJob(payload);
+            }
+            dispatch(dbConfigActions.refetchJobsListPageResources());
+          }}
+          initialData={
+            editingJobRaw
+              ? {
+                  chainId: String(editingJobRaw.chainId ?? ''),
+                  rpcUrlId: String(editingJobRaw.rpcUrlId ?? ''),
+                  jobType: editingJobRaw.jobType ?? editingJobRaw.job_type ?? '',
+                  description: editingJobRaw.description ?? '',
+                  additionalData: String(
+                    editingJobRaw.extraSettings ?? editingJobRaw.additionalData ?? editingJobRaw.additional_data ?? '',
+                  ),
                 }
               : undefined
           }
