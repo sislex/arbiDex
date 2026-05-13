@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { DataTable, Column } from '../DataTable';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChainForm } from '../forms/ChainForm';
 import { showDeleteToast } from '../../utils/toast';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -13,6 +14,8 @@ import {
   selectChainsMeta,
 } from '../../store/db-config/dbConfig.selectors';
 
+const DELETE_UNDO_MS = 5000;
+
 export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'dex' | 'cex' }) {
   const dispatch = useAppDispatch();
   const dexChainsFromStore = useAppSelector(selectChainsDataResponse);
@@ -20,8 +23,11 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
   const chainsMeta = useAppSelector(selectChainsMeta);
   const cexChainsMeta = useAppSelector(selectCexChainsMeta);
   const [formOpen, setFormOpen] = useState(false);
-  const [editData, setEditData] = useState<any>(null);
-  const [deletedChainIds, setDeletedChainIds] = useState<Set<number>>(new Set());
+  const [formInitial, setFormInitial] = useState<{ id: string; name: string } | null>(null);
+  /** Raw entity from API when editing (DEX: chain row, CEX: cex-chain row). */
+  const [editingRaw, setEditingRaw] = useState<any>(null);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<number>>(new Set());
+  const deleteTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if (type === 'cex') {
@@ -45,6 +51,13 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
     type,
   ]);
 
+  useEffect(() => {
+    return () => {
+      deleteTimeoutsRef.current.forEach(clearTimeout);
+      deleteTimeoutsRef.current.clear();
+    };
+  }, []);
+
   const chains = useMemo(() => {
     const chainsFromStore = type === 'cex' ? cexChainsFromStore : dexChainsFromStore;
     return chainsFromStore
@@ -53,8 +66,8 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
         name: chain.name ?? chain.chainName ?? '',
         raw: chain,
       }))
-      .filter((chain) => !deletedChainIds.has(chain.id));
-  }, [cexChainsFromStore, deletedChainIds, dexChainsFromStore, type]);
+      .filter((chain) => !pendingDeleteIds.has(chain.id));
+  }, [cexChainsFromStore, dexChainsFromStore, pendingDeleteIds, type]);
 
   const t = {
     en: {
@@ -74,31 +87,35 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
     { key: 'name', label: t[language].name, sortable: true, filterable: true },
   ];
 
-  const handleSave = async (data: any) => {
+  const handleSave = async (data: { id: string; name: string }) => {
     try {
-      const raw = editData?.__raw;
-      const idFromRaw = raw?.chainId ?? raw?.id;
-      const idParsed = Number(data?.id);
-      const hasNumericId = Number.isFinite(idFromRaw) || Number.isFinite(idParsed);
-      const editId = Number.isFinite(idFromRaw) ? Number(idFromRaw) : Number(idParsed);
+      const isEdit = Boolean(editingRaw);
 
       if (type === 'cex') {
-        if (raw || (hasNumericId && editId)) {
-          await apiService.editCexChain(editId, { name: data?.name });
+        if (isEdit) {
+          const id = Number(editingRaw.id ?? editingRaw.chainId);
+          await apiService.editCexChain(id, { name: data.name });
         } else {
-          await apiService.createCexChain(Number.isFinite(idParsed) ? { chainId: idParsed, name: data?.name } : { id: data?.id, name: data?.name });
+          await apiService.createCexChain({ name: data.name });
         }
         dispatch(dbConfigActions.setCexChainsData());
       } else {
-        if (raw || (hasNumericId && editId)) {
-          await apiService.editChain(editId, { name: data?.name });
+        const newChainId = Number(data.id);
+        if (!Number.isFinite(newChainId)) {
+          return;
+        }
+
+        if (isEdit) {
+          const currentId = Number(editingRaw.chainId ?? editingRaw.id);
+          await apiService.editChain(currentId, { name: data.name, newChainId });
         } else {
-          await apiService.createChain(Number.isFinite(idParsed) ? { chainId: idParsed, name: data?.name } : { id: data?.id, name: data?.name });
+          await apiService.createChain({ name: data.name, newChainId });
         }
         dispatch(dbConfigActions.setChainsData());
       }
     } finally {
-      setEditData(null);
+      setFormInitial(null);
+      setEditingRaw(null);
     }
   };
 
@@ -107,7 +124,8 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
       <div className="h-14 border-b border-border flex items-center justify-end px-4">
         <button
           onClick={() => {
-            setEditData(null);
+            setEditingRaw(null);
+            setFormInitial(null);
             setFormOpen(true);
           }}
           className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
@@ -124,18 +142,50 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
         isLoading={type === 'cex' ? cexChainsMeta.isLoading : chainsMeta.isLoading}
         loadingText={type === 'cex' ? 'Loading CEX Chains…' : 'Loading DEX Chains…'}
         onEdit={(row) => {
-          setEditData({ id: String(row.id ?? ''), name: row.name ?? '', __raw: row.raw ?? row });
+          setEditingRaw(row.raw ?? row);
+          setFormInitial({ id: String(row.id ?? ''), name: row.name ?? '' });
           setFormOpen(true);
         }}
         onDelete={(row) => {
-          setDeletedChainIds(new Set([...deletedChainIds, row.id]));
+          setPendingDeleteIds((prev) => new Set(prev).add(row.id));
+          const existing = deleteTimeoutsRef.current.get(row.id);
+          if (existing) clearTimeout(existing);
+
+          const tid = setTimeout(async () => {
+            deleteTimeoutsRef.current.delete(row.id);
+            try {
+              if (type === 'cex') {
+                await apiService.deletingCexChain(row.id);
+                dispatch(dbConfigActions.setCexChainsData());
+              } else {
+                await apiService.deletingChain(row.id);
+                dispatch(dbConfigActions.setChainsData());
+              }
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              toast.error(message);
+            } finally {
+              setPendingDeleteIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
+            }
+          }, DELETE_UNDO_MS);
+          deleteTimeoutsRef.current.set(row.id, tid);
+
           showDeleteToast({
             itemName: row.name,
             itemType: language === 'en' ? 'Chain' : 'Сеть',
             onUndo: () => {
-              const next = new Set(deletedChainIds);
-              next.delete(row.id);
-              setDeletedChainIds(next);
+              const scheduled = deleteTimeoutsRef.current.get(row.id);
+              if (scheduled) clearTimeout(scheduled);
+              deleteTimeoutsRef.current.delete(row.id);
+              setPendingDeleteIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
             },
             language,
           });
@@ -146,11 +196,13 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
         open={formOpen}
         onClose={() => {
           setFormOpen(false);
-          setEditData(null);
+          setFormInitial(null);
+          setEditingRaw(null);
         }}
         onSave={handleSave}
-        initialData={editData}
+        initialData={formInitial ?? undefined}
         language={language}
+        chainKind={type === 'cex' ? 'cex' : 'dex'}
       />
     </div>
   );

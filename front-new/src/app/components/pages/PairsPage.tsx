@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Tabs } from '../Tabs';
 import { DataTable, Column } from '../DataTable';
 import { Autocomplete } from '../Autocomplete';
@@ -20,6 +20,8 @@ import {
   selectTokenInList,
 } from '../../store/db-config/dbConfig.selectors';
 
+const DELETE_UNDO_MS = 5000;
+
 interface PairsPageProps {
   language: 'en' | 'ru';
   type: 'dex' | 'cex';
@@ -37,6 +39,9 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const [activeTab, setActiveTab] = useState('pairs');
   const [selectedTokenIn, setSelectedTokenIn] = useState('');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editingCexPairRaw, setEditingCexPairRaw] = useState<any>(null);
+  const [pendingDeleteCexPairIds, setPendingDeleteCexPairIds] = useState<Set<number>>(new Set());
+  const deleteCexPairTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if (type === 'cex') {
@@ -50,6 +55,13 @@ export function PairsPage({ language, type }: PairsPageProps) {
       dispatch(dbConfigActions.initPairsPage());
     }
   }, [cexPairsMeta.error, cexPairsMeta.isLoaded, cexPairsMeta.isLoading, dispatch, pairsMeta.error, pairsMeta.isLoaded, pairsMeta.isLoading, type]);
+
+  useEffect(() => {
+    return () => {
+      deleteCexPairTimeoutsRef.current.forEach(clearTimeout);
+      deleteCexPairTimeoutsRef.current.clear();
+    };
+  }, []);
 
   const dexPairs = useMemo(() => {
     return dexPairsFromStore.map((pair: any) => ({
@@ -71,6 +83,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
       source: resolveCexPairSourceLabel(pair, cexChainNameById),
       token0: pair.token0 ?? pair.token0Symbol ?? pair.baseToken ?? '',
       token1: pair.token1 ?? pair.token1Symbol ?? pair.quoteToken ?? '',
+      raw: pair,
     }));
   }, [cexChainNameById, cexPairsFromStore]);
 
@@ -226,7 +239,10 @@ export function PairsPage({ language, type }: PairsPageProps) {
     },
   ];
 
-  const tableData = type === 'cex' ? cexPairs : dexPairs;
+  const tableData =
+    type === 'cex'
+      ? cexPairs.filter((p) => !pendingDeleteCexPairIds.has(p.id))
+      : dexPairs;
   const tableColumns = type === 'cex' ? cexPairsColumns : dexPairsColumns;
   const showPairsTable = type === 'cex' || activeTab === 'pairs';
   const isTableLoading = type === 'cex' ? cexPairsMeta.isLoading : pairsMeta.isLoading;
@@ -239,7 +255,10 @@ export function PairsPage({ language, type }: PairsPageProps) {
         </h2>
         {showPairsTable && (
           <button
-            onClick={() => setAddDialogOpen(true)}
+            onClick={() => {
+              setEditingCexPairRaw(null);
+              setAddDialogOpen(true);
+            }}
             className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />
@@ -258,12 +277,47 @@ export function PairsPage({ language, type }: PairsPageProps) {
             data={tableData}
             isLoading={isTableLoading}
             loadingText={type === 'cex' ? 'Loading CEX Pairs…' : 'Loading DEX Pairs…'}
-            onEdit={(row) => console.log('Edit', row)}
+            onEdit={(row) => {
+              if (type === 'cex') {
+                setEditingCexPairRaw(row.raw);
+                setAddDialogOpen(true);
+              }
+            }}
             onDelete={(row) => {
+              if (type !== 'cex') return;
+
+              setPendingDeleteCexPairIds((prev) => new Set(prev).add(row.id));
+              const existing = deleteCexPairTimeoutsRef.current.get(row.id);
+              if (existing) clearTimeout(existing);
+
+              const tid = setTimeout(async () => {
+                deleteCexPairTimeoutsRef.current.delete(row.id);
+                try {
+                  await apiService.deletingCexPair(row.id);
+                  dispatch(dbConfigActions.initCexPairsPage());
+                } finally {
+                  setPendingDeleteCexPairIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(row.id);
+                    return next;
+                  });
+                }
+              }, DELETE_UNDO_MS);
+              deleteCexPairTimeoutsRef.current.set(row.id, tid);
+
               showDeleteToast({
-                itemName: type === 'cex' ? `${row.token0}/${row.token1}` : `${row.tokenInSymbol}/${row.tokenOutSymbol}`,
+                itemName: `${row.token0}/${row.token1}`,
                 itemType: language === 'en' ? 'Pair' : 'Пара',
-                onUndo: () => {},
+                onUndo: () => {
+                  const scheduled = deleteCexPairTimeoutsRef.current.get(row.id);
+                  if (scheduled) clearTimeout(scheduled);
+                  deleteCexPairTimeoutsRef.current.delete(row.id);
+                  setPendingDeleteCexPairIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(row.id);
+                    return next;
+                  });
+                },
                 language,
               });
             }}
@@ -328,15 +382,35 @@ export function PairsPage({ language, type }: PairsPageProps) {
       {type === 'cex' ? (
         <CexPairForm
           open={addDialogOpen}
-          onClose={() => setAddDialogOpen(false)}
+          onClose={() => {
+            setAddDialogOpen(false);
+            setEditingCexPairRaw(null);
+          }}
           onSave={async (data) => {
-            await apiService.createCexPair({
-              source: data.chain,
+            const payload = {
+              source: Number(data.sourceId),
               token0: data.token0Symbol,
               token1: data.token1Symbol,
-            });
+            };
+            if (editingCexPairRaw) {
+              const id = Number(
+                editingCexPairRaw.id ?? editingCexPairRaw.pairId ?? editingCexPairRaw.cexPairId ?? editingCexPairRaw.cex_pair_id,
+              );
+              await apiService.editCexPair(id, payload);
+            } else {
+              await apiService.createCexPair(payload);
+            }
             dispatch(dbConfigActions.initCexPairsPage());
           }}
+          initialData={
+            editingCexPairRaw
+              ? {
+                  sourceId: String(editingCexPairRaw.source ?? ''),
+                  token0Symbol: editingCexPairRaw.token0 ?? editingCexPairRaw.token0Symbol ?? '',
+                  token1Symbol: editingCexPairRaw.token1 ?? editingCexPairRaw.token1Symbol ?? '',
+                }
+              : undefined
+          }
           language={language}
         />
       ) : (
@@ -344,11 +418,10 @@ export function PairsPage({ language, type }: PairsPageProps) {
           open={addDialogOpen}
           onClose={() => setAddDialogOpen(false)}
           onSave={async (data) => {
-            const poolId = Number(data.poolId);
             await apiService.createPair({
-              poolId,
-              tokenIn: data.tokenIn,
-              tokenOut: data.tokenOut,
+              poolId: Number(data.poolId),
+              tokenIn: Number(data.tokenInId),
+              tokenOut: Number(data.tokenOutId),
             });
             dispatch(dbConfigActions.initPairsPage());
           }}

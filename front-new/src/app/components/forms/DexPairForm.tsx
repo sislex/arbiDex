@@ -5,10 +5,11 @@ import { Autocomplete } from '../Autocomplete';
 import { useAppSelector } from '../../store/hooks';
 import { selectPoolsDataResponse, selectTokensDataResponse } from '../../store/db-config/dbConfig.selectors';
 
-interface DexPairFormData {
+/** Submitted to API as PairDto: poolId, tokenIn, tokenOut (token IDs). */
+export interface DexPairFormData {
   poolId: string;
-  tokenIn: string;
-  tokenOut: string;
+  tokenInId: string;
+  tokenOutId: string;
 }
 
 interface DexPairFormProps {
@@ -19,16 +20,16 @@ interface DexPairFormProps {
   language: 'en' | 'ru';
 }
 
-interface MockPool {
+interface PoolOptionRow {
   id: string;
   label: string;
-  tokenIn: { symbol: string; name: string };
-  tokenOut: { symbol: string; name: string };
+  token0Id: number;
+  token1Id: number;
+  tokenInLabel: string;
+  tokenOutLabel: string;
 }
 
-const mockPools: MockPool[] = [];
-
-const empty: DexPairFormData = { poolId: '', tokenIn: '', tokenOut: '' };
+const empty: DexPairFormData = { poolId: '', tokenInId: '', tokenOutId: '' };
 
 export function DexPairForm({ open, onClose, onSave, initialData, language }: DexPairFormProps) {
   const poolsFromStore = useAppSelector(selectPoolsDataResponse);
@@ -58,39 +59,50 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
     setForm(initialData ?? empty);
   }, [open, initialData]);
 
-  const tokenById = useMemo(() => new Map(tokens.map((t: any) => [t.tokenId ?? t.id, t])), [tokens]);
+  const tokenById = useMemo(() => new Map(tokens.map((x: any) => [x.tokenId ?? x.id, x])), [tokens]);
 
-  const pools: MockPool[] = useMemo(() => {
+  const pools: PoolOptionRow[] = useMemo(() => {
     return poolsFromStore.map((p: any) => {
       const id = String(p.poolId ?? p.id);
       const t0 = tokenById.get(p.token0Id);
       const t1 = tokenById.get(p.token1Id);
-      const tokenIn = { symbol: t0?.symbol ?? 'Token0', name: t0?.tokenName ?? t0?.symbol ?? 'Token0' };
-      const tokenOut = { symbol: t1?.symbol ?? 'Token1', name: t1?.tokenName ?? t1?.symbol ?? 'Token1' };
+      const token0Id = Number(p.token0Id);
+      const token1Id = Number(p.token1Id);
+      const tokenInLabel = t0 ? `${t0.symbol ?? ''} (${String(t0.address ?? '').slice(0, 8)}…)` : String(token0Id);
+      const tokenOutLabel = t1 ? `${t1.symbol ?? ''} (${String(t1.address ?? '').slice(0, 8)}…)` : String(token1Id);
       const label = p.poolAddress ? `${String(p.poolAddress).slice(0, 10)}…${String(p.poolAddress).slice(-8)}` : id;
-      return { id, label, tokenIn, tokenOut };
+      return { id, label, token0Id, token1Id, tokenInLabel, tokenOutLabel };
     });
   }, [poolsFromStore, tokenById]);
 
   const poolOptions = useMemo(() => pools.map((p) => ({ value: p.id, label: p.label })), [pools]);
 
-  const selectedPool = useMemo(() =>
-    pools.find((p) => p.id === form.poolId) ?? null,
-    [form.poolId, pools]
+  const selectedPool = useMemo(
+    () => pools.find((p) => p.id === form.poolId) ?? null,
+    [form.poolId, pools],
   );
 
   const handlePoolChange = (poolId: string) => {
     const pool = pools.find((p) => p.id === poolId);
     setForm({
       poolId,
-      tokenIn: pool ? pool.tokenIn.name : '',
-      tokenOut: pool ? pool.tokenOut.name : '',
+      tokenInId: pool ? String(pool.token0Id) : '',
+      tokenOutId: pool ? String(pool.token1Id) : '',
     });
   };
 
   const handleSwap = () => {
-    setForm((f) => ({ ...f, tokenIn: f.tokenOut, tokenOut: f.tokenIn }));
+    setForm((f) => ({ ...f, tokenInId: f.tokenOutId, tokenOutId: f.tokenInId }));
   };
+
+  const tokenInDisplay = selectedPool
+    ? tokenById.get(Number(form.tokenInId))?.symbol ??
+      selectedPool.tokenInLabel
+    : '';
+  const tokenOutDisplay = selectedPool
+    ? tokenById.get(Number(form.tokenOutId))?.symbol ??
+      selectedPool.tokenOutLabel
+    : '';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +128,7 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
               <label className="text-sm text-muted-foreground">{t[language].tokenIn}</label>
               <input
                 type="text"
-                value={form.tokenIn}
+                value={tokenInDisplay}
                 readOnly
                 disabled={!selectedPool}
                 placeholder={t[language].tokenIn}
@@ -146,7 +158,7 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
               <label className="text-sm text-muted-foreground">{t[language].tokenOut}</label>
               <input
                 type="text"
-                value={form.tokenOut}
+                value={tokenOutDisplay}
                 readOnly
                 disabled={!selectedPool}
                 placeholder={t[language].tokenOut}
@@ -163,7 +175,7 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
         <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
           <button
             type="submit"
-            disabled={!form.poolId}
+            disabled={!form.poolId || !form.tokenInId || !form.tokenOutId}
             className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {t[language].add}

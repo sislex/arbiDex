@@ -37,7 +37,6 @@ const menuItems: MenuItem[] = [
       { id: 'cex-chains', label: { en: 'Chains', ru: 'Сети' } },
       { id: 'cex-pairs', label: { en: 'Pairs', ru: 'Пары' } },
       { id: 'cex-jobs', label: { en: 'Jobs', ru: 'Задачи' } },
-      { id: 'cex-rpc-urls', label: { en: 'RPC URLs', ru: 'RPC URLs' } },
     ],
   },
   {

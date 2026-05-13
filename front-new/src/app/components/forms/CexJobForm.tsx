@@ -1,44 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
 import { useAppSelector } from '../../store/hooks';
-import { selectCexChainsDataResponse } from '../../store/db-config/dbConfig.selectors';
+import {
+  selectCexChainsDataResponse,
+  selectCexPairsDataResponse,
+} from '../../store/db-config/dbConfig.selectors';
+import { buildCexChainNameById, resolveCexPairSourceLabel } from '../../utils/cexPairSource';
 
-interface CexPairFormData {
-  sourceId: string;
-  token0Symbol: string;
-  token1Symbol: string;
+export interface CexJobFormValues {
+  cexPairId: string;
+  jobType: string;
+  description: string;
 }
 
-interface CexPairFormProps {
+interface CexJobFormProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: CexPairFormData) => void;
-  initialData?: CexPairFormData;
+  onSave: (data: CexJobFormValues) => void;
+  initialData?: CexJobFormValues;
   language: 'en' | 'ru';
 }
 
-const empty: CexPairFormData = { sourceId: '', token0Symbol: '', token1Symbol: '' };
+const empty: CexJobFormValues = { cexPairId: '', jobType: '', description: '' };
 
-export function CexPairForm({ open, onClose, onSave, initialData, language }: CexPairFormProps) {
-  const cexChains = useAppSelector(selectCexChainsDataResponse);
-  const [form, setForm] = useState<CexPairFormData>(empty);
+export function CexJobForm({ open, onClose, onSave, initialData, language }: CexJobFormProps) {
+  const cexPairsFromStore = useAppSelector(selectCexPairsDataResponse);
+  const cexChainsFromStore = useAppSelector(selectCexChainsDataResponse);
+  const [form, setForm] = useState<CexJobFormValues>(empty);
+
+  const cexChainNameById = useMemo(() => buildCexChainNameById(cexChainsFromStore), [cexChainsFromStore]);
 
   const t = {
     en: {
-      title: initialData ? 'Edit pair' : 'Add new pair',
-      selectChain: 'Select chain',
-      token0: 'Token 0 symbol',
-      token1: 'Token 1 symbol',
+      title: initialData ? 'Edit job' : 'Add job',
+      selectPool: 'Select cex pool',
+      type: 'Type',
+      description: 'Description',
       submit: initialData ? 'SAVE' : 'ADD',
       cancel: 'CANCEL',
     },
     ru: {
-      title: initialData ? 'Редактировать пару' : 'Добавить пару',
-      selectChain: 'Выберите биржу',
-      token0: 'Символ токена 0',
-      token1: 'Символ токена 1',
+      title: initialData ? 'Изменить джобу' : 'Добавить джобу',
+      selectPool: 'Выберите CEX pool',
+      type: 'Тип',
+      description: 'Описание',
       submit: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
       cancel: 'ОТМЕНА',
     },
@@ -48,10 +55,15 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
     setForm(initialData ?? empty);
   }, [open, initialData]);
 
-  const chainOptions = (cexChains ?? []).map((c: any) => {
-    const id = c.id ?? c.chainId ?? c.cexChainId;
-    const name = c.name ?? c.chainName ?? String(id ?? '');
-    return { value: String(id ?? ''), label: name };
+  const pairOptions = (cexPairsFromStore ?? []).map((pair: any) => {
+    const id = pair.id ?? pair.pairId ?? pair.cexPairId ?? pair.cex_pair_id;
+    const token0 = pair.token0 ?? pair.token0Symbol ?? '';
+    const token1 = pair.token1 ?? pair.token1Symbol ?? '';
+    const src = resolveCexPairSourceLabel(pair, cexChainNameById);
+    return {
+      value: String(id ?? ''),
+      label: `${token0}/${token1} · ${src} (#${id})`,
+    };
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -65,29 +77,28 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
       <form onSubmit={handleSubmit} className="flex flex-col">
         <div className="p-6 space-y-4">
           <Autocomplete
-            label={t[language].selectChain}
-            options={chainOptions}
-            value={form.sourceId}
-            onChange={(v) => setForm({ ...form, sourceId: v })}
-            placeholder="Select chain..."
+            label={t[language].selectPool}
+            options={pairOptions}
+            value={form.cexPairId}
+            onChange={(v) => setForm({ ...form, cexPairId: v })}
+            placeholder="pool"
             required
           />
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">{t[language].token0}</label>
+            <label className="text-sm text-muted-foreground">{t[language].type}</label>
             <div className="relative">
               <input
                 type="text"
-                value={form.token0Symbol}
-                onChange={(e) => setForm({ ...form, token0Symbol: e.target.value })}
-                placeholder="e.g. WETH"
+                value={form.jobType}
+                onChange={(e) => setForm({ ...form, jobType: e.target.value })}
                 required
                 className="w-full px-3 py-2 pr-8 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
-              {form.token0Symbol && (
+              {form.jobType && (
                 <button
                   type="button"
-                  onClick={() => setForm({ ...form, token0Symbol: '' })}
+                  onClick={() => setForm({ ...form, jobType: '' })}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X className="w-4 h-4" />
@@ -97,20 +108,18 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">{t[language].token1}</label>
+            <label className="text-sm text-muted-foreground">{t[language].description}</label>
             <div className="relative">
               <input
                 type="text"
-                value={form.token1Symbol}
-                onChange={(e) => setForm({ ...form, token1Symbol: e.target.value })}
-                placeholder="e.g. USDC"
-                required
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className="w-full px-3 py-2 pr-8 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
-              {form.token1Symbol && (
+              {form.description && (
                 <button
                   type="button"
-                  onClick={() => setForm({ ...form, token1Symbol: '' })}
+                  onClick={() => setForm({ ...form, description: '' })}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X className="w-4 h-4" />

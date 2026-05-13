@@ -160,19 +160,22 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         }}
         onSave={async (data) => {
           const poolId = editData?.poolId ?? editData?.id;
-          const payload = {
+          const fee = Number(data.fee);
+          const base = {
             chainId: Number(data.chainId),
-            token0Id: Number(data.token0Id),
-            token1Id: Number(data.token1Id),
+            token0: Number(data.token0Id),
+            token1: Number(data.token1Id),
             dexId: Number(data.dexId),
-            fee: data.fee,
+            version: data.version as 'v2' | 'v3' | 'v4',
+            fee,
             poolAddress: data.poolAddress,
           };
 
           if (poolId !== undefined && poolId !== null && Number.isFinite(Number(poolId))) {
-            await apiService.editPool(Number(poolId), payload);
+            const id = Number(poolId);
+            await apiService.editPool(id, { poolId: id, ...base });
           } else {
-            await apiService.createPool(payload);
+            await apiService.createPool(base);
           }
 
           dispatch(dbConfigActions.initPoolsPage());

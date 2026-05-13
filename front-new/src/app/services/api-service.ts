@@ -29,7 +29,19 @@ async function request<T>(method: string, path: string, options: RequestOptions 
   });
 
   if (!response.ok) {
-    throw new Error(`Request ${method} ${path} failed with status ${response.status}`);
+    let detail = `Request ${method} ${path} failed with status ${response.status}`;
+    const text = await response.text();
+    if (text) {
+      try {
+        const errBody = JSON.parse(text) as { message?: string | string[] };
+        const msg = errBody?.message;
+        if (typeof msg === 'string') detail = msg;
+        else if (Array.isArray(msg)) detail = msg.join(', ');
+      } catch {
+        // non-JSON error body
+      }
+    }
+    throw new Error(detail);
   }
 
   if (response.status === 204) {
@@ -142,7 +154,7 @@ export const apiService = {
 
   getCexChainsData: () => request<any[]>("GET", "/cex-chains"),
   createCexChain: (data: any) => request<any>("POST", "/cex-chains", { body: { ...data } }),
-  editCexChain: (id: number, data: any) => request<any>("PUT", `/cex-chains/${id}`, { body: data }),
+  editCexChain: (id: number, data: any) => request<any>("PATCH", `/cex-chains/${id}`, { body: data }),
   deletingCexChain: (id: number) => request<any>("DELETE", `/cex-chains/${id}`),
 
   getCexPairs: () => request<any[]>("GET", "/cex-pairs"),

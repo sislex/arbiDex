@@ -13,6 +13,7 @@ interface PoolFormData {
   token0Id: string;
   token1Id: string;
   dexId: string;
+  version: string;
   fee: string;
   poolAddress: string;
 }
@@ -35,6 +36,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
     token0Id: '',
     token1Id: '',
     dexId: '',
+    version: 'v3',
     fee: '',
     poolAddress: '',
   });
@@ -46,7 +48,8 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
       token0: 'Token 0',
       token1: 'Token 1',
       dex: 'DEX',
-      fee: 'Fee (%)',
+      version: 'Pool version',
+      fee: 'Fee',
       poolAddress: 'Pool Address',
       cancel: 'Cancel',
       save: 'Save',
@@ -57,7 +60,8 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
       token0: 'Токен 0',
       token1: 'Токен 1',
       dex: 'DEX',
-      fee: 'Комиссия (%)',
+      version: 'Версия пула',
+      fee: 'Комиссия',
       poolAddress: 'Адрес пула',
       cancel: 'Отмена',
       save: 'Сохранить',
@@ -68,9 +72,10 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
     if (initialData) {
       setFormData({
         chainId: String(initialData.chainId ?? initialData.chain_id ?? ''),
-        token0Id: String(initialData.token0Id ?? initialData.token0_id ?? ''),
-        token1Id: String(initialData.token1Id ?? initialData.token1_id ?? ''),
+        token0Id: String(initialData.token0Id ?? initialData.token0_id ?? initialData.token0 ?? ''),
+        token1Id: String(initialData.token1Id ?? initialData.token1_id ?? initialData.token1 ?? ''),
         dexId: String(initialData.dexId ?? initialData.dex_id ?? ''),
+        version: String(initialData.version ?? 'v3'),
         fee: String(initialData.fee ?? ''),
         poolAddress: String(initialData.poolAddress ?? initialData.pool_address ?? initialData.address ?? ''),
       });
@@ -80,6 +85,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
         token0Id: '',
         token1Id: '',
         dexId: '',
+        version: 'v3',
         fee: '',
         poolAddress: '',
       });
@@ -175,6 +181,23 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
 
           <div className="flex flex-col gap-2">
             <label className="text-sm text-foreground">
+              {t[language].version}
+              <span className="text-destructive ml-1">*</span>
+            </label>
+            <select
+              value={formData.version}
+              onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+              required
+              className="px-3 py-2 bg-input border border-border rounded text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="v2">v2</option>
+              <option value="v3">v3</option>
+              <option value="v4">v4</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm text-foreground">
               {t[language].fee}
               <span className="text-destructive ml-1">*</span>
             </label>
@@ -182,7 +205,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
               type="text"
               value={formData.fee}
               onChange={(e) => setFormData({ ...formData, fee: e.target.value })}
-              placeholder="e.g., 0.3, 0.05, 1.0"
+              placeholder="e.g. 3000 (Uniswap v3 fee tier)"
               required
               className="px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
