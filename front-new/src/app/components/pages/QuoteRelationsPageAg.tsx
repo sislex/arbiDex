@@ -4,7 +4,14 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
-import { selectPairsFullData, selectPairsMeta } from '../../store/db-config/dbConfig.selectors';
+import {
+  selectChainsMeta,
+  selectDexesMeta,
+  selectPairsFullData,
+  selectPairsMeta,
+  selectPoolsMeta,
+  selectTokensMeta,
+} from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
 
 interface QuoteRelationsPageProps {
@@ -42,6 +49,10 @@ const areSetsEqual = (left: Set<number>, right: Set<number>) => {
 export function QuoteRelationsPageAg({ quoteId, quoteName, language, onBack }: QuoteRelationsPageProps) {
   const dispatch = useAppDispatch();
   const pairsMeta = useAppSelector(selectPairsMeta);
+  const poolsMeta = useAppSelector(selectPoolsMeta);
+  const tokensMeta = useAppSelector(selectTokensMeta);
+  const dexesMeta = useAppSelector(selectDexesMeta);
+  const chainsMeta = useAppSelector(selectChainsMeta);
   const pairs = useAppSelector(selectPairsFullData);
 
   const [layoutMode, setLayoutMode] = useState<'vertical' | 'horizontal'>('vertical');
@@ -93,10 +104,54 @@ export function QuoteRelationsPageAg({ quoteId, quoteName, language, onBack }: Q
   };
 
   useEffect(() => {
-    if ((!pairsMeta.isLoaded || pairsMeta.error) && !pairsMeta.isLoading) {
+    const hasAnyLoading =
+      pairsMeta.isLoading ||
+      poolsMeta.isLoading ||
+      tokensMeta.isLoading ||
+      dexesMeta.isLoading ||
+      chainsMeta.isLoading;
+
+    const hasMissingResource =
+      !pairsMeta.isLoaded ||
+      !poolsMeta.isLoaded ||
+      !tokensMeta.isLoaded ||
+      !dexesMeta.isLoaded ||
+      !chainsMeta.isLoaded;
+
+    const hasAnyError =
+      Boolean(pairsMeta.error) ||
+      Boolean(poolsMeta.error) ||
+      Boolean(tokensMeta.error) ||
+      Boolean(dexesMeta.error) ||
+      Boolean(chainsMeta.error);
+
+    if (!hasAnyLoading && (hasMissingResource || hasAnyError)) {
+      dispatch(dbConfigActions.initPairsPage());
+      return;
+    }
+
+    if (!hasAnyLoading && pairsMeta.isLoaded && pairs.length === 0) {
       dispatch(dbConfigActions.refetchPairsPageResources());
     }
-  }, [dispatch, pairsMeta.error, pairsMeta.isLoaded, pairsMeta.isLoading]);
+  }, [
+    chainsMeta.error,
+    chainsMeta.isLoaded,
+    chainsMeta.isLoading,
+    dexesMeta.error,
+    dexesMeta.isLoaded,
+    dexesMeta.isLoading,
+    dispatch,
+    pairs.length,
+    pairsMeta.error,
+    pairsMeta.isLoaded,
+    pairsMeta.isLoading,
+    poolsMeta.error,
+    poolsMeta.isLoaded,
+    poolsMeta.isLoading,
+    tokensMeta.error,
+    tokensMeta.isLoaded,
+    tokensMeta.isLoading,
+  ]);
 
   const allRows = useMemo<PairRow[]>(
     () =>
@@ -141,10 +196,16 @@ export function QuoteRelationsPageAg({ quoteId, quoteName, language, onBack }: Q
   };
 
   useEffect(() => {
-    if (!allRows.length) return;
     fetchRelations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quoteId, allRows.length]);
+  }, [quoteId]);
+
+  const isPageResourcesLoading =
+    pairsMeta.isLoading ||
+    poolsMeta.isLoading ||
+    tokensMeta.isLoading ||
+    dexesMeta.isLoading ||
+    chainsMeta.isLoading;
 
   const inRelations = useMemo(() => allRows.filter((row) => activePairIds.has(row.id)), [activePairIds, allRows]);
   const notInRelations = useMemo(
@@ -302,20 +363,22 @@ export function QuoteRelationsPageAg({ quoteId, quoteName, language, onBack }: Q
     ];
 
     return (
-      <DataTable
-        title={`${title} (${data.length})`}
-        columns={columnsWithCheckbox}
-        data={data}
-        language={language}
-        isLoading={isLoading || pairsMeta.isLoading}
-        loadingText={t[language].loading}
-        onFilteredDataChange={onFilteredDataChange}
-      />
+      <div className="h-full min-h-[260px] min-w-0 flex flex-col">
+        <DataTable
+          title={`${title} (${data.length})`}
+          columns={columnsWithCheckbox}
+          data={data}
+          language={language}
+          isLoading={isLoading || isPageResourcesLoading}
+          loadingText={t[language].loading}
+          onFilteredDataChange={onFilteredDataChange}
+        />
+      </div>
     );
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-background">
+    <div className="flex-1 min-h-0 flex flex-col bg-background">
       <div className="h-14 border-b border-border flex items-center px-4 gap-4">
         <button
           onClick={onBack}
@@ -335,10 +398,10 @@ export function QuoteRelationsPageAg({ quoteId, quoteName, language, onBack }: Q
         </button>
       </div>
 
-      <PanelGroup direction={layoutMode} className="flex-1">
+      <PanelGroup direction={layoutMode} className="flex-1 min-h-[320px] min-w-0 overflow-hidden">
         <Panel defaultSize={50} minSize={20}>
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-hidden">
+          <div className="flex h-full min-h-0 min-w-0 flex-col">
+            <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
               {renderTable(
                 inRelations,
                 selectedInRelations,
@@ -356,8 +419,8 @@ export function QuoteRelationsPageAg({ quoteId, quoteName, language, onBack }: Q
         />
 
         <Panel defaultSize={50} minSize={20}>
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-hidden">
+          <div className="flex h-full min-h-0 min-w-0 flex-col">
+            <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
               {renderTable(
                 notInRelations,
                 selectedNotInRelations,

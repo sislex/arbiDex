@@ -225,7 +225,7 @@ export function DataTable({
   );
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+    <div className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden">
       {title && (
         <div className="h-11 shrink-0 border-b border-border bg-background flex items-center px-4">
           <h2 className="text-sm text-foreground">
@@ -240,7 +240,7 @@ export function DataTable({
           </h2>
         </div>
       )}
-      <div className="ag-theme-quartz arb-dex-grid flex-1 min-h-0 w-full">
+      <div className="ag-theme-quartz arb-dex-grid flex-1 min-h-0 min-w-0 w-full">
         {isLoading ? (
           <div className="size-full flex items-center justify-center">
             <div className="flex items-center gap-3 text-muted-foreground">
