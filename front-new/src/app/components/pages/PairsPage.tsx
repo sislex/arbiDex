@@ -40,8 +40,11 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const [selectedTokenIn, setSelectedTokenIn] = useState('');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editingCexPairRaw, setEditingCexPairRaw] = useState<any>(null);
+  const [editingDexPairRaw, setEditingDexPairRaw] = useState<any>(null);
   const [pendingDeleteCexPairIds, setPendingDeleteCexPairIds] = useState<Set<number>>(new Set());
+  const [pendingDeleteDexPairIds, setPendingDeleteDexPairIds] = useState<Set<number>>(new Set());
   const deleteCexPairTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+  const deleteDexPairTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if (type === 'cex') {
@@ -60,6 +63,8 @@ export function PairsPage({ language, type }: PairsPageProps) {
     return () => {
       deleteCexPairTimeoutsRef.current.forEach(clearTimeout);
       deleteCexPairTimeoutsRef.current.clear();
+      deleteDexPairTimeoutsRef.current.forEach(clearTimeout);
+      deleteDexPairTimeoutsRef.current.clear();
     };
   }, []);
 
@@ -72,6 +77,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
       tokenOutSymbol: pair.tokenOutSymbol,
       tokenInAddress: pair.tokenInAddress,
       tokenOutAddress: pair.tokenOutAddress,
+      raw: pair,
     }));
   }, [dexPairsFromStore]);
 
@@ -270,7 +276,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const tableData =
     type === 'cex'
       ? cexPairs.filter((p) => !pendingDeleteCexPairIds.has(p.id))
-      : dexPairs;
+      : dexPairs.filter((p) => !pendingDeleteDexPairIds.has(p.id));
   const tableColumns = type === 'cex' ? cexPairsColumns : dexPairsColumns;
   const showPairsTable = type === 'cex' || activeTab === 'pairs';
   const isTableLoading = type === 'cex' ? cexPairsMeta.isLoading : pairsMeta.isLoading;
@@ -286,6 +292,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
           <button
             onClick={() => {
               setEditingCexPairRaw(null);
+              setEditingDexPairRaw(null);
               setAddDialogOpen(true);
             }}
             className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
@@ -311,38 +318,77 @@ export function PairsPage({ language, type }: PairsPageProps) {
               if (type === 'cex') {
                 setEditingCexPairRaw(row.raw);
                 setAddDialogOpen(true);
+              } else {
+                setEditingDexPairRaw(row.raw);
+                setAddDialogOpen(true);
               }
             }}
             onDelete={(row) => {
-              if (type !== 'cex') return;
+              if (type === 'cex') {
+                setPendingDeleteCexPairIds((prev) => new Set(prev).add(row.id));
+                const existing = deleteCexPairTimeoutsRef.current.get(row.id);
+                if (existing) clearTimeout(existing);
 
-              setPendingDeleteCexPairIds((prev) => new Set(prev).add(row.id));
-              const existing = deleteCexPairTimeoutsRef.current.get(row.id);
-              if (existing) clearTimeout(existing);
+                const tid = setTimeout(async () => {
+                  deleteCexPairTimeoutsRef.current.delete(row.id);
+                  try {
+                    await apiService.deletingCexPair(row.id);
+                    dispatch(dbConfigActions.refetchCexPairsPageResources());
+                  } finally {
+                    setPendingDeleteCexPairIds((prev) => {
+                      const next = new Set(prev);
+                      next.delete(row.id);
+                      return next;
+                    });
+                  }
+                }, DELETE_UNDO_MS);
+                deleteCexPairTimeoutsRef.current.set(row.id, tid);
 
-              const tid = setTimeout(async () => {
-                deleteCexPairTimeoutsRef.current.delete(row.id);
+                showDeleteToast({
+                  itemName: `${row.token0}/${row.token1}`,
+                  itemType: language === 'en' ? 'Pair' : 'Пара',
+                  onUndo: () => {
+                    const scheduled = deleteCexPairTimeoutsRef.current.get(row.id);
+                    if (scheduled) clearTimeout(scheduled);
+                    deleteCexPairTimeoutsRef.current.delete(row.id);
+                    setPendingDeleteCexPairIds((prev) => {
+                      const next = new Set(prev);
+                      next.delete(row.id);
+                      return next;
+                    });
+                  },
+                  language,
+                });
+                return;
+              }
+
+              setPendingDeleteDexPairIds((prev) => new Set(prev).add(row.id));
+              const existingDex = deleteDexPairTimeoutsRef.current.get(row.id);
+              if (existingDex) clearTimeout(existingDex);
+
+              const tidDex = setTimeout(async () => {
+                deleteDexPairTimeoutsRef.current.delete(row.id);
                 try {
-                  await apiService.deletingCexPair(row.id);
-                  dispatch(dbConfigActions.refetchCexPairsPageResources());
+                  await apiService.deletingPair(row.id);
+                  dispatch(dbConfigActions.refetchPairsPageResources());
                 } finally {
-                  setPendingDeleteCexPairIds((prev) => {
+                  setPendingDeleteDexPairIds((prev) => {
                     const next = new Set(prev);
                     next.delete(row.id);
                     return next;
                   });
                 }
               }, DELETE_UNDO_MS);
-              deleteCexPairTimeoutsRef.current.set(row.id, tid);
+              deleteDexPairTimeoutsRef.current.set(row.id, tidDex);
 
               showDeleteToast({
-                itemName: `${row.token0}/${row.token1}`,
+                itemName: `${row.tokenInSymbol}/${row.tokenOutSymbol}`,
                 itemType: language === 'en' ? 'Pair' : 'Пара',
                 onUndo: () => {
-                  const scheduled = deleteCexPairTimeoutsRef.current.get(row.id);
+                  const scheduled = deleteDexPairTimeoutsRef.current.get(row.id);
                   if (scheduled) clearTimeout(scheduled);
-                  deleteCexPairTimeoutsRef.current.delete(row.id);
-                  setPendingDeleteCexPairIds((prev) => {
+                  deleteDexPairTimeoutsRef.current.delete(row.id);
+                  setPendingDeleteDexPairIds((prev) => {
                     const next = new Set(prev);
                     next.delete(row.id);
                     return next;
@@ -428,15 +474,33 @@ export function PairsPage({ language, type }: PairsPageProps) {
       ) : (
         <DexPairForm
           open={addDialogOpen}
-          onClose={() => setAddDialogOpen(false)}
+          onClose={() => {
+            setAddDialogOpen(false);
+            setEditingDexPairRaw(null);
+          }}
           onSave={async (data) => {
-            await apiService.createPair({
+            const payload = {
               poolId: Number(data.poolId),
               tokenIn: Number(data.tokenInId),
               tokenOut: Number(data.tokenOutId),
-            });
+            };
+            if (editingDexPairRaw) {
+              const id = Number(editingDexPairRaw.pairId ?? editingDexPairRaw.id);
+              await apiService.editPair(id, payload);
+            } else {
+              await apiService.createPair(payload);
+            }
             dispatch(dbConfigActions.refetchPairsPageResources());
           }}
+          initialData={
+            editingDexPairRaw
+              ? {
+                  poolId: String(editingDexPairRaw.poolId ?? ''),
+                  tokenInId: String(editingDexPairRaw.tokenInId ?? ''),
+                  tokenOutId: String(editingDexPairRaw.tokenOutId ?? ''),
+                }
+              : undefined
+          }
           language={language}
         />
       )}

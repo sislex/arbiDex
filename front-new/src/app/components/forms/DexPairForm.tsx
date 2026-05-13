@@ -42,7 +42,7 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
       poolId: 'Pool Id',
       tokenIn: 'Token In',
       tokenOut: 'Token Out',
-      add: 'ADD',
+      submit: initialData ? 'SAVE' : 'ADD',
       cancel: 'CANCEL',
     },
     ru: {
@@ -50,7 +50,7 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
       poolId: 'ID пула',
       tokenIn: 'Токен входа',
       tokenOut: 'Токен выхода',
-      add: 'ДОБАВИТЬ',
+      submit: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
       cancel: 'ОТМЕНА',
     },
   };
@@ -178,7 +178,7 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
             disabled={!form.poolId || !form.tokenInId || !form.tokenOutId}
             className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {t[language].add}
+            {t[language].submit}
           </button>
           <button
             type="button"
