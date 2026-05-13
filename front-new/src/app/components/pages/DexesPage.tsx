@@ -49,6 +49,8 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
         title="DEXes"
         columns={columns}
         data={dexes}
+        isLoading={dexesMeta.isLoading}
+        loadingText="Loading DEXes…"
         onEdit={(row) => console.log('Edit', row)}
         onDelete={(row) => {
           setDeletedDexIds(new Set([...deletedDexIds, row.id]));

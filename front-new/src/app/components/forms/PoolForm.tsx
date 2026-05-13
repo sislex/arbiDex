@@ -1,12 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { useAppSelector } from '../../store/hooks';
+import {
+  selectChainsDataResponse,
+  selectDexesDataResponse,
+  selectTokensDataResponse,
+} from '../../store/db-config/dbConfig.selectors';
 
 interface PoolFormData {
-  chain: string;
-  token0: string;
-  token1: string;
-  dex: string;
+  chainId: string;
+  token0Id: string;
+  token1Id: string;
+  dexId: string;
   fee: string;
   poolAddress: string;
 }
@@ -15,66 +21,20 @@ interface PoolFormProps {
   open: boolean;
   onClose: () => void;
   onSave: (data: PoolFormData) => void;
-  initialData?: PoolFormData;
+  initialData?: any;
   language: 'en' | 'ru';
 }
 
-const mockChains = [
-  { value: 'ethereum', label: 'Ethereum' },
-  { value: 'bsc', label: 'Binance Smart Chain' },
-  { value: 'polygon', label: 'Polygon' },
-  { value: 'arbitrum', label: 'Arbitrum' },
-  { value: 'optimism', label: 'Optimism' },
-];
-
-const mockTokensByChain: Record<string, Array<{ value: string; label: string }>> = {
-  ethereum: [
-    { value: 'eth', label: 'ETH' },
-    { value: 'usdt', label: 'USDT' },
-    { value: 'usdc', label: 'USDC' },
-    { value: 'dai', label: 'DAI' },
-    { value: 'wbtc', label: 'WBTC' },
-  ],
-  bsc: [
-    { value: 'bnb', label: 'BNB' },
-    { value: 'busd', label: 'BUSD' },
-    { value: 'usdt', label: 'USDT' },
-    { value: 'cake', label: 'CAKE' },
-  ],
-  polygon: [
-    { value: 'matic', label: 'MATIC' },
-    { value: 'usdt', label: 'USDT' },
-    { value: 'usdc', label: 'USDC' },
-    { value: 'dai', label: 'DAI' },
-  ],
-  arbitrum: [
-    { value: 'eth', label: 'ETH' },
-    { value: 'usdt', label: 'USDT' },
-    { value: 'usdc', label: 'USDC' },
-    { value: 'arb', label: 'ARB' },
-  ],
-  optimism: [
-    { value: 'eth', label: 'ETH' },
-    { value: 'usdt', label: 'USDT' },
-    { value: 'usdc', label: 'USDC' },
-    { value: 'op', label: 'OP' },
-  ],
-};
-
-const mockDexes = [
-  { value: 'uniswap-v2', label: 'Uniswap V2' },
-  { value: 'uniswap-v3', label: 'Uniswap V3' },
-  { value: 'sushiswap', label: 'SushiSwap' },
-  { value: 'pancakeswap', label: 'PancakeSwap' },
-  { value: 'curve', label: 'Curve' },
-];
-
 export function PoolForm({ open, onClose, onSave, initialData, language }: PoolFormProps) {
+  const chains = useAppSelector(selectChainsDataResponse);
+  const tokens = useAppSelector(selectTokensDataResponse);
+  const dexes = useAppSelector(selectDexesDataResponse);
+
   const [formData, setFormData] = useState<PoolFormData>({
-    chain: '',
-    token0: '',
-    token1: '',
-    dex: '',
+    chainId: '',
+    token0Id: '',
+    token1Id: '',
+    dexId: '',
     fee: '',
     poolAddress: '',
   });
@@ -106,29 +66,64 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        chainId: String(initialData.chainId ?? initialData.chain_id ?? ''),
+        token0Id: String(initialData.token0Id ?? initialData.token0_id ?? ''),
+        token1Id: String(initialData.token1Id ?? initialData.token1_id ?? ''),
+        dexId: String(initialData.dexId ?? initialData.dex_id ?? ''),
+        fee: String(initialData.fee ?? ''),
+        poolAddress: String(initialData.poolAddress ?? initialData.pool_address ?? initialData.address ?? ''),
+      });
     } else {
       setFormData({
-        chain: '',
-        token0: '',
-        token1: '',
-        dex: '',
+        chainId: '',
+        token0Id: '',
+        token1Id: '',
+        dexId: '',
         fee: '',
         poolAddress: '',
       });
     }
   }, [initialData, open]);
 
-  const handleChainChange = (chain: string) => {
+  const chainOptions = useMemo(
+    () =>
+      chains.map((c: any) => ({
+        value: String(c.chainId ?? c.id),
+        label: c.name ?? c.chainName ?? String(c.chainId ?? c.id),
+      })),
+    [chains],
+  );
+
+  const dexOptions = useMemo(
+    () =>
+      dexes.map((d: any) => ({
+        value: String(d.dexId ?? d.id),
+        label: d.name ?? d.dexName ?? String(d.dexId ?? d.id),
+      })),
+    [dexes],
+  );
+
+  const tokenOptions = useMemo(() => {
+    const chainId = Number(formData.chainId);
+    const list = Number.isFinite(chainId)
+      ? tokens.filter((t: any) => Number(t.chainId) === chainId)
+      : tokens;
+
+    return list.map((t: any) => ({
+      value: String(t.tokenId ?? t.id),
+      label: `${t.symbol ?? t.tokenSymbol ?? t.tokenName ?? 'Token'} (${String(t.address ?? '').slice(0, 8)}…)`,
+    }));
+  }, [formData.chainId, tokens]);
+
+  const handleChainChange = (chainId: string) => {
     setFormData({
       ...formData,
-      chain,
-      token0: '',
-      token1: '',
+      chainId,
+      token0Id: '',
+      token1Id: '',
     });
   };
-
-  const availableTokens = formData.chain ? mockTokensByChain[formData.chain] || [] : [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,8 +138,8 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
           <Autocomplete
             label={t[language].chain}
             required
-            options={mockChains}
-            value={formData.chain}
+            options={chainOptions}
+            value={formData.chainId}
             onChange={handleChainChange}
             placeholder="Select chain..."
           />
@@ -152,29 +147,29 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
           <Autocomplete
             label={t[language].token0}
             required
-            options={availableTokens}
-            value={formData.token0}
-            onChange={(value) => setFormData({ ...formData, token0: value })}
+            options={tokenOptions}
+            value={formData.token0Id}
+            onChange={(value) => setFormData({ ...formData, token0Id: value })}
             placeholder="Select token 0..."
-            disabled={!formData.chain}
+            disabled={!formData.chainId}
           />
 
           <Autocomplete
             label={t[language].token1}
             required
-            options={availableTokens}
-            value={formData.token1}
-            onChange={(value) => setFormData({ ...formData, token1: value })}
+            options={tokenOptions}
+            value={formData.token1Id}
+            onChange={(value) => setFormData({ ...formData, token1Id: value })}
             placeholder="Select token 1..."
-            disabled={!formData.chain}
+            disabled={!formData.chainId}
           />
 
           <Autocomplete
             label={t[language].dex}
             required
-            options={mockDexes}
-            value={formData.dex}
-            onChange={(value) => setFormData({ ...formData, dex: value })}
+            options={dexOptions}
+            value={formData.dexId}
+            onChange={(value) => setFormData({ ...formData, dexId: value })}
             placeholder="Select DEX..."
           />
 

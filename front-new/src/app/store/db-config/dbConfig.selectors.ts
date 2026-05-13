@@ -104,6 +104,11 @@ export const selectChainsMeta = createSelector(
   (state) => state.chains,
 );
 
+export const selectCexChainsMeta = createSelector(
+  selectDbConfigFeature,
+  (state) => state.cexChains,
+);
+
 export const selectPairsMeta = createSelector(
   selectDbConfigFeature,
   (state) => state.pairs,

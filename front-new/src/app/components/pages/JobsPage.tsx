@@ -4,6 +4,7 @@ import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
+  selectCexChainsDataResponse,
   selectCexJobsMeta,
   selectCexPairsDataResponse,
   selectCexJobsDataResponse,
@@ -14,6 +15,7 @@ import {
   selectRpcUrlDataResponse,
 } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
+import { buildCexChainNameById, resolveCexSourceFromJobAndPair } from '../../utils/cexPairSource';
 
 interface JobsPageProps {
   language: 'en' | 'ru';
@@ -36,6 +38,7 @@ export function JobsPage({ language, type }: JobsPageProps) {
   const cexJobsMeta = useAppSelector(selectCexJobsMeta);
   const chains = useAppSelector(selectChainsDataResponse);
   const rpcUrls = useAppSelector(selectRpcUrlDataResponse);
+  const cexChains = useAppSelector(selectCexChainsDataResponse);
   const pairs = useAppSelector(selectPairsDataResponse);
   const cexPairs = useAppSelector(selectCexPairsDataResponse);
   const [cexWorkStatus, setCexWorkStatus] = useState<Record<number, boolean | null>>({});
@@ -76,6 +79,8 @@ export function JobsPage({ language, type }: JobsPageProps) {
     return new Map(cexPairs.map((pair: any) => [pair.id ?? pair.pairId ?? pair.cexPairId, pair]));
   }, [cexPairs]);
 
+  const cexChainNameById = useMemo(() => buildCexChainNameById(cexChains), [cexChains]);
+
   const dexJobs = useMemo(() => {
     return dexJobsFromStore.map((job: any) => {
       const jobId = job.jobId ?? job.id;
@@ -103,14 +108,14 @@ export function JobsPage({ language, type }: JobsPageProps) {
         id: jobId,
         jobType: job.job_type ?? job.jobType ?? '',
         description: job.description ?? '',
-        source: job.source ?? pair?.source ?? '',
+        source: resolveCexSourceFromJobAndPair(job, pair, cexChainNameById),
         token0: job.token0 ?? pair?.token0 ?? pair?.token0Symbol ?? '',
         token1: job.token1 ?? pair?.token1 ?? pair?.token1Symbol ?? '',
         isWork,
         raw: job,
       };
     });
-  }, [cexJobsFromStore, cexPairById, cexWorkStatus]);
+  }, [cexChainNameById, cexJobsFromStore, cexPairById, cexWorkStatus]);
 
   const t = {
     en: {
@@ -217,6 +222,8 @@ export function JobsPage({ language, type }: JobsPageProps) {
         title={type === 'cex' ? 'CEX Jobs' : 'DEX Jobs'}
         columns={type === 'cex' ? cexColumns : dexColumns}
         data={type === 'cex' ? cexJobs : dexJobs}
+        isLoading={type === 'cex' ? cexJobsMeta.isLoading : jobsMeta.isLoading}
+        loadingText={type === 'cex' ? 'Loading CEX Jobs…' : 'Loading DEX Jobs…'}
         onEdit={(row) => console.log('Edit', row)}
         onDelete={(row) => console.log('Delete', row)}
         extraActions={

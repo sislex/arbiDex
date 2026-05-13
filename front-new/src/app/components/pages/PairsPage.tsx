@@ -8,7 +8,10 @@ import { CexPairForm } from '../forms/CexPairForm';
 import { DexPairForm } from '../forms/DexPairForm';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
+import { apiService } from '../../services/api-service';
+import { buildCexChainNameById, resolveCexPairSourceLabel } from '../../utils/cexPairSource';
 import {
+  selectCexChainsDataResponse,
   selectCexPairsMeta,
   selectCexPairsDataResponse,
   selectPairsMeta,
@@ -25,6 +28,7 @@ interface PairsPageProps {
 export function PairsPage({ language, type }: PairsPageProps) {
   const dispatch = useAppDispatch();
   const dexPairsFromStore = useAppSelector(selectPairsFullData);
+  const cexChainsFromStore = useAppSelector(selectCexChainsDataResponse);
   const cexPairsFromStore = useAppSelector(selectCexPairsDataResponse);
   const pairsMeta = useAppSelector(selectPairsMeta);
   const cexPairsMeta = useAppSelector(selectCexPairsMeta);
@@ -59,14 +63,16 @@ export function PairsPage({ language, type }: PairsPageProps) {
     }));
   }, [dexPairsFromStore]);
 
+  const cexChainNameById = useMemo(() => buildCexChainNameById(cexChainsFromStore), [cexChainsFromStore]);
+
   const cexPairs = useMemo(() => {
     return cexPairsFromStore.map((pair: any) => ({
       id: pair.id ?? pair.pairId ?? pair.cexPairId ?? pair.cex_pair_id,
-      source: pair.source ?? pair.sourceId ?? pair.exchange ?? pair.exchangeName ?? '',
+      source: resolveCexPairSourceLabel(pair, cexChainNameById),
       token0: pair.token0 ?? pair.token0Symbol ?? pair.baseToken ?? '',
       token1: pair.token1 ?? pair.token1Symbol ?? pair.quoteToken ?? '',
     }));
-  }, [cexPairsFromStore]);
+  }, [cexChainNameById, cexPairsFromStore]);
 
   const t = {
     en: {
@@ -223,6 +229,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const tableData = type === 'cex' ? cexPairs : dexPairs;
   const tableColumns = type === 'cex' ? cexPairsColumns : dexPairsColumns;
   const showPairsTable = type === 'cex' || activeTab === 'pairs';
+  const isTableLoading = type === 'cex' ? cexPairsMeta.isLoading : pairsMeta.isLoading;
 
   return (
     <div className="flex-1 flex flex-col bg-background">
@@ -249,6 +256,8 @@ export function PairsPage({ language, type }: PairsPageProps) {
             title={type === 'cex' ? 'CEX Pairs' : 'DEX Pairs'}
             columns={tableColumns}
             data={tableData}
+            isLoading={isTableLoading}
+            loadingText={type === 'cex' ? 'Loading CEX Pairs…' : 'Loading DEX Pairs…'}
             onEdit={(row) => console.log('Edit', row)}
             onDelete={(row) => {
               showDeleteToast({
@@ -320,14 +329,29 @@ export function PairsPage({ language, type }: PairsPageProps) {
         <CexPairForm
           open={addDialogOpen}
           onClose={() => setAddDialogOpen(false)}
-          onSave={(data) => console.log('CEX pair saved', data)}
+          onSave={async (data) => {
+            await apiService.createCexPair({
+              source: data.chain,
+              token0: data.token0Symbol,
+              token1: data.token1Symbol,
+            });
+            dispatch(dbConfigActions.initCexPairsPage());
+          }}
           language={language}
         />
       ) : (
         <DexPairForm
           open={addDialogOpen}
           onClose={() => setAddDialogOpen(false)}
-          onSave={(data) => console.log('DEX pair saved', data)}
+          onSave={async (data) => {
+            const poolId = Number(data.poolId);
+            await apiService.createPair({
+              poolId,
+              tokenIn: data.tokenIn,
+              tokenOut: data.tokenOut,
+            });
+            dispatch(dbConfigActions.initPairsPage());
+          }}
           language={language}
         />
       )}

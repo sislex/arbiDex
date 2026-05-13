@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { useAppSelector } from '../../store/hooks';
+import { selectPoolsDataResponse, selectTokensDataResponse } from '../../store/db-config/dbConfig.selectors';
 
 interface DexPairFormData {
   poolId: string;
@@ -24,42 +26,13 @@ interface MockPool {
   tokenOut: { symbol: string; name: string };
 }
 
-const mockPools: MockPool[] = [
-  {
-    id: '0xae521238b37748be7df516416d3b5b60011e7064',
-    label: '0xae521238...11e7064',
-    tokenIn: { symbol: 'ETH', name: 'Ether' },
-    tokenOut: { symbol: 'WETH', name: 'Wrapped Ether' },
-  },
-  {
-    id: '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
-    label: '0x88e6a0c2...3f5640',
-    tokenIn: { symbol: 'USDC', name: 'USD Coin' },
-    tokenOut: { symbol: 'WETH', name: 'Wrapped Ether' },
-  },
-  {
-    id: '0xcbcdf9626bc03e24f779434178a73a0b4bad62ed',
-    label: '0xcbcdf962...d62ed',
-    tokenIn: { symbol: 'WBTC', name: 'Wrapped Bitcoin' },
-    tokenOut: { symbol: 'WETH', name: 'Wrapped Ether' },
-  },
-  {
-    id: '0x5777d92f208679db4b9778590fa3cab3ac9e2168',
-    label: '0x5777d92f...e2168',
-    tokenIn: { symbol: 'DAI', name: 'Dai Stablecoin' },
-    tokenOut: { symbol: 'USDC', name: 'USD Coin' },
-  },
-  {
-    id: '0x4e68ccd3e89f51c3074ca5072bbac773960dfa36',
-    label: '0x4e68ccd3...dfa36',
-    tokenIn: { symbol: 'WETH', name: 'Wrapped Ether' },
-    tokenOut: { symbol: 'USDT', name: 'Tether USD' },
-  },
-];
+const mockPools: MockPool[] = [];
 
 const empty: DexPairFormData = { poolId: '', tokenIn: '', tokenOut: '' };
 
 export function DexPairForm({ open, onClose, onSave, initialData, language }: DexPairFormProps) {
+  const poolsFromStore = useAppSelector(selectPoolsDataResponse);
+  const tokens = useAppSelector(selectTokensDataResponse);
   const [form, setForm] = useState<DexPairFormData>(empty);
 
   const t = {
@@ -85,18 +58,29 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
     setForm(initialData ?? empty);
   }, [open, initialData]);
 
-  const poolOptions = useMemo(() =>
-    mockPools.map((p) => ({ value: p.id, label: p.id })),
-    []
-  );
+  const tokenById = useMemo(() => new Map(tokens.map((t: any) => [t.tokenId ?? t.id, t])), [tokens]);
+
+  const pools: MockPool[] = useMemo(() => {
+    return poolsFromStore.map((p: any) => {
+      const id = String(p.poolId ?? p.id);
+      const t0 = tokenById.get(p.token0Id);
+      const t1 = tokenById.get(p.token1Id);
+      const tokenIn = { symbol: t0?.symbol ?? 'Token0', name: t0?.tokenName ?? t0?.symbol ?? 'Token0' };
+      const tokenOut = { symbol: t1?.symbol ?? 'Token1', name: t1?.tokenName ?? t1?.symbol ?? 'Token1' };
+      const label = p.poolAddress ? `${String(p.poolAddress).slice(0, 10)}…${String(p.poolAddress).slice(-8)}` : id;
+      return { id, label, tokenIn, tokenOut };
+    });
+  }, [poolsFromStore, tokenById]);
+
+  const poolOptions = useMemo(() => pools.map((p) => ({ value: p.id, label: p.label })), [pools]);
 
   const selectedPool = useMemo(() =>
-    mockPools.find((p) => p.id === form.poolId) ?? null,
-    [form.poolId]
+    pools.find((p) => p.id === form.poolId) ?? null,
+    [form.poolId, pools]
   );
 
   const handlePoolChange = (poolId: string) => {
-    const pool = mockPools.find((p) => p.id === poolId);
+    const pool = pools.find((p) => p.id === poolId);
     setForm({
       poolId,
       tokenIn: pool ? pool.tokenIn.name : '',

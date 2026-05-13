@@ -119,7 +119,7 @@ export default function App() {
         return <PoolsPage language={language} />;
       case 'dex-chains':
       case 'cex-chains':
-        return <ChainsPage language={language} />;
+        return <ChainsPage language={language} type={activePage === 'cex-chains' ? 'cex' : 'dex'} />;
       case 'dex-pairs':
         return <PairsPage language={language} type="dex" />;
       case 'cex-pairs':

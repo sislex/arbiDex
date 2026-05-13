@@ -28,6 +28,8 @@ interface DataTableProps {
   title?: string;
   columns: Column[];
   data: any[];
+  isLoading?: boolean;
+  loadingText?: string;
   onEdit?: (row: any) => void;
   onDelete?: (row: any) => void;
   extraActions?: (row: any) => React.ReactNode;
@@ -41,6 +43,8 @@ export function DataTable({
   title,
   columns,
   data,
+  isLoading = false,
+  loadingText = 'Loading…',
   onEdit,
   onDelete,
   extraActions,
@@ -83,6 +87,7 @@ export function DataTable({
       field: column.key,
       headerName: column.label,
       sortable: Boolean(column.sortable),
+      resizable: true,
       filter: column.filterable ? 'agTextColumnFilter' : false,
       floatingFilter: false,
       flex: 1,
@@ -101,7 +106,7 @@ export function DataTable({
         headerName: 'ACTIONS',
         width: extraActions ? 132 : 96,
         minWidth: extraActions ? 132 : 96,
-        maxWidth: extraActions ? 152 : 116,
+        resizable: true,
         sortable: false,
         filter: false,
         pinned: 'left',
@@ -192,21 +197,30 @@ export function DataTable({
         </div>
       )}
       <div className="ag-theme-quartz arb-dex-grid flex-1 min-h-0 w-full">
-        <AgGridReact
-          rowData={data}
-          columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          suppressCellFocus
-          animateRows
-          rowSelection={selectionMode === 'none' ? undefined : selectionMode}
-          getRowClass={getRowClass}
-          onGridReady={(event) => {
-            gridApiRef.current = event.api;
-            emitFilteredData(event.api);
-          }}
-          onModelUpdated={handleModelUpdated}
-          onRowClicked={handleRowClicked}
-        />
+        {isLoading ? (
+          <div className="size-full flex items-center justify-center">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="size-5 rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground animate-spin" />
+              <span className="text-sm">{loadingText}</span>
+            </div>
+          </div>
+        ) : (
+          <AgGridReact
+            rowData={data}
+            columnDefs={columnDefs}
+            defaultColDef={defaultColDef}
+            suppressCellFocus
+            animateRows
+            rowSelection={selectionMode === 'none' ? undefined : selectionMode}
+            getRowClass={getRowClass}
+            onGridReady={(event) => {
+              gridApiRef.current = event.api;
+              emitFilteredData(event.api);
+            }}
+            onModelUpdated={handleModelUpdated}
+            onRowClicked={handleRowClicked}
+          />
+        )}
       </div>
     </div>
   );

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { useAppSelector } from '../../store/hooks';
+import { selectCexChainsDataResponse } from '../../store/db-config/dbConfig.selectors';
 
 interface CexPairFormData {
   chain: string;
@@ -17,20 +19,10 @@ interface CexPairFormProps {
   language: 'en' | 'ru';
 }
 
-const mockCexChains = [
-  { value: 'gateio', label: 'gateio' },
-  { value: 'binance', label: 'binance' },
-  { value: 'okx', label: 'okx' },
-  { value: 'bybit', label: 'bybit' },
-  { value: 'kucoin', label: 'kucoin' },
-  { value: 'huobi', label: 'huobi' },
-  { value: 'kraken', label: 'kraken' },
-  { value: 'coinbase', label: 'coinbase' },
-];
-
 const empty: CexPairFormData = { chain: '', token0Symbol: '', token1Symbol: '' };
 
 export function CexPairForm({ open, onClose, onSave, initialData, language }: CexPairFormProps) {
+  const cexChains = useAppSelector(selectCexChainsDataResponse);
   const [form, setForm] = useState<CexPairFormData>(empty);
 
   const t = {
@@ -56,6 +48,11 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
     setForm(initialData ?? empty);
   }, [open, initialData]);
 
+  const chainOptions = (cexChains ?? []).map((c: any) => {
+    const value = String(c.name ?? c.chainName ?? c.id ?? c.chainId ?? '');
+    return { value, label: value };
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(form);
@@ -68,7 +65,7 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
         <div className="p-6 space-y-4">
           <Autocomplete
             label={t[language].selectChain}
-            options={mockCexChains}
+            options={chainOptions}
             value={form.chain}
             onChange={(v) => setForm({ ...form, chain: v })}
             placeholder="Select chain..."

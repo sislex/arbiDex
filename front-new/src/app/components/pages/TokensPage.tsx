@@ -114,25 +114,25 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
         </button>
       </div>
 
-      {tokens && tokens.length ? (
-        <DataTable
-          title="Tokens"
-          columns={columns}
-          data={tokens}
-          onEdit={(row) => console.log('Edit', row)}
-          onDelete={(row) => {
-            setTokens(tokens.filter((token) => token.id !== row.id));
-            showDeleteToast({
-              itemName: row.symbol,
-              itemType: language === 'en' ? 'Token' : 'Токен',
-              onUndo: () => setTokens([...tokens]),
-              language,
-            });
-          }}
-          onRowClick={setSelectedRow}
-          selectedRow={selectedRow}
-        />
-      ) : null}
+      <DataTable
+        title="Tokens"
+        columns={columns}
+        data={tokens}
+        isLoading={tokensMeta.isLoading}
+        loadingText="Loading Tokens…"
+        onEdit={(row) => console.log('Edit', row)}
+        onDelete={(row) => {
+          setTokens(tokens.filter((token) => token.id !== row.id));
+          showDeleteToast({
+            itemName: row.symbol,
+            itemType: language === 'en' ? 'Token' : 'Токен',
+            onUndo: () => setTokens([...tokens]),
+            language,
+          });
+        }}
+        onRowClick={setSelectedRow}
+        selectedRow={selectedRow}
+      />
     </div>
   );
 }

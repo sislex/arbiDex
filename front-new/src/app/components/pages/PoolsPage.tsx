@@ -6,6 +6,7 @@ import { showDeleteToast } from '../../utils/toast';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { selectFullPoolsData, selectPoolsMeta } from '../../store/db-config/dbConfig.selectors';
+import { apiService } from '../../services/api-service';
 
 export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
@@ -130,6 +131,8 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         title="Pools"
         columns={columns}
         data={pools}
+        isLoading={poolsMeta.isLoading}
+        loadingText="Loading Pools…"
         onEdit={(row) => {
           setEditData(row.raw ?? row);
           setFormOpen(true);
@@ -155,7 +158,25 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
           setFormOpen(false);
           setEditData(null);
         }}
-        onSave={(data) => console.log('Pool saved', data)}
+        onSave={async (data) => {
+          const poolId = editData?.poolId ?? editData?.id;
+          const payload = {
+            chainId: Number(data.chainId),
+            token0Id: Number(data.token0Id),
+            token1Id: Number(data.token1Id),
+            dexId: Number(data.dexId),
+            fee: data.fee,
+            poolAddress: data.poolAddress,
+          };
+
+          if (poolId !== undefined && poolId !== null && Number.isFinite(Number(poolId))) {
+            await apiService.editPool(Number(poolId), payload);
+          } else {
+            await apiService.createPool(payload);
+          }
+
+          dispatch(dbConfigActions.initPoolsPage());
+        }}
         initialData={editData}
         language={language}
       />

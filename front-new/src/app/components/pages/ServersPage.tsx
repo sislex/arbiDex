@@ -75,6 +75,8 @@ export function ServersPage({ language }: { language: 'en' | 'ru' }) {
           title="Servers"
           columns={columns}
           data={servers}
+          isLoading={serversMeta.isLoading}
+          loadingText="Loading Servers…"
           onEdit={(row) => console.log('Edit', row)}
           onDelete={(row) => {
             setDeletedServerIds(new Set([...deletedServerIds, row.id]));

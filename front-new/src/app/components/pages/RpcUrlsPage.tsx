@@ -69,6 +69,8 @@ export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
         title="RPC URLs"
         columns={columns}
         data={rpcUrls}
+        isLoading={rpcUrlsMeta.isLoading || chainsMeta.isLoading}
+        loadingText="Loading RPC URLs…"
         onEdit={(row) => console.log('Edit', row)}
         onDelete={(row) => console.log('Delete', row)}
       />

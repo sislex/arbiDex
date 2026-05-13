@@ -137,6 +137,8 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
         title="Bots"
         columns={columns}
         data={bots}
+        isLoading={botsMeta.isLoading}
+        loadingText="Loading Bots…"
         onEdit={(row) => console.log('Edit', row)}
         onDelete={(row) => {
           setDeletedBotIds(new Set([...deletedBotIds, row.id]));

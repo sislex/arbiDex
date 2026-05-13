@@ -108,6 +108,8 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
         title="Quotes"
         columns={columns}
         data={quotes}
+        isLoading={quotesMeta.isLoading}
+        loadingText="Loading Quotes…"
         onEdit={(row) => console.log('Edit', row)}
         onDelete={(row) => {
           setDeletedQuoteIds(new Set([...deletedQuoteIds, row.id]));
