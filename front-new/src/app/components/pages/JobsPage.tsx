@@ -160,6 +160,9 @@ export function JobsPage({ language, type }: JobsPageProps) {
       token1: 'Token 1',
       isWork: 'is work?',
       addJob: 'Add job',
+      tableTitleCex: 'CEX jobs',
+      tableTitleDex: 'DEX jobs',
+      checkAction: 'Check',
     },
     ru: {
       jobId: 'Job ID',
@@ -174,6 +177,9 @@ export function JobsPage({ language, type }: JobsPageProps) {
       token1: 'Token 1',
       isWork: 'is work?',
       addJob: 'Добавить джобу',
+      tableTitleCex: 'CEX джобы',
+      tableTitleDex: 'DEX джобы',
+      checkAction: 'Проверить',
     },
   };
 
@@ -245,6 +251,7 @@ export function JobsPage({ language, type }: JobsPageProps) {
     }
 
     setCexWorkStatus((current) => ({ ...current, [jobId]: isWork }));
+    dispatch(dbConfigActions.refetchCexJobsData());
   };
 
   const handleDeleteCexJob = (row: any) => {
@@ -256,7 +263,7 @@ export function JobsPage({ language, type }: JobsPageProps) {
       deleteCexJobTimeoutsRef.current.delete(row.id);
       try {
         await apiService.deletingCexJob(row.id);
-        dispatch(dbConfigActions.initCexJobsListPage());
+        dispatch(dbConfigActions.refetchCexJobsListPageResources());
       } finally {
         setPendingDeleteCexJobIds((prev) => {
           const next = new Set(prev);
@@ -303,9 +310,10 @@ export function JobsPage({ language, type }: JobsPageProps) {
       )}
 
       <DataTable
-        title={type === 'cex' ? 'CEX Jobs' : 'DEX Jobs'}
+        title={type === 'cex' ? t[language].tableTitleCex : t[language].tableTitleDex}
         columns={type === 'cex' ? cexColumns : dexColumns}
         data={type === 'cex' ? cexJobsVisible : dexJobs}
+        language={language}
         isLoading={type === 'cex' ? cexJobsMeta.isLoading : jobsMeta.isLoading}
         loadingText={type === 'cex' ? 'Loading CEX Jobs…' : 'Loading DEX Jobs…'}
         onEdit={
@@ -326,7 +334,7 @@ export function JobsPage({ language, type }: JobsPageProps) {
                     handleCheckCexJob(row);
                   }}
                   className="p-1.5 hover:bg-success/10 rounded transition-colors"
-                  title="Check"
+                  title={t[language].checkAction}
                 >
                   <Play className="w-3.5 h-3.5 text-success" />
                 </button>
@@ -358,7 +366,7 @@ export function JobsPage({ language, type }: JobsPageProps) {
             } else {
               await apiService.createCexJob(payload);
             }
-            dispatch(dbConfigActions.initCexJobsListPage());
+            dispatch(dbConfigActions.refetchCexJobsListPageResources());
           }}
           initialData={
             editingJobRaw

@@ -46,6 +46,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       isActive: 'Is Active',
       isChecked: 'Is Checked',
       balance: 'Balance',
+      tableTitle: 'Tokens',
     },
     ru: {
       add: 'Добавить токен',
@@ -58,6 +59,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       isActive: 'Is Active',
       isChecked: 'Is Checked',
       balance: 'Balance',
+      tableTitle: 'Токены',
     },
   };
 
@@ -115,9 +117,10 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       </div>
 
       <DataTable
-        title="Tokens"
+        title={t[language].tableTitle}
         columns={columns}
         data={tokens}
+        language={language}
         isLoading={tokensMeta.isLoading}
         loadingText="Loading Tokens…"
         onEdit={(row) => console.log('Edit', row)}

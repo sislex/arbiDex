@@ -282,6 +282,7 @@ export function QuoteRelationsPage({ quoteName, language, onBack }: QuoteRelatio
         title={title}
         columns={columnsWithCheckbox}
         data={data}
+        language={language}
         onFilteredDataChange={onFilteredDataChange}
       />
     );

@@ -6,6 +6,7 @@ import {
   AllCommunityModule,
   ModuleRegistry,
   type ColDef,
+  type GetRowIdParams,
   type GridApi,
   type ModelUpdatedEvent,
   type RowClickedEvent,
@@ -13,6 +14,8 @@ import {
 } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
+
+import { agGridLocaleRu } from '../utils/agGridLocale';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -30,6 +33,8 @@ interface DataTableProps {
   data: any[];
   isLoading?: boolean;
   loadingText?: string;
+  /** Drives AG Grid filter/sort menu strings and the actions column header. */
+  language?: 'en' | 'ru';
   onEdit?: (row: any) => void;
   onDelete?: (row: any) => void;
   extraActions?: (row: any) => React.ReactNode;
@@ -37,6 +42,8 @@ interface DataTableProps {
   selectedRow?: any;
   selectionMode?: 'none' | 'single' | 'multiple';
   onFilteredDataChange?: (filteredData: any[]) => void;
+  /** Stable row identity for AG Grid (e.g. pair rating rows). */
+  getRowId?: (params: GetRowIdParams<any>) => string;
 }
 
 export function DataTable({
@@ -45,6 +52,7 @@ export function DataTable({
   data,
   isLoading = false,
   loadingText = 'Loading…',
+  language = 'en',
   onEdit,
   onDelete,
   extraActions,
@@ -52,25 +60,41 @@ export function DataTable({
   selectedRow,
   selectionMode = 'none',
   onFilteredDataChange,
+  getRowId,
 }: DataTableProps) {
+  const rows = Array.isArray(data) ? data : [];
   const gridApiRef = useRef<GridApi | null>(null);
-  const [filteredCount, setFilteredCount] = useState(data.length);
+  const [filteredCount, setFilteredCount] = useState(rows.length);
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
 
   const emitFilteredData = useCallback(
     (api: GridApi) => {
-      const filteredData: any[] = [];
-      api.forEachNodeAfterFilterAndSort((node) => {
-        if (node.data) {
-          filteredData.push(node.data);
-        }
-      });
-      setFilteredCount(filteredData.length);
-      setHasActiveFilters(Object.keys(api.getFilterModel()).length > 0);
-      onFilteredDataChange?.(filteredData);
+      try {
+        const filteredData: any[] = [];
+        api.forEachNodeAfterFilterAndSort((node) => {
+          if (node.data) {
+            filteredData.push(node.data);
+          }
+        });
+        setFilteredCount(filteredData.length);
+        const model = api.getFilterModel?.();
+        const keys =
+          model != null && typeof model === 'object' ? Object.keys(model as object) : [];
+        setHasActiveFilters(keys.length > 0);
+        onFilteredDataChange?.(filteredData);
+      } catch {
+        setFilteredCount(rows.length);
+        setHasActiveFilters(false);
+      }
     },
-    [onFilteredDataChange],
+    [onFilteredDataChange, rows.length],
   );
+
+  useEffect(() => {
+    if (isLoading) {
+      gridApiRef.current = null;
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     if (gridApiRef.current) {
@@ -78,9 +102,15 @@ export function DataTable({
       return;
     }
 
-    setFilteredCount(data.length);
+    setFilteredCount(rows.length);
     setHasActiveFilters(false);
-  }, [data, emitFilteredData]);
+  }, [rows, emitFilteredData]);
+
+  const actionsHeader = language === 'ru' ? 'ДЕЙСТВИЯ' : 'ACTIONS';
+  const editTitle = language === 'ru' ? 'Изменить' : 'Edit';
+  const deleteTitle = language === 'ru' ? 'Удалить' : 'Delete';
+
+  const localeText = useMemo(() => (language === 'ru' ? agGridLocaleRu : undefined), [language]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
     const gridColumns: ColDef[] = columns.map((column) => ({
@@ -103,7 +133,7 @@ export function DataTable({
     if (onEdit || onDelete || extraActions) {
       gridColumns.unshift({
         colId: 'actions',
-        headerName: 'ACTIONS',
+        headerName: actionsHeader,
         width: extraActions ? 132 : 96,
         minWidth: extraActions ? 132 : 96,
         resizable: true,
@@ -120,7 +150,7 @@ export function DataTable({
                   onEdit(params.data);
                 }}
                 className="p-1.5 hover:bg-accent rounded transition-colors"
-                title="Edit"
+                title={editTitle}
               >
                 <Edit2 className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
               </button>
@@ -132,7 +162,7 @@ export function DataTable({
                   onDelete(params.data);
                 }}
                 className="p-1.5 hover:bg-destructive/10 rounded transition-colors"
-                title="Delete"
+                title={deleteTitle}
               >
                 <Trash2 className="w-3.5 h-3.5 text-destructive" />
               </button>
@@ -143,7 +173,7 @@ export function DataTable({
     }
 
     return gridColumns;
-  }, [columns, extraActions, onDelete, onEdit]);
+  }, [actionsHeader, columns, deleteTitle, editTitle, extraActions, onDelete, onEdit]);
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -190,8 +220,10 @@ export function DataTable({
             {title}{' '}
             <span className="text-muted-foreground">
               {hasActiveFilters
-                ? `(${filteredCount}/${data.length})`
-                : `(${data.length} Все элементы)`}
+                ? `(${filteredCount}/${rows.length})`
+                : language === 'ru'
+                  ? `(${rows.length} всего)`
+                  : `(${rows.length})`}
             </span>
           </h2>
         </div>
@@ -206,16 +238,21 @@ export function DataTable({
           </div>
         ) : (
           <AgGridReact
-            rowData={data}
+            rowData={rows}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
+            localeText={localeText}
             suppressCellFocus
             animateRows
             rowSelection={selectionMode === 'none' ? undefined : selectionMode}
+            getRowId={getRowId}
             getRowClass={getRowClass}
             onGridReady={(event) => {
               gridApiRef.current = event.api;
               emitFilteredData(event.api);
+            }}
+            onGridPreDestroyed={() => {
+              gridApiRef.current = null;
             }}
             onModelUpdated={handleModelUpdated}
             onRowClicked={handleRowClicked}

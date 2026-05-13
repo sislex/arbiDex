@@ -111,14 +111,16 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
       job: 'Job',
       server: 'Server',
       pairsCount: 'Pairs count',
+      tableTitle: 'Bots',
     },
     ru: {
-      botId: 'Bot ID',
-      botName: 'Bot Name',
-      description: 'Description',
-      job: 'Job',
-      server: 'Server',
-      pairsCount: 'Pairs count',
+      botId: 'ID бота',
+      botName: 'Имя бота',
+      description: 'Описание',
+      job: 'Джоба',
+      server: 'Сервер',
+      pairsCount: 'Кол-во пар',
+      tableTitle: 'Боты',
     },
   };
 
@@ -134,9 +136,10 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
-        title="Bots"
+        title={t[language].tableTitle}
         columns={columns}
         data={bots}
+        language={language}
         isLoading={botsMeta.isLoading}
         loadingText="Loading Bots…"
         onEdit={(row) => console.log('Edit', row)}

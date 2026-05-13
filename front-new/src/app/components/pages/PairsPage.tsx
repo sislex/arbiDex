@@ -102,6 +102,11 @@ export function PairsPage({ language, type }: PairsPageProps) {
       token1: 'Token 1',
       count: 'Count',
       selectToken: 'Select Token In...',
+      tableTitleCex: 'CEX pairs',
+      tableTitleDex: 'DEX pairs',
+      ratingTableTitle: 'Pair rating',
+      ratingPickToken: 'Select a token to view pair rating',
+      ratingNoPairs: 'No pairs found for selected token',
     },
     ru: {
       pairs: 'Пары',
@@ -117,6 +122,11 @@ export function PairsPage({ language, type }: PairsPageProps) {
       token1: 'Token 1',
       count: 'Кол-во',
       selectToken: 'Выберите токен входа...',
+      tableTitleCex: 'CEX пары',
+      tableTitleDex: 'DEX пары',
+      ratingTableTitle: 'Рейтинг пар',
+      ratingPickToken: 'Выберите токен входа для рейтинга пар',
+      ratingNoPairs: 'Для выбранного токена нет пар',
     },
   };
 
@@ -207,16 +217,19 @@ export function PairsPage({ language, type }: PairsPageProps) {
       key: 'tokenInSymbol',
       label: t[language].tokenIn,
       sortable: true,
+      filterable: true,
     },
     {
       key: 'tokenOutSymbol',
       label: t[language].tokenOut,
       sortable: true,
+      filterable: true,
     },
     {
       key: 'tokenInAddress',
       label: t[language].tokenInAddress,
       sortable: true,
+      filterable: true,
       render: (value) => (
         <span className="font-mono text-xs text-muted-foreground">{value}</span>
       ),
@@ -225,6 +238,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
       key: 'tokenOutAddress',
       label: t[language].tokenOutAddress,
       sortable: true,
+      filterable: true,
       render: (value) => (
         <span className="font-mono text-xs text-muted-foreground">{value}</span>
       ),
@@ -233,11 +247,25 @@ export function PairsPage({ language, type }: PairsPageProps) {
       key: 'count',
       label: t[language].count,
       sortable: true,
+      filterable: true,
       render: (value) => (
         <span className="font-mono text-sm text-foreground">{value}</span>
       ),
     },
   ];
+
+  const ratingTableRows = useMemo(
+    () =>
+      pairRatingData.map((row: any, idx: number) => ({
+        rowId: `${row.tokenInId}-${row.tokenOutId}-${idx}`,
+        tokenInSymbol: row.tokenInSymbol,
+        tokenInAddress: row.tokenInAddress,
+        tokenOutSymbol: row.tokenOutSymbol,
+        tokenOutAddress: row.tokenOutAddress,
+        count: row.count,
+      })),
+    [pairRatingData],
+  );
 
   const tableData =
     type === 'cex'
@@ -246,6 +274,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const tableColumns = type === 'cex' ? cexPairsColumns : dexPairsColumns;
   const showPairsTable = type === 'cex' || activeTab === 'pairs';
   const isTableLoading = type === 'cex' ? cexPairsMeta.isLoading : pairsMeta.isLoading;
+  const isRatingLoading = type === 'dex' && activeTab === 'rating' && pairsMeta.isLoading;
 
   return (
     <div className="flex-1 flex flex-col bg-background">
@@ -272,9 +301,10 @@ export function PairsPage({ language, type }: PairsPageProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         {showPairsTable ? (
           <DataTable
-            title={type === 'cex' ? 'CEX Pairs' : 'DEX Pairs'}
+            title={type === 'cex' ? t[language].tableTitleCex : t[language].tableTitleDex}
             columns={tableColumns}
             data={tableData}
+            language={language}
             isLoading={isTableLoading}
             loadingText={type === 'cex' ? 'Loading CEX Pairs…' : 'Loading DEX Pairs…'}
             onEdit={(row) => {
@@ -294,7 +324,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
                 deleteCexPairTimeoutsRef.current.delete(row.id);
                 try {
                   await apiService.deletingCexPair(row.id);
-                  dispatch(dbConfigActions.initCexPairsPage());
+                  dispatch(dbConfigActions.refetchCexPairsPageResources());
                 } finally {
                   setPendingDeleteCexPairIds((prev) => {
                     const next = new Set(prev);
@@ -323,8 +353,8 @@ export function PairsPage({ language, type }: PairsPageProps) {
             }}
           />
         ) : (
-          <div className="flex-1 flex flex-col">
-            <div className="p-4 border-b border-border">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="shrink-0 p-4 border-b border-border">
               <Autocomplete
                 label={t[language].tokenIn}
                 options={tokenOptions}
@@ -337,43 +367,25 @@ export function PairsPage({ language, type }: PairsPageProps) {
                 placeholder={t[language].selectToken}
               />
             </div>
-            {pairRatingData.length > 0 ? (
-              <div className="flex-1 overflow-auto">
-                <table className="w-full border-collapse">
-                  <thead className="sticky top-0 bg-muted z-10">
-                    <tr>
-                      {ratingColumns.map((column) => (
-                        <th
-                          key={column.key}
-                          className="text-left px-3 py-2 border-b border-border text-xs text-muted-foreground uppercase tracking-wider"
-                        >
-                          {column.label}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pairRatingData.map((row, idx) => (
-                      <tr key={idx} className="border-b border-border hover:bg-muted/50">
-                        {ratingColumns.map((column) => (
-                          <td key={column.key} className="px-3 py-2">
-                            {column.render
-                              ? column.render(row[column.key as keyof typeof row], row)
-                              : row[column.key as keyof typeof row]}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {!selectedTokenIn ? (
+              <div className="flex-1 min-h-0 flex items-center justify-center p-4">
+                <p className="text-muted-foreground text-sm text-center">{t[language].ratingPickToken}</p>
+              </div>
+            ) : pairRatingData.length === 0 && !isRatingLoading ? (
+              <div className="flex-1 min-h-0 flex items-center justify-center p-4">
+                <p className="text-muted-foreground text-sm text-center">{t[language].ratingNoPairs}</p>
               </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center">
-                <p className="text-muted-foreground text-sm">
-                  {selectedTokenIn
-                    ? 'No pairs found for selected token'
-                    : 'Select a token to view pair rating'}
-                </p>
+              <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                <DataTable
+                  title={t[language].ratingTableTitle}
+                  columns={ratingColumns}
+                  data={ratingTableRows}
+                  language={language}
+                  isLoading={isRatingLoading}
+                  loadingText={language === 'ru' ? 'Загрузка рейтинга…' : 'Loading pair rating…'}
+                  getRowId={(params) => String(params.data?.rowId ?? '')}
+                />
               </div>
             )}
           </div>
@@ -400,7 +412,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
             } else {
               await apiService.createCexPair(payload);
             }
-            dispatch(dbConfigActions.initCexPairsPage());
+            dispatch(dbConfigActions.refetchCexPairsPageResources());
           }}
           initialData={
             editingCexPairRaw
@@ -423,7 +435,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
               tokenIn: Number(data.tokenInId),
               tokenOut: Number(data.tokenOutId),
             });
-            dispatch(dbConfigActions.initPairsPage());
+            dispatch(dbConfigActions.refetchPairsPageResources());
           }}
           language={language}
         />

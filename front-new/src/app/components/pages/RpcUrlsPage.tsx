@@ -43,11 +43,13 @@ export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
       rpcUrlId: 'Rpc Url ID',
       rpcUrl: 'Rpc Url',
       chainName: 'Chain Name',
+      tableTitle: 'RPC URLs',
     },
     ru: {
-      rpcUrlId: 'Rpc Url ID',
-      rpcUrl: 'Rpc Url',
-      chainName: 'Chain Name',
+      rpcUrlId: 'ID RPC',
+      rpcUrl: 'RPC URL',
+      chainName: 'Сеть',
+      tableTitle: 'RPC URL',
     },
   };
 
@@ -66,9 +68,10 @@ export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
-        title="RPC URLs"
+        title={t[language].tableTitle}
         columns={columns}
         data={rpcUrls}
+        language={language}
         isLoading={rpcUrlsMeta.isLoading || chainsMeta.isLoading}
         loadingText="Loading RPC URLs…"
         onEdit={(row) => console.log('Edit', row)}

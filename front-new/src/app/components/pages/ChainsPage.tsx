@@ -74,11 +74,13 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
       add: 'Add Chain',
       id: 'ID',
       name: 'Name',
+      tableTitle: 'Chains',
     },
     ru: {
       add: 'Добавить сеть',
       id: 'ID',
       name: 'Название',
+      tableTitle: 'Цепочки',
     },
   };
 
@@ -98,7 +100,7 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
         } else {
           await apiService.createCexChain({ name: data.name });
         }
-        dispatch(dbConfigActions.setCexChainsData());
+        dispatch(dbConfigActions.refetchCexChainsData());
       } else {
         const newChainId = Number(data.id);
         if (!Number.isFinite(newChainId)) {
@@ -111,7 +113,7 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
         } else {
           await apiService.createChain({ name: data.name, newChainId });
         }
-        dispatch(dbConfigActions.setChainsData());
+        dispatch(dbConfigActions.refetchChainsData());
       }
     } finally {
       setFormInitial(null);
@@ -136,9 +138,10 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
       </div>
 
       <DataTable
-        title="Chains"
+        title={t[language].tableTitle}
         columns={columns}
         data={chains}
+        language={language}
         isLoading={type === 'cex' ? cexChainsMeta.isLoading : chainsMeta.isLoading}
         loadingText={type === 'cex' ? 'Loading CEX Chains…' : 'Loading DEX Chains…'}
         onEdit={(row) => {
@@ -156,10 +159,10 @@ export function ChainsPage({ language, type }: { language: 'en' | 'ru'; type: 'd
             try {
               if (type === 'cex') {
                 await apiService.deletingCexChain(row.id);
-                dispatch(dbConfigActions.setCexChainsData());
+                dispatch(dbConfigActions.refetchCexChainsData());
               } else {
                 await apiService.deletingChain(row.id);
-                dispatch(dbConfigActions.setChainsData());
+                dispatch(dbConfigActions.refetchChainsData());
               }
             } catch (err) {
               const message = err instanceof Error ? err.message : String(err);

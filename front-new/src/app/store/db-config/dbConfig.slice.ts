@@ -254,6 +254,92 @@ const dbConfigSlice = createSlice({
     setCexJobsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.cexJobs, action.payload);
     },
+
+    refetchTokensData(state) {
+      setLoading(state.tokens);
+    },
+    refetchPoolsData(state) {
+      setLoading(state.pools);
+    },
+    refetchDexesData(state) {
+      setLoading(state.dexes);
+    },
+    refetchChainsData(state) {
+      setLoading(state.chains);
+    },
+    refetchPairsData(state) {
+      setLoading(state.pairs);
+    },
+    refetchQuotesData(state) {
+      setLoading(state.quotes);
+    },
+    refetchJobsData(state) {
+      setLoading(state.jobs);
+    },
+    refetchBotsData(state) {
+      setLoading(state.bots);
+    },
+    refetchServersData(state) {
+      setLoading(state.servers);
+    },
+    refetchRpcUrlsData(state) {
+      setLoading(state.rpcUrls);
+    },
+    refetchSwapRate(state) {
+      setLoading(state.swapRate);
+    },
+    refetchCexChainsData(state) {
+      setLoading(state.cexChains);
+    },
+    refetchCexPairsData(state) {
+      setLoading(state.cexPairs);
+    },
+    refetchCexJobsData(state) {
+      setLoading(state.cexJobs);
+    },
+
+    refetchPoolsPageResources(state) {
+      setLoading(state.pools);
+      setLoading(state.tokens);
+      setLoading(state.dexes);
+      setLoading(state.chains);
+      setLoading(state.swapRate);
+    },
+    refetchPairsPageResources(state) {
+      setLoading(state.pairs);
+      setLoading(state.pools);
+      setLoading(state.tokens);
+      setLoading(state.dexes);
+      setLoading(state.chains);
+    },
+    refetchQuotesListPageResources(state) {
+      setLoading(state.quotes);
+      setLoading(state.tokens);
+    },
+    refetchJobsListPageResources(state) {
+      setLoading(state.jobs);
+      setLoading(state.chains);
+      setLoading(state.rpcUrls);
+    },
+    refetchBotsListPageResources(state) {
+      setLoading(state.bots);
+      setLoading(state.jobs);
+      setLoading(state.servers);
+      setLoading(state.cexJobs);
+    },
+    refetchCexPairsPageResources(state) {
+      setLoading(state.cexPairs);
+      setLoading(state.cexChains);
+    },
+    refetchCexJobsListPageResources(state) {
+      setLoading(state.cexJobs);
+      setLoading(state.cexChains);
+      setLoading(state.cexPairs);
+    },
+    refetchTokensListPageResources(state) {
+      setLoading(state.tokens);
+      setLoading(state.chains);
+    },
   },
 });
 

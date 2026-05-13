@@ -31,10 +31,12 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
     en: {
       id: 'ID',
       name: 'Name',
+      tableTitle: 'DEXes',
     },
     ru: {
       id: 'ID',
-      name: 'Name',
+      name: 'Название',
+      tableTitle: 'DEX',
     },
   };
 
@@ -46,9 +48,10 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
-        title="DEXes"
+        title={t[language].tableTitle}
         columns={columns}
         data={dexes}
+        language={language}
         isLoading={dexesMeta.isLoading}
         loadingText="Loading DEXes…"
         onEdit={(row) => console.log('Edit', row)}

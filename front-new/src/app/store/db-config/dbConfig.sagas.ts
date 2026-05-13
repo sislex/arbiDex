@@ -47,6 +47,19 @@ function* loadList(
   }
 }
 
+function* runFreshFetch(
+  apiCall: () => Promise<any[]>,
+  successAction: (payload: any[]) => PayloadAction<any[]>,
+  failureAction: (payload: string) => PayloadAction<string>,
+) {
+  try {
+    const response: any[] = yield call(apiCall);
+    yield put(successAction(response));
+  } catch (error) {
+    yield put(failureAction(getErrorMessage(error)));
+  }
+}
+
 export function* handleSetTokensData() {
   yield call(
     loadList,
@@ -237,6 +250,72 @@ function* handleInitCexJobsListPage() {
   yield put(dbConfigActions.setCexPairsData());
 }
 
+function* handleRefetchPoolsPageResources() {
+  yield all([
+    call(runFreshFetch, dbConfigApi.getPools, dbConfigActions.setPoolsDataSuccess, dbConfigActions.setPoolsDataFailure),
+    call(runFreshFetch, dbConfigApi.getTokens, dbConfigActions.setTokensDataSuccess, dbConfigActions.setTokensDataFailure),
+    call(runFreshFetch, dbConfigApi.getDexes, dbConfigActions.setDexesDataSuccess, dbConfigActions.setDexesDataFailure),
+    call(runFreshFetch, dbConfigApi.getChains, dbConfigActions.setChainsDataSuccess, dbConfigActions.setChainsDataFailure),
+    call(runFreshFetch, dbConfigApi.getSwapRate, dbConfigActions.setSwapRateDataSuccess, dbConfigActions.setSwapRateDataFailure),
+  ]);
+}
+
+function* handleRefetchPairsPageResources() {
+  yield all([
+    call(runFreshFetch, dbConfigApi.getPairs, dbConfigActions.setPairsDataSuccess, dbConfigActions.setPairsDataFailure),
+    call(runFreshFetch, dbConfigApi.getPools, dbConfigActions.setPoolsDataSuccess, dbConfigActions.setPoolsDataFailure),
+    call(runFreshFetch, dbConfigApi.getTokens, dbConfigActions.setTokensDataSuccess, dbConfigActions.setTokensDataFailure),
+    call(runFreshFetch, dbConfigApi.getDexes, dbConfigActions.setDexesDataSuccess, dbConfigActions.setDexesDataFailure),
+    call(runFreshFetch, dbConfigApi.getChains, dbConfigActions.setChainsDataSuccess, dbConfigActions.setChainsDataFailure),
+  ]);
+}
+
+function* handleRefetchQuotesListPageResources() {
+  yield all([
+    call(runFreshFetch, dbConfigApi.getQuotes, dbConfigActions.setQuotesDataSuccess, dbConfigActions.setQuotesDataFailure),
+    call(runFreshFetch, dbConfigApi.getTokens, dbConfigActions.setTokensDataSuccess, dbConfigActions.setTokensDataFailure),
+  ]);
+}
+
+function* handleRefetchJobsListPageResources() {
+  yield all([
+    call(runFreshFetch, dbConfigApi.getJobs, dbConfigActions.setJobsDataSuccess, dbConfigActions.setJobsDataFailure),
+    call(runFreshFetch, dbConfigApi.getChains, dbConfigActions.setChainsDataSuccess, dbConfigActions.setChainsDataFailure),
+    call(runFreshFetch, dbConfigApi.getRpcUrls, dbConfigActions.setRpcUrlsDataSuccess, dbConfigActions.setRpcUrlsDataFailure),
+  ]);
+}
+
+function* handleRefetchBotsListPageResources() {
+  yield all([
+    call(runFreshFetch, dbConfigApi.getBots, dbConfigActions.setBotsDataSuccess, dbConfigActions.setBotsDataFailure),
+    call(runFreshFetch, dbConfigApi.getJobs, dbConfigActions.setJobsDataSuccess, dbConfigActions.setJobsDataFailure),
+    call(runFreshFetch, dbConfigApi.getServers, dbConfigActions.setServersDataSuccess, dbConfigActions.setServersDataFailure),
+    call(runFreshFetch, dbConfigApi.getCexJobs, dbConfigActions.setCexJobsDataSuccess, dbConfigActions.setCexJobsDataFailure),
+  ]);
+}
+
+function* handleRefetchCexPairsPageResources() {
+  yield all([
+    call(runFreshFetch, dbConfigApi.getCexPairs, dbConfigActions.setCexPairsDataSuccess, dbConfigActions.setCexPairsDataFailure),
+    call(runFreshFetch, dbConfigApi.getCexChains, dbConfigActions.setCexChainsDataSuccess, dbConfigActions.setCexChainsDataFailure),
+  ]);
+}
+
+function* handleRefetchCexJobsListPageResources() {
+  yield all([
+    call(runFreshFetch, dbConfigApi.getCexJobs, dbConfigActions.setCexJobsDataSuccess, dbConfigActions.setCexJobsDataFailure),
+    call(runFreshFetch, dbConfigApi.getCexChains, dbConfigActions.setCexChainsDataSuccess, dbConfigActions.setCexChainsDataFailure),
+    call(runFreshFetch, dbConfigApi.getCexPairs, dbConfigActions.setCexPairsDataSuccess, dbConfigActions.setCexPairsDataFailure),
+  ]);
+}
+
+function* handleRefetchTokensListPageResources() {
+  yield all([
+    call(runFreshFetch, dbConfigApi.getTokens, dbConfigActions.setTokensDataSuccess, dbConfigActions.setTokensDataFailure),
+    call(runFreshFetch, dbConfigApi.getChains, dbConfigActions.setChainsDataSuccess, dbConfigActions.setChainsDataFailure),
+  ]);
+}
+
 export function* dbConfigSaga() {
   yield all([
     takeLatest(dbConfigActions.initTokensListPage.type, handleInitTokensListPage),
@@ -262,7 +341,57 @@ export function* dbConfigSaga() {
     takeLatest(dbConfigActions.setCexChainsData.type, handleSetCexChainsData),
     takeLatest(dbConfigActions.setCexPairsData.type, handleSetCexPairsData),
     takeLatest(dbConfigActions.setCexJobsData.type, handleSetCexJobsData),
+
+    takeLatest(dbConfigActions.refetchTokensData.type, function* refetchTokens() {
+      yield call(runFreshFetch, dbConfigApi.getTokens, dbConfigActions.setTokensDataSuccess, dbConfigActions.setTokensDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchPoolsData.type, function* refetchPools() {
+      yield call(runFreshFetch, dbConfigApi.getPools, dbConfigActions.setPoolsDataSuccess, dbConfigActions.setPoolsDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchDexesData.type, function* refetchDexes() {
+      yield call(runFreshFetch, dbConfigApi.getDexes, dbConfigActions.setDexesDataSuccess, dbConfigActions.setDexesDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchChainsData.type, function* refetchChains() {
+      yield call(runFreshFetch, dbConfigApi.getChains, dbConfigActions.setChainsDataSuccess, dbConfigActions.setChainsDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchPairsData.type, function* refetchPairs() {
+      yield call(runFreshFetch, dbConfigApi.getPairs, dbConfigActions.setPairsDataSuccess, dbConfigActions.setPairsDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchQuotesData.type, function* refetchQuotes() {
+      yield call(runFreshFetch, dbConfigApi.getQuotes, dbConfigActions.setQuotesDataSuccess, dbConfigActions.setQuotesDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchJobsData.type, function* refetchJobs() {
+      yield call(runFreshFetch, dbConfigApi.getJobs, dbConfigActions.setJobsDataSuccess, dbConfigActions.setJobsDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchBotsData.type, function* refetchBots() {
+      yield call(runFreshFetch, dbConfigApi.getBots, dbConfigActions.setBotsDataSuccess, dbConfigActions.setBotsDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchServersData.type, function* refetchServers() {
+      yield call(runFreshFetch, dbConfigApi.getServers, dbConfigActions.setServersDataSuccess, dbConfigActions.setServersDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchRpcUrlsData.type, function* refetchRpcUrls() {
+      yield call(runFreshFetch, dbConfigApi.getRpcUrls, dbConfigActions.setRpcUrlsDataSuccess, dbConfigActions.setRpcUrlsDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchSwapRate.type, function* refetchSwapRateData() {
+      yield call(runFreshFetch, dbConfigApi.getSwapRate, dbConfigActions.setSwapRateDataSuccess, dbConfigActions.setSwapRateDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchCexChainsData.type, function* refetchCexChains() {
+      yield call(runFreshFetch, dbConfigApi.getCexChains, dbConfigActions.setCexChainsDataSuccess, dbConfigActions.setCexChainsDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchCexPairsData.type, function* refetchCexPairs() {
+      yield call(runFreshFetch, dbConfigApi.getCexPairs, dbConfigActions.setCexPairsDataSuccess, dbConfigActions.setCexPairsDataFailure);
+    }),
+    takeLatest(dbConfigActions.refetchCexJobsData.type, function* refetchCexJobs() {
+      yield call(runFreshFetch, dbConfigApi.getCexJobs, dbConfigActions.setCexJobsDataSuccess, dbConfigActions.setCexJobsDataFailure);
+    }),
+
+    takeLatest(dbConfigActions.refetchPoolsPageResources.type, handleRefetchPoolsPageResources),
+    takeLatest(dbConfigActions.refetchPairsPageResources.type, handleRefetchPairsPageResources),
+    takeLatest(dbConfigActions.refetchQuotesListPageResources.type, handleRefetchQuotesListPageResources),
+    takeLatest(dbConfigActions.refetchJobsListPageResources.type, handleRefetchJobsListPageResources),
+    takeLatest(dbConfigActions.refetchBotsListPageResources.type, handleRefetchBotsListPageResources),
+    takeLatest(dbConfigActions.refetchCexPairsPageResources.type, handleRefetchCexPairsPageResources),
+    takeLatest(dbConfigActions.refetchCexJobsListPageResources.type, handleRefetchCexJobsListPageResources),
+    takeLatest(dbConfigActions.refetchTokensListPageResources.type, handleRefetchTokensListPageResources),
   ]);
 }
-
-

@@ -45,6 +45,7 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
   const t = {
     en: {
       add: 'Add Pool',
+      tableTitle: 'Pools',
       id: 'ID',
       address: 'Address',
       chainName: 'Chain Name',
@@ -60,6 +61,7 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
     },
     ru: {
       add: 'Добавить пул',
+      tableTitle: 'Пулы',
       id: 'ID',
       address: 'Address',
       chainName: 'Chain Name',
@@ -128,9 +130,10 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
       </div>
 
       <DataTable
-        title="Pools"
+        title={t[language].tableTitle}
         columns={columns}
         data={pools}
+        language={language}
         isLoading={poolsMeta.isLoading}
         loadingText="Loading Pools…"
         onEdit={(row) => {
@@ -178,7 +181,7 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
             await apiService.createPool(base);
           }
 
-          dispatch(dbConfigActions.initPoolsPage());
+          dispatch(dbConfigActions.refetchPoolsPageResources());
         }}
         initialData={editData}
         language={language}

@@ -80,15 +80,17 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
       quoteSource: 'Quote source',
       quoteToken: 'Qouote Token',
       pairsCount: 'Pairs count',
+      tableTitle: 'Quotes',
     },
     ru: {
       id: 'ID',
-      amount: 'Amount',
-      side: 'Side',
-      blockTag: 'Block Tag',
-      quoteSource: 'Quote source',
-      quoteToken: 'Qouote Token',
-      pairsCount: 'Pairs count',
+      amount: 'Сумма',
+      side: 'Сторона',
+      blockTag: 'Блок',
+      quoteSource: 'Источник',
+      quoteToken: 'Токен котировки',
+      pairsCount: 'Кол-во пар',
+      tableTitle: 'Котировки',
     },
   };
 
@@ -105,9 +107,10 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
-        title="Quotes"
+        title={t[language].tableTitle}
         columns={columns}
         data={quotes}
+        language={language}
         isLoading={quotesMeta.isLoading}
         loadingText="Loading Quotes…"
         onEdit={(row) => console.log('Edit', row)}

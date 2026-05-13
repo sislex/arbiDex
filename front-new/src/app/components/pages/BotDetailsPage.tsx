@@ -172,6 +172,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
               title={`${botName} Jobs`}
               columns={columns}
               data={mockJobs}
+              language={language}
               onRowClick={(row) => setSelectedJobId(row.id)}
               selectedRow={mockJobs.find(j => j.id === selectedJobId)}
             />

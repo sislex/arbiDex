@@ -40,15 +40,17 @@ export function ServersPage({ language }: { language: 'en' | 'ru' }) {
       serverName: 'Server Name',
       getConfig: 'Get Config',
       restart: 'Restart',
+      tableTitle: 'Servers',
     },
     ru: {
       serverId: 'Server ID',
       status: 'Status',
       ip: 'IP',
       port: 'Port',
-      serverName: 'Server Name',
+      serverName: 'Имя сервера',
       getConfig: 'Получить конфигурацию',
       restart: 'Перезапустить',
+      tableTitle: 'Серверы',
     },
   };
 
@@ -72,9 +74,10 @@ export function ServersPage({ language }: { language: 'en' | 'ru' }) {
     <div className="flex-1 flex flex-col bg-background">
       <div className="flex-1 border-b border-border">
         <DataTable
-          title="Servers"
+          title={t[language].tableTitle}
           columns={columns}
           data={servers}
+          language={language}
           isLoading={serversMeta.isLoading}
           loadingText="Loading Servers…"
           onEdit={(row) => console.log('Edit', row)}
