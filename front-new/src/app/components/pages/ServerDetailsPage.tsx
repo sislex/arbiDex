@@ -14,6 +14,8 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
   const [rowsRaw, setRowsRaw] = useState<any[]>([]);
   const [serverRaw, setServerRaw] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
+  const [configJson, setConfigJson] = useState('');
 
   const t = {
     en: {
@@ -87,6 +89,71 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
     { key: 'pairsCount', label: t[language].pairsCount, sortable: true, filterable: true },
   ];
 
+  const mapBotParams = (bot: any) => ({
+    botType: bot?.botName ?? '',
+    paused: Boolean(bot?.paused),
+    isRepeat: Boolean(bot?.isRepeat),
+    delayBetweenRepeat: Number(bot?.delayBetweenRepeat ?? 0),
+    maxJobs: Number(bot?.maxJobs ?? 0),
+    maxErrors: Number(bot?.maxErrors ?? 0),
+    timeoutMs: Number(bot?.timeoutMs ?? 0),
+    description: bot?.description ?? '',
+  });
+
+  const mapQuoteRelation = (item: any) => {
+    const quoteRelation = item?.quoteRelation ?? item;
+    const pair = quoteRelation?.pair;
+    const pool = pair?.pool;
+    return {
+      dex: String(pool?.dex?.name ?? '-').toLowerCase(),
+      version: pool?.version ?? '-',
+      poolAddress: String(pool?.poolAddress ?? '-'),
+      feePpm: Number(pool?.fee ?? 0),
+    };
+  };
+
+  const mapDexJobParams = (job: any) => {
+    const firstRelation = job?.quoteJobRelations?.[0]?.quoteRelation ?? null;
+    const tokenIn = firstRelation?.pair?.tokenIn;
+    const tokenOut = firstRelation?.pair?.tokenOut;
+    const chainName = String(job?.chain?.name ?? '').toLowerCase();
+    return {
+      extraSettings: job?.extraSettings ?? {},
+      cexPairId: null,
+      jobType: job?.jobType ?? job?.job_type ?? '-',
+      rpcUrl: job?.rpcUrl?.rpcUrl ?? null,
+      source: chainName ? `dex:${chainName}` : 'dex:',
+      opts: {
+        tokenIn: {
+          decimals: Number(tokenIn?.decimals ?? 0),
+          symbol: tokenIn?.symbol ?? '',
+          address: tokenIn?.address ?? '',
+        },
+        tokenOut: {
+          decimals: Number(tokenOut?.decimals ?? 0),
+          symbol: tokenOut?.symbol ?? '',
+          address: tokenOut?.address ?? '',
+        },
+      },
+      pairsToQuote: (job?.quoteJobRelations ?? []).map(mapQuoteRelation),
+    };
+  };
+
+  const mapCexJobParams = (job: any) => ({
+    jobType: job?.job_type ?? job?.jobType ?? '-',
+    source: job?.pair?.chain?.name ?? '',
+    token0: job?.token0 ?? job?.pair?.token0 ?? '',
+    token1: job?.token1 ?? job?.pair?.token1 ?? '',
+  });
+
+  const buildServerBotConfigs = () => {
+    return (rowsRaw ?? []).map((bot: any) => ({
+      id: String(bot?.botId ?? bot?.id ?? ''),
+      botParams: mapBotParams(bot),
+      jobParams: bot?.job ? mapDexJobParams(bot.job) : mapCexJobParams(bot?.cexJob),
+    }));
+  };
+
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-background">
       <div className="h-14 border-b border-border flex items-center px-4 gap-4">
@@ -103,17 +170,38 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
         </h2>
       </div>
 
-      <div className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden">
-        <DataTable
-          title={serverName}
-          columns={columns}
-          data={rows}
-          language={language}
-          isLoading={isLoading}
-          loadingText={t[language].loading}
-          getRowId={(params) => String(params.data?.rowId ?? '')}
-        />
-      </div>
+      {showConfig ? (
+        <div className="flex-1 min-h-0 flex flex-col p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm text-foreground">{t[language].getConfig}</h3>
+            <button
+              onClick={() => setShowConfig(false)}
+              className="px-4 py-1.5 text-sm bg-muted text-foreground rounded hover:bg-accent transition-colors"
+            >
+              CLOSE
+            </button>
+          </div>
+          <div className="flex-1 min-h-0 flex flex-col">
+            <textarea
+              value={configJson}
+              readOnly
+              className="flex-1 min-h-0 p-4 bg-input border border-border rounded text-sm text-foreground font-mono resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden">
+          <DataTable
+            title={serverName}
+            columns={columns}
+            data={rows}
+            language={language}
+            isLoading={isLoading}
+            loadingText={t[language].loading}
+            getRowId={(params) => String(params.data?.rowId ?? '')}
+          />
+        </div>
+      )}
 
       <div className="h-16 border-t border-border bg-card flex items-center justify-end gap-3 px-4">
         <button
@@ -121,7 +209,9 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
             const ip = serverRaw?.ip;
             const port = serverRaw?.port;
             if (!ip || !port) return;
-            await apiService.resetServerSettings(String(ip), String(port), []);
+            await apiService.resetServerSettings(String(ip), String(port), {
+              botsRulesList: buildServerBotConfigs(),
+            });
           }}
           className="px-6 py-2 bg-destructive text-destructive-foreground rounded hover:opacity-90 transition-opacity flex items-center gap-2 text-sm"
         >
@@ -129,9 +219,10 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
           {t[language].resetServer}
         </button>
         <button
-          onClick={async () => {
-            if (!serverRaw?.serverId) return;
-            await apiService.setServerById(Number(serverRaw.serverId));
+          onClick={() => {
+            const configArray = buildServerBotConfigs();
+            setConfigJson(JSON.stringify(configArray, null, 2));
+            setShowConfig(true);
           }}
           className="px-6 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity text-sm"
         >
