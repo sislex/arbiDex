@@ -5,9 +5,11 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
   selectChainsDataResponse,
+  selectChainsMeta,
   selectJobsDataResponse,
   selectJobsMeta,
   selectRpcUrlDataResponse,
+  selectRpcUrlsMeta,
 } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
 
@@ -21,6 +23,8 @@ interface BotDetailsPageProps {
 export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsPageProps) {
   const dispatch = useAppDispatch();
   const jobsMeta = useAppSelector(selectJobsMeta);
+  const chainsMeta = useAppSelector(selectChainsMeta);
+  const rpcUrlsMeta = useAppSelector(selectRpcUrlsMeta);
   const jobsFromStore = useAppSelector(selectJobsDataResponse);
   const chains = useAppSelector(selectChainsDataResponse);
   const rpcUrls = useAppSelector(selectRpcUrlDataResponse);
@@ -29,6 +33,8 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
   const [showConfig, setShowConfig] = useState(false);
   const [configJson, setConfigJson] = useState('');
   const [activeBotRaw, setActiveBotRaw] = useState<any>(null);
+  const [activeCexJobRaw, setActiveCexJobRaw] = useState<any>(null);
+  const [cexChainNameById, setCexChainNameById] = useState<Map<number, string>>(new Map());
 
   const t = {
     en: {
@@ -65,16 +71,63 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
     if ((!jobsMeta.isLoaded || jobsMeta.error) && !jobsMeta.isLoading) {
       dispatch(dbConfigActions.initJobsListPage());
     }
-  }, [dispatch, jobsMeta.error, jobsMeta.isLoaded, jobsMeta.isLoading]);
+    if ((!chainsMeta.isLoaded || chainsMeta.error) && !chainsMeta.isLoading) {
+      dispatch(dbConfigActions.setChainsData());
+    }
+    if ((!rpcUrlsMeta.isLoaded || rpcUrlsMeta.error) && !rpcUrlsMeta.isLoading) {
+      dispatch(dbConfigActions.setRpcUrlsData());
+    }
+  }, [
+    chainsMeta.error,
+    chainsMeta.isLoaded,
+    chainsMeta.isLoading,
+    dispatch,
+    jobsMeta.error,
+    jobsMeta.isLoaded,
+    jobsMeta.isLoading,
+    rpcUrlsMeta.error,
+    rpcUrlsMeta.isLoaded,
+    rpcUrlsMeta.isLoading,
+  ]);
 
   useEffect(() => {
     let mounted = true;
     const loadBot = async () => {
+      const cexChains = await apiService.getCexChainsData();
+      if (!mounted) return;
+      const cexChainMap = new Map<number, string>();
+      (cexChains ?? []).forEach((chain: any) => {
+        const id = Number(chain.id ?? chain.chainId);
+        const name = String(chain.name ?? '');
+        if (Number.isFinite(id) && name) cexChainMap.set(id, name);
+      });
+      setCexChainNameById(cexChainMap);
+
       const bot = await apiService.setBotById(botId);
       if (!mounted) return;
       setActiveBotRaw(bot);
       const assignedJobId = Number(bot?.job?.jobId ?? bot?.jobId ?? bot?.job_id);
       setSelectedJobId(Number.isFinite(assignedJobId) ? assignedJobId : null);
+
+      const cexJobIdFromBot = Number(bot?.cexJob?.id ?? bot?.cexJobId ?? bot?.cex_job_id);
+      if (Number.isFinite(cexJobIdFromBot)) {
+        const cexJob = await apiService.getCexJobById(cexJobIdFromBot);
+        if (!mounted) return;
+        setActiveCexJobRaw(cexJob ?? null);
+        return;
+      }
+
+      const botsList = await apiService.getBots();
+      if (!mounted) return;
+      const listBot = (botsList ?? []).find((item: any) => Number(item.botId ?? item.id) === botId);
+      const cexJobIdFromList = Number(listBot?.cexJobId ?? listBot?.cex_job_id);
+      if (Number.isFinite(cexJobIdFromList)) {
+        const cexJob = await apiService.getCexJobById(cexJobIdFromList);
+        if (!mounted) return;
+        setActiveCexJobRaw(cexJob ?? null);
+      } else {
+        setActiveCexJobRaw(null);
+      }
     };
     loadBot();
     return () => {
@@ -82,9 +135,22 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
     };
   }, [botId]);
 
-  const chainById = useMemo(() => new Map(chains.map((chain: any) => [chain.chainId ?? chain.id, chain.name])), [chains]);
+  const chainById = useMemo(
+    () =>
+      new Map(
+        chains
+          .map((chain: any) => [Number(chain.chainId ?? chain.id), String(chain.name ?? '')] as const)
+          .filter(([id, name]) => Number.isFinite(id) && Boolean(name)),
+      ),
+    [chains],
+  );
   const rpcById = useMemo(
-    () => new Map(rpcUrls.map((rpc: any) => [rpc.rpcUrlId ?? rpc.id, rpc.rpcUrl ?? rpc.url])),
+    () =>
+      new Map(
+        rpcUrls
+          .map((rpc: any) => [Number(rpc.rpcUrlId ?? rpc.id), String(rpc.rpcUrl ?? rpc.url ?? '')] as const)
+          .filter(([id, url]) => Number.isFinite(id) && Boolean(url)),
+      ),
     [rpcUrls],
   );
 
@@ -95,8 +161,12 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
         jobType: job.jobType ?? job.job_type ?? '-',
         chainId: job.chainId ?? '-',
         chainName: chainById.get(job.chainId) ?? String(job.chainId ?? '-'),
-        rpcUrlId: job.rpcUrlId ?? '-',
-        rpcUrl: rpcById.get(job.rpcUrlId) ?? String(job.rpcUrlId ?? '-'),
+        rpcUrlId: Number(job.rpcUrlId ?? job.rpc_url_id ?? 0),
+        rpcUrl:
+          (typeof job.rpcUrl === 'string' && job.rpcUrl.startsWith('http') ? job.rpcUrl : '') ||
+          (typeof rpcById.get(Number(job.rpcUrlId ?? job.rpc_url_id ?? 0)) === 'string'
+            ? String(rpcById.get(Number(job.rpcUrlId ?? job.rpc_url_id ?? 0)))
+            : ''),
         pairsCount: Number(job.pairsCount ?? job.pairs_count ?? 0),
         raw: job,
       })),
@@ -156,24 +226,107 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
   ];
 
   const handleGetConfig = () => {
-    if (!selectedJobId) return;
+    const mapBotParams = (bot: any) => ({
+      botType: bot?.botName ?? bot?.name ?? '',
+      paused: Boolean(bot?.paused),
+      isRepeat: Boolean(bot?.isRepeat),
+      delayBetweenRepeat: Number(bot?.delayBetweenRepeat ?? 0),
+      maxJobs: Number(bot?.maxJobs ?? 0),
+      maxErrors: Number(bot?.maxErrors ?? 0),
+      timeoutMs: Number(bot?.timeoutMs ?? 0),
+      description: bot?.description ?? '',
+    });
 
-    const selectedJob = jobs.find(j => j.id === selectedJobId);
-    const config = {
-      botId,
-      botName,
-      bot: activeBotRaw,
-      job: selectedJob,
-      timestamp: new Date().toISOString(),
-      settings: {
-        maxRetries: 3,
-        timeout: 30000,
-        autoRestart: true,
-      },
+    const mapQuoteRelation = (item: any) => {
+      const quoteRelation = item?.quoteRelation ?? item;
+      const pair = quoteRelation?.pair;
+      const pool = pair?.pool;
+      return {
+        dex: String(pool?.dex?.name ?? '-').toLowerCase(),
+        version: pool?.version ?? '-',
+        poolAddress: String(pool?.poolAddress ?? '-'),
+        feePpm: Number(pool?.fee ?? 0),
+      };
     };
 
-    setConfigJson(JSON.stringify(config, null, 2));
-    setShowConfig(true);
+    const buildJobParams = (selectedJob: any, relations: any[], resolvedRpcUrl: string) => {
+      const firstRelation = relations?.[0]?.quoteRelation ?? relations?.[0];
+      const tokenIn = firstRelation?.pair?.tokenIn;
+      const tokenOut = firstRelation?.pair?.tokenOut;
+      const chainLabel = String(selectedJob?.chainName ?? '').trim().toLowerCase();
+      return {
+        extraSettings: selectedJob?.raw?.extraSettings ?? selectedJob?.extraSettings ?? {},
+        cexPairId: null,
+        jobType: selectedJob?.jobType ?? '-',
+        rpcUrl: resolvedRpcUrl || '',
+        source: chainLabel ? `dex:${chainLabel}` : 'dex:',
+        opts: {
+          tokenIn: {
+            decimals: Number(tokenIn?.decimals ?? 0),
+            symbol: tokenIn?.symbol ?? '',
+            address: tokenIn?.address ?? '',
+          },
+          tokenOut: {
+            decimals: Number(tokenOut?.decimals ?? 0),
+            symbol: tokenOut?.symbol ?? '',
+            address: tokenOut?.address ?? '',
+          },
+        },
+        pairsToQuote: (relations ?? []).map(mapQuoteRelation),
+      };
+    };
+
+    const mapCexJobParams = (job: any) => {
+      const chainId = Number(job?.pair?.source ?? job?.source);
+      const source =
+        (typeof job?.pair?.chain?.name === 'string' && job.pair.chain.name) ||
+        (Number.isFinite(chainId) ? cexChainNameById.get(chainId) : '') ||
+        '';
+      return {
+        jobType: job?.job_type ?? job?.jobType ?? '-',
+        source,
+        token0: job?.token0 ?? job?.pair?.token0 ?? '',
+        token1: job?.token1 ?? job?.pair?.token1 ?? '',
+      };
+    };
+
+    const openConfig = async () => {
+      if (activeCexJobRaw) {
+        const cexConfig = {
+          id: botId,
+          botParams: mapBotParams(activeBotRaw),
+          jobParams: mapCexJobParams(activeCexJobRaw),
+        };
+        setConfigJson(JSON.stringify(cexConfig, null, 2));
+        setShowConfig(true);
+        return;
+      }
+
+      if (!selectedJobId) return;
+      const selectedJob = jobs.find((j) => j.id === selectedJobId);
+      if (!selectedJob) return;
+      const relations = await apiService.getJobRelationsByJobId(selectedJobId);
+      const rpcUrlId = Number(selectedJob?.raw?.rpcUrlId ?? selectedJob?.raw?.rpc_url_id ?? selectedJob?.rpcUrlId);
+      const rpcUrlFromMap = Number.isFinite(rpcUrlId) ? rpcById.get(rpcUrlId) : '';
+      const rpcUrlFromJobRaw =
+        (typeof selectedJob?.raw?.rpcUrl?.rpcUrl === 'string' && selectedJob.raw.rpcUrl.rpcUrl) ||
+        (typeof selectedJob?.raw?.rpcUrl?.url === 'string' && selectedJob.raw.rpcUrl.url) ||
+        '';
+      const rpcUrlValue =
+        rpcUrlFromJobRaw ||
+        (typeof rpcUrlFromMap === 'string' && rpcUrlFromMap) ||
+        (typeof selectedJob?.rpcUrl === 'string' && selectedJob.rpcUrl.startsWith('http') ? selectedJob.rpcUrl : '') ||
+        '';
+      const config = {
+        id: botId,
+        botParams: mapBotParams(activeBotRaw),
+        jobParams: buildJobParams(selectedJob, Array.isArray(relations) ? relations : [], rpcUrlValue),
+      };
+      setConfigJson(JSON.stringify(config, null, 2));
+      setShowConfig(true);
+    };
+
+    void openConfig();
   };
 
   return (
@@ -193,7 +346,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
       </div>
 
       {showConfig ? (
-        <div className="flex-1 flex flex-col p-4">
+        <div className="flex-1 min-h-0 flex flex-col p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm text-foreground">{t[language].config}</h3>
             <button
@@ -203,15 +356,17 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
               {t[language].close}
             </button>
           </div>
-          <textarea
-            value={configJson}
-            readOnly
-            className="flex-1 p-4 bg-input border border-border rounded text-sm text-foreground font-mono resize-none focus:outline-none focus:ring-1 focus:ring-primary"
-          />
+          <div className="flex-1 min-h-0 flex flex-col">
+            <textarea
+              value={configJson}
+              readOnly
+              className="flex-1 min-h-0 p-4 bg-input border border-border rounded text-sm text-foreground font-mono resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
         </div>
       ) : (
         <>
-          <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
+          <div className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden">
             <DataTable
               title={`${botName} Jobs`}
               columns={columns}
@@ -230,7 +385,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
             </button>
             <button
               onClick={handleGetConfig}
-              disabled={!selectedJobId}
+              disabled={!selectedJobId && !activeCexJobRaw}
               className="px-6 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase"
             >
               {t[language].getConfig}
