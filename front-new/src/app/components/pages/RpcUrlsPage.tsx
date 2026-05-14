@@ -86,21 +86,20 @@ export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      <div className="h-14 border-b border-border flex items-center justify-end px-4">
-        <button
-          onClick={() => {
-            setEditingRpcRaw(null);
-            setFormOpen(true);
-          }}
-          className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
-        >
-          <Plus className="w-4 h-4" />
-          <span className="text-sm">{language === 'en' ? 'Add RPC Url' : 'Добавить RPC Url'}</span>
-        </button>
-      </div>
-
       <DataTable
         title={t[language].tableTitle}
+        headerActions={
+          <button
+            onClick={() => {
+              setEditingRpcRaw(null);
+              setFormOpen(true);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="text-sm">{language === 'en' ? 'Add RPC Url' : 'Добавить RPC Url'}</span>
+          </button>
+        }
         columns={columns}
         data={rpcUrls}
         language={language}

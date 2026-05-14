@@ -30,6 +30,7 @@ export interface Column {
 
 interface DataTableProps {
   title?: string;
+  headerActions?: React.ReactNode;
   columns: Column[];
   data: any[];
   isLoading?: boolean;
@@ -50,6 +51,7 @@ interface DataTableProps {
 
 export function DataTable({
   title,
+  headerActions,
   columns,
   data,
   isLoading = false,
@@ -226,8 +228,8 @@ export function DataTable({
 
   return (
     <div className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden">
-      {title && (
-        <div className="h-11 shrink-0 border-b border-border bg-background flex items-center px-4">
+      {(title || headerActions) && (
+        <div className="h-11 shrink-0 border-b border-border bg-background flex items-center justify-between gap-3 px-4">
           <h2 className="text-sm text-foreground">
             {title}{' '}
             <span className="text-muted-foreground">
@@ -238,6 +240,7 @@ export function DataTable({
                   : `(${rows.length})`}
             </span>
           </h2>
+          {headerActions ? <div className="shrink-0">{headerActions}</div> : null}
         </div>
       )}
       <div className="ag-theme-quartz arb-dex-grid flex-1 min-h-0 min-w-0 w-full">

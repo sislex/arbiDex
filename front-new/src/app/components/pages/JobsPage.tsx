@@ -24,6 +24,7 @@ import { showDeleteToast } from '../../utils/toast';
 interface JobsPageProps {
   language: 'en' | 'ru';
   type: 'dex' | 'cex';
+  onDexJobClick?: (jobId: number, jobName: string) => void;
 }
 
 const DELETE_UNDO_MS = 5000;
@@ -36,7 +37,7 @@ const formatExtra = (value: any) => {
   return typeof value === 'object' ? JSON.stringify(value) : String(value);
 };
 
-export function JobsPage({ language, type }: JobsPageProps) {
+export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const dispatch = useAppDispatch();
   const dexJobsFromStore = useAppSelector(selectJobsDataResponse);
   const cexJobsFromStore = useAppSelector(selectCexJobsDataResponse);
@@ -339,22 +340,21 @@ export function JobsPage({ language, type }: JobsPageProps) {
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      <div className="h-14 border-b border-border flex items-center justify-end px-4">
-        <button
-          type="button"
-          onClick={() => {
-            setEditingJobRaw(null);
-            setJobFormOpen(true);
-          }}
-          className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
-        >
-          <Plus className="w-4 h-4" />
-          <span className="text-sm">{t[language].addJob}</span>
-        </button>
-      </div>
-
       <DataTable
         title={type === 'cex' ? t[language].tableTitleCex : t[language].tableTitleDex}
+        headerActions={
+          <button
+            type="button"
+            onClick={() => {
+              setEditingJobRaw(null);
+              setJobFormOpen(true);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="text-sm">{t[language].addJob}</span>
+          </button>
+        }
         columns={type === 'cex' ? cexColumns : dexColumns}
         data={type === 'cex' ? cexJobsVisible : dexJobs}
         language={language}
@@ -367,8 +367,7 @@ export function JobsPage({ language, type }: JobsPageProps) {
         onDelete={type === 'cex' ? handleDeleteCexJob : handleDeleteDexJob}
         onRowDoubleClick={(row) => {
           if (type === 'dex') {
-            setEditingJobRaw(row.raw);
-            setJobFormOpen(true);
+            onDexJobClick?.(row.id, row.description || `Job #${row.id}`);
           }
         }}
         extraActions={
@@ -383,6 +382,19 @@ export function JobsPage({ language, type }: JobsPageProps) {
                   title={t[language].checkAction}
                 >
                   <Play className="w-3.5 h-3.5 text-success" />
+                </button>
+              )
+            : onDexJobClick
+            ? (row) => (
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDexJobClick(row.id, row.description || `Job #${row.id}`);
+                  }}
+                  className="p-1.5 hover:bg-accent rounded transition-colors"
+                  title={language === 'ru' ? 'Связи' : 'Relations'}
+                >
+                  <Play className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               )
             : undefined

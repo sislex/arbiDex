@@ -1,27 +1,15 @@
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
-
-interface Job {
-  id: number;
-  jobType: string;
-  chainId: number;
-  rpcUrl: string;
-  pairsCount: number;
-}
-
-const mockJobs: Job[] = [
-  { id: 87, jobType: 'get_Pools_From_Factory', chainId: 59144, rpcUrl: '14', pairsCount: 0 },
-  { id: 86, jobType: 'get_Pools_From_Factory', chainId: 59144, rpcUrl: '14', pairsCount: 0 },
-  { id: 85, jobType: 'get_Pools_From_Factory', chainId: 59144, rpcUrl: '14', pairsCount: 0 },
-  { id: 84, jobType: 'get_Pools_From_Factory', chainId: 59144, rpcUrl: '14', pairsCount: 0 },
-  { id: 83, jobType: 'get_Pools_From_Factory', chainId: 59144, rpcUrl: '14', pairsCount: 0 },
-  { id: 82, jobType: 'get_Pools_From_Factory', chainId: 59144, rpcUrl: '13', pairsCount: 0 },
-  { id: 81, jobType: 'get_Pools_From_Factory', chainId: 59144, rpcUrl: '13', pairsCount: 0 },
-  { id: 80, jobType: 'get_Pools_From_Factory', chainId: 81457, rpcUrl: '13', pairsCount: 0 },
-  { id: 79, jobType: 'get_Pools_From_Factory', chainId: 81457, rpcUrl: '13', pairsCount: 0 },
-  { id: 78, jobType: 'get_Pools_From_Factory', chainId: 81457, rpcUrl: '13', pairsCount: 0 },
-];
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
+import {
+  selectChainsDataResponse,
+  selectJobsDataResponse,
+  selectJobsMeta,
+  selectRpcUrlDataResponse,
+} from '../../store/db-config/dbConfig.selectors';
+import { apiService } from '../../services/api-service';
 
 interface BotDetailsPageProps {
   botId: number;
@@ -31,9 +19,16 @@ interface BotDetailsPageProps {
 }
 
 export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsPageProps) {
+  const dispatch = useAppDispatch();
+  const jobsMeta = useAppSelector(selectJobsMeta);
+  const jobsFromStore = useAppSelector(selectJobsDataResponse);
+  const chains = useAppSelector(selectChainsDataResponse);
+  const rpcUrls = useAppSelector(selectRpcUrlDataResponse);
+
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [configJson, setConfigJson] = useState('');
+  const [activeBotRaw, setActiveBotRaw] = useState<any>(null);
 
   const t = {
     en: {
@@ -66,6 +61,48 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
     },
   };
 
+  useEffect(() => {
+    if ((!jobsMeta.isLoaded || jobsMeta.error) && !jobsMeta.isLoading) {
+      dispatch(dbConfigActions.initJobsListPage());
+    }
+  }, [dispatch, jobsMeta.error, jobsMeta.isLoaded, jobsMeta.isLoading]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadBot = async () => {
+      const bot = await apiService.setBotById(botId);
+      if (!mounted) return;
+      setActiveBotRaw(bot);
+      const assignedJobId = Number(bot?.job?.jobId ?? bot?.jobId ?? bot?.job_id);
+      setSelectedJobId(Number.isFinite(assignedJobId) ? assignedJobId : null);
+    };
+    loadBot();
+    return () => {
+      mounted = false;
+    };
+  }, [botId]);
+
+  const chainById = useMemo(() => new Map(chains.map((chain: any) => [chain.chainId ?? chain.id, chain.name])), [chains]);
+  const rpcById = useMemo(
+    () => new Map(rpcUrls.map((rpc: any) => [rpc.rpcUrlId ?? rpc.id, rpc.rpcUrl ?? rpc.url])),
+    [rpcUrls],
+  );
+
+  const jobs = useMemo(
+    () =>
+      jobsFromStore.map((job: any) => ({
+        id: Number(job.jobId ?? job.id),
+        jobType: job.jobType ?? job.job_type ?? '-',
+        chainId: job.chainId ?? '-',
+        chainName: chainById.get(job.chainId) ?? String(job.chainId ?? '-'),
+        rpcUrlId: job.rpcUrlId ?? '-',
+        rpcUrl: rpcById.get(job.rpcUrlId) ?? String(job.rpcUrlId ?? '-'),
+        pairsCount: Number(job.pairsCount ?? job.pairs_count ?? 0),
+        raw: job,
+      })),
+    [chainById, jobsFromStore, rpcById],
+  );
+
   const columns: Column[] = [
     {
       key: 'radio',
@@ -97,12 +134,18 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
       label: t[language].chainId,
       sortable: true,
       filterable: true,
+      render: (_, row) => (
+        <span className="text-xs text-muted-foreground">{row.chainName}</span>
+      ),
     },
     {
       key: 'rpcUrl',
       label: t[language].rpcUrl,
       sortable: true,
       filterable: true,
+      render: (value) => (
+        <span className="font-mono text-xs text-muted-foreground">{value}</span>
+      ),
     },
     {
       key: 'pairsCount',
@@ -115,10 +158,11 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
   const handleGetConfig = () => {
     if (!selectedJobId) return;
 
-    const selectedJob = mockJobs.find(j => j.id === selectedJobId);
+    const selectedJob = jobs.find(j => j.id === selectedJobId);
     const config = {
       botId,
       botName,
+      bot: activeBotRaw,
       job: selectedJob,
       timestamp: new Date().toISOString(),
       settings: {
@@ -133,7 +177,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-background">
+    <div className="flex-1 min-h-0 flex flex-col bg-background">
       <div className="h-14 border-b border-border flex items-center px-4 gap-4">
         <button
           onClick={onBack}
@@ -144,7 +188,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
         </button>
         <div className="h-6 w-px bg-border" />
         <h2 className="text-foreground">
-          Bot ID:{botId} {t[language].relationsTable} ({mockJobs.length})
+          Bot ID:{botId} {t[language].relationsTable} ({jobs.length})
         </h2>
       </div>
 
@@ -167,14 +211,16 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
             <DataTable
               title={`${botName} Jobs`}
               columns={columns}
-              data={mockJobs}
+              data={jobs}
               language={language}
+              isLoading={jobsMeta.isLoading}
+              loadingText={language === 'ru' ? 'Загрузка Jobs…' : 'Loading Jobs…'}
               onRowClick={(row) => setSelectedJobId(row.id)}
-              selectedRow={mockJobs.find(j => j.id === selectedJobId)}
+              selectedRow={jobs.find(j => j.id === selectedJobId)}
             />
           </div>
 

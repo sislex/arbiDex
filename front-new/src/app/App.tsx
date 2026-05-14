@@ -9,10 +9,12 @@ import { QuoteRelationsPage } from './components/pages/QuoteRelationsPage';
 import { BotsPage } from './components/pages/BotsPage';
 import { BotDetailsPage } from './components/pages/BotDetailsPage';
 import { ServersPage } from './components/pages/ServersPage';
+import { ServerDetailsPage } from './components/pages/ServerDetailsPage';
 import { ChainsPage } from './components/pages/ChainsPage';
 import { PoolsPage } from './components/pages/PoolsPage';
 import { PairsPage } from './components/pages/PairsPage';
 import { JobsPage } from './components/pages/JobsPage';
+import { DexJobRelationsPage } from './components/pages/DexJobRelationsPage';
 import { RpcUrlsPage } from './components/pages/RpcUrlsPage';
 import { DexesPage } from './components/pages/DexesPage';
 
@@ -22,6 +24,8 @@ export default function App() {
   const [activePage, setActivePage] = useState('dex-chains');
   const [selectedQuote, setSelectedQuote] = useState<{ id: number; name: string } | null>(null);
   const [selectedBot, setSelectedBot] = useState<{ id: number; name: string } | null>(null);
+  const [selectedServer, setSelectedServer] = useState<{ id: number; name: string } | null>(null);
+  const [selectedDexJob, setSelectedDexJob] = useState<{ id: number; name: string } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userLogin, setUserLogin] = useState('');
@@ -41,6 +45,8 @@ export default function App() {
     setActivePage('dex-chains');
     setSelectedQuote(null);
     setSelectedBot(null);
+    setSelectedServer(null);
+    setSelectedDexJob(null);
   };
 
   const handleLogout = () => {
@@ -49,6 +55,8 @@ export default function App() {
     setActivePage('dex-chains');
     setSelectedQuote(null);
     setSelectedBot(null);
+    setSelectedServer(null);
+    setSelectedDexJob(null);
   };
 
   const pageTitles = {
@@ -100,6 +108,17 @@ export default function App() {
       );
     }
 
+    if (activePage === 'dex-jobs' && selectedDexJob) {
+      return (
+        <DexJobRelationsPage
+          jobId={selectedDexJob.id}
+          jobName={selectedDexJob.name}
+          language={language}
+          onBack={() => setSelectedDexJob(null)}
+        />
+      );
+    }
+
     if (activePage === 'bots' && selectedBot) {
       return (
         <BotDetailsPage
@@ -107,6 +126,17 @@ export default function App() {
           botName={selectedBot.name}
           language={language}
           onBack={() => setSelectedBot(null)}
+        />
+      );
+    }
+
+    if (activePage === 'servers' && selectedServer) {
+      return (
+        <ServerDetailsPage
+          serverId={selectedServer.id}
+          serverName={selectedServer.name}
+          language={language}
+          onBack={() => setSelectedServer(null)}
         />
       );
     }
@@ -124,7 +154,13 @@ export default function App() {
       case 'cex-pairs':
         return <PairsPage language={language} type="cex" />;
       case 'dex-jobs':
-        return <JobsPage language={language} type="dex" />;
+        return (
+          <JobsPage
+            language={language}
+            type="dex"
+            onDexJobClick={(jobId, jobName) => setSelectedDexJob({ id: jobId, name: jobName })}
+          />
+        );
       case 'cex-jobs':
         return <JobsPage language={language} type="cex" />;
       case 'dex-rpc-urls':
@@ -141,7 +177,12 @@ export default function App() {
       case 'bots':
         return <BotsPage language={language} onBotClick={(bot) => setSelectedBot({ id: bot.id, name: bot.name })} />;
       case 'servers':
-        return <ServersPage language={language} />;
+        return (
+          <ServersPage
+            language={language}
+            onServerClick={(server) => setSelectedServer({ id: server.id, name: server.name })}
+          />
+        );
       default:
         return <TokensPage language={language} />;
     }
@@ -171,8 +212,12 @@ export default function App() {
         pageTitle={
           selectedQuote
             ? selectedQuote.name
+            : selectedDexJob
+            ? selectedDexJob.name
             : selectedBot
             ? selectedBot.name
+            : selectedServer
+            ? selectedServer.name
             : pageTitles[language][activePage as keyof typeof pageTitles.en]
         }
         onThemeToggle={() => setIsDark(!isDark)}
@@ -193,6 +238,8 @@ export default function App() {
               setActivePage(page);
               setSelectedQuote(null);
               setSelectedBot(null);
+              setSelectedServer(null);
+              setSelectedDexJob(null);
             }}
             language={language}
           />

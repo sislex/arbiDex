@@ -150,73 +150,74 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      <div className="h-14 border-b border-border flex items-center justify-end px-4">
-        <button
-          onClick={() => {
-            setEditingBotRaw(null);
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <DataTable
+          title={t[language].tableTitle}
+          headerActions={
+            <button
+              onClick={() => {
+                setEditingBotRaw(null);
+                setFormOpen(true);
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-sm">{language === 'en' ? 'Add Bot' : 'Добавить Bot'}</span>
+            </button>
+          }
+          columns={columns}
+          data={bots}
+          language={language}
+          isLoading={botsMeta.isLoading}
+          loadingText="Loading Bots…"
+          onEdit={(row) => {
+            setEditingBotRaw(row.raw ?? row);
             setFormOpen(true);
           }}
-          className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
-        >
-          <Plus className="w-4 h-4" />
-          <span className="text-sm">{language === 'en' ? 'Add Bot' : 'Добавить Bot'}</span>
-        </button>
-      </div>
+          onDelete={(row) => {
+            setPendingDeleteBotIds((prev) => new Set(prev).add(row.id));
+            const existing = deleteBotTimeoutsRef.current.get(row.id);
+            if (existing) clearTimeout(existing);
 
-      <DataTable
-        title={t[language].tableTitle}
-        columns={columns}
-        data={bots}
-        language={language}
-        isLoading={botsMeta.isLoading}
-        loadingText="Loading Bots…"
-        onEdit={(row) => {
-          setEditingBotRaw(row.raw ?? row);
-          setFormOpen(true);
-        }}
-        onDelete={(row) => {
-          setPendingDeleteBotIds((prev) => new Set(prev).add(row.id));
-          const existing = deleteBotTimeoutsRef.current.get(row.id);
-          if (existing) clearTimeout(existing);
-
-          const tid = setTimeout(async () => {
-            deleteBotTimeoutsRef.current.delete(row.id);
-            try {
-              await apiService.deletingBot(row.id);
-              dispatch(dbConfigActions.refetchBotsListPageResources());
-            } finally {
-              setPendingDeleteBotIds((prev) => {
-                const next = new Set(prev);
-                next.delete(row.id);
-                return next;
-              });
-            }
-          }, DELETE_UNDO_MS);
-          deleteBotTimeoutsRef.current.set(row.id, tid);
-
-          showDeleteToast({
-            itemName: row.name,
-            itemType: language === 'en' ? 'Bot' : 'Bot',
-            onUndo: () => {
-              const scheduled = deleteBotTimeoutsRef.current.get(row.id);
-              if (scheduled) clearTimeout(scheduled);
+            const tid = setTimeout(async () => {
               deleteBotTimeoutsRef.current.delete(row.id);
-              setPendingDeleteBotIds((prev) => {
-                const next = new Set(prev);
-                next.delete(row.id);
-                return next;
-              });
-            },
-            language,
-          });
-        }}
-        onRowDoubleClick={(row) => {
-          setSelectedBot(row);
-          onBotClick?.(row);
-        }}
-        selectedRow={selectedBot}
-        selectionMode="single"
-      />
+              try {
+                await apiService.deletingBot(row.id);
+                dispatch(dbConfigActions.refetchBotsListPageResources());
+              } finally {
+                setPendingDeleteBotIds((prev) => {
+                  const next = new Set(prev);
+                  next.delete(row.id);
+                  return next;
+                });
+              }
+            }, DELETE_UNDO_MS);
+            deleteBotTimeoutsRef.current.set(row.id, tid);
+
+            showDeleteToast({
+              itemName: row.name,
+              itemType: language === 'en' ? 'Bot' : 'Bot',
+              onUndo: () => {
+                const scheduled = deleteBotTimeoutsRef.current.get(row.id);
+                if (scheduled) clearTimeout(scheduled);
+                deleteBotTimeoutsRef.current.delete(row.id);
+                setPendingDeleteBotIds((prev) => {
+                  const next = new Set(prev);
+                  next.delete(row.id);
+                  return next;
+                });
+              },
+              language,
+            });
+          }}
+          onRowDoubleClick={(row) => {
+            setSelectedBot(row);
+            onBotClick?.(row);
+          }}
+          selectedRow={selectedBot}
+          selectionMode="single"
+        />
+      </div>
 
       <BotForm
         open={formOpen}
