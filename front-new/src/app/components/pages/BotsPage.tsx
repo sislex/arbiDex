@@ -168,7 +168,13 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
           columns={columns}
           data={bots}
           language={language}
-          isLoading={botsMeta.isLoading}
+          isLoading={
+            botsMeta.isLoading ||
+            jobsMeta.isLoading ||
+            cexJobsMeta.isLoading ||
+            serversMeta.isLoading ||
+            pairsMeta.isLoading
+          }
           loadingText="Loading Bots…"
           onEdit={(row) => {
             setEditingBotRaw(row.raw ?? row);

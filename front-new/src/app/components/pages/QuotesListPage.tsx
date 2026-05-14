@@ -145,7 +145,7 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
         columns={columns}
         data={quotes}
         language={language}
-        isLoading={quotesMeta.isLoading}
+        isLoading={quotesMeta.isLoading || tokensMeta.isLoading || pairsMeta.isLoading}
         loadingText="Loading Quotes…"
         onEdit={(row) => {
           setEditingQuoteRaw(row.raw ?? row);

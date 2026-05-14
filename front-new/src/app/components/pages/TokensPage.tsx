@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import { showDeleteToast } from '../../utils/toast';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
-import { selectTokensFullDataResponse, selectTokensMeta } from '../../store/db-config/dbConfig.selectors';
+import {
+  selectChainsMeta,
+  selectTokensFullDataResponse,
+  selectTokensMeta,
+} from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
 import { DexTokenForm } from '../forms/DexTokenForm';
 
@@ -14,6 +18,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
   const tokensFromStore = useAppSelector(selectTokensFullDataResponse);
   const tokensMeta = useAppSelector(selectTokensMeta);
+  const chainsMeta = useAppSelector(selectChainsMeta);
   const [selectedRow, setSelectedRow] = useState(null);
   const [tokens, setTokens] = useState<any[]>([]);
   const [formOpen, setFormOpen] = useState(false);
@@ -143,7 +148,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
         columns={columns}
         data={tokens.filter((token) => !pendingDeleteTokenIds.has(token.id))}
         language={language}
-        isLoading={tokensMeta.isLoading}
+        isLoading={tokensMeta.isLoading || chainsMeta.isLoading}
         loadingText="Loading Tokens…"
         onEdit={(row) => {
           setEditingTokenRaw(

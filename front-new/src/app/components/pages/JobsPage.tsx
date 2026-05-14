@@ -6,7 +6,9 @@ import { DexJobForm } from '../forms/DexJobForm';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
+  selectChainsMeta,
   selectCexChainsDataResponse,
+  selectCexChainsMeta,
   selectCexJobsMeta,
   selectCexPairsDataResponse,
   selectCexPairsMeta,
@@ -15,7 +17,9 @@ import {
   selectJobsMeta,
   selectJobsDataResponse,
   selectPairsDataResponse,
+  selectPairsMeta,
   selectRpcUrlDataResponse,
+  selectRpcUrlsMeta,
 } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
 import { buildCexChainNameById, resolveCexSourceFromJobAndPair } from '../../utils/cexPairSource';
@@ -37,6 +41,11 @@ const formatExtra = (value: any) => {
   return typeof value === 'object' ? JSON.stringify(value) : String(value);
 };
 
+const normalizeCexSource = (raw: any) => {
+  const value = String(raw ?? '').trim();
+  return value ? value.toLowerCase() : '';
+};
+
 export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const dispatch = useAppDispatch();
   const dexJobsFromStore = useAppSelector(selectJobsDataResponse);
@@ -44,6 +53,10 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const jobsMeta = useAppSelector(selectJobsMeta);
   const cexJobsMeta = useAppSelector(selectCexJobsMeta);
   const cexPairsMeta = useAppSelector(selectCexPairsMeta);
+  const cexChainsMeta = useAppSelector(selectCexChainsMeta);
+  const chainsMeta = useAppSelector(selectChainsMeta);
+  const rpcUrlsMeta = useAppSelector(selectRpcUrlsMeta);
+  const pairsMeta = useAppSelector(selectPairsMeta);
   const chains = useAppSelector(selectChainsDataResponse);
   const rpcUrls = useAppSelector(selectRpcUrlDataResponse);
   const cexChains = useAppSelector(selectCexChainsDataResponse);
@@ -246,9 +259,24 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const handleCheckCexJob = async (row: any) => {
     const jobId = row.id;
     let isWork = false;
+    const payload = {
+      source: normalizeCexSource(
+        row?.raw?.sourceName ??
+          row?.raw?.exchangeName ??
+          row?.raw?.exchange ??
+          row?.raw?.pair?.sourceName ??
+          row?.raw?.pair?.exchangeName ??
+          row?.raw?.pair?.exchange ??
+          row?.raw?.source ??
+          row?.raw?.pair?.source ??
+          row?.source,
+      ),
+      token0: String(row?.raw?.token0 ?? row?.raw?.pair?.token0 ?? row?.token0 ?? '').trim(),
+      token1: String(row?.raw?.token1 ?? row?.raw?.pair?.token1 ?? row?.token1 ?? '').trim(),
+    };
 
     try {
-      const response = await apiService.checkCexJob(row.raw);
+      const response = await apiService.checkCexJob(payload);
       isWork = Boolean(response?.isWork ?? response?.is_work ?? response?.checked ?? response?.success ?? response);
       await apiService.updateCexJobStatus(jobId, isWork);
     } catch (error) {
@@ -358,7 +386,11 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         columns={type === 'cex' ? cexColumns : dexColumns}
         data={type === 'cex' ? cexJobsVisible : dexJobs}
         language={language}
-        isLoading={type === 'cex' ? cexJobsMeta.isLoading : jobsMeta.isLoading}
+        isLoading={
+          type === 'cex'
+            ? cexJobsMeta.isLoading || cexPairsMeta.isLoading || cexChainsMeta.isLoading
+            : jobsMeta.isLoading || chainsMeta.isLoading || rpcUrlsMeta.isLoading || pairsMeta.isLoading
+        }
         loadingText={type === 'cex' ? 'Loading CEX Jobs…' : 'Loading DEX Jobs…'}
         onEdit={(row) => {
           setEditingJobRaw(row.raw);

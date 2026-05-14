@@ -118,22 +118,32 @@ export function DataTable({
   const localeText = useMemo(() => (language === 'ru' ? agGridLocaleRu : undefined), [language]);
 
   const columnDefs = useMemo<ColDef[]>(() => {
-    const gridColumns: ColDef[] = columns.map((column) => ({
-      field: column.key,
-      headerName: column.label,
-      sortable: Boolean(column.sortable),
-      resizable: true,
-      filter: column.filterable ? 'agTextColumnFilter' : false,
-      floatingFilter: false,
-      flex: 1,
-      minWidth: column.key === 'checkbox' || column.key === 'actions' ? 64 : 120,
-      suppressHeaderMenuButton: true,
-      suppressHeaderFilterButton: !column.filterable,
-      menuTabs: column.filterable ? ['filterMenuTab'] : [],
-      cellRenderer: column.render
-        ? (params: any) => column.render?.(params.value, params.data)
-        : undefined,
-    }));
+    const gridColumns: ColDef[] = columns.map((column) => {
+      const isAddressColumn = column.key.toLowerCase().includes('address');
+      return {
+        field: column.key,
+        headerName: column.label,
+        sortable: Boolean(column.sortable),
+        resizable: true,
+        filter: column.filterable ? 'agTextColumnFilter' : false,
+        floatingFilter: false,
+        flex: 1,
+        minWidth: column.key === 'checkbox' || column.key === 'actions' ? 64 : 120,
+        suppressHeaderMenuButton: true,
+        suppressHeaderFilterButton: !column.filterable,
+        menuTabs: column.filterable ? ['filterMenuTab'] : [],
+        tooltipValueGetter: isAddressColumn
+          ? (params: any) => {
+              const value = params?.value;
+              if (value === null || value === undefined || value === '') return null;
+              return String(value);
+            }
+          : undefined,
+        cellRenderer: column.render
+          ? (params: any) => column.render?.(params.value, params.data)
+          : undefined,
+      };
+    });
 
     if (onEdit || onDelete || extraActions) {
       gridColumns.unshift({
@@ -257,6 +267,9 @@ export function DataTable({
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
             localeText={localeText}
+            enableBrowserTooltips
+            enableCellTextSelection
+            ensureDomOrder
             suppressCellFocus
             animateRows
             rowSelection={selectionMode === 'none' ? undefined : selectionMode}

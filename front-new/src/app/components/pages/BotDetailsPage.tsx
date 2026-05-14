@@ -35,6 +35,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
   const [activeBotRaw, setActiveBotRaw] = useState<any>(null);
   const [activeCexJobRaw, setActiveCexJobRaw] = useState<any>(null);
   const [cexChainNameById, setCexChainNameById] = useState<Map<number, string>>(new Map());
+  const [isBotDataLoading, setIsBotDataLoading] = useState(false);
 
   const t = {
     en: {
@@ -93,40 +94,45 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
   useEffect(() => {
     let mounted = true;
     const loadBot = async () => {
-      const cexChains = await apiService.getCexChainsData();
-      if (!mounted) return;
-      const cexChainMap = new Map<number, string>();
-      (cexChains ?? []).forEach((chain: any) => {
-        const id = Number(chain.id ?? chain.chainId);
-        const name = String(chain.name ?? '');
-        if (Number.isFinite(id) && name) cexChainMap.set(id, name);
-      });
-      setCexChainNameById(cexChainMap);
-
-      const bot = await apiService.setBotById(botId);
-      if (!mounted) return;
-      setActiveBotRaw(bot);
-      const assignedJobId = Number(bot?.job?.jobId ?? bot?.jobId ?? bot?.job_id);
-      setSelectedJobId(Number.isFinite(assignedJobId) ? assignedJobId : null);
-
-      const cexJobIdFromBot = Number(bot?.cexJob?.id ?? bot?.cexJobId ?? bot?.cex_job_id);
-      if (Number.isFinite(cexJobIdFromBot)) {
-        const cexJob = await apiService.getCexJobById(cexJobIdFromBot);
+      if (mounted) setIsBotDataLoading(true);
+      try {
+        const cexChains = await apiService.getCexChainsData();
         if (!mounted) return;
-        setActiveCexJobRaw(cexJob ?? null);
-        return;
-      }
+        const cexChainMap = new Map<number, string>();
+        (cexChains ?? []).forEach((chain: any) => {
+          const id = Number(chain.id ?? chain.chainId);
+          const name = String(chain.name ?? '');
+          if (Number.isFinite(id) && name) cexChainMap.set(id, name);
+        });
+        setCexChainNameById(cexChainMap);
 
-      const botsList = await apiService.getBots();
-      if (!mounted) return;
-      const listBot = (botsList ?? []).find((item: any) => Number(item.botId ?? item.id) === botId);
-      const cexJobIdFromList = Number(listBot?.cexJobId ?? listBot?.cex_job_id);
-      if (Number.isFinite(cexJobIdFromList)) {
-        const cexJob = await apiService.getCexJobById(cexJobIdFromList);
+        const bot = await apiService.setBotById(botId);
         if (!mounted) return;
-        setActiveCexJobRaw(cexJob ?? null);
-      } else {
-        setActiveCexJobRaw(null);
+        setActiveBotRaw(bot);
+        const assignedJobId = Number(bot?.job?.jobId ?? bot?.jobId ?? bot?.job_id);
+        setSelectedJobId(Number.isFinite(assignedJobId) ? assignedJobId : null);
+
+        const cexJobIdFromBot = Number(bot?.cexJob?.id ?? bot?.cexJobId ?? bot?.cex_job_id);
+        if (Number.isFinite(cexJobIdFromBot)) {
+          const cexJob = await apiService.getCexJobById(cexJobIdFromBot);
+          if (!mounted) return;
+          setActiveCexJobRaw(cexJob ?? null);
+          return;
+        }
+
+        const botsList = await apiService.getBots();
+        if (!mounted) return;
+        const listBot = (botsList ?? []).find((item: any) => Number(item.botId ?? item.id) === botId);
+        const cexJobIdFromList = Number(listBot?.cexJobId ?? listBot?.cex_job_id);
+        if (Number.isFinite(cexJobIdFromList)) {
+          const cexJob = await apiService.getCexJobById(cexJobIdFromList);
+          if (!mounted) return;
+          setActiveCexJobRaw(cexJob ?? null);
+        } else {
+          setActiveCexJobRaw(null);
+        }
+      } finally {
+        if (mounted) setIsBotDataLoading(false);
       }
     };
     loadBot();
@@ -372,7 +378,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
               columns={columns}
               data={jobs}
               language={language}
-              isLoading={jobsMeta.isLoading}
+              isLoading={jobsMeta.isLoading || chainsMeta.isLoading || rpcUrlsMeta.isLoading || isBotDataLoading}
               loadingText={language === 'ru' ? 'Загрузка Jobs…' : 'Loading Jobs…'}
               onRowClick={(row) => setSelectedJobId(row.id)}
               selectedRow={jobs.find(j => j.id === selectedJobId)}

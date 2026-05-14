@@ -12,6 +12,7 @@ import { apiService } from '../../services/api-service';
 import { buildCexChainNameById, resolveCexPairSourceLabel } from '../../utils/cexPairSource';
 import {
   selectCexChainsDataResponse,
+  selectCexChainsMeta,
   selectCexPairsMeta,
   selectCexPairsDataResponse,
   selectChainsMeta,
@@ -38,6 +39,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
   const cexPairsFromStore = useAppSelector(selectCexPairsDataResponse);
   const pairsMeta = useAppSelector(selectPairsMeta);
   const cexPairsMeta = useAppSelector(selectCexPairsMeta);
+  const cexChainsMeta = useAppSelector(selectCexChainsMeta);
   const pairRatingData = useAppSelector(selectPairsRating);
   const tokenInList = useAppSelector(selectTokenInList);
   const poolsMeta = useAppSelector(selectPoolsMeta);
@@ -293,7 +295,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
     tokensMeta.isLoading ||
     dexesMeta.isLoading ||
     chainsMeta.isLoading;
-  const isTableLoading = type === 'cex' ? cexPairsMeta.isLoading : isDexPageLoading;
+  const isTableLoading = type === 'cex' ? cexPairsMeta.isLoading || cexChainsMeta.isLoading : isDexPageLoading;
   const isRatingLoading = type === 'dex' && activeTab === 'rating' && isDexPageLoading;
 
   return (

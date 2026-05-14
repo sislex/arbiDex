@@ -4,11 +4,11 @@
 
 .arb-dex-grid {
   --ag-background-color: hsl(var(--background));
-  --ag-foreground-color: hsl(var(--foreground));
+  --ag-foreground-color: #000;
   --ag-header-background-color: hsl(var(--muted));
-  --ag-header-foreground-color: hsl(var(--muted-foreground));
-  --ag-border-color: hsl(var(--border));
-  --ag-row-border-color: hsl(var(--border));
+  --ag-header-foreground-color: #000;
+  --ag-border-color: #000;
+  --ag-row-border-color: #000;
   --ag-odd-row-background-color: hsl(var(--background));
   --ag-row-hover-color: hsl(var(--muted) / 0.5);
   --ag-selected-row-background-color: hsl(var(--accent) / 0.5);
@@ -26,14 +26,18 @@
 .arb-dex-grid .ag-header-cell-label {
   font-size: 12px;
   text-transform: uppercase;
-  color: hsl(var(--muted-foreground));
+  color: #000;
 }
 
 .arb-dex-grid .ag-floating-filter-input,
 .arb-dex-grid .ag-input-field-input {
-  color: hsl(var(--foreground));
+  color: #000;
 }
 
 .arb-dex-grid .ag-row-selected-local {
   background-color: hsl(var(--accent) / 0.5);
+}
+
+.arb-dex-grid .text-muted-foreground {
+  color: #000 !important;
 }
