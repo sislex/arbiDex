@@ -50,11 +50,11 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
     },
     ru: {
       title: initialData ? 'Редактировать DEX джобу' : 'Добавить DEX джобу',
-      chain: 'Chain',
-      rpcUrl: 'Rpc Url',
-      type: 'Type',
-      description: 'Description',
-      additionalData: 'Additional data',
+      chain: 'Сеть',
+      rpcUrl: 'RPC URL',
+      type: 'Тип',
+      description: 'Описание',
+      additionalData: 'Доп. данные',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
       back: 'НАЗАД',
     },
@@ -108,7 +108,7 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
             options={chainOptions}
             value={form.chainId}
             onChange={handleChainChange}
-            placeholder="Select chain..."
+            placeholder={language === 'ru' ? 'Выберите сеть...' : 'Select chain...'}
             required
           />
 
@@ -117,7 +117,7 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
             options={rpcOptions}
             value={form.rpcUrlId}
             onChange={(rpcUrlId) => setForm((current) => ({ ...current, rpcUrlId }))}
-            placeholder="Select rpc url..."
+            placeholder={language === 'ru' ? 'Выберите RPC URL...' : 'Select rpc url...'}
             required
             disabled={!form.chainId}
           />

@@ -32,9 +32,9 @@ export function RpcUrlForm({ open, onClose, onSave, initialData, language }: Rpc
       save: initialData ? 'SAVE' : 'ADD',
     },
     ru: {
-      title: initialData ? 'Редактировать RPC Url' : 'Добавить RPC Url',
-      chain: 'Chain',
-      rpcUrl: 'Rpc Url',
+      title: initialData ? 'Редактировать RPC URL' : 'Добавить RPC URL',
+      chain: 'Сеть',
+      rpcUrl: 'RPC URL',
       back: 'НАЗАД',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
     },
@@ -68,7 +68,7 @@ export function RpcUrlForm({ open, onClose, onSave, initialData, language }: Rpc
             options={chainOptions}
             value={form.chainId}
             onChange={(chainId) => setForm((current) => ({ ...current, chainId }))}
-            placeholder="Select chain..."
+            placeholder={language === 'ru' ? 'Выберите сеть...' : 'Select chain...'}
             required
           />
 

@@ -115,13 +115,13 @@ export function ServersPage({
       error: 'Error',
     },
     ru: {
-      serverId: 'Server ID',
-      status: 'Status',
+      serverId: 'ID сервера',
+      status: 'Статус',
       ip: 'IP',
-      port: 'Port',
+      port: 'Порт',
       serverName: 'Имя сервера',
       tableTitle: 'Серверы',
-      add: 'Добавить Server',
+      add: 'Добавить сервер',
       pending: 'Ожидание',
       success: 'Успех',
       error: 'Ошибка',
@@ -198,7 +198,7 @@ export function ServersPage({
           data={servers}
           language={language}
           isLoading={serversMeta.isLoading}
-          loadingText="Loading Servers…"
+          loadingText={language === 'ru' ? 'Загрузка серверов…' : 'Loading Servers…'}
           onEdit={(row) => {
             setEditingServerRaw(row.raw ?? row);
             setFormOpen(true);

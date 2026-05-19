@@ -71,19 +71,19 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
       save: initialData ? 'SAVE' : 'ADD',
     },
     ru: {
-      title: initialData ? 'Редактировать Bot' : 'Добавить Bot',
-      botName: 'Bot Name',
-      description: 'Description',
-      mode: 'Mode',
-      dexJob: 'Dex Job Id',
-      cexJob: 'Cex Job Id',
-      server: 'Server Id',
-      paused: 'is Paused',
-      repeat: 'is repeat',
-      delay: 'Delay between repeat',
-      maxJobs: 'Max jobs',
-      maxErrors: 'Max errors',
-      timeout: 'Timeout ms',
+      title: initialData ? 'Редактировать бота' : 'Добавить бота',
+      botName: 'Имя бота',
+      description: 'Описание',
+      mode: 'Режим',
+      dexJob: 'ID DEX-джобы',
+      cexJob: 'ID CEX-джобы',
+      server: 'ID сервера',
+      paused: 'На паузе',
+      repeat: 'Повторять',
+      delay: 'Задержка между повторами',
+      maxJobs: 'Макс. задач',
+      maxErrors: 'Макс. ошибок',
+      timeout: 'Таймаут, мс',
       back: 'НАЗАД',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
     },
@@ -174,7 +174,7 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
             options={modeOptions}
             value={form.mode}
             onChange={handleModeChange}
-            placeholder="Select Dex or Cex"
+            placeholder={language === 'ru' ? 'Выберите DEX или CEX' : 'Select Dex or Cex'}
             required
           />
 
@@ -184,7 +184,7 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
               options={dexJobOptions}
               value={form.dexJobId}
               onChange={(dexJobId) => setForm((current) => ({ ...current, dexJobId }))}
-              placeholder="job id"
+              placeholder={language === 'ru' ? 'Выберите ID джобы' : 'job id'}
               required
             />
           ) : (
@@ -193,7 +193,7 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
               options={cexJobOptions}
               value={form.cexJobId}
               onChange={(cexJobId) => setForm((current) => ({ ...current, cexJobId }))}
-              placeholder="job id"
+              placeholder={language === 'ru' ? 'Выберите ID джобы' : 'job id'}
               required
             />
           )}
@@ -203,7 +203,7 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
             options={serverOptions}
             value={form.serverId}
             onChange={(serverId) => setForm((current) => ({ ...current, serverId }))}
-            placeholder="Server Id"
+            placeholder={language === 'ru' ? 'Выберите ID сервера' : 'Server Id'}
             required
           />
 

@@ -59,7 +59,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
       chain: 'Сеть',
       token0: 'Токен 0',
       token1: 'Токен 1',
-      dex: 'DEX',
+      dex: 'DEX-биржа',
       version: 'Версия пула',
       fee: 'Комиссия',
       poolAddress: 'Адрес пула',
@@ -147,7 +147,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
             options={chainOptions}
             value={formData.chainId}
             onChange={handleChainChange}
-            placeholder="Select chain..."
+            placeholder={language === 'ru' ? 'Выберите сеть...' : 'Select chain...'}
           />
 
           <Autocomplete
@@ -156,7 +156,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
             options={tokenOptions}
             value={formData.token0Id}
             onChange={(value) => setFormData({ ...formData, token0Id: value })}
-            placeholder="Select token 0..."
+            placeholder={language === 'ru' ? 'Выберите токен 0...' : 'Select token 0...'}
             disabled={!formData.chainId}
           />
 
@@ -166,7 +166,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
             options={tokenOptions}
             value={formData.token1Id}
             onChange={(value) => setFormData({ ...formData, token1Id: value })}
-            placeholder="Select token 1..."
+            placeholder={language === 'ru' ? 'Выберите токен 1...' : 'Select token 1...'}
             disabled={!formData.chainId}
           />
 
@@ -176,7 +176,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
             options={dexOptions}
             value={formData.dexId}
             onChange={(value) => setFormData({ ...formData, dexId: value })}
-            placeholder="Select DEX..."
+            placeholder={language === 'ru' ? 'Выберите DEX-биржу...' : 'Select DEX...'}
           />
 
           <div className="flex flex-col gap-2">
@@ -205,7 +205,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
               type="text"
               value={formData.fee}
               onChange={(e) => setFormData({ ...formData, fee: e.target.value })}
-              placeholder="e.g. 3000 (Uniswap v3 fee tier)"
+              placeholder={language === 'ru' ? 'например, 3000 (уровень комиссии Uniswap v3)' : 'e.g. 3000 (Uniswap v3 fee tier)'}
               required
               className="px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />

@@ -72,14 +72,14 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
     ru: {
       add: 'Добавить токен',
       id: 'ID',
-      name: 'Name',
-      chainName: 'Chain Name',
-      address: 'Address',
-      symbol: 'Symbol',
-      decimals: 'Decimals',
-      isActive: 'Is Active',
-      isChecked: 'Is Checked',
-      balance: 'Balance',
+      name: 'Название',
+      chainName: 'Сеть',
+      address: 'Адрес',
+      symbol: 'Символ',
+      decimals: 'Десятичные',
+      isActive: 'Активен',
+      isChecked: 'Проверен',
+      balance: 'Баланс',
       tableTitle: 'Токены',
       back: 'НАЗАД',
     },
@@ -149,7 +149,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
         data={tokens.filter((token) => !pendingDeleteTokenIds.has(token.id))}
         language={language}
         isLoading={tokensMeta.isLoading || chainsMeta.isLoading}
-        loadingText="Loading Tokens…"
+        loadingText={language === 'ru' ? 'Загрузка токенов…' : 'Loading Tokens…'}
         onEdit={(row) => {
           setEditingTokenRaw(
             tokensFromStore.find((token: any) => Number(token.tokenId ?? token.id) === Number(row.id)) ?? null,

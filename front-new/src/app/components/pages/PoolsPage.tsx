@@ -109,17 +109,17 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
       add: 'Добавить пул',
       tableTitle: 'Пулы',
       id: 'ID',
-      address: 'Address',
-      chainName: 'Chain Name',
-      dexName: 'Dex Name',
-      dexVersion: 'Dex Version',
-      fee: 'Fee',
-      token0Symbol: 'Token 0 (symbol)',
-      token1Symbol: 'Token 1 (symbol)',
-      token0Address: 'Token 0 Address',
-      token1Address: 'Token 1 Address',
-      reserve0: 'Reserve 0',
-      reserve1: 'Reserve 1',
+      address: 'Адрес',
+      chainName: 'Сеть',
+      dexName: 'DEX',
+      dexVersion: 'Версия DEX',
+      fee: 'Комиссия',
+      token0Symbol: 'Токен 0 (символ)',
+      token1Symbol: 'Токен 1 (символ)',
+      token0Address: 'Адрес токена 0',
+      token1Address: 'Адрес токена 1',
+      reserve0: 'Резерв 0',
+      reserve1: 'Резерв 1',
     },
   };
 
@@ -180,7 +180,7 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         data={pools}
         language={language}
         isLoading={isPageLoading}
-        loadingText="Loading Pools…"
+        loadingText={language === 'ru' ? 'Загрузка пулов…' : 'Loading Pools…'}
         onEdit={(row) => {
           setEditData(row.raw ?? row);
           setFormOpen(true);

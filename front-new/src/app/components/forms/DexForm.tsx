@@ -27,7 +27,7 @@ export function DexForm({ open, onClose, onSave, initialData, language }: DexFor
     },
     ru: {
       title: initialData ? 'Редактировать DEX' : 'Добавить DEX',
-      name: 'Name',
+      name: 'Название',
       back: 'НАЗАД',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
     },

@@ -35,9 +35,9 @@ export function ServerForm({ open, onClose, onSave, initialData, language }: Ser
     },
     ru: {
       title: initialData ? 'Редактировать сервер' : 'Добавить сервер',
-      ip: 'Ip',
-      port: 'Port',
-      serverName: 'Server Name',
+      ip: 'IP',
+      port: 'Порт',
+      serverName: 'Имя сервера',
       back: 'НАЗАД',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
     },

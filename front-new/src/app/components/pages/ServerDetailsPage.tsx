@@ -34,15 +34,16 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
     ru: {
       back: 'К списку серверов',
       relationsTable: 'таблица связей',
-      botName: 'Bot Name',
-      botDescription: 'Bot Description',
-      chainId: 'Chain Id',
-      jobName: 'Job Name',
-      pairsCount: 'Pairs count',
-      getConfig: 'GET CONFIG',
-      resetServer: 'RESET SERVER',
-      cancel: 'CANCEL',
+      botName: 'Имя бота',
+      botDescription: 'Описание бота',
+      chainId: 'ID сети',
+      jobName: 'Имя задачи',
+      pairsCount: 'Кол-во пар',
+      getConfig: 'ПОЛУЧИТЬ КОНФИГ',
+      resetServer: 'СБРОСИТЬ СЕРВЕР',
+      cancel: 'ОТМЕНА',
       loading: 'Загрузка связей сервера…',
+      close: 'ЗАКРЫТЬ',
     },
   };
 
@@ -178,7 +179,7 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
               onClick={() => setShowConfig(false)}
               className="px-4 py-1.5 text-sm bg-muted text-foreground rounded hover:bg-accent transition-colors"
             >
-              CLOSE
+              {language === 'ru' ? t.ru.close : 'CLOSE'}
             </button>
           </div>
           <div className="flex-1 min-h-0 flex flex-col">

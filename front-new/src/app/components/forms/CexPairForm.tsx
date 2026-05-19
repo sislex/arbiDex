@@ -36,7 +36,7 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
     },
     ru: {
       title: initialData ? 'Редактировать пару' : 'Добавить пару',
-      selectChain: 'Выберите биржу',
+      selectChain: 'Выберите CEX-источник',
       token0: 'Символ токена 0',
       token1: 'Символ токена 1',
       submit: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
@@ -69,7 +69,7 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
             options={chainOptions}
             value={form.sourceId}
             onChange={(v) => setForm({ ...form, sourceId: v })}
-            placeholder="Select chain..."
+            placeholder={language === 'ru' ? 'Выберите CEX-источник...' : 'Select chain...'}
             required
           />
 
@@ -80,7 +80,7 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
                 type="text"
                 value={form.token0Symbol}
                 onChange={(e) => setForm({ ...form, token0Symbol: e.target.value })}
-                placeholder="e.g. WETH"
+                placeholder={language === 'ru' ? 'например, WETH' : 'e.g. WETH'}
                 required
                 className="w-full px-3 py-2 pr-8 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
@@ -103,7 +103,7 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
                 type="text"
                 value={form.token1Symbol}
                 onChange={(e) => setForm({ ...form, token1Symbol: e.target.value })}
-                placeholder="e.g. USDC"
+                placeholder={language === 'ru' ? 'например, USDC' : 'e.g. USDC'}
                 required
                 className="w-full px-3 py-2 pr-8 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />

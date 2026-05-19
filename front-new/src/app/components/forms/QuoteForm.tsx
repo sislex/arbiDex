@@ -44,12 +44,12 @@ export function QuoteForm({ open, onClose, onSave, initialData, language }: Quot
       save: initialData ? 'SAVE' : 'ADD',
     },
     ru: {
-      title: initialData ? 'Редактировать Quote' : 'Добавить Quote',
-      amount: 'Amount',
-      blockTag: 'Block Tag',
-      side: 'Side',
-      quoteSource: 'Quote Source',
-      quoteToken: 'Select Quote Token',
+      title: initialData ? 'Редактировать котировку' : 'Добавить котировку',
+      amount: 'Сумма',
+      blockTag: 'Тег блока',
+      side: 'Сторона',
+      quoteSource: 'Источник котировки',
+      quoteToken: 'Токен котировки',
       back: 'НАЗАД',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
     },
@@ -126,7 +126,7 @@ export function QuoteForm({ open, onClose, onSave, initialData, language }: Quot
             options={tokenOptions}
             value={form.quoteTokenId}
             onChange={(quoteTokenId) => setForm((current) => ({ ...current, quoteTokenId }))}
-            placeholder="Select token..."
+            placeholder={language === 'ru' ? 'Выберите токен...' : 'Select token...'}
             required
           />
         </div>

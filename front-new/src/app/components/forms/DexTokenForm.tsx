@@ -45,11 +45,11 @@ export function DexTokenForm({ open, onClose, onSave, initialData, language }: D
     },
     ru: {
       title: initialData ? 'Редактировать токен' : 'Добавить токен',
-      chain: 'Chain',
-      address: 'Address',
-      symbol: 'Symbol',
-      tokenName: 'Token name',
-      decimals: 'Decimal',
+      chain: 'Сеть',
+      address: 'Адрес',
+      symbol: 'Символ',
+      tokenName: 'Название токена',
+      decimals: 'Десятичные',
       back: 'НАЗАД',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
     },
@@ -83,7 +83,7 @@ export function DexTokenForm({ open, onClose, onSave, initialData, language }: D
             options={chainOptions}
             value={form.chainId}
             onChange={(chainId) => setForm((current) => ({ ...current, chainId }))}
-            placeholder="Select chain..."
+            placeholder={language === 'ru' ? 'Выберите сеть...' : 'Select chain...'}
             required
           />
 

@@ -187,17 +187,17 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
       deleteType: 'Job',
     },
     ru: {
-      jobId: 'Job ID',
-      jobType: 'Job Type',
-      description: 'Description',
-      chain: 'Chain',
-      rpcUrl: 'Rpc Url',
-      pairsCount: 'Pairs count',
-      additionalData: 'Additional data',
-      source: 'Source',
-      token0: 'Token 0',
-      token1: 'Token 1',
-      isWork: 'is work?',
+      jobId: 'ID задачи',
+      jobType: 'Тип задачи',
+      description: 'Описание',
+      chain: 'Сеть',
+      rpcUrl: 'RPC URL',
+      pairsCount: 'Кол-во пар',
+      additionalData: 'Доп. данные',
+      source: 'Источник',
+      token0: 'Токен 0',
+      token1: 'Токен 1',
+      isWork: 'Работает?',
       addJob: type === 'cex' ? 'Добавить CEX джобу' : 'Добавить DEX джобу',
       tableTitleCex: 'CEX джобы',
       tableTitleDex: 'DEX джобы',
@@ -391,7 +391,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
             ? cexJobsMeta.isLoading || cexPairsMeta.isLoading || cexChainsMeta.isLoading
             : jobsMeta.isLoading || chainsMeta.isLoading || rpcUrlsMeta.isLoading || pairsMeta.isLoading
         }
-        loadingText={type === 'cex' ? 'Loading CEX Jobs…' : 'Loading DEX Jobs…'}
+        loadingText={type === 'cex' ? (language === 'ru' ? 'Загрузка CEX джоб…' : 'Loading CEX Jobs…') : language === 'ru' ? 'Загрузка DEX джоб…' : 'Loading DEX Jobs…'}
         onEdit={(row) => {
           setEditingJobRaw(row.raw);
           setJobFormOpen(true);

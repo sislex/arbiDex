@@ -133,9 +133,9 @@ export function PairsPage({ language, type }: PairsPageProps) {
       tokenOut: 'Токен выхода',
       tokenInAddress: 'Адрес входа',
       tokenOutAddress: 'Адрес выхода',
-      source: 'Source',
-      token0: 'Token 0',
-      token1: 'Token 1',
+      source: 'Источник',
+      token0: 'Токен 0',
+      token1: 'Токен 1',
       count: 'Кол-во',
       selectToken: 'Выберите токен входа...',
       tableTitleCex: 'CEX пары',
@@ -329,7 +329,7 @@ export function PairsPage({ language, type }: PairsPageProps) {
             data={tableData}
             language={language}
             isLoading={isTableLoading}
-            loadingText={type === 'cex' ? 'Loading CEX Pairs…' : 'Loading DEX Pairs…'}
+            loadingText={type === 'cex' ? (language === 'ru' ? 'Загрузка CEX пар…' : 'Loading CEX Pairs…') : language === 'ru' ? 'Загрузка DEX пар…' : 'Loading DEX Pairs…'}
             onEdit={(row) => {
               if (type === 'cex') {
                 setEditingCexPairRaw(row.raw);
