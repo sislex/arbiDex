@@ -1,4 +1,4 @@
-import { ChevronRight, Plus } from 'lucide-react';
+import { ChevronRight, Copy, Plus } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -13,7 +13,7 @@ import {
 } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
 import { apiService } from '../../services/api-service';
-import { QuoteForm } from '../forms/QuoteForm';
+import { QuoteForm, type QuoteFormValues } from '../forms/QuoteForm';
 
 interface QuotesListPageProps {
   language: 'en' | 'ru';
@@ -32,8 +32,17 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
   const pairs = useAppSelector(selectPairsDataResponse);
   const [formOpen, setFormOpen] = useState(false);
   const [editingQuoteRaw, setEditingQuoteRaw] = useState<any>(null);
+  const [copiedQuoteInitialData, setCopiedQuoteInitialData] = useState<QuoteFormValues | undefined>(undefined);
   const [pendingDeleteQuoteIds, setPendingDeleteQuoteIds] = useState<Set<number>>(new Set());
   const deleteQuoteTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+
+  const buildQuoteInitialData = (quote: any): QuoteFormValues => ({
+    amount: String(quote.amount ?? ''),
+    blockTag: 'latest',
+    side: 'exactIn',
+    quoteSource: String(quote.quoteSource ?? quote.quote_source ?? quote.source ?? ''),
+    quoteTokenId: String(quote.token ?? quote.tokenId ?? quote.quoteTokenId ?? quote.quote_token_id ?? ''),
+  });
 
   useEffect(() => {
     if ((!quotesMeta.isLoaded || quotesMeta.error) && !quotesMeta.isLoading) {
@@ -134,6 +143,7 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
           <button
             onClick={() => {
               setEditingQuoteRaw(null);
+              setCopiedQuoteInitialData(undefined);
               setFormOpen(true);
             }}
             className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
@@ -149,6 +159,7 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
         loadingText="Loading Quotes…"
         onEdit={(row) => {
           setEditingQuoteRaw(row.raw ?? row);
+          setCopiedQuoteInitialData(undefined);
           setFormOpen(true);
         }}
         onDelete={(row) => {
@@ -188,16 +199,30 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
           });
         }}
         extraActions={(row) => (
-          <button
-            onClick={(event) => {
-              event.stopPropagation();
-              onQuoteClick(row.id, row.quoteSource || String(row.id));
-            }}
-            className="p-1.5 hover:bg-accent rounded transition-colors"
-            title="Edit Relations"
-          >
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <>
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                setEditingQuoteRaw(null);
+                setCopiedQuoteInitialData(buildQuoteInitialData(row.raw ?? row));
+                setFormOpen(true);
+              }}
+              className="p-1.5 hover:bg-accent rounded transition-colors"
+              title={language === 'ru' ? 'Копировать' : 'Copy'}
+            >
+              <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+            </button>
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                onQuoteClick(row.id, row.quoteSource || String(row.id));
+              }}
+              className="p-1.5 hover:bg-accent rounded transition-colors"
+              title="Edit Relations"
+            >
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </>
         )}
         onRowDoubleClick={(row) => onQuoteClick(row.id, row.quoteSource || String(row.id))}
       />
@@ -207,6 +232,7 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
         onClose={() => {
           setFormOpen(false);
           setEditingQuoteRaw(null);
+          setCopiedQuoteInitialData(undefined);
         }}
         onSave={async (data) => {
           const payload = {
@@ -225,19 +251,7 @@ export function QuotesListPage({ language, onQuoteClick }: QuotesListPageProps) 
           dispatch(dbConfigActions.refetchQuotesListPageResources());
         }}
         initialData={
-          editingQuoteRaw
-            ? {
-                amount: String(editingQuoteRaw.amount ?? ''),
-                blockTag: 'latest',
-                side: 'exactIn',
-                quoteSource: String(
-                  editingQuoteRaw.quoteSource ?? editingQuoteRaw.quote_source ?? editingQuoteRaw.source ?? '',
-                ),
-                quoteTokenId: String(
-                  editingQuoteRaw.token ?? editingQuoteRaw.tokenId ?? editingQuoteRaw.quoteTokenId ?? editingQuoteRaw.quote_token_id ?? '',
-                ),
-              }
-            : undefined
+          copiedQuoteInitialData ?? (editingQuoteRaw ? buildQuoteInitialData(editingQuoteRaw) : undefined)
         }
         language={language}
       />

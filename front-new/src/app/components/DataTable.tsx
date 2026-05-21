@@ -245,9 +245,7 @@ export function DataTable({
             <span className="text-muted-foreground">
               {hasActiveFilters
                 ? `(${filteredCount}/${rows.length})`
-                : language === 'ru'
-                  ? `(${rows.length} всего)`
-                  : `(${rows.length})`}
+                : `(${rows.length})`}
             </span>
           </h2>
           {headerActions ? <div className="shrink-0">{headerActions}</div> : null}

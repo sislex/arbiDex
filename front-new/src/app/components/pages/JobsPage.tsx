@@ -1,8 +1,8 @@
-import { Play, Plus } from 'lucide-react';
+import { Copy, Play, Plus } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { CexJobForm } from '../forms/CexJobForm';
-import { DexJobForm } from '../forms/DexJobForm';
+import { DexJobForm, type DexJobFormValues } from '../forms/DexJobForm';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
@@ -65,10 +65,19 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const [cexWorkStatus, setCexWorkStatus] = useState<Record<number, boolean | null>>({});
   const [jobFormOpen, setJobFormOpen] = useState(false);
   const [editingJobRaw, setEditingJobRaw] = useState<any>(null);
+  const [copiedDexJobInitialData, setCopiedDexJobInitialData] = useState<DexJobFormValues | undefined>(undefined);
   const [pendingDeleteDexJobIds, setPendingDeleteDexJobIds] = useState<Set<number>>(new Set());
   const [pendingDeleteCexJobIds, setPendingDeleteCexJobIds] = useState<Set<number>>(new Set());
   const deleteDexJobTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   const deleteCexJobTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+
+  const buildDexJobInitialData = (job: any): DexJobFormValues => ({
+    chainId: String(job.chainId ?? ''),
+    rpcUrlId: String(job.rpcUrlId ?? ''),
+    jobType: String(job.jobType ?? job.job_type ?? ''),
+    description: String(job.description ?? ''),
+    additionalData: String(job.extraSettings ?? job.additionalData ?? job.additional_data ?? ''),
+  });
 
   useEffect(() => {
     if (type === 'cex') {
@@ -375,6 +384,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
             type="button"
             onClick={() => {
               setEditingJobRaw(null);
+              setCopiedDexJobInitialData(undefined);
               setJobFormOpen(true);
             }}
             className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
@@ -394,6 +404,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         loadingText={type === 'cex' ? (language === 'ru' ? 'Загрузка CEX джоб…' : 'Loading CEX Jobs…') : language === 'ru' ? 'Загрузка DEX джоб…' : 'Loading DEX Jobs…'}
         onEdit={(row) => {
           setEditingJobRaw(row.raw);
+          setCopiedDexJobInitialData(undefined);
           setJobFormOpen(true);
         }}
         onDelete={type === 'cex' ? handleDeleteCexJob : handleDeleteDexJob}
@@ -416,20 +427,34 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
                   <Play className="w-3.5 h-3.5 text-success" />
                 </button>
               )
-            : onDexJobClick
-            ? (row) => (
-                <button
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onDexJobClick(row.id, row.description || `Job #${row.id}`);
-                  }}
-                  className="p-1.5 hover:bg-accent rounded transition-colors"
-                  title={language === 'ru' ? 'Связи' : 'Relations'}
-                >
-                  <Play className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
+            : (row) => (
+                <>
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setEditingJobRaw(null);
+                      setCopiedDexJobInitialData(buildDexJobInitialData(row.raw));
+                      setJobFormOpen(true);
+                    }}
+                    className="p-1.5 hover:bg-accent rounded transition-colors"
+                    title={language === 'ru' ? 'Копировать' : 'Copy'}
+                  >
+                    <Copy className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
+                  </button>
+                  {onDexJobClick ? (
+                    <button
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDexJobClick(row.id, row.description || `Job #${row.id}`);
+                      }}
+                      className="p-1.5 hover:bg-accent rounded transition-colors"
+                      title={language === 'ru' ? 'Связи' : 'Relations'}
+                    >
+                      <Play className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  ) : null}
+                </>
               )
-            : undefined
         }
       />
 
@@ -439,6 +464,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
           onClose={() => {
             setJobFormOpen(false);
             setEditingJobRaw(null);
+            setCopiedDexJobInitialData(undefined);
           }}
           onSave={async (data) => {
             const payload: Record<string, unknown> = {
@@ -478,6 +504,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
           onClose={() => {
             setJobFormOpen(false);
             setEditingJobRaw(null);
+            setCopiedDexJobInitialData(undefined);
           }}
           onSave={async (data) => {
             const payload = {
@@ -497,17 +524,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
             dispatch(dbConfigActions.refetchJobsListPageResources());
           }}
           initialData={
-            editingJobRaw
-              ? {
-                  chainId: String(editingJobRaw.chainId ?? ''),
-                  rpcUrlId: String(editingJobRaw.rpcUrlId ?? ''),
-                  jobType: editingJobRaw.jobType ?? editingJobRaw.job_type ?? '',
-                  description: editingJobRaw.description ?? '',
-                  additionalData: String(
-                    editingJobRaw.extraSettings ?? editingJobRaw.additionalData ?? editingJobRaw.additional_data ?? '',
-                  ),
-                }
-              : undefined
+            copiedDexJobInitialData ?? (editingJobRaw ? buildDexJobInitialData(editingJobRaw) : undefined)
           }
           language={language}
         />

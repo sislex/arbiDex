@@ -42,10 +42,10 @@ export class DexesService {
       where: { dexId: id },
     });
     if (!dex) {
-      throw new Error(`Chain с id ${updateDexDto.dexId} не найден`);
+      throw new Error(`Dex с id ${id} не найден`);
     }
 
-    dex.dexId = updateDexDto.dexId;
+    // Keep primary key immutable on update; route param identifies the row.
     dex.name = updateDexDto.name;
 
     return await this.dexesRepository.save(dex);

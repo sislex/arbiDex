@@ -82,7 +82,8 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
         isLoading={dexesMeta.isLoading}
         loadingText="Loading DEXes…"
         onEdit={(row) => {
-          setEditingDexRaw(row.raw ?? row);
+          // Keep normalized row (with guaranteed `id`) to avoid losing identifier on save.
+          setEditingDexRaw(row);
           setFormOpen(true);
         }}
         onDelete={(row) => {
@@ -130,11 +131,12 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
           setEditingDexRaw(null);
         }}
         onSave={async (data) => {
-          const payload = { name: data.name.trim() };
-          if (editingDexRaw) {
-            const id = Number(editingDexRaw.dexId ?? editingDexRaw.id);
+          const id = Number(editingDexRaw?.id ?? editingDexRaw?.dexId);
+          if (Number.isFinite(id)) {
+            const payload = { dexId: id, name: data.name.trim() };
             await apiService.editDex(id, payload);
           } else {
+            const payload = { name: data.name.trim() };
             await apiService.createDex(payload);
           }
           dispatch(dbConfigActions.refetchDexesData());
@@ -142,7 +144,7 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
         initialData={
           editingDexRaw
             ? {
-                name: editingDexRaw.name ?? editingDexRaw.dexName ?? '',
+                name: editingDexRaw.name ?? editingDexRaw.raw?.name ?? editingDexRaw.raw?.dexName ?? '',
               }
             : undefined
         }

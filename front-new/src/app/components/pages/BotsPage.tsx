@@ -1,5 +1,5 @@
 import { DataTable, Column } from '../DataTable';
-import { Plus } from 'lucide-react';
+import { Copy, Plus } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
@@ -17,7 +17,7 @@ import {
 } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
 import { apiService } from '../../services/api-service';
-import { BotForm } from '../forms/BotForm';
+import { BotForm, type BotFormValues } from '../forms/BotForm';
 
 const DELETE_UNDO_MS = 5000;
 
@@ -36,8 +36,24 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
   const [selectedBot, setSelectedBot] = useState<any>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingBotRaw, setEditingBotRaw] = useState<any>(null);
+  const [copiedBotInitialData, setCopiedBotInitialData] = useState<BotFormValues | undefined>(undefined);
   const [pendingDeleteBotIds, setPendingDeleteBotIds] = useState<Set<number>>(new Set());
   const deleteBotTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+
+  const buildBotInitialData = (bot: any): BotFormValues => ({
+    botName: String(bot.botName ?? bot.name ?? ''),
+    description: String(bot.description ?? ''),
+    mode: bot.cexJobId || bot.cex_job_id ? 'CEX' : 'DEX',
+    dexJobId: bot.jobId ? String(bot.jobId) : '',
+    cexJobId: bot.cexJobId || bot.cex_job_id ? String(bot.cexJobId ?? bot.cex_job_id) : '',
+    serverId: String(bot.serverId ?? bot.server_id ?? ''),
+    paused: Boolean(bot.paused),
+    isRepeat: Boolean(bot.isRepeat),
+    delayBetweenRepeat: String(bot.delayBetweenRepeat ?? 5000),
+    maxJobs: String(bot.maxJobs ?? 99999999),
+    maxErrors: String(bot.maxErrors ?? 10),
+    timeoutMs: String(bot.timeoutMs ?? 99999999),
+  });
 
   useEffect(() => {
     if (
@@ -132,7 +148,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
       botId: 'ID бота',
       botName: 'Имя бота',
       description: 'Описание',
-      job: 'Джоба',
+      job: 'Задача',
       server: 'Сервер',
       pairsCount: 'Кол-во пар',
       tableTitle: 'Боты',
@@ -157,6 +173,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
             <button
               onClick={() => {
                 setEditingBotRaw(null);
+                setCopiedBotInitialData(undefined);
                 setFormOpen(true);
               }}
               className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
@@ -178,8 +195,23 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
           loadingText="Loading Bots…"
           onEdit={(row) => {
             setEditingBotRaw(row.raw ?? row);
+            setCopiedBotInitialData(undefined);
             setFormOpen(true);
           }}
+          extraActions={(row) => (
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                setEditingBotRaw(null);
+                setCopiedBotInitialData(buildBotInitialData(row.raw ?? row));
+                setFormOpen(true);
+              }}
+              className="p-1.5 hover:bg-accent rounded transition-colors"
+              title={language === 'ru' ? 'Копировать' : 'Copy'}
+            >
+              <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+            </button>
+          )}
           onDelete={(row) => {
             setPendingDeleteBotIds((prev) => new Set(prev).add(row.id));
             const existing = deleteBotTimeoutsRef.current.get(row.id);
@@ -230,6 +262,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
         onClose={() => {
           setFormOpen(false);
           setEditingBotRaw(null);
+          setCopiedBotInitialData(undefined);
         }}
         onSave={async (data) => {
           const payload = {
@@ -255,22 +288,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
           dispatch(dbConfigActions.refetchBotsListPageResources());
         }}
         initialData={
-          editingBotRaw
-            ? {
-                botName: editingBotRaw.botName ?? editingBotRaw.name ?? '',
-                description: editingBotRaw.description ?? '',
-                mode: editingBotRaw.cexJobId ? 'CEX' : 'DEX',
-                dexJobId: editingBotRaw.jobId ? String(editingBotRaw.jobId) : '',
-                cexJobId: editingBotRaw.cexJobId ? String(editingBotRaw.cexJobId) : '',
-                serverId: String(editingBotRaw.serverId ?? ''),
-                paused: Boolean(editingBotRaw.paused),
-                isRepeat: Boolean(editingBotRaw.isRepeat),
-                delayBetweenRepeat: String(editingBotRaw.delayBetweenRepeat ?? 5000),
-                maxJobs: String(editingBotRaw.maxJobs ?? 99999999),
-                maxErrors: String(editingBotRaw.maxErrors ?? 10),
-                timeoutMs: String(editingBotRaw.timeoutMs ?? 99999999),
-              }
-            : undefined
+          copiedBotInitialData ?? (editingBotRaw ? buildBotInitialData(editingBotRaw) : undefined)
         }
         language={language}
       />

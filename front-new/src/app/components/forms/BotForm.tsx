@@ -75,8 +75,8 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
       botName: 'Имя бота',
       description: 'Описание',
       mode: 'Режим',
-      dexJob: 'ID DEX-джобы',
-      cexJob: 'ID CEX-джобы',
+      dexJob: 'ID DEX-задачи',
+      cexJob: 'ID CEX-задачи',
       server: 'ID сервера',
       paused: 'На паузе',
       repeat: 'Повторять',
@@ -184,7 +184,7 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
               options={dexJobOptions}
               value={form.dexJobId}
               onChange={(dexJobId) => setForm((current) => ({ ...current, dexJobId }))}
-              placeholder={language === 'ru' ? 'Выберите ID джобы' : 'job id'}
+              placeholder={language === 'ru' ? 'Выберите ID задачи' : 'job id'}
               required
             />
           ) : (
@@ -193,7 +193,7 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
               options={cexJobOptions}
               value={form.cexJobId}
               onChange={(cexJobId) => setForm((current) => ({ ...current, cexJobId }))}
-              placeholder={language === 'ru' ? 'Выберите ID джобы' : 'job id'}
+              placeholder={language === 'ru' ? 'Выберите ID задачи' : 'job id'}
               required
             />
           )}

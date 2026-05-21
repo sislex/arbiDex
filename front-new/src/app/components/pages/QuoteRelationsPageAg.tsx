@@ -88,14 +88,14 @@ export function QuoteRelationsPageAg({ quoteId, quoteName, language, onBack }: Q
       back: 'К списку котировок',
       inRelations: 'В связях',
       notInRelations: 'Не в связях',
-      chainName: 'Chain Name',
-      dexName: 'Dex Name',
-      dexVersion: 'Dex version',
-      fee: 'Fee',
-      tokenIn: 'Token In',
-      tokenOut: 'Token Out',
-      tokenInAddress: 'Token In Address',
-      tokenOutAddress: 'Token Out Address',
+      chainName: 'Сеть',
+      dexName: 'DEX',
+      dexVersion: 'Версия DEX',
+      fee: 'Комиссия',
+      tokenIn: 'Токен входа',
+      tokenOut: 'Токен выхода',
+      tokenInAddress: 'Адрес токена входа',
+      tokenOutAddress: 'Адрес токена выхода',
       addSelected: 'Добавить выбранные',
       removeSelected: 'Удалить выбранные',
       saveChanges: 'Сохранить',
@@ -365,7 +365,7 @@ export function QuoteRelationsPageAg({ quoteId, quoteName, language, onBack }: Q
     return (
       <div className="h-full min-h-[260px] min-w-0 flex flex-col">
         <DataTable
-          title={`${title} (${data.length})`}
+          title={title}
           columns={columnsWithCheckbox}
           data={data}
           language={language}

@@ -89,17 +89,17 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
       back: 'К списку DEX задач',
       inRelations: `Job ID:${jobId} таблица связей`,
       notInRelations: 'Не в связях',
-      quoteId: 'Quote ID',
-      dexName: 'Dex Name',
-      dexVersion: 'Dex version',
-      tokenInSymbol: 'Token In Symbol',
-      tokenOutSymbol: 'Token Out Symbol',
-      tokenIn: 'Token In',
-      tokenOut: 'Token Out',
-      amount: 'Amount',
-      fee: 'Fee',
-      pairId: 'Pair ID',
-      chainName: 'Chain Name',
+      quoteId: 'ID котировки',
+      dexName: 'DEX',
+      dexVersion: 'Версия DEX',
+      tokenInSymbol: 'Символ токена входа',
+      tokenOutSymbol: 'Символ токена выхода',
+      tokenIn: 'Токен входа',
+      tokenOut: 'Токен выхода',
+      amount: 'Сумма',
+      fee: 'Комиссия',
+      pairId: 'ID пары',
+      chainName: 'Сеть',
       addSelected: 'Добавить выбранные',
       removeSelected: 'Удалить выбранные',
       saveChanges: 'Сохранить',
@@ -311,7 +311,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
     return (
       <div className="h-full min-h-[260px] min-w-0 flex flex-col">
         <DataTable
-          title={`${title} (${data.length})`}
+          title={title}
           columns={columnsWithCheckbox}
           data={data}
           language={language}
