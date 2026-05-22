@@ -43,6 +43,17 @@ export class AgGridBotsContainer implements OnInit {
   readonly botDialog = inject(BotDialogService);
   readonly router = inject(Router);
 
+  private formatServerAddress(server: any): string {
+    const ip = String(server?.ip ?? '').trim();
+    const port = String(server?.port ?? '').trim();
+
+    if (!ip) {
+      return '';
+    }
+
+    return port ? `${ip}:${port}` : ip;
+  }
+
   fullBotsDataResponse$ = this.store.select(getFullBotsDataResponse);
   fullBotsDataIsReady$ = this.store.select(getFullBotsDataIsReady);
   filteredItemCount: number = 0;
@@ -51,7 +62,7 @@ export class AgGridBotsContainer implements OnInit {
     map(item =>
       item.map(item => ({
         id: item.serverId,
-        name: item.serverName,
+        name: item.serverName || this.formatServerAddress(item),
       }))
     )
   );

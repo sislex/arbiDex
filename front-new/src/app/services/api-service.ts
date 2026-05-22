@@ -19,6 +19,12 @@ function buildUrl(path: string, params?: RequestOptions["params"]) {
   return url.toString();
 }
 
+function buildServerBaseUrl(ip: string, port: string) {
+  const normalizedIp = String(ip ?? "").trim();
+  const normalizedPort = String(port ?? "").trim();
+  return normalizedPort ? `http://${normalizedIp}:${normalizedPort}` : `http://${normalizedIp}`;
+}
+
 async function request<T>(method: string, path: string, options: RequestOptions = {}): Promise<T> {
   const response = await fetch(buildUrl(path, options.params), {
     method,
@@ -103,7 +109,7 @@ export const apiService = {
   editServer: (id: number, data: any) => request<any>("PUT", `/servers/${id}`, { body: data }),
   deletingServer: (id: number) => request<any>("DELETE", `/servers/${id}`),
   resetServerSettings: (ip: string, port: string, data: any) => {
-    return fetch(`http://${ip}:${port}/setBotsRulesList`, {
+    return fetch(`${buildServerBaseUrl(ip, port)}/setBotsRulesList`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

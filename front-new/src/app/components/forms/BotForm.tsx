@@ -46,6 +46,14 @@ const empty: BotFormValues = {
   timeoutMs: '99999999',
 };
 
+function formatServerAddress(server: any): string {
+  const ip = String(server?.ip ?? '').trim();
+  const port = String(server?.port ?? '').trim();
+
+  if (!ip) return '';
+  return port ? `${ip}:${port}` : ip;
+}
+
 export function BotForm({ open, onClose, onSave, initialData, language }: BotFormProps) {
   const jobs = useAppSelector(selectJobsDataResponse);
   const cexJobs = useAppSelector(selectCexJobsDataResponse);
@@ -123,7 +131,11 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
     () =>
       (servers ?? []).map((server: any) => ({
         value: String(server.serverId ?? server.id ?? ''),
-        label: server.serverName ?? server.name ?? `Server ${server.serverId ?? server.id ?? ''}`,
+        label:
+          server.serverName?.trim() ||
+          server.name?.trim() ||
+          formatServerAddress(server) ||
+          `Server ${server.serverId ?? server.id ?? ''}`,
       })),
     [servers],
   );

@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { Copy, Plus } from 'lucide-react';
 import { DataTable, Column } from '../DataTable';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PoolForm } from '../forms/PoolForm';
@@ -24,7 +24,8 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
   const dexesMeta = useAppSelector(selectDexesMeta);
   const chainsMeta = useAppSelector(selectChainsMeta);
   const [formOpen, setFormOpen] = useState(false);
-  const [editData, setEditData] = useState<any>(null);
+  const [editingPoolRaw, setEditingPoolRaw] = useState<any>(null);
+  const [copiedPoolInitialData, setCopiedPoolInitialData] = useState<any>(null);
   const [pendingDeletePoolIds, setPendingDeletePoolIds] = useState<Set<number>>(new Set());
   const deletePoolTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -167,7 +168,8 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         headerActions={
           <button
             onClick={() => {
-              setEditData(null);
+              setEditingPoolRaw(null);
+              setCopiedPoolInitialData(null);
               setFormOpen(true);
             }}
             className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
@@ -182,9 +184,24 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         isLoading={isPageLoading}
         loadingText={language === 'ru' ? 'Загрузка пулов…' : 'Loading Pools…'}
         onEdit={(row) => {
-          setEditData(row.raw ?? row);
+          setEditingPoolRaw(row.raw ?? row);
+          setCopiedPoolInitialData(null);
           setFormOpen(true);
         }}
+        extraActions={(row) => (
+          <button
+            onClick={(event) => {
+              event.stopPropagation();
+              setEditingPoolRaw(null);
+              setCopiedPoolInitialData(row.raw ?? row);
+              setFormOpen(true);
+            }}
+            className="p-1.5 hover:bg-accent rounded transition-colors"
+            title={language === 'ru' ? 'Копировать' : 'Copy'}
+          >
+            <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+          </button>
+        )}
         onDelete={(row) => {
           setPendingDeletePoolIds((prev) => new Set(prev).add(row.id));
           const existing = deletePoolTimeoutsRef.current.get(row.id);
@@ -227,10 +244,11 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         open={formOpen}
         onClose={() => {
           setFormOpen(false);
-          setEditData(null);
+          setEditingPoolRaw(null);
+          setCopiedPoolInitialData(null);
         }}
         onSave={async (data) => {
-          const poolId = editData?.poolId ?? editData?.id;
+          const poolId = editingPoolRaw?.poolId ?? editingPoolRaw?.id;
           const fee = Number(data.fee);
           const base = {
             chainId: Number(data.chainId),
@@ -242,7 +260,7 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
             poolAddress: data.poolAddress,
           };
 
-          if (poolId !== undefined && poolId !== null && Number.isFinite(Number(poolId))) {
+          if (editingPoolRaw && poolId !== undefined && poolId !== null && Number.isFinite(Number(poolId))) {
             const id = Number(poolId);
             await apiService.editPool(id, { poolId: id, ...base });
           } else {
@@ -251,7 +269,7 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
 
           dispatch(dbConfigActions.refetchPoolsPageResources());
         }}
-        initialData={editData}
+        initialData={copiedPoolInitialData ?? editingPoolRaw ?? undefined}
         language={language}
       />
     </div>

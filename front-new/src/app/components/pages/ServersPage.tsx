@@ -11,6 +11,12 @@ import { ServerForm } from '../forms/ServerForm';
 const DELETE_UNDO_MS = 5000;
 const STATUS_REFRESH_MS = 15000;
 
+function buildServerBaseUrl(ip: string, port: string): string {
+  const normalizedIp = String(ip ?? '').trim();
+  const normalizedPort = String(port ?? '').trim();
+  return normalizedPort ? `http://${normalizedIp}:${normalizedPort}` : `http://${normalizedIp}`;
+}
+
 export function ServersPage({
   language,
   onServerClick,
@@ -73,7 +79,7 @@ export function ServersPage({
 
     const checkServer = async (server: { id: number; ip: string; port: string }) => {
       try {
-        const response = await fetch(`http://${server.ip}:${server.port}/bots/get-all`);
+        const response = await fetch(`${buildServerBaseUrl(server.ip, server.port)}/bots/get-all`);
         const nextStatus: 'success' | 'error' = response.ok ? 'success' : 'error';
         if (!cancelled && activeIds.has(server.id)) {
           setStatusByServerId((current) => ({ ...current, [server.id]: nextStatus }));
