@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, X } from 'lucide-react';
 
 interface AutocompleteOption {
@@ -27,20 +28,50 @@ export function Autocomplete({
 }: AutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [dropdownStyle, setDropdownStyle] = useState({ top: 0, left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find((opt) => opt.value === value);
 
   const filteredOptions = options.filter((opt) =>
-    opt.label.toLowerCase().includes(search.toLowerCase())
+    opt.label.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const updateDropdownPosition = () => {
+    if (!triggerRef.current) return;
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+    });
+  };
+
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    updateDropdownPosition();
+
+    window.addEventListener('resize', updateDropdownPosition);
+    window.addEventListener('scroll', updateDropdownPosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updateDropdownPosition);
+      window.removeEventListener('scroll', updateDropdownPosition, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-        setSearch('');
-      }
+      const target = e.target as Node;
+      if (containerRef.current?.contains(target)) return;
+      if (dropdownRef.current?.contains(target)) return;
+
+      setOpen(false);
+      setSearch('');
     };
 
     if (open) {
@@ -52,6 +83,54 @@ export function Autocomplete({
     };
   }, [open]);
 
+  const dropdown = open ? (
+    <div
+      ref={dropdownRef}
+      style={{
+        position: 'fixed',
+        top: dropdownStyle.top,
+        left: dropdownStyle.left,
+        width: dropdownStyle.width,
+      }}
+      className="bg-popover border border-border rounded shadow-lg z-[100] max-h-60 overflow-hidden flex flex-col"
+    >
+      <div className="p-2 border-b border-border">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search..."
+          className="w-full px-3 py-1.5 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          autoFocus
+        />
+      </div>
+      <div className="overflow-y-auto max-h-48">
+        {filteredOptions.length === 0 ? (
+          <div className="px-3 py-2 text-sm text-muted-foreground text-center">No results found</div>
+        ) : (
+          filteredOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => {
+                onChange(option.value);
+                setOpen(false);
+                setSearch('');
+              }}
+              className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+                option.value === value
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-foreground hover:bg-muted'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))
+        )}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div className="flex flex-col gap-2">
       {label && (
@@ -62,9 +141,13 @@ export function Autocomplete({
       )}
       <div ref={containerRef} className="relative">
         <button
+          ref={triggerRef}
           type="button"
           disabled={disabled}
-          onClick={() => !disabled && setOpen(!open)}
+          onClick={() => {
+            if (disabled) return;
+            setOpen((current) => !current);
+          }}
           className={`w-full flex items-center justify-between px-3 py-2 bg-input border border-border rounded text-sm text-foreground transition-colors ${
             disabled
               ? 'opacity-50 cursor-not-allowed'
@@ -88,46 +171,7 @@ export function Autocomplete({
           </div>
         </button>
 
-        {open && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
-            <div className="p-2 border-b border-border">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search..."
-                className="w-full px-3 py-1.5 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                autoFocus
-              />
-            </div>
-            <div className="overflow-y-auto">
-              {filteredOptions.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-muted-foreground text-center">
-                  No results found
-                </div>
-              ) : (
-                filteredOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      onChange(option.value);
-                      setOpen(false);
-                      setSearch('');
-                    }}
-                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${
-                      option.value === value
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-foreground hover:bg-muted'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
+        {dropdown && createPortal(dropdown, document.body)}
       </div>
     </div>
   );

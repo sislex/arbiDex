@@ -2,11 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { FormLoader } from '../FormLoader';
 import { useAppSelector } from '../../store/hooks';
 import {
   selectChainsDataResponse,
+  selectChainsMeta,
   selectRpcUrlDataResponse,
+  selectRpcUrlsMeta,
 } from '../../store/db-config/dbConfig.selectors';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 export interface DexJobFormValues {
   chainId: string;
@@ -35,7 +39,16 @@ const empty: DexJobFormValues = {
 export function DexJobForm({ open, onClose, onSave, initialData, language }: DexJobFormProps) {
   const chains = useAppSelector(selectChainsDataResponse);
   const rpcUrls = useAppSelector(selectRpcUrlDataResponse);
+  const chainsMeta = useAppSelector(selectChainsMeta);
+  const rpcUrlsMeta = useAppSelector(selectRpcUrlsMeta);
   const [form, setForm] = useState<DexJobFormValues>(empty);
+
+  const isEdit = Boolean(initialData);
+  const isFormLoading =
+    chainsMeta.isLoading ||
+    rpcUrlsMeta.isLoading ||
+    !chainsMeta.isLoaded ||
+    !rpcUrlsMeta.isLoaded;
 
   const t = {
     en: {
@@ -47,6 +60,7 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
       additionalData: 'Additional data',
       save: initialData ? 'SAVE' : 'ADD',
       back: 'BACK',
+      loading: 'Loading...',
     },
     ru: {
       title: initialData ? 'Редактировать DEX джобу' : 'Добавить DEX джобу',
@@ -57,6 +71,7 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
       additionalData: 'Доп. данные',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
       back: 'НАЗАД',
+      loading: 'Загрузка...',
     },
   };
 
@@ -85,6 +100,20 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
     }));
   }, [form.chainId, rpcUrls]);
 
+  const hasChanges = useMemo(
+    () => hasFormChanges(form, initialData),
+    [form, initialData],
+  );
+
+  const isValid = Boolean(form.chainId && form.rpcUrlId && form.jobType.trim());
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: isFormLoading,
+  });
+
   const handleChainChange = (chainId: string) => {
     setForm((current) => ({
       ...current,
@@ -95,13 +124,16 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveDisabled) return;
     onSave(form);
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={onClose} title={t[language].title}>
-      <form onSubmit={handleSubmit} className="flex flex-col">
+      <form onSubmit={handleSubmit} className="relative flex flex-col">
+        {isFormLoading ? <FormLoader text={t[language].loading} /> : null}
+
         <div className="p-6 space-y-4">
           <Autocomplete
             label={t[language].chain}
@@ -110,6 +142,7 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
             onChange={handleChainChange}
             placeholder={language === 'ru' ? 'Выберите сеть...' : 'Select chain...'}
             required
+            disabled={isFormLoading}
           />
 
           <Autocomplete
@@ -119,7 +152,7 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
             onChange={(rpcUrlId) => setForm((current) => ({ ...current, rpcUrlId }))}
             placeholder={language === 'ru' ? 'Выберите RPC URL...' : 'Select rpc url...'}
             required
-            disabled={!form.chainId}
+            disabled={!form.chainId || isFormLoading}
           />
 
           <div className="flex flex-col gap-1.5">
@@ -130,7 +163,8 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
                 value={form.jobType}
                 onChange={(e) => setForm((current) => ({ ...current, jobType: e.target.value }))}
                 required
-                className="w-full px-3 py-2 pr-8 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                disabled={isFormLoading}
+                className="w-full px-3 py-2 pr-8 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
               />
               {form.jobType && (
                 <button
@@ -150,7 +184,8 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
               type="text"
               value={form.description}
               onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))}
-              className="w-full px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              disabled={isFormLoading}
+              className="w-full px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
             />
           </div>
 
@@ -160,7 +195,8 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
               value={form.additionalData}
               onChange={(e) => setForm((current) => ({ ...current, additionalData: e.target.value }))}
               rows={4}
-              className="w-full px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none font-mono"
+              disabled={isFormLoading}
+              className="w-full px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none font-mono disabled:opacity-50"
             />
           </div>
         </div>
@@ -175,7 +211,8 @@ export function DexJobForm({ open, onClose, onSave, initialData, language }: Dex
           </button>
           <button
             type="submit"
-            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity"
+            disabled={saveDisabled}
+            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].save}
           </button>

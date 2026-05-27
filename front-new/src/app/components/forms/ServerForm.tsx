@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Dialog } from '../Dialog';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 export interface ServerFormValues {
   ip: string;
@@ -24,6 +25,8 @@ const empty: ServerFormValues = {
 export function ServerForm({ open, onClose, onSave, initialData, language }: ServerFormProps) {
   const [form, setForm] = useState<ServerFormValues>(empty);
 
+  const isEdit = Boolean(initialData);
+
   const t = {
     en: {
       title: initialData ? 'Edit Server' : 'Add Server',
@@ -47,8 +50,23 @@ export function ServerForm({ open, onClose, onSave, initialData, language }: Ser
     setForm(initialData ?? empty);
   }, [open, initialData]);
 
+  const hasChanges = useMemo(
+    () => hasFormChanges(form, initialData),
+    [form, initialData],
+  );
+
+  const isValid = Boolean(form.ip.trim() && form.port.trim() && form.serverName.trim());
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: false,
+  });
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    if (saveDisabled) return;
     onSave({
       ip: form.ip.trim(),
       port: form.port.trim(),
@@ -105,7 +123,8 @@ export function ServerForm({ open, onClose, onSave, initialData, language }: Ser
           </button>
           <button
             type="submit"
-            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity"
+            disabled={saveDisabled}
+            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].save}
           </button>

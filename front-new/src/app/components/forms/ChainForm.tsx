@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dialog } from '../Dialog';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 interface ChainFormData {
   id: string;
@@ -65,9 +66,26 @@ export function ChainForm({ open, onClose, onSave, initialData, language, chainK
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveDisabled) return;
     onSave(formData);
     onClose();
   };
+
+  const hasChanges = useMemo(
+    () => hasFormChanges(formData, initialData),
+    [formData, initialData],
+  );
+
+  const isValid =
+    Boolean(formData.name.trim()) &&
+    (chainKind === 'cex' && !isEdit ? true : Boolean(formData.id.trim()));
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: false,
+  });
 
   const showChainIdField = chainKind === 'dex' || (chainKind === 'cex' && isEdit);
 
@@ -122,7 +140,8 @@ export function ChainForm({ open, onClose, onSave, initialData, language, chainK
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity text-sm"
+            disabled={saveDisabled}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].save}
           </button>

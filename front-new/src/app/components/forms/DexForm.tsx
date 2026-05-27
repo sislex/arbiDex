@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Dialog } from '../Dialog';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 export interface DexFormValues {
   name: string;
@@ -17,6 +18,8 @@ const empty: DexFormValues = { name: '' };
 
 export function DexForm({ open, onClose, onSave, initialData, language }: DexFormProps) {
   const [form, setForm] = useState<DexFormValues>(empty);
+
+  const isEdit = Boolean(initialData);
 
   const t = {
     en: {
@@ -37,8 +40,23 @@ export function DexForm({ open, onClose, onSave, initialData, language }: DexFor
     setForm(initialData ?? empty);
   }, [open, initialData]);
 
+  const hasChanges = useMemo(
+    () => hasFormChanges(form, initialData),
+    [form, initialData],
+  );
+
+  const isValid = Boolean(form.name.trim());
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: false,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveDisabled) return;
     onSave(form);
     onClose();
   };
@@ -69,7 +87,8 @@ export function DexForm({ open, onClose, onSave, initialData, language }: DexFor
           </button>
           <button
             type="submit"
-            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity"
+            disabled={saveDisabled}
+            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].save}
           </button>

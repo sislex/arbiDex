@@ -38,7 +38,7 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        <div className="flex-1 overflow-visible">{children}</div>
       </div>
     </div>
   );

@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { FormLoader } from '../FormLoader';
 import { useAppSelector } from '../../store/hooks';
-import { selectCexChainsDataResponse } from '../../store/db-config/dbConfig.selectors';
+import { selectCexChainsDataResponse, selectCexChainsMeta } from '../../store/db-config/dbConfig.selectors';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 interface CexPairFormData {
   sourceId: string;
@@ -23,7 +25,11 @@ const empty: CexPairFormData = { sourceId: '', token0Symbol: '', token1Symbol: '
 
 export function CexPairForm({ open, onClose, onSave, initialData, language }: CexPairFormProps) {
   const cexChains = useAppSelector(selectCexChainsDataResponse);
+  const cexChainsMeta = useAppSelector(selectCexChainsMeta);
   const [form, setForm] = useState<CexPairFormData>(empty);
+
+  const isEdit = Boolean(initialData);
+  const isFormLoading = cexChainsMeta.isLoading || !cexChainsMeta.isLoaded;
 
   const t = {
     en: {
@@ -33,6 +39,7 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
       token1: 'Token 1 symbol',
       submit: initialData ? 'SAVE' : 'ADD',
       cancel: 'CANCEL',
+      loading: 'Loading...',
     },
     ru: {
       title: initialData ? 'Редактировать пару' : 'Добавить пару',
@@ -41,6 +48,7 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
       token1: 'Символ токена 1',
       submit: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
       cancel: 'ОТМЕНА',
+      loading: 'Загрузка...',
     },
   };
 
@@ -54,15 +62,32 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
     return { value: String(id ?? ''), label: name };
   });
 
+  const hasChanges = useMemo(
+    () => hasFormChanges(form, initialData),
+    [form, initialData],
+  );
+
+  const isValid = Boolean(form.sourceId && form.token0Symbol.trim() && form.token1Symbol.trim());
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: isFormLoading,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveDisabled) return;
     onSave(form);
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={onClose} title={t[language].title}>
-      <form onSubmit={handleSubmit} className="flex flex-col">
+      <form onSubmit={handleSubmit} className="relative flex flex-col">
+        {isFormLoading ? <FormLoader text={t[language].loading} /> : null}
+
         <div className="p-6 space-y-4">
           <Autocomplete
             label={t[language].selectChain}
@@ -71,6 +96,7 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
             onChange={(v) => setForm({ ...form, sourceId: v })}
             placeholder={language === 'ru' ? 'Выберите CEX-источник...' : 'Select chain...'}
             required
+            disabled={isFormLoading}
           />
 
           <div className="flex flex-col gap-1.5">
@@ -123,7 +149,8 @@ export function CexPairForm({ open, onClose, onSave, initialData, language }: Ce
         <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
           <button
             type="submit"
-            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity"
+            disabled={saveDisabled}
+            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].submit}
           </button>

@@ -2,8 +2,15 @@ import { useState, useEffect, useMemo } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { FormLoader } from '../FormLoader';
 import { useAppSelector } from '../../store/hooks';
-import { selectPoolsDataResponse, selectTokensDataResponse } from '../../store/db-config/dbConfig.selectors';
+import {
+  selectPoolsDataResponse,
+  selectPoolsMeta,
+  selectTokensDataResponse,
+  selectTokensMeta,
+} from '../../store/db-config/dbConfig.selectors';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 /** Submitted to API as PairDto: poolId, tokenIn, tokenOut (token IDs). */
 export interface DexPairFormData {
@@ -34,7 +41,13 @@ const empty: DexPairFormData = { poolId: '', tokenInId: '', tokenOutId: '' };
 export function DexPairForm({ open, onClose, onSave, initialData, language }: DexPairFormProps) {
   const poolsFromStore = useAppSelector(selectPoolsDataResponse);
   const tokens = useAppSelector(selectTokensDataResponse);
+  const poolsMeta = useAppSelector(selectPoolsMeta);
+  const tokensMeta = useAppSelector(selectTokensMeta);
   const [form, setForm] = useState<DexPairFormData>(empty);
+
+  const isEdit = Boolean(initialData);
+  const isFormLoading =
+    poolsMeta.isLoading || tokensMeta.isLoading || !poolsMeta.isLoaded || !tokensMeta.isLoaded;
 
   const t = {
     en: {
@@ -44,6 +57,7 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
       tokenOut: 'Token Out',
       submit: initialData ? 'SAVE' : 'ADD',
       cancel: 'CANCEL',
+      loading: 'Loading...',
     },
     ru: {
       title: initialData ? 'Редактировать пару' : 'Добавить пару',
@@ -52,6 +66,7 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
       tokenOut: 'Токен выхода',
       submit: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
       cancel: 'ОТМЕНА',
+      loading: 'Загрузка...',
     },
   };
 
@@ -104,15 +119,32 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
       selectedPool.tokenOutLabel
     : '';
 
+  const hasChanges = useMemo(
+    () => hasFormChanges(form, initialData),
+    [form, initialData],
+  );
+
+  const isValid = Boolean(form.poolId && form.tokenInId && form.tokenOutId);
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: isFormLoading,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveDisabled) return;
     onSave(form);
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={onClose} title={t[language].title}>
-      <form onSubmit={handleSubmit} className="flex flex-col">
+      <form onSubmit={handleSubmit} className="relative flex flex-col">
+        {isFormLoading ? <FormLoader text={t[language].loading} /> : null}
+
         <div className="p-6 space-y-4">
           <Autocomplete
             label={t[language].poolId}
@@ -121,6 +153,7 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
             onChange={handlePoolChange}
             placeholder="Select pool..."
             required
+            disabled={isFormLoading}
           />
 
           <div className="flex items-end gap-2">
@@ -175,8 +208,8 @@ export function DexPairForm({ open, onClose, onSave, initialData, language }: De
         <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
           <button
             type="submit"
-            disabled={!form.poolId || !form.tokenInId || !form.tokenOutId}
-            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled={saveDisabled}
+            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].submit}
           </button>

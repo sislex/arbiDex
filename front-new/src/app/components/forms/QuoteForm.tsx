@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { FormLoader } from '../FormLoader';
 import { useAppSelector } from '../../store/hooks';
-import { selectTokensDataResponse } from '../../store/db-config/dbConfig.selectors';
+import { selectTokensDataResponse, selectTokensMeta } from '../../store/db-config/dbConfig.selectors';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 export interface QuoteFormValues {
   amount: string;
@@ -30,7 +32,11 @@ const empty: QuoteFormValues = {
 
 export function QuoteForm({ open, onClose, onSave, initialData, language }: QuoteFormProps) {
   const tokens = useAppSelector(selectTokensDataResponse);
+  const tokensMeta = useAppSelector(selectTokensMeta);
   const [form, setForm] = useState<QuoteFormValues>(empty);
+
+  const isEdit = Boolean(initialData);
+  const isFormLoading = tokensMeta.isLoading || !tokensMeta.isLoaded;
 
   const t = {
     en: {
@@ -42,6 +48,7 @@ export function QuoteForm({ open, onClose, onSave, initialData, language }: Quot
       quoteToken: 'Select Quote Token',
       back: 'BACK',
       save: initialData ? 'SAVE' : 'ADD',
+      loading: 'Loading...',
     },
     ru: {
       title: initialData ? 'Редактировать котировку' : 'Добавить котировку',
@@ -52,6 +59,7 @@ export function QuoteForm({ open, onClose, onSave, initialData, language }: Quot
       quoteToken: 'Токен котировки',
       back: 'НАЗАД',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
+      loading: 'Загрузка...',
     },
   };
 
@@ -68,16 +76,33 @@ export function QuoteForm({ open, onClose, onSave, initialData, language }: Quot
     [tokens],
   );
 
+  const hasChanges = useMemo(
+    () => hasFormChanges(form, initialData),
+    [form, initialData],
+  );
+
+  const isValid = Boolean(form.amount.trim() && form.quoteSource.trim() && form.quoteTokenId);
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: isFormLoading,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveDisabled) return;
     onSave(form);
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={onClose} title={t[language].title}>
-      <form onSubmit={handleSubmit} className="flex flex-col">
-        <div className="p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="relative flex flex-col">
+        {isFormLoading ? <FormLoader text={t[language].loading} /> : null}
+
+        <div className="p-6 space-y-4 min-h-[28rem]">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm text-muted-foreground">{t[language].amount}</label>
             <input
@@ -85,7 +110,8 @@ export function QuoteForm({ open, onClose, onSave, initialData, language }: Quot
               value={form.amount}
               onChange={(e) => setForm((current) => ({ ...current, amount: e.target.value }))}
               required
-              className="w-full px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              disabled={isFormLoading}
+              className="w-full px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
             />
           </div>
 
@@ -117,7 +143,8 @@ export function QuoteForm({ open, onClose, onSave, initialData, language }: Quot
               value={form.quoteSource}
               onChange={(e) => setForm((current) => ({ ...current, quoteSource: e.target.value }))}
               required
-              className="w-full px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              disabled={isFormLoading}
+              className="w-full px-3 py-2 bg-input border border-border rounded text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
             />
           </div>
 
@@ -128,6 +155,7 @@ export function QuoteForm({ open, onClose, onSave, initialData, language }: Quot
             onChange={(quoteTokenId) => setForm((current) => ({ ...current, quoteTokenId }))}
             placeholder={language === 'ru' ? 'Выберите токен...' : 'Select token...'}
             required
+            disabled={isFormLoading}
           />
         </div>
 
@@ -141,7 +169,8 @@ export function QuoteForm({ open, onClose, onSave, initialData, language }: Quot
           </button>
           <button
             type="submit"
-            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity"
+            disabled={saveDisabled}
+            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].save}
           </button>

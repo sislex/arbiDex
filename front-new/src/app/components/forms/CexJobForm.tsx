@@ -2,12 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { FormLoader } from '../FormLoader';
 import { useAppSelector } from '../../store/hooks';
 import {
   selectCexChainsDataResponse,
+  selectCexChainsMeta,
   selectCexPairsDataResponse,
+  selectCexPairsMeta,
 } from '../../store/db-config/dbConfig.selectors';
 import { buildCexChainNameById, resolveCexPairSourceLabel } from '../../utils/cexPairSource';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 export interface CexJobFormValues {
   cexPairId: string;
@@ -28,7 +32,16 @@ const empty: CexJobFormValues = { cexPairId: '', jobType: '', description: '' };
 export function CexJobForm({ open, onClose, onSave, initialData, language }: CexJobFormProps) {
   const cexPairsFromStore = useAppSelector(selectCexPairsDataResponse);
   const cexChainsFromStore = useAppSelector(selectCexChainsDataResponse);
+  const cexPairsMeta = useAppSelector(selectCexPairsMeta);
+  const cexChainsMeta = useAppSelector(selectCexChainsMeta);
   const [form, setForm] = useState<CexJobFormValues>(empty);
+
+  const isEdit = Boolean(initialData);
+  const isFormLoading =
+    cexPairsMeta.isLoading ||
+    cexChainsMeta.isLoading ||
+    !cexPairsMeta.isLoaded ||
+    !cexChainsMeta.isLoaded;
 
   const cexChainNameById = useMemo(() => buildCexChainNameById(cexChainsFromStore), [cexChainsFromStore]);
 
@@ -40,6 +53,7 @@ export function CexJobForm({ open, onClose, onSave, initialData, language }: Cex
       description: 'Description',
       submit: initialData ? 'SAVE' : 'ADD',
       cancel: 'CANCEL',
+      loading: 'Loading...',
     },
     ru: {
       title: initialData ? 'Изменить джобу' : 'Добавить джобу',
@@ -48,6 +62,7 @@ export function CexJobForm({ open, onClose, onSave, initialData, language }: Cex
       description: 'Описание',
       submit: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
       cancel: 'ОТМЕНА',
+      loading: 'Загрузка...',
     },
   };
 
@@ -66,15 +81,32 @@ export function CexJobForm({ open, onClose, onSave, initialData, language }: Cex
     };
   });
 
+  const hasChanges = useMemo(
+    () => hasFormChanges(form, initialData),
+    [form, initialData],
+  );
+
+  const isValid = Boolean(form.cexPairId && form.jobType.trim());
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: isFormLoading,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveDisabled) return;
     onSave(form);
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={onClose} title={t[language].title}>
-      <form onSubmit={handleSubmit} className="flex flex-col">
+      <form onSubmit={handleSubmit} className="relative flex flex-col">
+        {isFormLoading ? <FormLoader text={t[language].loading} /> : null}
+
         <div className="p-6 space-y-4">
           <Autocomplete
             label={t[language].selectPool}
@@ -83,6 +115,7 @@ export function CexJobForm({ open, onClose, onSave, initialData, language }: Cex
             onChange={(v) => setForm({ ...form, cexPairId: v })}
             placeholder="pool"
             required
+            disabled={isFormLoading}
           />
 
           <div className="flex flex-col gap-1.5">
@@ -132,7 +165,8 @@ export function CexJobForm({ open, onClose, onSave, initialData, language }: Cex
         <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
           <button
             type="submit"
-            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity"
+            disabled={saveDisabled}
+            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].submit}
           </button>

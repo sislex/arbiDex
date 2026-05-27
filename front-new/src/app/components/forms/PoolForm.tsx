@@ -1,12 +1,17 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { FormLoader } from '../FormLoader';
 import { useAppSelector } from '../../store/hooks';
 import {
   selectChainsDataResponse,
+  selectChainsMeta,
   selectDexesDataResponse,
+  selectDexesMeta,
   selectTokensDataResponse,
+  selectTokensMeta,
 } from '../../store/db-config/dbConfig.selectors';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 interface PoolFormData {
   chainId: string;
@@ -30,6 +35,18 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
   const chains = useAppSelector(selectChainsDataResponse);
   const tokens = useAppSelector(selectTokensDataResponse);
   const dexes = useAppSelector(selectDexesDataResponse);
+  const chainsMeta = useAppSelector(selectChainsMeta);
+  const tokensMeta = useAppSelector(selectTokensMeta);
+  const dexesMeta = useAppSelector(selectDexesMeta);
+
+  const isEdit = Boolean(initialData);
+  const isFormLoading =
+    chainsMeta.isLoading ||
+    tokensMeta.isLoading ||
+    dexesMeta.isLoading ||
+    !chainsMeta.isLoaded ||
+    !tokensMeta.isLoaded ||
+    !dexesMeta.isLoaded;
 
   const [formData, setFormData] = useState<PoolFormData>({
     chainId: '',
@@ -53,6 +70,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
       poolAddress: 'Pool Address',
       cancel: 'Cancel',
       save: 'Save',
+      loading: 'Loading...',
     },
     ru: {
       title: initialData ? 'Редактировать пул' : 'Добавить пул',
@@ -65,6 +83,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
       poolAddress: 'Адрес пула',
       cancel: 'Отмена',
       save: 'Сохранить',
+      loading: 'Загрузка...',
     },
   };
 
@@ -131,16 +150,41 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
     });
   };
 
+  const hasChanges = useMemo(
+    () => hasFormChanges(formData, initialData),
+    [formData, initialData],
+  );
+
+  const isValid = Boolean(
+    formData.chainId &&
+      formData.token0Id &&
+      formData.token1Id &&
+      formData.dexId &&
+      formData.version.trim() &&
+      formData.fee.trim() &&
+      formData.poolAddress.trim(),
+  );
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: isFormLoading,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveDisabled) return;
     onSave(formData);
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={onClose} title={t[language].title}>
-      <form onSubmit={handleSubmit} className="flex flex-col h-full">
-        <div className="flex-1 p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="relative flex flex-col h-full">
+        {isFormLoading ? <FormLoader text={t[language].loading} /> : null}
+
+        <div className="flex-1 p-6 space-y-4 max-h-[75vh] overflow-y-auto">
           <Autocomplete
             label={t[language].chain}
             required
@@ -148,6 +192,7 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
             value={formData.chainId}
             onChange={handleChainChange}
             placeholder={language === 'ru' ? 'Выберите сеть...' : 'Select chain...'}
+            disabled={isFormLoading}
           />
 
           <Autocomplete
@@ -237,7 +282,8 @@ export function PoolForm({ open, onClose, onSave, initialData, language }: PoolF
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity text-sm"
+            disabled={saveDisabled}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].save}
           </button>

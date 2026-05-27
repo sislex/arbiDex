@@ -1,12 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Dialog } from '../Dialog';
 import { Autocomplete } from '../Autocomplete';
+import { FormLoader } from '../FormLoader';
 import { useAppSelector } from '../../store/hooks';
 import {
   selectCexJobsDataResponse,
+  selectCexJobsMeta,
   selectJobsDataResponse,
+  selectJobsMeta,
   selectServersDataResponse,
+  selectServersMeta,
 } from '../../store/db-config/dbConfig.selectors';
+import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 export interface BotFormValues {
   botName: string;
@@ -58,7 +63,19 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
   const jobs = useAppSelector(selectJobsDataResponse);
   const cexJobs = useAppSelector(selectCexJobsDataResponse);
   const servers = useAppSelector(selectServersDataResponse);
+  const jobsMeta = useAppSelector(selectJobsMeta);
+  const cexJobsMeta = useAppSelector(selectCexJobsMeta);
+  const serversMeta = useAppSelector(selectServersMeta);
   const [form, setForm] = useState<BotFormValues>(empty);
+
+  const isEdit = Boolean(initialData);
+  const isFormLoading =
+    jobsMeta.isLoading ||
+    cexJobsMeta.isLoading ||
+    serversMeta.isLoading ||
+    !jobsMeta.isLoaded ||
+    !cexJobsMeta.isLoaded ||
+    !serversMeta.isLoaded;
 
   const t = {
     en: {
@@ -77,6 +94,7 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
       timeout: 'Timeout ms',
       back: 'BACK',
       save: initialData ? 'SAVE' : 'ADD',
+      loading: 'Loading...',
     },
     ru: {
       title: initialData ? 'Редактировать бота' : 'Добавить бота',
@@ -94,6 +112,7 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
       timeout: 'Таймаут, мс',
       back: 'НАЗАД',
       save: initialData ? 'СОХРАНИТЬ' : 'ДОБАВИТЬ',
+      loading: 'Загрузка...',
     },
   };
 
@@ -150,15 +169,36 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
     }));
   };
 
+  const hasChanges = useMemo(
+    () => hasFormChanges(form, initialData),
+    [form, initialData],
+  );
+
+  const isValid = Boolean(
+    form.botName.trim() &&
+      form.serverId &&
+      (form.mode === 'DEX' ? form.dexJobId : form.cexJobId),
+  );
+
+  const saveDisabled = isSubmitDisabled({
+    isEdit,
+    hasChanges,
+    isValid,
+    isLoading: isFormLoading,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveDisabled) return;
     onSave(form);
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={onClose} title={t[language].title}>
-      <form onSubmit={handleSubmit} className="flex flex-col">
+      <form onSubmit={handleSubmit} className="relative flex flex-col">
+        {isFormLoading ? <FormLoader text={t[language].loading} /> : null}
+
         <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm text-muted-foreground">{t[language].botName}</label>
@@ -290,7 +330,8 @@ export function BotForm({ open, onClose, onSave, initialData, language }: BotFor
           </button>
           <button
             type="submit"
-            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity"
+            disabled={saveDisabled}
+            className="px-5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold tracking-widest rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t[language].save}
           </button>
