@@ -14,8 +14,8 @@ services:
       context: ./front-new
       dockerfile: ../docker/DockerfileFrontendReact
       args:
-        VITE_HOST_URL: http://localhost:3001
-        VITE_CEX_QUOTES_URL: http://45.135.182.251:1001
+        VITE_HOST_URL: http://78.17.27.246:3001
+        VITE_CEX_QUOTES_URL: http://78.17.27.246:1001
     container_name: arbi-front-new
     ports:
       - "4203:4203"
