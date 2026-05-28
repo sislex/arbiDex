@@ -1,13 +1,24 @@
 services:
-  frontend:
+#  frontend:
+#    build:
+#      context: ./front
+#      dockerfile: ../docker/DockerfileFrontend
+#    container_name: arbi-front
+#    ports:
+#      - "4203:80"
+#    depends_on:
+#      - backend
+
+  frontend-new:
     build:
-      context: ./front
-      dockerfile: ../docker/DockerfileFrontend
-    container_name: arbi-front
+      context: ./front-new
+      dockerfile: ../docker/DockerfileFrontendReact
+      args:
+        VITE_HOST_URL: http://localhost:3001
+        VITE_CEX_QUOTES_URL: http://45.135.182.251:1001
+    container_name: arbi-front-new
     ports:
-      - "4203:80"
-    depends_on:
-      - backend
+      - "4203:4203"
 
   backend:
     build:
