@@ -14,8 +14,8 @@ services:
       context: ./front-new
       dockerfile: ../docker/DockerfileFrontendReact
       args:
-        VITE_HOST_URL: http://78.17.27.246:3001
-        VITE_CEX_QUOTES_URL: http://78.17.27.246:1001
+        VITE_HOST_URL: ${VITE_HOST_URL}
+        VITE_CEX_QUOTES_URL: ${VITE_CEX_QUOTES_URL}
     container_name: arbi-front-new
     ports:
       - "4203:4203"
@@ -34,7 +34,6 @@ services:
     depends_on:
       arbi-postgres:
         condition: service_healthy
-
 
   arbi-postgres:
     image: postgres:16

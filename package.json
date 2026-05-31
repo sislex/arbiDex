@@ -10,7 +10,7 @@
     "back-start:dev": "npm run start:dev --prefix back",
     "back-build": "npm run build --prefix back",
 
-    "start:docker": "docker-compose up --build -d",
+    "start:docker": "docker compose up --build -d",
     "stop & clear:docker": "docker compose down -v",
 
     "test": "echo \"Error: no db/pgadmin_storage/storage/admin_example.com/test specified\" && exit 1"
