@@ -11,6 +11,7 @@ import { Bots } from './Bots';
 import { Chains } from './Chains';
 import { RpcUrls } from './RpcUrls';
 import { QuoteJobRelations } from './QuoteJobRelations';
+import { PoolsJobRelations } from './PoolsJobRelations';
 
 @Index('idx_jobs_chain_id', ['chainId'], {})
 @Index('jobs_pkey', ['jobId'], { unique: true })
@@ -50,6 +51,12 @@ export class Jobs {
   @ManyToOne(() => RpcUrls, (rpcUrls) => rpcUrls.jobs, { onDelete: 'RESTRICT' })
   @JoinColumn([{ name: 'rpc_url_id', referencedColumnName: 'rpcUrlId' }])
   rpcUrl: RpcUrls;
+
+  @OneToMany(
+    () => PoolsJobRelations,
+    (poolsJobRelations) => poolsJobRelations.job,
+  )
+  poolsJobRelations: PoolsJobRelations[];
 
   @OneToMany(
     () => QuoteJobRelations,

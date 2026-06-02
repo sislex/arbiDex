@@ -22,20 +22,29 @@ export class JobsController {
   @Get()
   async findAll() {
     const jobs = await this.jobsService.findAll();
-    return jobs.map(j => ({
+    return jobs.map((j) => ({
       jobId: j.jobId,
       jobType: j.jobType,
       description: j.description,
       extraSettings: j.extraSettings,
       chainId: j.chain.chainId,
       rpcUrlId: j.rpcUrl.rpcUrlId,
-      pairsCount: j.quoteJobRelations?.length,
-    }))
+      poolsCount: j.poolsCount ?? j.poolsJobRelations?.length ?? 0,
+    }));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: any) {
-    return this.jobsService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const job = await this.jobsService.findOne(+id);
+    return {
+      jobId: job.jobId,
+      jobType: job.jobType,
+      description: job.description,
+      extraSettings: job.extraSettings,
+      chainId: job.chain?.chainId,
+      rpcUrlId: job.rpcUrl?.rpcUrlId,
+      poolsCount: job.poolsCount ?? 0,
+    };
   }
 
   @Put(':id')

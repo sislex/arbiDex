@@ -14,6 +14,7 @@ import { PairsModule } from './pairs/pairs.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { PairQuoteRelationsModule } from './pair-quote-relations/pair-quote-relations.module';
 import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relations.module';
+import { PoolJobRelationsModule } from './pool-job-relations/pool-job-relations.module';
 import { RpcUrlsModule } from './rpc-urls/rpc-urls.module';
 import { GetFeeModule } from './services/get-fee.module';
 import { SwapRateModule } from './swap-rate/swap-rate.module';
@@ -27,6 +28,7 @@ import { Jobs } from './entities/entities/Jobs';
 import { Bots } from './entities/entities/Bots';
 import { Quotes } from './entities/entities/Quotes';
 import { QuoteJobRelations } from './entities/entities/QuoteJobRelations';
+import { PoolsJobRelations } from './entities/entities/PoolsJobRelations';
 import { Pairs } from './entities/entities/Pairs';
 import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
 import { CexPairsModule } from './cex-pairs/cex-pairs.module';
@@ -60,6 +62,7 @@ import { CexChain } from './entities/entities/cex-chain.entity';
           Bots,
           Quotes,
           QuoteJobRelations,
+          PoolsJobRelations,
           Pairs,
           PairQuoteRelations,
           CexChain,
@@ -85,6 +88,7 @@ import { CexChain } from './entities/entities/cex-chain.entity';
     QuotesModule,
     PairQuoteRelationsModule,
     QuoteJobRelationsModule,
+    PoolJobRelationsModule,
     RpcUrlsModule,
     GetFeeModule,
     SwapRateModule,

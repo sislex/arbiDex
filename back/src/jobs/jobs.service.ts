@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Jobs } from '../entities/entities/Jobs';
 import { Repository } from 'typeorm';
 import { JobDto } from '../dtos/jobs-dto/job.dto';
-import { QuoteJobRelationsService } from '../quote-job-relations/quote-job-relations.service';
+import { PoolJobRelationsService } from '../pool-job-relations/pool-job-relations.service';
 import { ChainsService } from '../chains/chains.service';
 import { RpcUrlsService } from '../rpc-urls/rpc-urls.service';
 
@@ -12,8 +12,8 @@ export class JobsService {
   constructor(
     @InjectRepository(Jobs)
     private jobRepository: Repository<Jobs>,
-    @Inject(forwardRef(() => QuoteJobRelationsService))
-    private quoteJobRelationsService: QuoteJobRelationsService,
+    @Inject(forwardRef(() => PoolJobRelationsService))
+    private poolJobRelationsService: PoolJobRelationsService,
     private chainsService: ChainsService,
     private rpcUrlsService: RpcUrlsService,
   ) {}
@@ -37,42 +37,36 @@ export class JobsService {
       relations: {
         chain: true,
         rpcUrl: true,
-        quoteJobRelations: true,
+        poolsJobRelations: true,
       },
       select: {
+        jobId: true,
+        jobType: true,
+        description: true,
+        extraSettings: true,
         chain: {
           chainId: true,
         },
-        quoteJobRelations: {
-          quoteJobRelationId: true,
+        poolsJobRelations: {
+          poolsJobRelationId: true,
         },
         rpcUrl: {
           rpcUrlId: true,
-        }
+        },
       },
       order: { jobId: 'DESC' },
     });
 
-    if (jobData && jobData.length > 0) {
-      return Promise.all(
-        jobData.map(async (item) => {
-          const relations = await this.quoteJobRelationsService.findByJobId(
-            item.jobId,
-          );
-          return {
-            ...item,
-            pairsCount: relations.length,
-          };
-        }),
-      );
-    }
-
-    return [];
+    return jobData.map((item) => ({
+      ...item,
+      poolsCount: item.poolsJobRelations?.length ?? 0,
+    }));
   }
 
-  async findOne(id: number) {
+  private async findEntity(id: number): Promise<Jobs> {
     const job = await this.jobRepository.findOne({
       where: { jobId: id.toString() },
+      relations: ['chain', 'rpcUrl'],
     });
     if (!job) {
       throw new Error(`Job with id ${id} not found`);
@@ -80,24 +74,21 @@ export class JobsService {
     return job;
   }
 
-  async findOneWithPairs(id: number) {
-    const job = await this.jobRepository.findOne({
-      where: { jobId: id.toString() },
-      relations: ['chain', 'rpcUrl'],
-    });
-
-    const relations = await this.quoteJobRelationsService.findByJobId(
-      job!.jobId,
-    );
-
+  async findOne(id: number) {
+    const job = await this.findEntity(id);
+    const relations = await this.poolJobRelationsService.findByJobId(job.jobId);
     return {
       ...job,
-      pairsCount: relations.length,
+      poolsCount: relations.length,
     };
   }
 
+  async findOneWithPairs(id: number) {
+    return this.findOne(id);
+  }
+
   async update(id: number, updateJobDto: JobDto) {
-    const job = await this.findOne(id);
+    const job = await this.findEntity(id);
     const chain = await this.chainsService.findOne(updateJobDto.chainId);
     const rpcUrl = await this.rpcUrlsService.findOne(updateJobDto.rpcUrlId);
 
@@ -109,6 +100,7 @@ export class JobsService {
 
     return await this.jobRepository.save(job);
   }
+
   async remove(id: number) {
     return await this.jobRepository.delete(id);
   }
