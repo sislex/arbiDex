@@ -3,6 +3,13 @@ import { ArrowLeft, Columns2, Plus, Rows2, Save, Trash2 } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { DataTable, Column } from '../DataTable';
 import { apiService } from '../../services/api-service';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
+import {
+  selectDexesMeta,
+  selectFullPoolsData,
+  selectPoolsMeta,
+} from '../../store/db-config/dbConfig.selectors';
 
 interface DexJobRelationsPageProps {
   jobId: number;
@@ -11,19 +18,17 @@ interface DexJobRelationsPageProps {
   onBack: () => void;
 }
 
-interface QuoteRelationRow {
+interface PoolJobRow {
   id: number;
-  quoteId: number | string;
+  poolId: number;
+  relationId?: number;
   dexName: string;
   dexVersion: string;
-  tokenInSymbol: string;
-  tokenOutSymbol: string;
-  tokenIn: number | string;
-  tokenOut: number | string;
-  amount: string;
-  fee: string;
-  pairId: number | string;
+  poolAddress: string;
   chainName: string;
+  token0Symbol: string;
+  token1Symbol: string;
+  fee: string;
 }
 
 const areSetsEqual = (left: Set<number>, right: Set<number>) => {
@@ -34,147 +39,150 @@ const areSetsEqual = (left: Set<number>, right: Set<number>) => {
   return true;
 };
 
-const mapQuoteRelationToRow = (relation: any): QuoteRelationRow => {
-  const pair = relation?.pair ?? {};
-  const pool = pair?.pool ?? {};
-  return {
-    id: Number(relation?.pairQuoteRelationId ?? relation?.pair_quote_relation_id ?? relation?.id),
-    quoteId: relation?.quote?.quoteId ?? relation?.quote?.id ?? '-',
-    dexName: pool?.dex?.name ?? '-',
-    dexVersion: String(pool?.version ?? '-'),
-    tokenInSymbol: pair?.tokenIn?.symbol ?? '-',
-    tokenOutSymbol: pair?.tokenOut?.symbol ?? '-',
-    tokenIn: pair?.tokenIn?.tokenId ?? '-',
-    tokenOut: pair?.tokenOut?.tokenId ?? '-',
-    amount: String(relation?.quote?.amount ?? '-'),
-    fee: String(pool?.fee ?? '-'),
-    pairId: pair?.pairId ?? '-',
-    chainName: pool?.chain?.name ?? '-',
-  };
-};
+const mapPoolToRow = (pool: any, relationId?: number): PoolJobRow => ({
+  id: Number(pool.poolId ?? pool.id),
+  poolId: Number(pool.poolId ?? pool.id),
+  relationId,
+  dexName: String(pool.dexName ?? '-'),
+  dexVersion: String(pool.version ?? '-'),
+  poolAddress: String(pool.poolAddress ?? '-'),
+  chainName: String(pool.chainName ?? '-'),
+  token0Symbol: String(pool.token0Symbol ?? pool.token0Name ?? '-'),
+  token1Symbol: String(pool.token1Symbol ?? pool.token1Name ?? '-'),
+  fee: String(pool.fee ?? '-'),
+});
 
 export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJobRelationsPageProps) {
+  const dispatch = useAppDispatch();
+  const pools = useAppSelector(selectFullPoolsData);
+  const poolsMeta = useAppSelector(selectPoolsMeta);
+  const dexesMeta = useAppSelector(selectDexesMeta);
+
   const [layoutMode, setLayoutMode] = useState<'vertical' | 'horizontal'>('vertical');
-  const [allRelations, setAllRelations] = useState<QuoteRelationRow[]>([]);
-  const [activeRelationIds, setActiveRelationIds] = useState<Set<number>>(new Set());
-  const [initialActiveRelationIds, setInitialActiveRelationIds] = useState<Set<number>>(new Set());
-  const [jobRelationIdByQuoteRelationId, setJobRelationIdByQuoteRelationId] = useState<Map<number, number>>(new Map());
-  const [selectedInRelations, setSelectedInRelations] = useState<Set<number>>(new Set());
-  const [selectedNotInRelations, setSelectedNotInRelations] = useState<Set<number>>(new Set());
+  const [jobChainId, setJobChainId] = useState<number | null>(null);
+  const [activePoolIds, setActivePoolIds] = useState<Set<number>>(new Set());
+  const [initialActivePoolIds, setInitialActivePoolIds] = useState<Set<number>>(new Set());
+  const [relationIdByPoolId, setRelationIdByPoolId] = useState<Map<number, number>>(new Map());
+  const [selectedInRows, setSelectedInRows] = useState<Set<number>>(new Set());
+  const [selectedNotInRows, setSelectedNotInRows] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const t = {
     en: {
       back: 'Back to DEX jobs',
-      inRelations: `Job ID:${jobId} relations table`,
-      notInRelations: 'Is not relations',
-      quoteId: 'Quote ID',
+      inRelations: `Job ID:${jobId} pools`,
+      notInRelations: 'Available pools',
       dexName: 'Dex Name',
       dexVersion: 'Dex version',
-      tokenInSymbol: 'Token In Symbol',
-      tokenOutSymbol: 'Token Out Symbol',
-      tokenIn: 'Token In',
-      tokenOut: 'Token Out',
-      amount: 'Amount',
+      token0Symbol: 'Token 0',
+      token1Symbol: 'Token 1',
       fee: 'Fee',
-      pairId: 'Pair ID',
+      poolAddress: 'Pool address',
       chainName: 'Chain Name',
       addSelected: 'Add selected',
       removeSelected: 'Remove selected',
       saveChanges: 'Save changes',
-      loading: 'Loading job relations…',
+      loading: 'Loading job pools…',
     },
     ru: {
       back: 'К списку DEX задач',
-      inRelations: `Job ID:${jobId} таблица связей`,
-      notInRelations: 'Не в связях',
-      quoteId: 'ID котировки',
+      inRelations: `Job ID:${jobId} пулы`,
+      notInRelations: 'Доступные пулы',
       dexName: 'DEX',
       dexVersion: 'Версия DEX',
-      tokenInSymbol: 'Символ токена входа',
-      tokenOutSymbol: 'Символ токена выхода',
-      tokenIn: 'Токен входа',
-      tokenOut: 'Токен выхода',
-      amount: 'Сумма',
+      token0Symbol: 'Токен 0',
+      token1Symbol: 'Токен 1',
       fee: 'Комиссия',
-      pairId: 'ID пары',
+      poolAddress: 'Адрес пула',
       chainName: 'Сеть',
       addSelected: 'Добавить выбранные',
       removeSelected: 'Удалить выбранные',
       saveChanges: 'Сохранить',
-      loading: 'Загрузка связей задачи…',
+      loading: 'Загрузка пулов задачи…',
     },
   };
+
+  useEffect(() => {
+    if ((!poolsMeta.isLoaded || poolsMeta.error) && !poolsMeta.isLoading) {
+      dispatch(dbConfigActions.initPoolsPage());
+    }
+    if ((!dexesMeta.isLoaded || dexesMeta.error) && !dexesMeta.isLoading) {
+      dispatch(dbConfigActions.setDexesData());
+    }
+  }, [dexesMeta.error, dexesMeta.isLoaded, dexesMeta.isLoading, dispatch, poolsMeta.error, poolsMeta.isLoaded, poolsMeta.isLoading]);
+
+  const chainPools = useMemo(() => {
+    if (jobChainId === null) return [];
+    return (pools ?? []).filter((pool: any) => Number(pool.chainId) === jobChainId);
+  }, [jobChainId, pools]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [allQuoteRelationsRaw, activeJobRelationsRaw] = await Promise.all([
-        apiService.getQuoteRelations(jobId),
-        apiService.getJobRelationsByJobId(jobId),
+      const [job, activeRelationsRaw] = await Promise.all([
+        apiService.getJobById(jobId),
+        apiService.getPoolJobRelationsByJobId(jobId),
       ]);
 
-      const rowById = new Map<number, QuoteRelationRow>();
-      (allQuoteRelationsRaw ?? []).forEach((relation: any) => {
-        const row = mapQuoteRelationToRow(relation);
-        if (Number.isFinite(row.id)) rowById.set(row.id, row);
-      });
+      const chainId = Number(job?.chainId);
+      setJobChainId(Number.isFinite(chainId) ? chainId : null);
 
-      const nextActiveRelationIds = new Set<number>();
-      const nextJobRelationMap = new Map<number, number>();
+      const nextActivePoolIds = new Set<number>();
+      const nextRelationMap = new Map<number, number>();
 
-      (activeJobRelationsRaw ?? []).forEach((jobRelation: any) => {
-        const quoteRelation = jobRelation?.quoteRelation;
-        if (!quoteRelation) return;
-
-        const quoteRelationId = Number(
-          quoteRelation?.pairQuoteRelationId ?? quoteRelation?.pair_quote_relation_id ?? quoteRelation?.id,
+      (activeRelationsRaw ?? []).forEach((relation: any) => {
+        const poolId = Number(relation?.pool?.poolId ?? relation?.poolId);
+        const relationId = Number(
+          relation?.poolsJobRelationId ?? relation?.pools_job_relation_id ?? relation?.id,
         );
-        const jobRelationId = Number(
-          jobRelation?.quoteJobRelationId ?? jobRelation?.quote_job_relation_id ?? jobRelation?.id,
-        );
-
-        if (Number.isFinite(quoteRelationId)) {
-          nextActiveRelationIds.add(quoteRelationId);
-          if (Number.isFinite(jobRelationId)) nextJobRelationMap.set(quoteRelationId, jobRelationId);
-          if (!rowById.has(quoteRelationId)) {
-            rowById.set(quoteRelationId, mapQuoteRelationToRow(quoteRelation));
-          }
+        if (Number.isFinite(poolId)) {
+          nextActivePoolIds.add(poolId);
+          if (Number.isFinite(relationId)) nextRelationMap.set(poolId, relationId);
         }
       });
 
-      const rows = Array.from(rowById.values());
-      setAllRelations(rows);
-      setActiveRelationIds(nextActiveRelationIds);
-      setInitialActiveRelationIds(new Set(nextActiveRelationIds));
-      setJobRelationIdByQuoteRelationId(nextJobRelationMap);
-      setSelectedInRelations(new Set());
-      setSelectedNotInRelations(new Set());
+      setActivePoolIds(nextActivePoolIds);
+      setInitialActivePoolIds(new Set(nextActivePoolIds));
+      setRelationIdByPoolId(nextRelationMap);
+      setSelectedInRows(new Set());
+      setSelectedNotInRows(new Set());
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!poolsMeta.isLoaded || poolsMeta.isLoading) return;
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobId]);
+  }, [jobId, poolsMeta.isLoaded, poolsMeta.isLoading]);
 
   const inRelations = useMemo(
-    () => allRelations.filter((row) => activeRelationIds.has(row.id)),
-    [activeRelationIds, allRelations],
-  );
-  const notInRelations = useMemo(
-    () => allRelations.filter((row) => !activeRelationIds.has(row.id)),
-    [activeRelationIds, allRelations],
-  );
-  const hasChanges = useMemo(
-    () => !areSetsEqual(activeRelationIds, initialActiveRelationIds),
-    [activeRelationIds, initialActiveRelationIds],
+    () =>
+      chainPools
+        .filter((pool: any) => activePoolIds.has(Number(pool.poolId)))
+        .map((pool: any) => mapPoolToRow(pool, relationIdByPoolId.get(Number(pool.poolId)))),
+    [activePoolIds, chainPools, relationIdByPoolId],
   );
 
-  const toggleSelected = (setState: (value: Set<number> | ((prev: Set<number>) => Set<number>)) => void, id: number) => {
+  const notInRelations = useMemo(
+    () =>
+      chainPools
+        .filter((pool: any) => !activePoolIds.has(Number(pool.poolId)))
+        .map((pool: any) => mapPoolToRow(pool)),
+    [activePoolIds, chainPools],
+  );
+
+  const hasChanges = useMemo(
+    () => !areSetsEqual(activePoolIds, initialActivePoolIds),
+    [activePoolIds, initialActivePoolIds],
+  );
+
+  const toggleSelected = (
+    setState: (value: Set<number> | ((prev: Set<number>) => Set<number>)) => void,
+    id: number,
+  ) => {
     setState((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -183,65 +191,63 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
     });
   };
 
-  const moveSingle = (relationId: number, toActive: boolean) => {
-    setActiveRelationIds((prev) => {
+  const moveSingle = (poolId: number, toActive: boolean) => {
+    setActivePoolIds((prev) => {
       const next = new Set(prev);
-      if (toActive) next.add(relationId);
-      else next.delete(relationId);
+      if (toActive) next.add(poolId);
+      else next.delete(poolId);
       return next;
     });
-    setSelectedInRelations((prev) => {
+    setSelectedInRows((prev) => {
       const next = new Set(prev);
-      next.delete(relationId);
+      next.delete(poolId);
       return next;
     });
-    setSelectedNotInRelations((prev) => {
+    setSelectedNotInRows((prev) => {
       const next = new Set(prev);
-      next.delete(relationId);
+      next.delete(poolId);
       return next;
     });
   };
 
   const handleRemoveSelected = () => {
-    setActiveRelationIds((prev) => {
+    setActivePoolIds((prev) => {
       const next = new Set(prev);
-      selectedInRelations.forEach((id) => next.delete(id));
+      selectedInRows.forEach((id) => next.delete(id));
       return next;
     });
-    setSelectedInRelations(new Set());
+    setSelectedInRows(new Set());
   };
 
   const handleAddSelected = () => {
-    setActiveRelationIds((prev) => {
+    setActivePoolIds((prev) => {
       const next = new Set(prev);
-      selectedNotInRelations.forEach((id) => next.add(id));
+      selectedNotInRows.forEach((id) => next.add(id));
       return next;
     });
-    setSelectedNotInRelations(new Set());
+    setSelectedNotInRows(new Set());
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const currentIds = activeRelationIds;
-      const initialIds = initialActiveRelationIds;
-      const toCreate = Array.from(currentIds).filter((id) => !initialIds.has(id));
-      const removedQuoteRelationIds = Array.from(initialIds).filter((id) => !currentIds.has(id));
-      const toDelete = removedQuoteRelationIds
-        .map((quoteRelationId) => jobRelationIdByQuoteRelationId.get(quoteRelationId))
+      const toCreate = Array.from(activePoolIds).filter((poolId) => !initialActivePoolIds.has(poolId));
+      const removedPoolIds = Array.from(initialActivePoolIds).filter((poolId) => !activePoolIds.has(poolId));
+      const toDelete = removedPoolIds
+        .map((poolId) => relationIdByPoolId.get(poolId))
         .filter((id): id is number => Number.isFinite(Number(id)));
 
       if (toCreate.length > 0) {
-        await apiService.createJobRelations(
-          toCreate.map((quoteRelationId) => ({
+        await apiService.createPoolJobRelations(
+          toCreate.map((poolId) => ({
             jobId,
-            quoteRelationId,
+            poolId,
           })),
         );
       }
 
       if (toDelete.length > 0) {
-        await apiService.deleteJobRelations(toDelete);
+        await apiService.deletePoolJobRelations(toDelete);
       }
 
       await fetchData();
@@ -251,21 +257,23 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
   };
 
   const relationColumns: Column[] = [
-    { key: 'quoteId', label: t[language].quoteId, sortable: true, filterable: true },
     { key: 'dexName', label: t[language].dexName, sortable: true, filterable: true },
     { key: 'dexVersion', label: t[language].dexVersion, sortable: true, filterable: true },
-    { key: 'tokenInSymbol', label: t[language].tokenInSymbol, sortable: true, filterable: true },
-    { key: 'tokenOutSymbol', label: t[language].tokenOutSymbol, sortable: true, filterable: true },
-    { key: 'tokenIn', label: t[language].tokenIn, sortable: true, filterable: true },
-    { key: 'tokenOut', label: t[language].tokenOut, sortable: true, filterable: true },
-    { key: 'amount', label: t[language].amount, sortable: true, filterable: true },
+    { key: 'token0Symbol', label: t[language].token0Symbol, sortable: true, filterable: true },
+    { key: 'token1Symbol', label: t[language].token1Symbol, sortable: true, filterable: true },
     { key: 'fee', label: t[language].fee, sortable: true, filterable: true },
-    { key: 'pairId', label: t[language].pairId, sortable: true, filterable: true },
+    {
+      key: 'poolAddress',
+      label: t[language].poolAddress,
+      sortable: true,
+      filterable: true,
+      render: (value) => <span className="font-mono text-xs text-muted-foreground">{value}</span>,
+    },
     { key: 'chainName', label: t[language].chainName, sortable: true, filterable: true },
   ];
 
   const renderTable = (
-    data: QuoteRelationRow[],
+    data: PoolJobRow[],
     selectedSet: Set<number>,
     onToggle: (id: number) => void,
     title: string,
@@ -279,8 +287,8 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
         render: (_, row) => (
           <input
             type="checkbox"
-            checked={selectedSet.has(row.id)}
-            onChange={() => onToggle(row.id)}
+            checked={selectedSet.has(row.poolId)}
+            onChange={() => onToggle(row.poolId)}
             className="w-4 h-4 rounded border-input bg-input accent-primary cursor-pointer"
             onClick={(event) => event.stopPropagation()}
           />
@@ -294,7 +302,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
           <button
             onClick={(event) => {
               event.stopPropagation();
-              moveSingle(row.id, action === 'add');
+              moveSingle(row.poolId, action === 'add');
             }}
             className={`p-1.5 rounded transition-colors ${
               action === 'remove'
@@ -315,10 +323,10 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
           columns={columnsWithCheckbox}
           data={data}
           language={language}
-          isLoading={isLoading}
+          isLoading={isLoading || poolsMeta.isLoading}
           loadingText={t[language].loading}
           onFilteredDataChange={onFilteredDataChange}
-          getRowId={(params) => String(params.data?.id ?? '')}
+          getRowId={(params) => String(params.data?.poolId ?? '')}
         />
       </div>
     );
@@ -351,8 +359,8 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
             <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
               {renderTable(
                 inRelations,
-                selectedInRelations,
-                (id) => toggleSelected(setSelectedInRelations, id),
+                selectedInRows,
+                (id) => toggleSelected(setSelectedInRows, id),
                 t[language].inRelations,
                 'remove',
                 () => undefined,
@@ -370,8 +378,8 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
             <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
               {renderTable(
                 notInRelations,
-                selectedNotInRelations,
-                (id) => toggleSelected(setSelectedNotInRelations, id),
+                selectedNotInRows,
+                (id) => toggleSelected(setSelectedNotInRows, id),
                 t[language].notInRelations,
                 'add',
                 () => undefined,
@@ -383,20 +391,20 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
 
       <div className="h-16 border-t border-border bg-card flex items-center justify-end gap-3 px-4">
         <button
-          disabled={selectedInRelations.size === 0}
+          disabled={selectedInRows.size === 0}
           onClick={handleRemoveSelected}
           className="flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
           <Trash2 className="w-4 h-4" />
-          {t[language].removeSelected} ({selectedInRelations.size})
+          {t[language].removeSelected} ({selectedInRows.size})
         </button>
         <button
-          disabled={selectedNotInRelations.size === 0}
+          disabled={selectedNotInRows.size === 0}
           onClick={handleAddSelected}
           className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
           <Plus className="w-4 h-4" />
-          {t[language].addSelected} ({selectedNotInRelations.size})
+          {t[language].addSelected} ({selectedNotInRows.size})
         </button>
         <button
           onClick={handleSave}

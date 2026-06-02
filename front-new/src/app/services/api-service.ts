@@ -129,6 +129,11 @@ export const apiService = {
   createQuoteRelations: (data: any[]) => request<any>("POST", "/pair-quote-relations", { body: data }),
   deleteQuoteRelations: (ids: number[]) => request<any>("DELETE", "/pair-quote-relations", { body: ids }),
 
+  getPoolJobRelationsByJobId: (id: number) => request<any[]>("GET", `/pool-job-relations/by-job-id/${id}`),
+  createPoolJobRelations: (data: { jobId: number; poolId: number }[]) =>
+    request<any>("POST", "/pool-job-relations", { body: data }),
+  deletePoolJobRelations: (ids: number[]) => request<any>("DELETE", "/pool-job-relations", { body: ids }),
+
   getJobRelationsByJobId: (id: number) => request<any[]>("GET", `/quote-job-relations/by-job-id/${id}`),
   createJobRelations: (data: any[]) => request<any>("POST", "/quote-job-relations", { body: data }),
   deleteJobRelations: (ids: number[]) => request<any>("DELETE", "/quote-job-relations", { body: ids }),

@@ -2,6 +2,7 @@ import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { apiService } from '../../services/api-service';
+import { mapPoolJobRelationToJobPair } from '../../utils/jobPairUtils';
 
 interface ServerDetailsPageProps {
   serverId: number;
@@ -25,7 +26,7 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
       botDescription: 'Bot Description',
       chainId: 'Chain Id',
       jobName: 'Job Name',
-      pairsCount: 'Pairs count',
+      poolsCount: 'Pools count',
       getConfig: 'GET CONFIG',
       resetServer: 'RESET SERVER',
       cancel: 'CANCEL',
@@ -38,7 +39,7 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
       botDescription: 'Описание бота',
       chainId: 'ID сети',
       jobName: 'Имя задачи',
-      pairsCount: 'Кол-во пар',
+      poolsCount: 'Кол-во пулов',
       getConfig: 'ПОЛУЧИТЬ КОНФИГ',
       resetServer: 'СБРОСИТЬ СЕРВЕР',
       cancel: 'ОТМЕНА',
@@ -77,7 +78,7 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
         botDescription: item.description ?? '-',
         chainId: item.job?.chain?.chainId ?? '-',
         jobName: item.job?.jobType ?? '-',
-        pairsCount: item.job?.quoteJobRelations?.length ?? '-',
+        poolsCount: item.job?.poolsJobRelations?.length ?? '-',
       })),
     [rowsRaw],
   );
@@ -87,7 +88,7 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
     { key: 'botDescription', label: t[language].botDescription, sortable: true, filterable: true },
     { key: 'chainId', label: t[language].chainId, sortable: true, filterable: true },
     { key: 'jobName', label: t[language].jobName, sortable: true, filterable: true },
-    { key: 'pairsCount', label: t[language].pairsCount, sortable: true, filterable: true },
+    { key: 'poolsCount', label: t[language].poolsCount, sortable: true, filterable: true },
   ];
 
   const mapBotParams = (bot: any) => ({
@@ -101,22 +102,9 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
     description: bot?.description ?? '',
   });
 
-  const mapQuoteRelation = (item: any) => {
-    const quoteRelation = item?.quoteRelation ?? item;
-    const pair = quoteRelation?.pair;
-    const pool = pair?.pool;
-    return {
-      dex: String(pool?.dex?.name ?? '-').toLowerCase(),
-      version: pool?.version ?? '-',
-      poolAddress: String(pool?.poolAddress ?? '-'),
-      feePpm: Number(pool?.fee ?? 0),
-    };
-  };
-
   const mapDexJobParams = (job: any) => {
-    const firstRelation = job?.quoteJobRelations?.[0]?.quoteRelation ?? null;
-    const tokenIn = firstRelation?.pair?.tokenIn;
-    const tokenOut = firstRelation?.pair?.tokenOut;
+    const relations = job?.poolsJobRelations ?? [];
+    const firstPool = relations?.[0]?.pool;
     const chainName = String(job?.chain?.name ?? '').toLowerCase();
     return {
       extraSettings: job?.extraSettings ?? {},
@@ -126,17 +114,17 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
       source: chainName ? `dex:${chainName}` : 'dex:',
       opts: {
         tokenIn: {
-          decimals: Number(tokenIn?.decimals ?? 0),
-          symbol: tokenIn?.symbol ?? '',
-          address: tokenIn?.address ?? '',
+          decimals: Number(firstPool?.token0?.decimals ?? 0),
+          symbol: firstPool?.token0?.symbol ?? '',
+          address: firstPool?.token0?.address ?? '',
         },
         tokenOut: {
-          decimals: Number(tokenOut?.decimals ?? 0),
-          symbol: tokenOut?.symbol ?? '',
-          address: tokenOut?.address ?? '',
+          decimals: Number(firstPool?.token1?.decimals ?? 0),
+          symbol: firstPool?.token1?.symbol ?? '',
+          address: firstPool?.token1?.address ?? '',
         },
       },
-      pairsToQuote: (job?.quoteJobRelations ?? []).map(mapQuoteRelation),
+      pairsToQuote: relations.map(mapPoolJobRelationToJobPair),
     };
   };
 
