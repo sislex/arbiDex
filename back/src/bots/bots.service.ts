@@ -56,7 +56,7 @@ export class BotsService {
       relations: {
         server: true,
         job: {
-          quoteJobRelations: true,
+          poolsJobRelations: true,
         },
         cexJob: true,
       },
@@ -72,8 +72,8 @@ export class BotsService {
         timeoutMs: true,
         job: {
           jobId: true,
-          quoteJobRelations: {
-            quoteJobRelationId: true,
+          poolsJobRelations: {
+            poolsJobRelationId: true,
           },
         },
         server: {
@@ -97,19 +97,12 @@ export class BotsService {
         job: {
           chain: true,
           rpcUrl: true,
-          quoteJobRelations: {
-            quoteRelation: {
-              quote: true,
-              pair: {
-                tokenIn: true,
-                tokenOut: true,
-                pool: {
-                  dex: true,
-                  chain: true,
-                  token0: true,
-                  token1: true,
-                },
-              },
+          poolsJobRelations: {
+            pool: {
+              dex: true,
+              chain: true,
+              token0: true,
+              token1: true,
             },
           },
         },

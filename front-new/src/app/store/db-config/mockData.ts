@@ -29,19 +29,6 @@ export interface Pool {
   version: "v2" | "v3" | "v4";
 }
 
-export interface Pair {
-  pairId: number;
-  poolId: number;
-  tokenInId: number;
-  tokenOutId: number;
-}
-
-export interface Quote {
-  quoteId: number;
-  tokenId: number;
-  quoteName: string;
-}
-
 export interface Job {
   jobId: number;
   chainId: number;
@@ -185,19 +172,6 @@ export const mockPools: Pool[] = [
     fee: 2500,
     version: "v2",
   },
-];
-
-export const mockPairs: Pair[] = [
-  { pairId: 1, poolId: 1, tokenInId: 1, tokenOutId: 2 },
-  { pairId: 2, poolId: 2, tokenInId: 3, tokenOutId: 1 },
-  { pairId: 3, poolId: 1, tokenInId: 1, tokenOutId: 4 },
-  { pairId: 4, poolId: 1, tokenInId: 1, tokenOutId: 2 },
-  { pairId: 5, poolId: 3, tokenInId: 5, tokenOutId: 2 },
-];
-
-export const mockQuotes: Quote[] = [
-  { quoteId: 1, tokenId: 1, quoteName: "Uniswap V3" },
-  { quoteId: 2, tokenId: 2, quoteName: "Binance Spot" },
 ];
 
 export const mockJobs: Job[] = [

@@ -34,16 +34,6 @@ export const selectChainsDataResponse = createSelector(
   (state) => state.chains.response,
 );
 
-export const selectPairsDataResponse = createSelector(
-  selectDbConfigFeature,
-  (state) => state.pairs.response,
-);
-
-export const selectQuotesDataResponse = createSelector(
-  selectDbConfigFeature,
-  (state) => state.quotes.response,
-);
-
 export const selectJobsDataResponse = createSelector(
   selectDbConfigFeature,
   (state) => state.jobs.response,
@@ -107,16 +97,6 @@ export const selectChainsMeta = createSelector(
 export const selectCexChainsMeta = createSelector(
   selectDbConfigFeature,
   (state) => state.cexChains,
-);
-
-export const selectPairsMeta = createSelector(
-  selectDbConfigFeature,
-  (state) => state.pairs,
-);
-
-export const selectQuotesMeta = createSelector(
-  selectDbConfigFeature,
-  (state) => state.quotes,
 );
 
 export const selectJobsMeta = createSelector(
@@ -200,96 +180,5 @@ export const selectFullPoolsData = createSelector(
     });
   },
 );
-
-export const selectPairsFullData = createSelector(
-  selectPairsDataResponse,
-  selectPoolMap,
-  selectTokenMap,
-  selectChainMap,
-  selectDexMap,
-  (pairsData, poolMap, tokenMap, chainMap, dexMap) => {
-    return pairsData.map((pair: any) => {
-      const pool = poolMap.get(pair.poolId);
-      const tokenIn = tokenMap.get(pair.tokenInId);
-      const tokenOut = tokenMap.get(pair.tokenOutId);
-
-      return {
-        ...pair,
-        chainName: pool?.chainId ? chainMap.get(pool.chainId) : undefined,
-        dexName: pool?.dexId ? dexMap.get(pool.dexId) : undefined,
-        poolAddress: pool?.poolAddress,
-        tokenInName: tokenIn?.tokenName,
-        tokenInSymbol: tokenIn?.symbol,
-        tokenInAddress: tokenIn?.address,
-        tokenOutName: tokenOut?.tokenName,
-        tokenOutSymbol: tokenOut?.symbol,
-        tokenOutAddress: tokenOut?.address,
-      };
-    });
-  },
-);
-
-export const selectPairsRatingId = createSelector(
-  selectDbConfigFeature,
-  (state) => state.pairIdForRating,
-);
-
-export const selectTokenInList = createSelector(selectPairsFullData, (pairsData) => {
-  const uniqueMap = new Map<number, { tokenInId: number; tokenInSymbol: string; tokenInAddress: string }>();
-
-  pairsData.forEach((pair: any) => {
-    if (pair.tokenInId && !uniqueMap.has(pair.tokenInId)) {
-      uniqueMap.set(pair.tokenInId, {
-        tokenInId: pair.tokenInId,
-        tokenInSymbol: pair.tokenInSymbol ?? "Unknown",
-        tokenInAddress: pair.tokenInAddress ?? "",
-      });
-    }
-  });
-
-  return Array.from(uniqueMap.values());
-});
-
-export const selectPairsBySelectedTokenIn = createSelector(
-  selectPairsFullData,
-  selectPairsRatingId,
-  (allPairs, selectedId) => {
-    if (!selectedId || !allPairs.length) {
-      return [];
-    }
-
-    return allPairs.filter((pair: any) => pair.tokenInId === selectedId);
-  },
-);
-
-export const selectPairsRating = createSelector(selectPairsBySelectedTokenIn, (filteredPairs) => {
-  if (!filteredPairs.length) {
-    return [];
-  }
-
-  const ratingMap = new Map<number, { data: any; count: number }>();
-
-  filteredPairs.forEach((pair: any) => {
-    const outId = pair.tokenOutId;
-    const entry = ratingMap.get(outId);
-    if (entry) {
-      entry.count += 1;
-    } else {
-      ratingMap.set(outId, { data: pair, count: 1 });
-    }
-  });
-
-  return Array.from(ratingMap.values())
-    .map(({ data, count }) => ({
-      tokenInId: data.tokenInId,
-      tokenInSymbol: data.tokenInSymbol,
-      tokenInAddress: data.tokenInAddress,
-      tokenOutId: data.tokenOutId,
-      tokenOutSymbol: data.tokenOutSymbol,
-      tokenOutAddress: data.tokenOutAddress,
-      count,
-    }))
-    .sort((a, b) => b.count - a.count);
-});
 
 

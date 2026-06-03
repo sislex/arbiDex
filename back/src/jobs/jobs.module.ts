@@ -5,13 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Jobs } from '../entities/entities/Jobs';
 import { ChainsModule } from '../chains/chains.module';
 import { RpcUrlsModule } from '../rpc-urls/rpc-urls.module';
-import { RpcUrls } from '../entities/entities/RpcUrls';
-import { QuoteJobRelationsModule } from '../quote-job-relations/quote-job-relations.module';
+import { PoolJobRelationsModule } from '../pool-job-relations/pool-job-relations.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Jobs, RpcUrls]),
-    forwardRef(() => QuoteJobRelationsModule),
+    TypeOrmModule.forFeature([Jobs]),
+    forwardRef(() => PoolJobRelationsModule),
     ChainsModule,
     RpcUrlsModule,
   ],

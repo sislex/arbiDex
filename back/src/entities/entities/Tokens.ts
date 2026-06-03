@@ -8,9 +8,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { Pairs } from './Pairs';
 import { Pools } from './Pools';
-import { Quotes } from './Quotes';
 import { SwapRate } from './SwapRate';
 import { Chains } from './Chains';
 
@@ -46,20 +44,11 @@ export class Tokens {
   @Column('boolean', { name: 'balance', nullable: true })
   balance: boolean | null;
 
-  @OneToMany(() => Pairs, (pairs) => pairs.tokenIn)
-  pairs: Pairs[];
-
-  @OneToMany(() => Pairs, (pairs) => pairs.tokenOut)
-  pairs2: Pairs[];
-
   @OneToMany(() => Pools, (pools) => pools.token0)
   pools: Pools[];
 
   @OneToMany(() => Pools, (pools) => pools.token1)
   pools2: Pools[];
-
-  @OneToMany(() => Quotes, (quotes) => quotes.token)
-  quotes: Quotes[];
 
   @OneToMany(() => SwapRate, (swapRate) => swapRate.swapRateToken0)
   swapRates0: SwapRate[];

@@ -10,7 +10,7 @@ import {
 import { Bots } from './Bots';
 import { Chains } from './Chains';
 import { RpcUrls } from './RpcUrls';
-import { QuoteJobRelations } from './QuoteJobRelations';
+import { PoolsJobRelations } from './PoolsJobRelations';
 
 @Index('idx_jobs_chain_id', ['chainId'], {})
 @Index('jobs_pkey', ['jobId'], { unique: true })
@@ -52,8 +52,8 @@ export class Jobs {
   rpcUrl: RpcUrls;
 
   @OneToMany(
-    () => QuoteJobRelations,
-    (quoteJobRelations) => quoteJobRelations.job,
+    () => PoolsJobRelations,
+    (poolsJobRelations) => poolsJobRelations.job,
   )
-  quoteJobRelations: QuoteJobRelations[];
+  poolsJobRelations: PoolsJobRelations[];
 }

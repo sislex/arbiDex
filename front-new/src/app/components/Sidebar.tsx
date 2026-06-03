@@ -45,12 +45,10 @@ const menuItems: MenuItem[] = [
     icon: <Activity className="w-4 h-4" />,
     submenu: [
       { id: 'dex-chains', label: { en: 'Chains', ru: 'Сети' } },
-      { id: 'dex-pairs', label: { en: 'Pairs', ru: 'Пары' } },
       { id: 'dex-jobs', label: { en: 'Jobs', ru: 'Задачи' } },
       { id: 'tokens', label: { en: 'Tokens', ru: 'Токены' } },
       { id: 'pools', label: { en: 'Pools', ru: 'Пулы' } },
       { id: 'dexes', label: { en: 'DEXes', ru: 'DEX-биржи' } },
-      { id: 'quotes', label: { en: 'Quotes', ru: 'Котировки' } },
       { id: 'dex-rpc-urls', label: { en: 'RPC URLs', ru: 'RPC URLs' } },
     ],
   },

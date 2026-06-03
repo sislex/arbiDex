@@ -10,8 +10,6 @@ import {
   selectCexJobsDataResponse,
   selectJobsMeta,
   selectJobsDataResponse,
-  selectPairsMeta,
-  selectPairsDataResponse,
   selectServersMeta,
   selectServersDataResponse,
 } from '../../store/db-config/dbConfig.selectors';
@@ -28,11 +26,9 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
   const jobsMeta = useAppSelector(selectJobsMeta);
   const cexJobsMeta = useAppSelector(selectCexJobsMeta);
   const serversMeta = useAppSelector(selectServersMeta);
-  const pairsMeta = useAppSelector(selectPairsMeta);
   const jobs = useAppSelector(selectJobsDataResponse);
   const cexJobs = useAppSelector(selectCexJobsDataResponse);
   const servers = useAppSelector(selectServersDataResponse);
-  const pairs = useAppSelector(selectPairsDataResponse);
   const [selectedBot, setSelectedBot] = useState<any>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingBotRaw, setEditingBotRaw] = useState<any>(null);
@@ -65,10 +61,6 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
     ) {
       dispatch(dbConfigActions.initBotsListPage());
     }
-
-    if ((!pairsMeta.isLoaded || pairsMeta.error) && !pairsMeta.isLoading) {
-      dispatch(dbConfigActions.setPairsData());
-    }
   }, [
     botsMeta.error,
     botsMeta.isLoaded,
@@ -76,9 +68,6 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
     cexJobsMeta.isLoading,
     dispatch,
     jobsMeta.isLoading,
-    pairsMeta.error,
-    pairsMeta.isLoaded,
-    pairsMeta.isLoading,
     serversMeta.isLoading,
   ]);
 
@@ -93,17 +82,6 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
   const serverById = useMemo(() => {
     return new Map(servers.map((server: any) => [server.serverId ?? server.id, server]));
   }, [servers]);
-
-  const pairCountByJobId = useMemo(() => {
-    const counts = new Map<number, number>();
-    pairs.forEach((pair: any) => {
-      const jobId = pair.jobId ?? pair.job_id;
-      if (jobId !== undefined && jobId !== null) {
-        counts.set(jobId, (counts.get(jobId) ?? 0) + 1);
-      }
-    });
-    return counts;
-  }, [pairs]);
 
   const bots = useMemo(() => {
     return botsFromStore
@@ -120,12 +98,17 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
           description: bot.description ?? '',
           job: bot.jobName ?? job?.jobType ?? job?.job_type ?? jobId ?? cexJobId ?? '',
           server: bot.serverName ?? server?.serverName ?? server?.name ?? bot.serverId ?? '',
-          pairsCount: bot.pairsCount ?? bot.pairs_count ?? (jobId ? pairCountByJobId.get(jobId) : 0) ?? 0,
+          poolsCount:
+            bot.poolsCount ??
+            bot.pools_count ??
+            job?.poolsCount ??
+            job?.pools_count ??
+            0,
           raw: bot,
         };
       })
       .filter((bot) => !pendingDeleteBotIds.has(bot.id));
-  }, [botsFromStore, cexJobById, jobById, pairCountByJobId, pendingDeleteBotIds, serverById]);
+  }, [botsFromStore, cexJobById, jobById, pendingDeleteBotIds, serverById]);
 
   useEffect(() => {
     return () => {
@@ -141,7 +124,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
       description: 'Description',
       job: 'Job',
       server: 'Server',
-      pairsCount: 'Pairs count',
+      poolsCount: 'Pools count',
       tableTitle: 'Bots',
     },
     ru: {
@@ -150,7 +133,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
       description: 'Описание',
       job: 'Задача',
       server: 'Сервер',
-      pairsCount: 'Кол-во пар',
+      poolsCount: 'Кол-во пулов',
       tableTitle: 'Боты',
     },
   };
@@ -161,7 +144,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
     { key: 'description', label: t[language].description, sortable: true, filterable: true },
     { key: 'job', label: t[language].job, sortable: true, filterable: true },
     { key: 'server', label: t[language].server, sortable: true, filterable: true },
-    { key: 'pairsCount', label: t[language].pairsCount, sortable: true, filterable: true },
+    { key: 'poolsCount', label: t[language].poolsCount, sortable: true, filterable: true },
   ];
 
   return (
@@ -189,8 +172,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
             botsMeta.isLoading ||
             jobsMeta.isLoading ||
             cexJobsMeta.isLoading ||
-            serversMeta.isLoading ||
-            pairsMeta.isLoading
+            serversMeta.isLoading
           }
           loadingText="Loading Bots…"
           onEdit={(row) => {

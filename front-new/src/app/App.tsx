@@ -4,8 +4,6 @@ import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { LoginForm } from './components/LoginForm';
 import { TokensPage } from './components/pages/TokensPage';
-import { QuotesListPage } from './components/pages/QuotesListPage';
-import { QuoteRelationsPage } from './components/pages/QuoteRelationsPage';
 import { BotsPage } from './components/pages/BotsPage';
 import { BotDetailsPage } from './components/pages/BotDetailsPage';
 import { ServersPage } from './components/pages/ServersPage';
@@ -22,7 +20,6 @@ export default function App() {
   const [isDark, setIsDark] = useState(true);
   const [language, setLanguage] = useState<'en' | 'ru'>('en');
   const [activePage, setActivePage] = useState('dex-chains');
-  const [selectedQuote, setSelectedQuote] = useState<{ id: number; name: string } | null>(null);
   const [selectedBot, setSelectedBot] = useState<{ id: number; name: string } | null>(null);
   const [selectedServer, setSelectedServer] = useState<{ id: number; name: string } | null>(null);
   const [selectedDexJob, setSelectedDexJob] = useState<{ id: number; name: string } | null>(null);
@@ -43,7 +40,6 @@ export default function App() {
     setUserLogin(login);
     setIsAuthenticated(true);
     setActivePage('dex-chains');
-    setSelectedQuote(null);
     setSelectedBot(null);
     setSelectedServer(null);
     setSelectedDexJob(null);
@@ -53,7 +49,6 @@ export default function App() {
     setIsAuthenticated(false);
     setUserLogin('');
     setActivePage('dex-chains');
-    setSelectedQuote(null);
     setSelectedBot(null);
     setSelectedServer(null);
     setSelectedDexJob(null);
@@ -69,9 +64,7 @@ export default function App() {
       'dex-rpc-urls': 'DEX RPC URLs',
       tokens: 'Tokens',
       pools: 'Pools',
-      'dex-pairs': 'DEX Pairs',
       'cex-pairs': 'CEX Pairs',
-      quotes: 'Quotes',
       'dex-jobs': 'DEX Jobs',
       'cex-jobs': 'CEX Jobs',
       bots: 'Bots',
@@ -86,9 +79,7 @@ export default function App() {
       'dex-rpc-urls': 'DEX RPC URLs',
       tokens: 'Токены',
       pools: 'Пулы',
-      'dex-pairs': 'DEX-пары',
       'cex-pairs': 'CEX-пары',
-      quotes: 'Котировки',
       'dex-jobs': 'DEX-задачи',
       'cex-jobs': 'CEX-задачи',
       bots: 'Боты',
@@ -97,17 +88,6 @@ export default function App() {
   };
 
   const renderPage = () => {
-    if (activePage === 'quotes' && selectedQuote) {
-      return (
-        <QuoteRelationsPage
-          quoteId={selectedQuote.id}
-          quoteName={selectedQuote.name}
-          language={language}
-          onBack={() => setSelectedQuote(null)}
-        />
-      );
-    }
-
     if (activePage === 'dex-jobs' && selectedDexJob) {
       return (
         <DexJobRelationsPage
@@ -149,10 +129,8 @@ export default function App() {
       case 'dex-chains':
       case 'cex-chains':
         return <ChainsPage language={language} type={activePage === 'cex-chains' ? 'cex' : 'dex'} />;
-      case 'dex-pairs':
-        return <PairsPage language={language} type="dex" />;
       case 'cex-pairs':
-        return <PairsPage language={language} type="cex" />;
+        return <PairsPage language={language} />;
       case 'dex-jobs':
         return (
           <JobsPage
@@ -167,13 +145,6 @@ export default function App() {
         return <RpcUrlsPage language={language} />;
       case 'dexes':
         return <DexesPage language={language} />;
-      case 'quotes':
-        return (
-          <QuotesListPage
-            language={language}
-            onQuoteClick={(id, name) => setSelectedQuote({ id, name })}
-          />
-        );
       case 'bots':
         return <BotsPage language={language} onBotClick={(bot) => setSelectedBot({ id: bot.id, name: bot.name })} />;
       case 'servers':
@@ -210,9 +181,7 @@ export default function App() {
       />
       <TopBar
         pageTitle={
-          selectedQuote
-            ? selectedQuote.name
-            : selectedDexJob
+          selectedDexJob
             ? selectedDexJob.name
             : selectedBot
             ? selectedBot.name
@@ -236,7 +205,6 @@ export default function App() {
             activeItem={activePage}
             onItemClick={(page) => {
               setActivePage(page);
-              setSelectedQuote(null);
               setSelectedBot(null);
               setSelectedServer(null);
               setSelectedDexJob(null);

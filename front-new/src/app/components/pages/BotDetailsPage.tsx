@@ -12,6 +12,7 @@ import {
   selectRpcUrlsMeta,
 } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
+import { mapPoolJobRelationToJobPair } from '../../utils/jobPairUtils';
 
 interface BotDetailsPageProps {
   botId: number;
@@ -45,7 +46,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
       jobType: 'Job Type',
       chainId: 'Chain Id',
       rpcUrl: 'Rpc Url',
-      pairsCount: 'Pairs count',
+      poolsCount: 'Pools count',
       getConfig: 'GET CONFIG',
       cancel: 'CANCEL',
       createForError: 'CREATE FOR ERROR',
@@ -59,7 +60,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
       jobType: 'Тип задачи',
       chainId: 'ID сети',
       rpcUrl: 'RPC URL',
-      pairsCount: 'Кол-во пар',
+      poolsCount: 'Кол-во пулов',
       getConfig: 'ПОЛУЧИТЬ КОНФИГ',
       cancel: 'ОТМЕНА',
       createForError: 'СОЗДАТЬ ДЛЯ ОШИБКИ',
@@ -173,7 +174,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
           (typeof rpcById.get(Number(job.rpcUrlId ?? job.rpc_url_id ?? 0)) === 'string'
             ? String(rpcById.get(Number(job.rpcUrlId ?? job.rpc_url_id ?? 0)))
             : ''),
-        pairsCount: Number(job.pairsCount ?? job.pairs_count ?? 0),
+        poolsCount: Number(job.poolsCount ?? job.pools_count ?? 0),
         raw: job,
       })),
     [chainById, jobsFromStore, rpcById],
@@ -224,8 +225,8 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
       ),
     },
     {
-      key: 'pairsCount',
-      label: t[language].pairsCount,
+      key: 'poolsCount',
+      label: t[language].poolsCount,
       sortable: true,
       filterable: true,
     },
@@ -243,22 +244,8 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
       description: bot?.description ?? '',
     });
 
-    const mapQuoteRelation = (item: any) => {
-      const quoteRelation = item?.quoteRelation ?? item;
-      const pair = quoteRelation?.pair;
-      const pool = pair?.pool;
-      return {
-        dex: String(pool?.dex?.name ?? '-').toLowerCase(),
-        version: pool?.version ?? '-',
-        poolAddress: String(pool?.poolAddress ?? '-'),
-        feePpm: Number(pool?.fee ?? 0),
-      };
-    };
-
     const buildJobParams = (selectedJob: any, relations: any[], resolvedRpcUrl: string) => {
-      const firstRelation = relations?.[0]?.quoteRelation ?? relations?.[0];
-      const tokenIn = firstRelation?.pair?.tokenIn;
-      const tokenOut = firstRelation?.pair?.tokenOut;
+      const firstPool = relations?.[0]?.pool;
       const chainLabel = String(selectedJob?.chainName ?? '').trim().toLowerCase();
       return {
         extraSettings: selectedJob?.raw?.extraSettings ?? selectedJob?.extraSettings ?? {},
@@ -268,17 +255,17 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
         source: chainLabel ? `dex:${chainLabel}` : 'dex:',
         opts: {
           tokenIn: {
-            decimals: Number(tokenIn?.decimals ?? 0),
-            symbol: tokenIn?.symbol ?? '',
-            address: tokenIn?.address ?? '',
+            decimals: Number(firstPool?.token0?.decimals ?? 0),
+            symbol: firstPool?.token0?.symbol ?? '',
+            address: firstPool?.token0?.address ?? '',
           },
           tokenOut: {
-            decimals: Number(tokenOut?.decimals ?? 0),
-            symbol: tokenOut?.symbol ?? '',
-            address: tokenOut?.address ?? '',
+            decimals: Number(firstPool?.token1?.decimals ?? 0),
+            symbol: firstPool?.token1?.symbol ?? '',
+            address: firstPool?.token1?.address ?? '',
           },
         },
-        pairsToQuote: (relations ?? []).map(mapQuoteRelation),
+        pairsToQuote: (relations ?? []).map(mapPoolJobRelationToJobPair),
       };
     };
 
@@ -311,7 +298,7 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
       if (!selectedJobId) return;
       const selectedJob = jobs.find((j) => j.id === selectedJobId);
       if (!selectedJob) return;
-      const relations = await apiService.getJobRelationsByJobId(selectedJobId);
+      const relations = await apiService.getPoolJobRelationsByJobId(selectedJobId);
       const rpcUrlId = Number(selectedJob?.raw?.rpcUrlId ?? selectedJob?.raw?.rpc_url_id ?? selectedJob?.rpcUrlId);
       const rpcUrlFromMap = Number.isFinite(rpcUrlId) ? rpcById.get(rpcUrlId) : '';
       const rpcUrlFromJobRaw =

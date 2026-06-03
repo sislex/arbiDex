@@ -16,8 +16,6 @@ import {
   selectChainsDataResponse,
   selectJobsMeta,
   selectJobsDataResponse,
-  selectPairsDataResponse,
-  selectPairsMeta,
   selectRpcUrlDataResponse,
   selectRpcUrlsMeta,
 } from '../../store/db-config/dbConfig.selectors';
@@ -56,11 +54,9 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const cexChainsMeta = useAppSelector(selectCexChainsMeta);
   const chainsMeta = useAppSelector(selectChainsMeta);
   const rpcUrlsMeta = useAppSelector(selectRpcUrlsMeta);
-  const pairsMeta = useAppSelector(selectPairsMeta);
   const chains = useAppSelector(selectChainsDataResponse);
   const rpcUrls = useAppSelector(selectRpcUrlDataResponse);
   const cexChains = useAppSelector(selectCexChainsDataResponse);
-  const pairs = useAppSelector(selectPairsDataResponse);
   const cexPairs = useAppSelector(selectCexPairsDataResponse);
   const [cexWorkStatus, setCexWorkStatus] = useState<Record<number, boolean | null>>({});
   const [jobFormOpen, setJobFormOpen] = useState(false);
@@ -116,17 +112,6 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
     return new Map(rpcUrls.map((rpc: any) => [rpc.rpcUrlId ?? rpc.id, rpc.rpcUrl ?? rpc.url]));
   }, [rpcUrls]);
 
-  const pairCountByJobId = useMemo(() => {
-    const counts = new Map<number, number>();
-    pairs.forEach((pair: any) => {
-      const jobId = pair.jobId ?? pair.job_id;
-      if (jobId !== undefined && jobId !== null) {
-        counts.set(jobId, (counts.get(jobId) ?? 0) + 1);
-      }
-    });
-    return counts;
-  }, [pairs]);
-
   const cexPairById = useMemo(() => {
     return new Map(cexPairs.map((pair: any) => [pair.id ?? pair.pairId ?? pair.cexPairId, pair]));
   }, [cexPairs]);
@@ -143,13 +128,13 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         description: job.description ?? '',
         chain: job.chainName ?? chainById.get(job.chainId) ?? job.chainId ?? '',
         rpcUrl: job.rpcUrl ?? rpcById.get(job.rpcUrlId) ?? job.rpcUrlId ?? '',
-        pairsCount: job.pairsCount ?? job.pairs_count ?? pairCountByJobId.get(jobId) ?? 0,
+        poolsCount: job.poolsCount ?? job.pools_count ?? 0,
         additionalData: formatExtra(job.extraSettings ?? job.additionalData ?? job.additional_data),
         raw: job,
       };
       })
       .filter((row) => !pendingDeleteDexJobIds.has(row.id));
-  }, [chainById, dexJobsFromStore, pairCountByJobId, pendingDeleteDexJobIds, rpcById]);
+  }, [chainById, dexJobsFromStore, pendingDeleteDexJobIds, rpcById]);
 
   const cexJobs = useMemo(() => {
     return cexJobsFromStore.map((job: any) => {
@@ -183,7 +168,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
       description: 'Description',
       chain: 'Chain',
       rpcUrl: 'Rpc Url',
-      pairsCount: 'Pairs count',
+      poolsCount: 'Pools count',
       additionalData: 'Additional data',
       source: 'Source',
       token0: 'Token 0',
@@ -201,7 +186,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
       description: 'Описание',
       chain: 'Сеть',
       rpcUrl: 'RPC URL',
-      pairsCount: 'Кол-во пар',
+      poolsCount: 'Кол-во пулов',
       additionalData: 'Доп. данные',
       source: 'Источник',
       token0: 'Токен 0',
@@ -227,7 +212,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
       filterable: true,
       render: (value) => <span className="font-mono text-xs text-muted-foreground">{value}</span>,
     },
-    { key: 'pairsCount', label: t[language].pairsCount, sortable: true, filterable: true },
+    { key: 'poolsCount', label: t[language].poolsCount, sortable: true, filterable: true },
     {
       key: 'additionalData',
       label: t[language].additionalData,
@@ -399,7 +384,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         isLoading={
           type === 'cex'
             ? cexJobsMeta.isLoading || cexPairsMeta.isLoading || cexChainsMeta.isLoading
-            : jobsMeta.isLoading || chainsMeta.isLoading || rpcUrlsMeta.isLoading || pairsMeta.isLoading
+            : jobsMeta.isLoading || chainsMeta.isLoading || rpcUrlsMeta.isLoading
         }
         loadingText={type === 'cex' ? (language === 'ru' ? 'Загрузка CEX джоб…' : 'Loading CEX Jobs…') : language === 'ru' ? 'Загрузка DEX джоб…' : 'Loading DEX Jobs…'}
         onEdit={(row) => {

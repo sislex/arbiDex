@@ -34,7 +34,7 @@ export class BotsController {
       paused: bot.paused,
       timeoutMs: bot.timeoutMs,
 
-      pairsCount: bot.job?.quoteJobRelations?.length ?? 0,
+      poolsCount: bot.job?.poolsJobRelations?.length ?? 0,
 
       serverId: bot.server?.serverId,
       jobId: bot.job?.jobId ?? null,

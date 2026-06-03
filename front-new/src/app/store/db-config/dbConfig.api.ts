@@ -5,8 +5,6 @@ export const dbConfigApi = {
   getPools: apiService.getPools,
   getDexes: apiService.getDexes,
   getChains: apiService.getChainsData,
-  getPairs: apiService.getPairs,
-  getQuotes: apiService.getQuotes,
   getJobs: apiService.getJobs,
   getBots: apiService.getBots,
   getServers: apiService.getServers,
