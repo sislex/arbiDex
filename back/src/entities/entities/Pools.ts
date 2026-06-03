@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { Pairs } from './Pairs';
 import { PoolsJobRelations } from './PoolsJobRelations';
 import { Chains } from './Chains';
 import { Dexes } from './Dexes';
@@ -46,9 +45,6 @@ export class Pools {
     name: 'reserves_updated_at',
   })
   reserves_updated_at: Date;
-
-  @OneToMany(() => Pairs, (pairs) => pairs.pool)
-  pairs: Pairs[];
 
   @OneToMany(() => PoolsJobRelations, (relation) => relation.pool)
   poolsJobRelations: PoolsJobRelations[];

@@ -10,9 +10,7 @@ import {
   selectChainsDataResponse,
   selectDexesDataResponse,
   selectJobsDataResponse,
-  selectPairsDataResponse,
   selectPoolsDataResponse,
-  selectQuotesDataResponse,
   selectRpcUrlDataResponse,
   selectServersDataResponse,
   selectSwapRateDataResponse,
@@ -97,26 +95,6 @@ function* handleSetChainsData() {
     dbConfigApi.getChains,
     dbConfigActions.setChainsDataSuccess,
     dbConfigActions.setChainsDataFailure,
-  );
-}
-
-function* handleSetPairsData() {
-  yield call(
-    loadList,
-    selectPairsDataResponse,
-    dbConfigApi.getPairs,
-    dbConfigActions.setPairsDataSuccess,
-    dbConfigActions.setPairsDataFailure,
-  );
-}
-
-function* handleSetQuotesData() {
-  yield call(
-    loadList,
-    selectQuotesDataResponse,
-    dbConfigApi.getQuotes,
-    dbConfigActions.setQuotesDataSuccess,
-    dbConfigActions.setQuotesDataFailure,
   );
 }
 
@@ -213,19 +191,6 @@ function* handleInitPoolsPage() {
   yield put(dbConfigActions.setSwapRate());
 }
 
-function* handleInitPairsPage() {
-  yield put(dbConfigActions.setPairsData());
-  yield put(dbConfigActions.setPoolsData());
-  yield put(dbConfigActions.setTokensData());
-  yield put(dbConfigActions.setDexesData());
-  yield put(dbConfigActions.setChainsData());
-}
-
-function* handleInitQuotesListPage() {
-  yield put(dbConfigActions.setQuotesData());
-  yield put(dbConfigActions.setTokensData());
-}
-
 function* handleInitJobsListPage() {
   yield put(dbConfigActions.setJobsData());
   yield put(dbConfigActions.setChainsData());
@@ -257,23 +222,6 @@ function* handleRefetchPoolsPageResources() {
     call(runFreshFetch, dbConfigApi.getDexes, dbConfigActions.setDexesDataSuccess, dbConfigActions.setDexesDataFailure),
     call(runFreshFetch, dbConfigApi.getChains, dbConfigActions.setChainsDataSuccess, dbConfigActions.setChainsDataFailure),
     call(runFreshFetch, dbConfigApi.getSwapRate, dbConfigActions.setSwapRateDataSuccess, dbConfigActions.setSwapRateDataFailure),
-  ]);
-}
-
-function* handleRefetchPairsPageResources() {
-  yield all([
-    call(runFreshFetch, dbConfigApi.getPairs, dbConfigActions.setPairsDataSuccess, dbConfigActions.setPairsDataFailure),
-    call(runFreshFetch, dbConfigApi.getPools, dbConfigActions.setPoolsDataSuccess, dbConfigActions.setPoolsDataFailure),
-    call(runFreshFetch, dbConfigApi.getTokens, dbConfigActions.setTokensDataSuccess, dbConfigActions.setTokensDataFailure),
-    call(runFreshFetch, dbConfigApi.getDexes, dbConfigActions.setDexesDataSuccess, dbConfigActions.setDexesDataFailure),
-    call(runFreshFetch, dbConfigApi.getChains, dbConfigActions.setChainsDataSuccess, dbConfigActions.setChainsDataFailure),
-  ]);
-}
-
-function* handleRefetchQuotesListPageResources() {
-  yield all([
-    call(runFreshFetch, dbConfigApi.getQuotes, dbConfigActions.setQuotesDataSuccess, dbConfigActions.setQuotesDataFailure),
-    call(runFreshFetch, dbConfigApi.getTokens, dbConfigActions.setTokensDataSuccess, dbConfigActions.setTokensDataFailure),
   ]);
 }
 
@@ -320,8 +268,6 @@ export function* dbConfigSaga() {
   yield all([
     takeLatest(dbConfigActions.initTokensListPage.type, handleInitTokensListPage),
     takeLatest(dbConfigActions.initPoolsPage.type, handleInitPoolsPage),
-    takeLatest(dbConfigActions.initPairsPage.type, handleInitPairsPage),
-    takeLatest(dbConfigActions.initQuotesListPage.type, handleInitQuotesListPage),
     takeLatest(dbConfigActions.initJobsListPage.type, handleInitJobsListPage),
     takeLatest(dbConfigActions.initBotsListPage.type, handleInitBotsListPage),
     takeLatest(dbConfigActions.initCexPairsPage.type, handleInitCexPairsPage),
@@ -331,8 +277,6 @@ export function* dbConfigSaga() {
     takeLatest(dbConfigActions.setPoolsData.type, handleSetPoolsData),
     takeLatest(dbConfigActions.setDexesData.type, handleSetDexesData),
     takeLatest(dbConfigActions.setChainsData.type, handleSetChainsData),
-    takeLatest(dbConfigActions.setPairsData.type, handleSetPairsData),
-    takeLatest(dbConfigActions.setQuotesData.type, handleSetQuotesData),
     takeLatest(dbConfigActions.setJobsData.type, handleSetJobsData),
     takeLatest(dbConfigActions.setBotsData.type, handleSetBotsData),
     takeLatest(dbConfigActions.setServersData.type, handleSetServersData),
@@ -353,12 +297,6 @@ export function* dbConfigSaga() {
     }),
     takeLatest(dbConfigActions.refetchChainsData.type, function* refetchChains() {
       yield call(runFreshFetch, dbConfigApi.getChains, dbConfigActions.setChainsDataSuccess, dbConfigActions.setChainsDataFailure);
-    }),
-    takeLatest(dbConfigActions.refetchPairsData.type, function* refetchPairs() {
-      yield call(runFreshFetch, dbConfigApi.getPairs, dbConfigActions.setPairsDataSuccess, dbConfigActions.setPairsDataFailure);
-    }),
-    takeLatest(dbConfigActions.refetchQuotesData.type, function* refetchQuotes() {
-      yield call(runFreshFetch, dbConfigApi.getQuotes, dbConfigActions.setQuotesDataSuccess, dbConfigActions.setQuotesDataFailure);
     }),
     takeLatest(dbConfigActions.refetchJobsData.type, function* refetchJobs() {
       yield call(runFreshFetch, dbConfigApi.getJobs, dbConfigActions.setJobsDataSuccess, dbConfigActions.setJobsDataFailure);
@@ -386,8 +324,6 @@ export function* dbConfigSaga() {
     }),
 
     takeLatest(dbConfigActions.refetchPoolsPageResources.type, handleRefetchPoolsPageResources),
-    takeLatest(dbConfigActions.refetchPairsPageResources.type, handleRefetchPairsPageResources),
-    takeLatest(dbConfigActions.refetchQuotesListPageResources.type, handleRefetchQuotesListPageResources),
     takeLatest(dbConfigActions.refetchJobsListPageResources.type, handleRefetchJobsListPageResources),
     takeLatest(dbConfigActions.refetchBotsListPageResources.type, handleRefetchBotsListPageResources),
     takeLatest(dbConfigActions.refetchCexPairsPageResources.type, handleRefetchCexPairsPageResources),

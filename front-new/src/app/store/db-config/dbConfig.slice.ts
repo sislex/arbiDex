@@ -17,8 +17,6 @@ export interface DbConfigState {
   pools: AsyncState<any[]>;
   dexes: AsyncState<any[]>;
   chains: AsyncState<any[]>;
-  pairs: AsyncState<any[]>;
-  quotes: AsyncState<any[]>;
   jobs: AsyncState<any[]>;
   bots: AsyncState<any[]>;
   botsByServerId: AsyncState<any[]>;
@@ -29,7 +27,6 @@ export interface DbConfigState {
   cexPairs: AsyncState<any[]>;
   cexJobs: AsyncState<any[]>;
   versions: string[];
-  pairIdForRating: number | null;
 }
 
 const emptyAsyncResponse = <T>(response: T): AsyncState<T> => ({
@@ -69,8 +66,6 @@ export const initialState: DbConfigState = {
   pools: emptyAsyncResponse([]),
   dexes: emptyAsyncResponse([]),
   chains: emptyAsyncResponse([]),
-  pairs: emptyAsyncResponse([]),
-  quotes: emptyAsyncResponse([]),
   jobs: emptyAsyncResponse([]),
   bots: emptyAsyncResponse([]),
   botsByServerId: emptyAsyncResponse([]),
@@ -81,7 +76,6 @@ export const initialState: DbConfigState = {
   cexPairs: emptyAsyncResponse([]),
   cexJobs: emptyAsyncResponse([]),
   versions: ["v2", "v3", "v4"],
-  pairIdForRating: null,
 };
 
 const dbConfigSlice = createSlice({
@@ -94,8 +88,6 @@ const dbConfigSlice = createSlice({
 
     initTokensListPage() {},
     initPoolsPage() {},
-    initPairsPage() {},
-    initQuotesListPage() {},
     initJobsListPage() {},
     initBotsListPage() {},
     initCexPairsPage() {},
@@ -139,30 +131,6 @@ const dbConfigSlice = createSlice({
     },
     setChainsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.chains, action.payload);
-    },
-
-    setPairsData(state) {
-      setLoading(state.pairs);
-    },
-    setPairsDataSuccess(state, action: PayloadAction<any[]>) {
-      setSuccess(state.pairs, action.payload);
-    },
-    setPairsDataFailure(state, action: PayloadAction<string>) {
-      setFailure(state.pairs, action.payload);
-    },
-
-    setPairsRatingData(state, action: PayloadAction<number | null>) {
-      state.pairIdForRating = action.payload;
-    },
-
-    setQuotesData(state) {
-      setLoading(state.quotes);
-    },
-    setQuotesDataSuccess(state, action: PayloadAction<any[]>) {
-      setSuccess(state.quotes, action.payload);
-    },
-    setQuotesDataFailure(state, action: PayloadAction<string>) {
-      setFailure(state.quotes, action.payload);
     },
 
     setJobsData(state) {
@@ -267,12 +235,6 @@ const dbConfigSlice = createSlice({
     refetchChainsData(state) {
       setLoading(state.chains);
     },
-    refetchPairsData(state) {
-      setLoading(state.pairs);
-    },
-    refetchQuotesData(state) {
-      setLoading(state.quotes);
-    },
     refetchJobsData(state) {
       setLoading(state.jobs);
     },
@@ -304,17 +266,6 @@ const dbConfigSlice = createSlice({
       setLoading(state.dexes);
       setLoading(state.chains);
       setLoading(state.swapRate);
-    },
-    refetchPairsPageResources(state) {
-      setLoading(state.pairs);
-      setLoading(state.pools);
-      setLoading(state.tokens);
-      setLoading(state.dexes);
-      setLoading(state.chains);
-    },
-    refetchQuotesListPageResources(state) {
-      setLoading(state.quotes);
-      setLoading(state.tokens);
     },
     refetchJobsListPageResources(state) {
       setLoading(state.jobs);

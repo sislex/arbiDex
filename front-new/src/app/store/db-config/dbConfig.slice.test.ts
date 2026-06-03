@@ -20,11 +20,5 @@ describe("dbConfig reducer", () => {
     expect(nextState.tokens.isLoaded).toBe(true);
     expect(nextState.tokens.response).toEqual(payload);
   });
-
-  it("updates selected pair id for rating", () => {
-    const nextState = dbConfigReducer(initialState, dbConfigActions.setPairsRatingData(42));
-
-    expect(nextState.pairIdForRating).toBe(42);
-  });
 });
 
