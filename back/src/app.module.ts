@@ -10,10 +10,6 @@ import { ServersModule } from './servers/servers.module';
 import { DexesModule } from './dexes/dexes.module';
 import { JobsModule } from './jobs/jobs.module';
 import { BotsModule } from './bots/bots.module';
-import { PairsModule } from './pairs/pairs.module';
-import { QuotesModule } from './quotes/quotes.module';
-import { PairQuoteRelationsModule } from './pair-quote-relations/pair-quote-relations.module';
-import { QuoteJobRelationsModule } from './quote-job-relations/quote-job-relations.module';
 import { PoolJobRelationsModule } from './pool-job-relations/pool-job-relations.module';
 import { RpcUrlsModule } from './rpc-urls/rpc-urls.module';
 import { GetFeeModule } from './services/get-fee.module';
@@ -26,11 +22,7 @@ import { Dexes } from './entities/entities/Dexes';
 import { Servers } from './entities/entities/Servers';
 import { Jobs } from './entities/entities/Jobs';
 import { Bots } from './entities/entities/Bots';
-import { Quotes } from './entities/entities/Quotes';
-import { QuoteJobRelations } from './entities/entities/QuoteJobRelations';
 import { PoolsJobRelations } from './entities/entities/PoolsJobRelations';
-import { Pairs } from './entities/entities/Pairs';
-import { PairQuoteRelations } from './entities/entities/PairQuoteRelations';
 import { CexPairsModule } from './cex-pairs/cex-pairs.module';
 import { CexChainsModule } from './cex-chains/cex-chains.module';
 import { CexJobsModule } from './cex-jobs/cex-jobs.module';
@@ -60,11 +52,7 @@ import { CexChain } from './entities/entities/cex-chain.entity';
           Servers,
           Jobs,
           Bots,
-          Quotes,
-          QuoteJobRelations,
           PoolsJobRelations,
-          Pairs,
-          PairQuoteRelations,
           CexChain,
           CexPair,
           CexJob
@@ -84,10 +72,6 @@ import { CexChain } from './entities/entities/cex-chain.entity';
     DexesModule,
     JobsModule,
     BotsModule,
-    PairsModule,
-    QuotesModule,
-    PairQuoteRelationsModule,
-    QuoteJobRelationsModule,
     PoolJobRelationsModule,
     RpcUrlsModule,
     GetFeeModule,

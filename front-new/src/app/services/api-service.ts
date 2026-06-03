@@ -86,17 +86,6 @@ export const apiService = {
   editBot: (id: number, data: any) => request<any>("PUT", `/bots/${id}`, { body: data }),
   deletingBot: (id: number) => request<any>("DELETE", `/bots/${id}`),
 
-  getPairs: () => request<any[]>("GET", "/pairs"),
-  createPair: (data: any) => request<any>("POST", "/pairs", { body: { ...data } }),
-  editPair: (id: number, data: any) => request<any>("PUT", `/pairs/${id}`, { body: data }),
-  deletingPair: (id: number) => request<any>("DELETE", `/pairs/${id}`),
-
-  getQuotes: () => request<any[]>("GET", "/quotes"),
-  getOneQuote: (quoteId: number) => request<any>("GET", `/quotes/${quoteId}`),
-  createQuote: (data: any) => request<any>("POST", "/quotes", { body: { ...data } }),
-  editQuote: (id: number, data: any) => request<any>("PUT", `/quotes/${id}`, { body: data }),
-  deletingQuote: (id: number) => request<any>("DELETE", `/quotes/${id}`),
-
   getJobs: () => request<any[]>("GET", "/jobs"),
   getJobById: (id: number) => request<any>("GET", `/jobs/${id}`),
   createJob: (data: any) => request<any>("POST", "/jobs", { body: { ...data } }),
@@ -124,19 +113,10 @@ export const apiService = {
 
   getSwapRates: () => request<any[]>("GET", "/swap-rate"),
 
-  getQuoteRelationsByQuoteId: (id: number) => request<any[]>("GET", `/pair-quote-relations/by-quote-id/${id}`),
-  getQuoteRelations: (jobId: number) => request<any[]>("GET", "/pair-quote-relations/findAllWithFilter", { params: { jobId } }),
-  createQuoteRelations: (data: any[]) => request<any>("POST", "/pair-quote-relations", { body: data }),
-  deleteQuoteRelations: (ids: number[]) => request<any>("DELETE", "/pair-quote-relations", { body: ids }),
-
   getPoolJobRelationsByJobId: (id: number) => request<any[]>("GET", `/pool-job-relations/by-job-id/${id}`),
   createPoolJobRelations: (data: { jobId: number; poolId: number }[]) =>
     request<any>("POST", "/pool-job-relations", { body: data }),
   deletePoolJobRelations: (ids: number[]) => request<any>("DELETE", "/pool-job-relations", { body: ids }),
-
-  getJobRelationsByJobId: (id: number) => request<any[]>("GET", `/quote-job-relations/by-job-id/${id}`),
-  createJobRelations: (data: any[]) => request<any>("POST", "/quote-job-relations", { body: data }),
-  deleteJobRelations: (ids: number[]) => request<any>("DELETE", "/quote-job-relations", { body: ids }),
 
   getRpcUrls: () => request<any[]>("GET", "/rpc-urls"),
   createRpcUrl: (data: any) => request<any>("POST", "/rpc-urls", { body: { ...data } }),
