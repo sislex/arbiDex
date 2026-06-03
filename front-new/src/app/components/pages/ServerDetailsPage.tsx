@@ -1,8 +1,12 @@
 import { ArrowLeft, RefreshCw } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { apiService } from '../../services/api-service';
 import { mapPoolJobRelationToJobPair } from '../../utils/jobPairUtils';
+
+function getBotRowId(bot: any, idx: number): string {
+  return String(bot?.botId ?? bot?.id ?? idx);
+}
 
 interface ServerDetailsPageProps {
   serverId: number;
@@ -17,6 +21,8 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
   const [isLoading, setIsLoading] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [configJson, setConfigJson] = useState('');
+  const [selectedBotIds, setSelectedBotIds] = useState<Set<string>>(new Set());
+  const headerCheckboxRef = useRef<HTMLInputElement>(null);
 
   const t = {
     en: {
@@ -70,6 +76,41 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
     };
   }, [serverId]);
 
+  useEffect(() => {
+    setSelectedBotIds(new Set(rowsRaw.map((bot, idx) => getBotRowId(bot, idx))));
+  }, [rowsRaw]);
+
+  const allBotIds = useMemo(
+    () => rowsRaw.map((bot, idx) => getBotRowId(bot, idx)),
+    [rowsRaw],
+  );
+
+  const allSelected = allBotIds.length > 0 && allBotIds.every((id) => selectedBotIds.has(id));
+  const someSelected = allBotIds.some((id) => selectedBotIds.has(id));
+
+  useEffect(() => {
+    const el = headerCheckboxRef.current;
+    if (el) {
+      el.indeterminate = someSelected && !allSelected;
+    }
+  }, [allSelected, someSelected]);
+
+  const toggleBot = useCallback((rowId: string) => {
+    setSelectedBotIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowId)) {
+        next.delete(rowId);
+      } else {
+        next.add(rowId);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleAllBots = useCallback(() => {
+    setSelectedBotIds(allSelected ? new Set() : new Set(allBotIds));
+  }, [allBotIds, allSelected]);
+
   const rows = useMemo(
     () =>
       rowsRaw.map((item: any, idx: number) => ({
@@ -83,13 +124,48 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
     [rowsRaw],
   );
 
-  const columns: Column[] = [
-    { key: 'botName', label: t[language].botName, sortable: true, filterable: true },
-    { key: 'botDescription', label: t[language].botDescription, sortable: true, filterable: true },
-    { key: 'chainId', label: t[language].chainId, sortable: true, filterable: true },
-    { key: 'jobName', label: t[language].jobName, sortable: true, filterable: true },
-    { key: 'poolsCount', label: t[language].poolsCount, sortable: true, filterable: true },
-  ];
+  const columns: Column[] = useMemo(
+    () => [
+      {
+        key: 'checkbox',
+        label: '',
+        headerRender: () => (
+          <input
+            ref={headerCheckboxRef}
+            type="checkbox"
+            checked={allSelected}
+            onChange={toggleAllBots}
+            className="w-4 h-4 rounded border-input bg-input accent-primary cursor-pointer"
+            onClick={(event) => event.stopPropagation()}
+            title={
+              allSelected
+                ? language === 'ru'
+                  ? 'Снять все'
+                  : 'Deselect all'
+                : language === 'ru'
+                  ? 'Отметить все'
+                  : 'Select all'
+            }
+          />
+        ),
+        render: (_, row) => (
+          <input
+            type="checkbox"
+            checked={selectedBotIds.has(String(row.rowId))}
+            onChange={() => toggleBot(String(row.rowId))}
+            className="w-4 h-4 rounded border-input bg-input accent-primary cursor-pointer"
+            onClick={(event) => event.stopPropagation()}
+          />
+        ),
+      },
+      { key: 'botName', label: t[language].botName, sortable: true, filterable: true },
+      { key: 'botDescription', label: t[language].botDescription, sortable: true, filterable: true },
+      { key: 'chainId', label: t[language].chainId, sortable: true, filterable: true },
+      { key: 'jobName', label: t[language].jobName, sortable: true, filterable: true },
+      { key: 'poolsCount', label: t[language].poolsCount, sortable: true, filterable: true },
+    ],
+    [allSelected, language, selectedBotIds, t, toggleAllBots, toggleBot],
+  );
 
   const mapBotParams = (bot: any) => ({
     botType: bot?.botName ?? '',
@@ -136,11 +212,13 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
   });
 
   const buildServerBotConfigs = () => {
-    return (rowsRaw ?? []).map((bot: any) => ({
-      id: String(bot?.botId ?? bot?.id ?? ''),
-      botParams: mapBotParams(bot),
-      jobParams: bot?.job ? mapDexJobParams(bot.job) : mapCexJobParams(bot?.cexJob),
-    }));
+    return (rowsRaw ?? [])
+      .filter((bot: any, idx: number) => selectedBotIds.has(getBotRowId(bot, idx)))
+      .map((bot: any) => ({
+        id: String(bot?.botId ?? bot?.id ?? ''),
+        botParams: mapBotParams(bot),
+        jobParams: bot?.job ? mapDexJobParams(bot.job) : mapCexJobParams(bot?.cexJob),
+      }));
   };
 
   return (
@@ -194,15 +272,16 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
 
       <div className="h-16 border-t border-border bg-card flex items-center justify-end gap-3 px-4">
         <button
+          disabled={selectedBotIds.size === 0}
           onClick={async () => {
             const ip = serverRaw?.ip;
             const port = serverRaw?.port;
-            if (!ip || !port) return;
+            if (!ip || !port || selectedBotIds.size === 0) return;
             await apiService.resetServerSettings(String(ip), String(port), {
               botsRulesList: buildServerBotConfigs(),
             });
           }}
-          className="px-6 py-2 bg-destructive text-destructive-foreground rounded hover:opacity-90 transition-opacity flex items-center gap-2 text-sm"
+          className="px-6 py-2 bg-destructive text-destructive-foreground rounded hover:opacity-90 transition-opacity flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RefreshCw className="w-4 h-4" />
           {t[language].resetServer}

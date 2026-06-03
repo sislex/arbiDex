@@ -26,6 +26,7 @@ export interface Column {
   sortable?: boolean;
   filterable?: boolean;
   render?: (value: any, row: any) => React.ReactNode;
+  headerRender?: () => React.ReactNode;
 }
 
 interface DataTableProps {
@@ -120,9 +121,13 @@ export function DataTable({
   const columnDefs = useMemo<ColDef[]>(() => {
     const gridColumns: ColDef[] = columns.map((column) => {
       const isAddressColumn = column.key.toLowerCase().includes('address');
+      const HeaderComponent = column.headerRender
+        ? () => <div className="flex h-full items-center justify-center">{column.headerRender?.()}</div>
+        : undefined;
       return {
         field: column.key,
-        headerName: column.label,
+        headerName: column.headerRender ? undefined : column.label,
+        headerComponent: HeaderComponent,
         sortable: Boolean(column.sortable),
         resizable: true,
         filter: column.filterable ? 'agTextColumnFilter' : false,
