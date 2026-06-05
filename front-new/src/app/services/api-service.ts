@@ -143,6 +143,10 @@ export const apiService = {
   editCexJob: (id: number, data: any) => request<any>("PUT", `/cex-jobs/${id}`, { body: data }),
   updateCexJobStatus: (id: number, checked: boolean | null) => request<any>("PATCH", `/cex-jobs/${id}/status`, { body: { checked } }),
   deletingCexJob: (id: number) => request<any>("DELETE", `/cex-jobs/${id}`),
+  bulkDeleteCexJobs: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/cex-jobs/bulk-delete", {
+      body: { ids },
+    }),
 
   getCexChainsData: () => request<any[]>("GET", "/cex-chains"),
   createCexChain: (data: any) => request<any>("POST", "/cex-chains", { body: { ...data } }),
