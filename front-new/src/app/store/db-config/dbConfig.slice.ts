@@ -82,6 +82,7 @@ const getTokenId = (token: any) => Number(token.tokenId ?? token.id);
 const getPoolId = (pool: any) => Number(pool.poolId ?? pool.id);
 const getDexId = (dex: any) => Number(dex.dexId ?? dex.id);
 const getRpcUrlId = (rpcUrl: any) => Number(rpcUrl.rpcUrlId ?? rpcUrl.id);
+const getBotId = (bot: any) => Number(bot.botId ?? bot.id);
 
 const setFailure = (state: AsyncState<any[]>, error: string) => {
   state.loadingTime = state.startTime ? Date.now() - state.startTime : null;
@@ -257,6 +258,21 @@ const dbConfigSlice = createSlice({
     },
     setBotsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.bots, action.payload);
+    },
+    removeBotsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.bots.response = (state.bots.response ?? []).filter((bot: any) => {
+        const botId = Number(bot.botId ?? bot.id);
+        return !ids.has(botId);
+      });
+    },
+    upsertBot(state, action: PayloadAction<{ bot: any }>) {
+      state.bots.response = upsertListItem(
+        state.bots.response ?? [],
+        action.payload.bot,
+        getBotId,
+      );
     },
 
     setBotsByServerId(state) {

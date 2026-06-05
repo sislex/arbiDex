@@ -102,6 +102,10 @@ export const apiService = {
   createBot: (data: any) => request<any>("POST", "/bots", { body: { ...data } }),
   editBot: (id: number, data: any) => request<any>("PUT", `/bots/${id}`, { body: data }),
   deletingBot: (id: number) => request<any>("DELETE", `/bots/${id}`),
+  bulkDeleteBots: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/bots/bulk-delete", {
+      body: { ids },
+    }),
 
   getJobs: () => request<any[]>("GET", "/jobs"),
   getJobById: (id: number) => request<any>("GET", `/jobs/${id}`),

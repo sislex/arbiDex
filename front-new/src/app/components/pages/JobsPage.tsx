@@ -1,4 +1,4 @@
-import { Copy, Menu, Play, Plus } from 'lucide-react';
+import { ArrowRight, Copy, Menu, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
@@ -703,7 +703,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
                   className="p-1.5 hover:bg-success/10 rounded transition-colors"
                   title={t[language].checkAction}
                 >
-                  <Play className="w-3.5 h-3.5 text-success" />
+                  <ArrowRight className="w-3.5 h-3.5 text-success" />
                 </button>
               )
             : (row) => (
@@ -729,7 +729,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
                       className="p-1.5 hover:bg-accent rounded transition-colors"
                       title={language === 'ru' ? 'Связи' : 'Relations'}
                     >
-                      <Play className="w-3.5 h-3.5 text-muted-foreground" />
+                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
                     </button>
                   ) : null}
                 </>

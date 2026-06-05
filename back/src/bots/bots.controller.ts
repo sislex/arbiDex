@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { BotsService } from './bots.service';
 import { BotDto } from '../dtos/bots-dto/bot.dto';
+import { BulkDeleteBotsDto } from '../dtos/bots-dto/bulk-delete-bots.dto';
 
 @Controller('bots')
 export class BotsController {
@@ -45,6 +46,11 @@ export class BotsController {
   @Get('findAllByServerId')
   findAllByServerId(@Query('serverId') serverId: string) {
     return this.botsService.findAllByServerId(serverId);
+  }
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeleteBotsDto) {
+    return this.botsService.removeMany(body.ids ?? []);
   }
 
   @Get('findAllByJobId')

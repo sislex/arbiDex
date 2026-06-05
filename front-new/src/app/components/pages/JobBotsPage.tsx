@@ -1,4 +1,4 @@
-import { ArrowLeft, Play } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -202,7 +202,7 @@ export function JobBotsPage({ jobId, language, onBack, onBotClick }: JobBotsPage
                     className="p-1.5 hover:bg-success/10 rounded transition-colors"
                     title={t[language].openBot}
                   >
-                    <Play className="w-3.5 h-3.5 text-success" />
+                    <ArrowRight className="w-3.5 h-3.5 text-success" />
                   </button>
                 )
               : undefined

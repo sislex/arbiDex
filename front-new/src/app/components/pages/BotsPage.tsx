@@ -1,6 +1,6 @@
+import { ArrowRight, Copy, Menu, Plus } from 'lucide-react';
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
-import { Copy, Play, Plus } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
@@ -13,13 +13,56 @@ import {
   selectServersMeta,
   selectServersDataResponse,
 } from '../../store/db-config/dbConfig.selectors';
-import { showDeleteToast } from '../../utils/toast';
-import { cancelPendingDelete, schedulePendingDelete } from '../../utils/pendingDeleteScheduler';
+import { showBulkDeleteToast, showDeleteToast } from '../../utils/toast';
+import {
+  buildBulkDeleteKey,
+  cancelPendingDelete,
+  schedulePendingDelete,
+} from '../../utils/pendingDeleteScheduler';
 import { resolveBotDexJobId } from '../../utils/botJobId';
 import { apiService } from '../../services/api-service';
+import { normalizeBotForStore } from '../../utils/bot';
 import { BotForm, type BotFormValues } from '../forms/BotForm';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 const BOTS_DELETE_SCOPE = 'bots';
+
+function mapBotRow(
+  bot: any,
+  lookup: {
+    jobById: Map<number, any>;
+    cexJobById: Map<number, any>;
+    serverById: Map<number, any>;
+  },
+) {
+  const id = Number(bot.botId ?? bot.id);
+  const jobId = resolveBotDexJobId(bot);
+  const cexJobId = bot.cexJobId ?? bot.cex_job_id;
+  const job = jobId != null ? lookup.jobById.get(jobId) : lookup.cexJobById.get(Number(cexJobId));
+  const serverId = Number(bot.serverId ?? bot.server_id);
+  const server = lookup.serverById.get(serverId);
+
+  return {
+    id,
+    name: bot.botName ?? bot.name ?? '',
+    description: bot.description ?? '',
+    job: bot.jobName ?? job?.jobType ?? job?.job_type ?? jobId ?? cexJobId ?? '',
+    server: bot.serverName ?? server?.serverName ?? server?.name ?? String(serverId),
+    serverId,
+    poolsCount:
+      bot.poolsCount ??
+      bot.pools_count ??
+      job?.poolsCount ??
+      job?.pools_count ??
+      0,
+    raw: bot,
+  };
+}
 
 export function BotsPage({
   language,
@@ -36,7 +79,7 @@ export function BotsPage({
   }) => void;
 }) {
   const dispatch = useAppDispatch();
-  const botsFromStore = useAppSelector(selectBotsDataResponse);
+  const botsRaw = useAppSelector(selectBotsDataResponse);
   const botsMeta = useAppSelector(selectBotsMeta);
   const jobsMeta = useAppSelector(selectJobsMeta);
   const cexJobsMeta = useAppSelector(selectCexJobsMeta);
@@ -49,6 +92,11 @@ export function BotsPage({
   const [editingBotRaw, setEditingBotRaw] = useState<any>(null);
   const [copiedBotInitialData, setCopiedBotInitialData] = useState<BotFormValues | undefined>(undefined);
   const [pendingDeleteBotIds, setPendingDeleteBotIds] = useState<Set<number>>(new Set());
+  const [selectedBotIds, setSelectedBotIds] = useState<Set<number>>(new Set());
+  const [tableRows, setTableRows] = useState<ReturnType<typeof mapBotRow>[]>([]);
+  const headerCheckboxRef = useRef<HTMLInputElement>(null);
+  const botsFromStoreRef = useRef<any[] | null>(null);
+
   const buildBotInitialData = (bot: any): BotFormValues => ({
     botName: String(bot.botName ?? bot.name ?? ''),
     description: String(bot.description ?? ''),
@@ -96,34 +144,81 @@ export function BotsPage({
     return new Map(servers.map((server: any) => [server.serverId ?? server.id, server]));
   }, [servers]);
 
-  const bots = useMemo(() => {
-    return botsFromStore
-      .map((bot: any) => {
-        const id = bot.botId ?? bot.id;
-        const jobId = resolveBotDexJobId(bot);
-        const cexJobId = bot.cexJobId ?? bot.cex_job_id;
-        const job = jobId != null ? jobById.get(jobId) : cexJobById.get(cexJobId);
-        const serverId = Number(bot.serverId ?? bot.server_id);
-        const server = serverById.get(serverId);
+  const lookupMaps = useMemo(
+    () => ({ jobById, cexJobById, serverById }),
+    [cexJobById, jobById, serverById],
+  );
 
-        return {
-          id,
-          name: bot.botName ?? bot.name ?? '',
-          description: bot.description ?? '',
-          job: bot.jobName ?? job?.jobType ?? job?.job_type ?? jobId ?? cexJobId ?? '',
-          server: bot.serverName ?? server?.serverName ?? server?.name ?? String(serverId),
-          serverId,
-          poolsCount:
-            bot.poolsCount ??
-            bot.pools_count ??
-            job?.poolsCount ??
-            job?.pools_count ??
-            0,
-          raw: bot,
-        };
-      })
-      .filter((bot) => !pendingDeleteBotIds.has(bot.id));
-  }, [botsFromStore, cexJobById, jobById, pendingDeleteBotIds, serverById]);
+  const enrichBotRow = useCallback((bot: any) => mapBotRow(bot, lookupMaps), [lookupMaps]);
+
+  useEffect(() => {
+    const prevStore = botsFromStoreRef.current;
+    const nextStore = Array.isArray(botsRaw) ? botsRaw : [];
+    botsFromStoreRef.current = nextStore;
+
+    if (!prevStore) {
+      setTableRows(nextStore.map(enrichBotRow));
+      return;
+    }
+
+    const prevLen = prevStore.length;
+    const nextLen = nextStore.length;
+
+    if (prevLen > 0 && nextLen < prevLen) {
+      const nextIds = new Set(nextStore.map((bot: any) => Number(bot.botId ?? bot.id)));
+      setTableRows((current) => current.filter((row) => nextIds.has(row.id)));
+      return;
+    }
+
+    if (prevLen === nextLen && prevStore === nextStore) {
+      return;
+    }
+
+    setTableRows(nextStore.map(enrichBotRow));
+  }, [botsRaw, enrichBotRow]);
+
+  const visibleBotIds = useMemo(() => {
+    if (pendingDeleteBotIds.size === 0) {
+      return tableRows.map((bot) => bot.id);
+    }
+    const ids: number[] = [];
+    for (const bot of tableRows) {
+      if (!pendingDeleteBotIds.has(bot.id)) {
+        ids.push(bot.id);
+      }
+    }
+    return ids;
+  }, [pendingDeleteBotIds, tableRows]);
+
+  const allBotIds = visibleBotIds;
+  const allSelected = allBotIds.length > 0 && allBotIds.every((id) => selectedBotIds.has(id));
+  const someSelected = allBotIds.some((id) => selectedBotIds.has(id));
+
+  useEffect(() => {
+    const el = headerCheckboxRef.current;
+    if (el) {
+      el.indeterminate = someSelected && !allSelected;
+    }
+  }, [allSelected, someSelected]);
+
+  const updatePendingDeleteBotIds = useCallback((updater: (prev: Set<number>) => Set<number>) => {
+    startTransition(() => {
+      setPendingDeleteBotIds(updater);
+    });
+  }, []);
+
+  const toggleBot = useCallback((id: number) => {
+    setSelectedBotIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleAllBots = useCallback(() => {
+    setSelectedBotIds(allSelected ? new Set() : new Set(allBotIds));
+  }, [allBotIds, allSelected]);
 
   const t = {
     en: {
@@ -135,6 +230,11 @@ export function BotsPage({
       poolsCount: 'Pools count',
       tableTitle: 'Bots',
       openServer: 'Open server',
+      add: 'Add Bot',
+      actions: 'Actions',
+      deleteSelected: 'Delete selected',
+      deleteFailed: 'Failed to delete bots',
+      deleteType: 'Bot',
     },
     ru: {
       botId: 'ID бота',
@@ -145,10 +245,127 @@ export function BotsPage({
       poolsCount: 'Кол-во пулов',
       tableTitle: 'Боты',
       openServer: 'Открыть сервер',
+      add: 'Добавить Bot',
+      actions: 'Действия',
+      deleteSelected: 'Удалить выбранные',
+      deleteFailed: 'Не удалось удалить ботов',
+      deleteType: 'Bot',
     },
   };
 
+  const scheduleDelete = useCallback(
+    (row: { id: number; name: string }) => {
+      updatePendingDeleteBotIds((prev) => new Set(prev).add(row.id));
+      setSelectedBotIds((prev) => {
+        const next = new Set(prev);
+        next.delete(row.id);
+        return next;
+      });
+
+      const deleteKey = `${BOTS_DELETE_SCOPE}:${row.id}`;
+
+      schedulePendingDelete(deleteKey, async () => {
+        const result = await apiService.bulkDeleteBots([row.id]);
+        dispatch(dbConfigActions.removeBotsByIds(result.deletedIds ?? [row.id]));
+        updatePendingDeleteBotIds((prev) => {
+          const next = new Set(prev);
+          next.delete(row.id);
+          return next;
+        });
+      });
+
+      showDeleteToast({
+        itemName: row.name,
+        itemType: t[language].deleteType,
+        onUndo: () => {
+          cancelPendingDelete(deleteKey);
+          updatePendingDeleteBotIds((prev) => {
+            const next = new Set(prev);
+            next.delete(row.id);
+            return next;
+          });
+        },
+        language,
+      });
+    },
+    [dispatch, language, t, updatePendingDeleteBotIds],
+  );
+
+  const handleDeleteSelected = useCallback(() => {
+    if (selectedBotIds.size === 0) return;
+
+    const deleteIds = [...selectedBotIds];
+
+    updatePendingDeleteBotIds((prev) => {
+      const next = new Set(prev);
+      deleteIds.forEach((id) => next.add(id));
+      return next;
+    });
+    setSelectedBotIds(new Set());
+
+    const bulkDeleteKey = buildBulkDeleteKey(BOTS_DELETE_SCOPE, deleteIds);
+
+    schedulePendingDelete(bulkDeleteKey, async () => {
+      const result = await apiService.bulkDeleteBots(deleteIds);
+      if (!result?.success) {
+        throw new Error(t[language].deleteFailed);
+      }
+      dispatch(dbConfigActions.removeBotsByIds(result.deletedIds ?? deleteIds));
+      updatePendingDeleteBotIds((prev) => {
+        const next = new Set(prev);
+        deleteIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    });
+
+    showBulkDeleteToast({
+      count: deleteIds.length,
+      itemType: language === 'en' ? 'bots' : 'ботов',
+      onUndo: () => {
+        cancelPendingDelete(bulkDeleteKey);
+        updatePendingDeleteBotIds((prev) => {
+          const next = new Set(prev);
+          deleteIds.forEach((id) => next.delete(id));
+          return next;
+        });
+      },
+      language,
+    });
+  }, [dispatch, language, selectedBotIds, t, updatePendingDeleteBotIds]);
+
   const columns: Column[] = [
+    {
+      key: 'checkbox',
+      label: '',
+      headerRender: () => (
+        <input
+          ref={headerCheckboxRef}
+          type="checkbox"
+          checked={allSelected}
+          onChange={toggleAllBots}
+          className="w-4 h-4 rounded border-input bg-input accent-primary cursor-pointer"
+          onClick={(event) => event.stopPropagation()}
+          title={
+            allSelected
+              ? language === 'ru'
+                ? 'Снять все'
+                : 'Deselect all'
+              : language === 'ru'
+                ? 'Отметить все'
+                : 'Select all'
+          }
+        />
+      ),
+      render: (_, row) => (
+        <input
+          type="checkbox"
+          checked={selectedBotIds.has(row.id)}
+          onChange={() => toggleBot(row.id)}
+          className="w-4 h-4 rounded border-input bg-input accent-primary cursor-pointer"
+          onClick={(event) => event.stopPropagation()}
+        />
+      ),
+    },
     { key: 'id', label: t[language].botId, sortable: true, filterable: true },
     { key: 'name', label: t[language].botName, sortable: true, filterable: true },
     { key: 'description', label: t[language].description, sortable: true, filterable: true },
@@ -163,20 +380,46 @@ export function BotsPage({
         <DataTable
           title={t[language].tableTitle}
           headerActions={
-            <button
-              onClick={() => {
-                setEditingBotRaw(null);
-                setCopiedBotInitialData(undefined);
-                setFormOpen(true);
-              }}
-              className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="text-sm">{language === 'en' ? 'Add Bot' : 'Добавить Bot'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setEditingBotRaw(null);
+                  setCopiedBotInitialData(undefined);
+                  setFormOpen(true);
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm">{t[language].add}</span>
+              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center p-2 bg-muted text-foreground rounded hover:bg-accent transition-colors"
+                    aria-label={t[language].actions}
+                    title={t[language].actions}
+                  >
+                    <Menu className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    disabled={selectedBotIds.size === 0}
+                    variant="destructive"
+                    onClick={handleDeleteSelected}
+                  >
+                    {t[language].deleteSelected}
+                    {selectedBotIds.size > 0 ? ` (${selectedBotIds.size})` : ''}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           }
           columns={columns}
-          data={bots}
+          data={tableRows}
+          excludeRowIds={pendingDeleteBotIds}
+          getExcludeRowId={(row) => row.id}
           language={language}
           isLoading={
             botsMeta.isLoading ||
@@ -185,6 +428,8 @@ export function BotsPage({
             serversMeta.isLoading
           }
           loadingText="Loading Bots…"
+          actionsColumnPosition="last"
+          getRowId={(params) => String(params.data?.id ?? '')}
           onEdit={(row) => {
             setEditingBotRaw(row.raw ?? row);
             setCopiedBotInitialData(undefined);
@@ -206,7 +451,7 @@ export function BotsPage({
                   className="p-1.5 hover:bg-success/10 rounded transition-colors"
                   title={t[language].openServer}
                 >
-                  <Play className="w-3.5 h-3.5 text-success" />
+                  <ArrowRight className="w-3.5 h-3.5 text-success" />
                 </button>
               ) : null}
               <button
@@ -223,40 +468,13 @@ export function BotsPage({
               </button>
             </>
           )}
-          onDelete={(row) => {
-            setPendingDeleteBotIds((prev) => new Set(prev).add(row.id));
-            const deleteKey = `${BOTS_DELETE_SCOPE}:${row.id}`;
-
-            schedulePendingDelete(deleteKey, async () => {
-              await apiService.deletingBot(row.id);
-              dispatch(dbConfigActions.refetchBotsListPageResources());
-              setPendingDeleteBotIds((prev) => {
-                const next = new Set(prev);
-                next.delete(row.id);
-                return next;
-              });
-            });
-
-            showDeleteToast({
-              itemName: row.name,
-              itemType: language === 'en' ? 'Bot' : 'Bot',
-              onUndo: () => {
-                cancelPendingDelete(deleteKey);
-                setPendingDeleteBotIds((prev) => {
-                  const next = new Set(prev);
-                  next.delete(row.id);
-                  return next;
-                });
-              },
-              language,
-            });
-          }}
+          onDelete={scheduleDelete}
+          onRowClick={(row) => setSelectedBot(row)}
           onRowDoubleClick={(row) => {
             setSelectedBot(row);
             onBotClick?.(row);
           }}
           selectedRow={selectedBot}
-          selectionMode="single"
         />
       </div>
 
@@ -284,11 +502,20 @@ export function BotsPage({
 
           if (editingBotRaw) {
             const id = Number(editingBotRaw.botId ?? editingBotRaw.id);
-            await apiService.editBot(id, payload);
+            const saved = await apiService.editBot(id, payload);
+            dispatch(
+              dbConfigActions.upsertBot({
+                bot: normalizeBotForStore({ ...saved, ...payload, botId: id }),
+              }),
+            );
           } else {
-            await apiService.createBot(payload);
+            const saved = await apiService.createBot(payload);
+            dispatch(
+              dbConfigActions.upsertBot({
+                bot: normalizeBotForStore({ ...saved, ...payload }),
+              }),
+            );
           }
-          dispatch(dbConfigActions.refetchBotsListPageResources());
         }}
         initialData={
           copiedBotInitialData ?? (editingBotRaw ? buildBotInitialData(editingBotRaw) : undefined)

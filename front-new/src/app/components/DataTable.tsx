@@ -145,6 +145,15 @@ export function DataTable({
 
   const shouldAnimateRows = rows.length <= 1000;
 
+  const rowSelection = useMemo(() => {
+    if (selectionMode === 'none') return undefined;
+    return {
+      mode: selectionMode === 'single' ? ('singleRow' as const) : ('multiRow' as const),
+      checkboxes: false,
+      enableClickSelection: true,
+    };
+  }, [selectionMode]);
+
   const actionsHeader = language === 'ru' ? 'ДЕЙСТВИЯ' : 'ACTIONS';
   const editTitle = language === 'ru' ? 'Изменить' : 'Edit';
   const deleteTitle = language === 'ru' ? 'Удалить' : 'Delete';
@@ -350,7 +359,7 @@ export function DataTable({
             animateRows={shouldAnimateRows}
             isExternalFilterPresent={isExternalFilterPresent}
             doesExternalFilterPass={doesExternalFilterPass}
-            rowSelection={selectionMode === 'none' ? undefined : selectionMode}
+            rowSelection={rowSelection}
             getRowId={getRowId}
             getRowClass={getRowClass}
             onGridReady={(event) => {
