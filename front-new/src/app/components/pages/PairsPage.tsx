@@ -1,8 +1,12 @@
-import { ChevronDown, Plus } from 'lucide-react';
-import { toast } from 'sonner';
+import { Menu, Plus } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { showBulkDeleteToast, showDeleteToast } from '../../utils/toast';
+import {
+  buildBulkDeleteKey,
+  cancelPendingDelete,
+  schedulePendingDelete,
+} from '../../utils/pendingDeleteScheduler';
 import { CexPairForm } from '../forms/CexPairForm';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
@@ -21,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
-const DELETE_UNDO_MS = 5000;
+const CEX_PAIRS_DELETE_SCOPE = 'cex-pairs';
 
 interface PairsPageProps {
   language: 'en' | 'ru';
@@ -37,9 +41,6 @@ export function PairsPage({ language }: PairsPageProps) {
   const [editingCexPairRaw, setEditingCexPairRaw] = useState<any>(null);
   const [pendingDeleteCexPairIds, setPendingDeleteCexPairIds] = useState<Set<number>>(new Set());
   const [selectedPairIds, setSelectedPairIds] = useState<Set<number>>(new Set());
-  const deleteCexPairTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
-  const bulkDeleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingBulkDeleteRef = useRef<{ id: number; token0: string; token1: string }[]>([]);
   const headerCheckboxRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -47,14 +48,6 @@ export function PairsPage({ language }: PairsPageProps) {
       dispatch(dbConfigActions.initCexPairsPage());
     }
   }, [cexPairsMeta.error, cexPairsMeta.isLoaded, cexPairsMeta.isLoading, dispatch]);
-
-  useEffect(() => {
-    return () => {
-      deleteCexPairTimeoutsRef.current.forEach(clearTimeout);
-      deleteCexPairTimeoutsRef.current.clear();
-      if (bulkDeleteTimeoutRef.current) clearTimeout(bulkDeleteTimeoutRef.current);
-    };
-  }, []);
 
   const cexChainNameById = useMemo(() => buildCexChainNameById(cexChainsFromStore), [cexChainsFromStore]);
 
@@ -126,34 +119,23 @@ export function PairsPage({ language }: PairsPageProps) {
         return next;
       });
 
-      const existing = deleteCexPairTimeoutsRef.current.get(row.id);
-      if (existing) clearTimeout(existing);
+      const deleteKey = `${CEX_PAIRS_DELETE_SCOPE}:${row.id}`;
 
-      const tid = setTimeout(async () => {
-        deleteCexPairTimeoutsRef.current.delete(row.id);
-        try {
-          const result = await apiService.bulkDeleteCexPairs([row.id]);
-          dispatch(dbConfigActions.removeCexPairsByIds(result.deletedIds ?? [row.id]));
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          toast.error(message);
-        } finally {
-          setPendingDeleteCexPairIds((prev) => {
-            const next = new Set(prev);
-            next.delete(row.id);
-            return next;
-          });
-        }
-      }, DELETE_UNDO_MS);
-      deleteCexPairTimeoutsRef.current.set(row.id, tid);
+      schedulePendingDelete(deleteKey, async () => {
+        const result = await apiService.bulkDeleteCexPairs([row.id]);
+        dispatch(dbConfigActions.removeCexPairsByIds(result.deletedIds ?? [row.id]));
+        setPendingDeleteCexPairIds((prev) => {
+          const next = new Set(prev);
+          next.delete(row.id);
+          return next;
+        });
+      });
 
       showDeleteToast({
         itemName: `${row.token0}/${row.token1}`,
         itemType: language === 'en' ? 'Pair' : 'Пара',
         onUndo: () => {
-          const scheduled = deleteCexPairTimeoutsRef.current.get(row.id);
-          if (scheduled) clearTimeout(scheduled);
-          deleteCexPairTimeoutsRef.current.delete(row.id);
+          cancelPendingDelete(deleteKey);
           setPendingDeleteCexPairIds((prev) => {
             const next = new Set(prev);
             next.delete(row.id);
@@ -179,43 +161,26 @@ export function PairsPage({ language }: PairsPageProps) {
     });
     setSelectedPairIds(new Set());
 
-    pendingBulkDeleteRef.current = toDelete;
+    const bulkDeleteKey = buildBulkDeleteKey(CEX_PAIRS_DELETE_SCOPE, deleteIds);
 
-    if (bulkDeleteTimeoutRef.current) clearTimeout(bulkDeleteTimeoutRef.current);
-
-    bulkDeleteTimeoutRef.current = setTimeout(async () => {
-      bulkDeleteTimeoutRef.current = null;
-      const rows = pendingBulkDeleteRef.current;
-      const rowIds = rows.map((row) => row.id);
-      pendingBulkDeleteRef.current = [];
-
-      try {
-        const result = await apiService.bulkDeleteCexPairs(rowIds);
-        if (!result?.success) {
-          throw new Error(language === 'ru' ? 'Не удалось удалить пары' : 'Failed to delete pairs');
-        }
-        dispatch(dbConfigActions.removeCexPairsByIds(result.deletedIds ?? rowIds));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        toast.error(message);
-      } finally {
-        setPendingDeleteCexPairIds((prev) => {
-          const next = new Set(prev);
-          rowIds.forEach((id) => next.delete(id));
-          return next;
-        });
+    schedulePendingDelete(bulkDeleteKey, async () => {
+      const result = await apiService.bulkDeleteCexPairs(deleteIds);
+      if (!result?.success) {
+        throw new Error(language === 'ru' ? 'Не удалось удалить пары' : 'Failed to delete pairs');
       }
-    }, DELETE_UNDO_MS);
+      dispatch(dbConfigActions.removeCexPairsByIds(result.deletedIds ?? deleteIds));
+      setPendingDeleteCexPairIds((prev) => {
+        const next = new Set(prev);
+        deleteIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    });
 
     showBulkDeleteToast({
       count: toDelete.length,
       itemType: language === 'en' ? 'pairs' : 'пар',
       onUndo: () => {
-        if (bulkDeleteTimeoutRef.current) {
-          clearTimeout(bulkDeleteTimeoutRef.current);
-          bulkDeleteTimeoutRef.current = null;
-        }
-        pendingBulkDeleteRef.current = [];
+        cancelPendingDelete(bulkDeleteKey);
         setPendingDeleteCexPairIds((prev) => {
           const next = new Set(prev);
           deleteIds.forEach((id) => next.delete(id));
@@ -287,10 +252,11 @@ export function PairsPage({ language }: PairsPageProps) {
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded hover:bg-accent transition-colors"
+                  className="flex items-center justify-center p-2 bg-muted text-foreground rounded hover:bg-accent transition-colors"
+                  aria-label={t[language].actions}
+                  title={t[language].actions}
                 >
-                  <span className="text-sm">{t[language].actions}</span>
-                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  <Menu className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -332,18 +298,18 @@ export function PairsPage({ language }: PairsPageProps) {
             token0: data.token0Symbol,
             token1: data.token1Symbol,
           };
-          if (editingCexPairRaw) {
-            const id = Number(
-              editingCexPairRaw.id ??
-                editingCexPairRaw.pairId ??
-                editingCexPairRaw.cexPairId ??
-                editingCexPairRaw.cex_pair_id,
-            );
-            await apiService.editCexPair(id, payload);
-          } else {
-            await apiService.createCexPair(payload);
-          }
-          dispatch(dbConfigActions.refetchCexPairsPageResources());
+          const saved = editingCexPairRaw
+            ? await apiService.editCexPair(
+                Number(
+                  editingCexPairRaw.id ??
+                    editingCexPairRaw.pairId ??
+                    editingCexPairRaw.cexPairId ??
+                    editingCexPairRaw.cex_pair_id,
+                ),
+                payload,
+              )
+            : await apiService.createCexPair(payload);
+          dispatch(dbConfigActions.upsertCexPair({ pair: saved }));
         }}
         initialData={
           editingCexPairRaw

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ChainsService } from './chains.service';
 import { ChainDto, UpdateChainDto } from '../dtos/chains-dto/chain.dto';
+import { BulkDeleteChainsDto } from '../dtos/chains-dto/bulk-delete-chains.dto';
 
 @Controller('chains')
 export class ChainsController {
@@ -22,6 +23,11 @@ export class ChainsController {
   @Get()
   findAll() {
     return this.chainsService.findAll();
+  }
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeleteChainsDto) {
+    return this.chainsService.removeMany(body.ids ?? []);
   }
 
   @Put(':id')

@@ -78,6 +78,10 @@ export const apiService = {
   createChain: (data: any) => request<any>("POST", "/chains", { body: { ...data } }),
   editChain: (id: number, data: any) => request<any>("PUT", `/chains/${id}`, { body: data }),
   deletingChain: (id: number) => request<any>("DELETE", `/chains/${id}`),
+  bulkDeleteChains: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/chains/bulk-delete", {
+      body: { ids },
+    }),
 
   getBots: () => request<any[]>("GET", "/bots"),
   getBotsByServerId: (serverId: number) => request<any[]>("GET", "/bots/findAllByServerId", { params: { serverId } }),

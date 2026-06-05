@@ -67,3 +67,24 @@ export function resolveCexSourceFromJobAndPair(
   };
   return resolveCexPairSourceLabel(merged, cexChainNameById);
 }
+
+/** Default CEX job description after pool pick, e.g. gateio + eth/usdt → Gateio_ETH_USDT */
+export function buildCexJobDescriptionFromPair(
+  pair: any,
+  cexChainNameById: Map<number, string>,
+): string {
+  const source = resolveCexPairSourceLabel(pair, cexChainNameById).trim();
+  const token0 = String(pair?.token0 ?? pair?.token0Symbol ?? pair?.baseToken ?? '').trim();
+  const token1 = String(pair?.token1 ?? pair?.token1Symbol ?? pair?.quoteToken ?? '').trim();
+
+  const sourcePart = source
+    ? `${source.charAt(0).toUpperCase()}${source.slice(1).toLowerCase()}`
+    : '';
+  const tokensPart = [token0, token1]
+    .filter(Boolean)
+    .map((token) => token.toUpperCase())
+    .join('_');
+
+  if (sourcePart && tokensPart) return `${sourcePart}_${tokensPart}`;
+  return sourcePart || tokensPart;
+}

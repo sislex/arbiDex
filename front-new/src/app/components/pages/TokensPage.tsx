@@ -1,7 +1,8 @@
 import { Plus } from 'lucide-react';
 import { DataTable, Column } from '../DataTable';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { showDeleteToast } from '../../utils/toast';
+import { cancelPendingDelete, schedulePendingDelete } from '../../utils/pendingDeleteScheduler';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
@@ -12,7 +13,7 @@ import {
 import { apiService } from '../../services/api-service';
 import { DexTokenForm } from '../forms/DexTokenForm';
 
-const DELETE_UNDO_MS = 5000;
+const TOKENS_DELETE_SCOPE = 'tokens';
 
 export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
@@ -24,8 +25,6 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingTokenRaw, setEditingTokenRaw] = useState<any>(null);
   const [pendingDeleteTokenIds, setPendingDeleteTokenIds] = useState<Set<number>>(new Set());
-  const deleteTokenTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
-
   useEffect(() => {
     if ((!tokensMeta.isLoaded || tokensMeta.error) && !tokensMeta.isLoading) {
       dispatch(dbConfigActions.initTokensListPage());
@@ -46,13 +45,6 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
     }));
     setTokens(mappedTokens);
   }, [tokensFromStore]);
-
-  useEffect(() => {
-    return () => {
-      deleteTokenTimeoutsRef.current.forEach(clearTimeout);
-      deleteTokenTimeoutsRef.current.clear();
-    };
-  }, []);
 
   const t = {
     en: {
@@ -158,31 +150,23 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
         }}
         onDelete={(row) => {
           setPendingDeleteTokenIds((prev) => new Set(prev).add(row.id));
-          const existing = deleteTokenTimeoutsRef.current.get(row.id);
-          if (existing) clearTimeout(existing);
+          const deleteKey = `${TOKENS_DELETE_SCOPE}:${row.id}`;
 
-          const tid = setTimeout(async () => {
-            deleteTokenTimeoutsRef.current.delete(row.id);
-            try {
-              await apiService.deletingToken(row.id);
-              dispatch(dbConfigActions.refetchTokensListPageResources());
-            } finally {
-              setPendingDeleteTokenIds((prev) => {
-                const next = new Set(prev);
-                next.delete(row.id);
-                return next;
-              });
-            }
-          }, DELETE_UNDO_MS);
-          deleteTokenTimeoutsRef.current.set(row.id, tid);
+          schedulePendingDelete(deleteKey, async () => {
+            await apiService.deletingToken(row.id);
+            dispatch(dbConfigActions.refetchTokensListPageResources());
+            setPendingDeleteTokenIds((prev) => {
+              const next = new Set(prev);
+              next.delete(row.id);
+              return next;
+            });
+          });
 
           showDeleteToast({
             itemName: row.symbol,
             itemType: language === 'en' ? 'Token' : 'Токен',
             onUndo: () => {
-              const scheduled = deleteTokenTimeoutsRef.current.get(row.id);
-              if (scheduled) clearTimeout(scheduled);
-              deleteTokenTimeoutsRef.current.delete(row.id);
+              cancelPendingDelete(deleteKey);
               setPendingDeleteTokenIds((prev) => {
                 const next = new Set(prev);
                 next.delete(row.id);

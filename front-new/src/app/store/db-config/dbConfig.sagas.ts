@@ -213,6 +213,7 @@ function* handleInitCexJobsListPage() {
   yield put(dbConfigActions.setCexJobsData());
   yield put(dbConfigActions.setCexChainsData());
   yield put(dbConfigActions.setCexPairsData());
+  yield put(dbConfigActions.setServersData());
 }
 
 function* handleRefetchPoolsPageResources() {

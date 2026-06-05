@@ -1,8 +1,9 @@
 import { Copy, Plus } from 'lucide-react';
 import { DataTable, Column } from '../DataTable';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PoolForm } from '../forms/PoolForm';
 import { showDeleteToast } from '../../utils/toast';
+import { cancelPendingDelete, schedulePendingDelete } from '../../utils/pendingDeleteScheduler';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
@@ -14,7 +15,7 @@ import {
 } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
 
-const DELETE_UNDO_MS = 5000;
+const POOLS_DELETE_SCOPE = 'pools';
 
 export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
@@ -27,8 +28,6 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
   const [editingPoolRaw, setEditingPoolRaw] = useState<any>(null);
   const [copiedPoolInitialData, setCopiedPoolInitialData] = useState<any>(null);
   const [pendingDeletePoolIds, setPendingDeletePoolIds] = useState<Set<number>>(new Set());
-  const deletePoolTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
-
   useEffect(() => {
     const shouldInit =
       !poolsMeta.isLoaded ||
@@ -81,13 +80,6 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
       }))
       .filter((pool) => !pendingDeletePoolIds.has(pool.id));
   }, [pendingDeletePoolIds, poolsFromStore]);
-
-  useEffect(() => {
-    return () => {
-      deletePoolTimeoutsRef.current.forEach(clearTimeout);
-      deletePoolTimeoutsRef.current.clear();
-    };
-  }, []);
 
   const t = {
     en: {
@@ -204,31 +196,23 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
         )}
         onDelete={(row) => {
           setPendingDeletePoolIds((prev) => new Set(prev).add(row.id));
-          const existing = deletePoolTimeoutsRef.current.get(row.id);
-          if (existing) clearTimeout(existing);
+          const deleteKey = `${POOLS_DELETE_SCOPE}:${row.id}`;
 
-          const tid = setTimeout(async () => {
-            deletePoolTimeoutsRef.current.delete(row.id);
-            try {
-              await apiService.deletingPool(row.id);
-              dispatch(dbConfigActions.refetchPoolsPageResources());
-            } finally {
-              setPendingDeletePoolIds((prev) => {
-                const next = new Set(prev);
-                next.delete(row.id);
-                return next;
-              });
-            }
-          }, DELETE_UNDO_MS);
-          deletePoolTimeoutsRef.current.set(row.id, tid);
+          schedulePendingDelete(deleteKey, async () => {
+            await apiService.deletingPool(row.id);
+            dispatch(dbConfigActions.refetchPoolsPageResources());
+            setPendingDeletePoolIds((prev) => {
+              const next = new Set(prev);
+              next.delete(row.id);
+              return next;
+            });
+          });
 
           showDeleteToast({
             itemName: `${row.token0Symbol}/${row.token1Symbol}`,
             itemType: language === 'en' ? 'Pool' : 'Пул',
             onUndo: () => {
-              const scheduled = deletePoolTimeoutsRef.current.get(row.id);
-              if (scheduled) clearTimeout(scheduled);
-              deletePoolTimeoutsRef.current.delete(row.id);
+              cancelPendingDelete(deleteKey);
               setPendingDeletePoolIds((prev) => {
                 const next = new Set(prev);
                 next.delete(row.id);

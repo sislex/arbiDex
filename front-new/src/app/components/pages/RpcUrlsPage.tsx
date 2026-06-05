@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
@@ -10,10 +10,11 @@ import {
   selectRpcUrlsMeta,
 } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
+import { cancelPendingDelete, schedulePendingDelete } from '../../utils/pendingDeleteScheduler';
 import { apiService } from '../../services/api-service';
 import { RpcUrlForm } from '../forms/RpcUrlForm';
 
-const DELETE_UNDO_MS = 5000;
+const RPC_URLS_DELETE_SCOPE = 'rpc-urls';
 
 export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
@@ -24,8 +25,6 @@ export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingRpcRaw, setEditingRpcRaw] = useState<any>(null);
   const [pendingDeleteRpcIds, setPendingDeleteRpcIds] = useState<Set<number>>(new Set());
-  const deleteRpcTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
-
   useEffect(() => {
     if ((!rpcUrlsMeta.isLoaded || rpcUrlsMeta.error) && !rpcUrlsMeta.isLoading) {
       dispatch(dbConfigActions.setRpcUrlsData());
@@ -49,13 +48,6 @@ export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
       }))
       .filter((row) => !pendingDeleteRpcIds.has(row.id));
   }, [chainById, pendingDeleteRpcIds, rpcUrlsFromStore]);
-
-  useEffect(() => {
-    return () => {
-      deleteRpcTimeoutsRef.current.forEach(clearTimeout);
-      deleteRpcTimeoutsRef.current.clear();
-    };
-  }, []);
 
   const t = {
     en: {
@@ -111,31 +103,23 @@ export function RpcUrlsPage({ language }: { language: 'en' | 'ru' }) {
         }}
         onDelete={(row) => {
           setPendingDeleteRpcIds((prev) => new Set(prev).add(row.id));
-          const existing = deleteRpcTimeoutsRef.current.get(row.id);
-          if (existing) clearTimeout(existing);
+          const deleteKey = `${RPC_URLS_DELETE_SCOPE}:${row.id}`;
 
-          const tid = setTimeout(async () => {
-            deleteRpcTimeoutsRef.current.delete(row.id);
-            try {
-              await apiService.deletingRpcUrl(row.id);
-              dispatch(dbConfigActions.refetchRpcUrlsData());
-            } finally {
-              setPendingDeleteRpcIds((prev) => {
-                const next = new Set(prev);
-                next.delete(row.id);
-                return next;
-              });
-            }
-          }, DELETE_UNDO_MS);
-          deleteRpcTimeoutsRef.current.set(row.id, tid);
+          schedulePendingDelete(deleteKey, async () => {
+            await apiService.deletingRpcUrl(row.id);
+            dispatch(dbConfigActions.refetchRpcUrlsData());
+            setPendingDeleteRpcIds((prev) => {
+              const next = new Set(prev);
+              next.delete(row.id);
+              return next;
+            });
+          });
 
           showDeleteToast({
             itemName: row.rpcUrl,
             itemType: language === 'en' ? 'Rpc Url' : 'Rpc Url',
             onUndo: () => {
-              const scheduled = deleteRpcTimeoutsRef.current.get(row.id);
-              if (scheduled) clearTimeout(scheduled);
-              deleteRpcTimeoutsRef.current.delete(row.id);
+              cancelPendingDelete(deleteKey);
               setPendingDeleteRpcIds((prev) => {
                 const next = new Set(prev);
                 next.delete(row.id);

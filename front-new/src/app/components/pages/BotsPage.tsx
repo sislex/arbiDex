@@ -1,6 +1,6 @@
 import { DataTable, Column } from '../DataTable';
 import { Copy, Play, Plus } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
@@ -14,11 +14,12 @@ import {
   selectServersDataResponse,
 } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
+import { cancelPendingDelete, schedulePendingDelete } from '../../utils/pendingDeleteScheduler';
 import { resolveBotDexJobId } from '../../utils/botJobId';
 import { apiService } from '../../services/api-service';
 import { BotForm, type BotFormValues } from '../forms/BotForm';
 
-const DELETE_UNDO_MS = 5000;
+const BOTS_DELETE_SCOPE = 'bots';
 
 export function BotsPage({
   language,
@@ -48,8 +49,6 @@ export function BotsPage({
   const [editingBotRaw, setEditingBotRaw] = useState<any>(null);
   const [copiedBotInitialData, setCopiedBotInitialData] = useState<BotFormValues | undefined>(undefined);
   const [pendingDeleteBotIds, setPendingDeleteBotIds] = useState<Set<number>>(new Set());
-  const deleteBotTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
-
   const buildBotInitialData = (bot: any): BotFormValues => ({
     botName: String(bot.botName ?? bot.name ?? ''),
     description: String(bot.description ?? ''),
@@ -125,13 +124,6 @@ export function BotsPage({
       })
       .filter((bot) => !pendingDeleteBotIds.has(bot.id));
   }, [botsFromStore, cexJobById, jobById, pendingDeleteBotIds, serverById]);
-
-  useEffect(() => {
-    return () => {
-      deleteBotTimeoutsRef.current.forEach(clearTimeout);
-      deleteBotTimeoutsRef.current.clear();
-    };
-  }, []);
 
   const t = {
     en: {
@@ -233,31 +225,23 @@ export function BotsPage({
           )}
           onDelete={(row) => {
             setPendingDeleteBotIds((prev) => new Set(prev).add(row.id));
-            const existing = deleteBotTimeoutsRef.current.get(row.id);
-            if (existing) clearTimeout(existing);
+            const deleteKey = `${BOTS_DELETE_SCOPE}:${row.id}`;
 
-            const tid = setTimeout(async () => {
-              deleteBotTimeoutsRef.current.delete(row.id);
-              try {
-                await apiService.deletingBot(row.id);
-                dispatch(dbConfigActions.refetchBotsListPageResources());
-              } finally {
-                setPendingDeleteBotIds((prev) => {
-                  const next = new Set(prev);
-                  next.delete(row.id);
-                  return next;
-                });
-              }
-            }, DELETE_UNDO_MS);
-            deleteBotTimeoutsRef.current.set(row.id, tid);
+            schedulePendingDelete(deleteKey, async () => {
+              await apiService.deletingBot(row.id);
+              dispatch(dbConfigActions.refetchBotsListPageResources());
+              setPendingDeleteBotIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
+            });
 
             showDeleteToast({
               itemName: row.name,
               itemType: language === 'en' ? 'Bot' : 'Bot',
               onUndo: () => {
-                const scheduled = deleteBotTimeoutsRef.current.get(row.id);
-                if (scheduled) clearTimeout(scheduled);
-                deleteBotTimeoutsRef.current.delete(row.id);
+                cancelPendingDelete(deleteKey);
                 setPendingDeleteBotIds((prev) => {
                   const next = new Set(prev);
                   next.delete(row.id);

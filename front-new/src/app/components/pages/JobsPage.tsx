@@ -1,7 +1,8 @@
-import { ChevronDown, Copy, Play, Plus } from 'lucide-react';
+import { Copy, Menu, Play, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
+import { BulkCexBotsFromJobsForm } from '../forms/BulkCexBotsFromJobsForm';
 import { CexJobForm } from '../forms/CexJobForm';
 import { DexJobForm, type DexJobFormValues } from '../forms/DexJobForm';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -24,6 +25,11 @@ import { apiService } from '../../services/api-service';
 import { buildCexChainNameById, resolveCexSourceFromJobAndPair } from '../../utils/cexPairSource';
 import { showBulkDeleteToast, showDeleteToast } from '../../utils/toast';
 import {
+  buildBulkDeleteKey,
+  cancelPendingDelete,
+  schedulePendingDelete,
+} from '../../utils/pendingDeleteScheduler';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -36,7 +42,8 @@ interface JobsPageProps {
   onDexJobClick?: (jobId: number, jobName: string) => void;
 }
 
-const DELETE_UNDO_MS = 5000;
+const CEX_JOBS_DELETE_SCOPE = 'cex-jobs';
+const DEX_JOBS_DELETE_SCOPE = 'dex-jobs';
 
 const formatExtra = (value: any) => {
   if (value === null || value === undefined || value === '') {
@@ -72,10 +79,8 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const [pendingDeleteDexJobIds, setPendingDeleteDexJobIds] = useState<Set<number>>(new Set());
   const [pendingDeleteCexJobIds, setPendingDeleteCexJobIds] = useState<Set<number>>(new Set());
   const [selectedCexJobIds, setSelectedCexJobIds] = useState<Set<number>>(new Set());
-  const deleteDexJobTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
-  const deleteCexJobTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
-  const bulkDeleteCexJobTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingBulkDeleteCexJobsRef = useRef<{ id: number; jobType: string }[]>([]);
+  const [bulkBotsFormOpen, setBulkBotsFormOpen] = useState(false);
+  const [isCreatingBots, setIsCreatingBots] = useState(false);
   const headerCheckboxRef = useRef<HTMLInputElement>(null);
 
   const buildDexJobInitialData = (job: any): DexJobFormValues => ({
@@ -105,16 +110,6 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
       dispatch(dbConfigActions.initCexPairsPage());
     }
   }, [cexPairsMeta.error, cexPairsMeta.isLoaded, cexPairsMeta.isLoading, dispatch, type]);
-
-  useEffect(() => {
-    return () => {
-      deleteDexJobTimeoutsRef.current.forEach(clearTimeout);
-      deleteDexJobTimeoutsRef.current.clear();
-      deleteCexJobTimeoutsRef.current.forEach(clearTimeout);
-      deleteCexJobTimeoutsRef.current.clear();
-      if (bulkDeleteCexJobTimeoutRef.current) clearTimeout(bulkDeleteCexJobTimeoutRef.current);
-    };
-  }, []);
 
   const chainById = useMemo(() => {
     return new Map(chains.map((chain: any) => [chain.chainId ?? chain.id, chain.name]));
@@ -173,6 +168,11 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
     [cexJobs, pendingDeleteCexJobIds],
   );
 
+  const selectedCexJobsForBots = useMemo(
+    () => cexJobsVisible.filter((job) => selectedCexJobIds.has(job.id)),
+    [cexJobsVisible, selectedCexJobIds],
+  );
+
   const allCexJobIds = useMemo(() => cexJobsVisible.map((job) => job.id), [cexJobsVisible]);
   const allCexJobsSelected =
     type === 'cex' && allCexJobIds.length > 0 && allCexJobIds.every((id) => selectedCexJobIds.has(id));
@@ -220,6 +220,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
       deleteType: 'Job',
       actions: 'Actions',
       deleteSelected: 'Delete selected',
+      createBotsFromSelected: 'Create bots',
     },
     ru: {
       jobId: 'ID задачи',
@@ -240,8 +241,52 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
       deleteType: 'Джоба',
       actions: 'Действия',
       deleteSelected: 'Удалить выбранные',
+      createBotsFromSelected: 'Создать ботов',
     },
   };
+
+  const handleCreateBotsFromSelectedJobs = useCallback(
+    async (data: {
+      botName: string;
+      serverId: string;
+      paused: boolean;
+      isRepeat: boolean;
+      delayBetweenRepeat: string;
+      maxJobs: string;
+      maxErrors: string;
+      timeoutMs: string;
+    }) => {
+      if (selectedCexJobsForBots.length === 0) return;
+
+      setIsCreatingBots(true);
+      try {
+        for (const job of selectedCexJobsForBots) {
+          await apiService.createBot({
+            botName: data.botName.trim(),
+            description: String(job.description ?? '').trim(),
+            jobId: null,
+            cexJobId: job.id,
+            serverId: Number(data.serverId),
+            paused: data.paused,
+            isRepeat: data.isRepeat,
+            delayBetweenRepeat: Number(data.delayBetweenRepeat),
+            maxJobs: Number(data.maxJobs),
+            maxErrors: Number(data.maxErrors),
+            timeoutMs: Number(data.timeoutMs),
+          });
+        }
+        dispatch(dbConfigActions.refetchBotsListPageResources());
+        setBulkBotsFormOpen(false);
+        setSelectedCexJobIds(new Set());
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        toast.error(message);
+      } finally {
+        setIsCreatingBots(false);
+      }
+    },
+    [dispatch, selectedCexJobsForBots],
+  );
 
   const dexColumns: Column[] = [
     { key: 'id', label: t[language].jobId, sortable: true, filterable: true },
@@ -377,34 +422,23 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         return next;
       });
 
-      const existing = deleteCexJobTimeoutsRef.current.get(row.id);
-      if (existing) clearTimeout(existing);
+      const deleteKey = `${CEX_JOBS_DELETE_SCOPE}:${row.id}`;
 
-      const tid = setTimeout(async () => {
-        deleteCexJobTimeoutsRef.current.delete(row.id);
-        try {
-          const result = await apiService.bulkDeleteCexJobs([row.id]);
-          dispatch(dbConfigActions.removeCexJobsByIds(result.deletedIds ?? [row.id]));
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          toast.error(message);
-        } finally {
-          setPendingDeleteCexJobIds((prev) => {
-            const next = new Set(prev);
-            next.delete(row.id);
-            return next;
-          });
-        }
-      }, DELETE_UNDO_MS);
-      deleteCexJobTimeoutsRef.current.set(row.id, tid);
+      schedulePendingDelete(deleteKey, async () => {
+        const result = await apiService.bulkDeleteCexJobs([row.id]);
+        dispatch(dbConfigActions.removeCexJobsByIds(result.deletedIds ?? [row.id]));
+        setPendingDeleteCexJobIds((prev) => {
+          const next = new Set(prev);
+          next.delete(row.id);
+          return next;
+        });
+      });
 
       showDeleteToast({
         itemName: getCexJobLabel(row),
         itemType: language === 'en' ? 'Job' : 'Джоба',
         onUndo: () => {
-          const scheduled = deleteCexJobTimeoutsRef.current.get(row.id);
-          if (scheduled) clearTimeout(scheduled);
-          deleteCexJobTimeoutsRef.current.delete(row.id);
+          cancelPendingDelete(deleteKey);
           setPendingDeleteCexJobIds((prev) => {
             const next = new Set(prev);
             next.delete(row.id);
@@ -430,43 +464,26 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
     });
     setSelectedCexJobIds(new Set());
 
-    pendingBulkDeleteCexJobsRef.current = toDelete;
+    const bulkDeleteKey = buildBulkDeleteKey(CEX_JOBS_DELETE_SCOPE, deleteIds);
 
-    if (bulkDeleteCexJobTimeoutRef.current) clearTimeout(bulkDeleteCexJobTimeoutRef.current);
-
-    bulkDeleteCexJobTimeoutRef.current = setTimeout(async () => {
-      bulkDeleteCexJobTimeoutRef.current = null;
-      const rows = pendingBulkDeleteCexJobsRef.current;
-      const rowIds = rows.map((row) => row.id);
-      pendingBulkDeleteCexJobsRef.current = [];
-
-      try {
-        const result = await apiService.bulkDeleteCexJobs(rowIds);
-        if (!result?.success) {
-          throw new Error(language === 'ru' ? 'Не удалось удалить джобы' : 'Failed to delete jobs');
-        }
-        dispatch(dbConfigActions.removeCexJobsByIds(result.deletedIds ?? rowIds));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        toast.error(message);
-      } finally {
-        setPendingDeleteCexJobIds((prev) => {
-          const next = new Set(prev);
-          rowIds.forEach((id) => next.delete(id));
-          return next;
-        });
+    schedulePendingDelete(bulkDeleteKey, async () => {
+      const result = await apiService.bulkDeleteCexJobs(deleteIds);
+      if (!result?.success) {
+        throw new Error(language === 'ru' ? 'Не удалось удалить джобы' : 'Failed to delete jobs');
       }
-    }, DELETE_UNDO_MS);
+      dispatch(dbConfigActions.removeCexJobsByIds(result.deletedIds ?? deleteIds));
+      setPendingDeleteCexJobIds((prev) => {
+        const next = new Set(prev);
+        deleteIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    });
 
     showBulkDeleteToast({
       count: toDelete.length,
       itemType: language === 'en' ? 'jobs' : 'джоб',
       onUndo: () => {
-        if (bulkDeleteCexJobTimeoutRef.current) {
-          clearTimeout(bulkDeleteCexJobTimeoutRef.current);
-          bulkDeleteCexJobTimeoutRef.current = null;
-        }
-        pendingBulkDeleteCexJobsRef.current = [];
+        cancelPendingDelete(bulkDeleteKey);
         setPendingDeleteCexJobIds((prev) => {
           const next = new Set(prev);
           deleteIds.forEach((id) => next.delete(id));
@@ -479,31 +496,23 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
 
   const handleDeleteDexJob = (row: any) => {
     setPendingDeleteDexJobIds((prev) => new Set(prev).add(row.id));
-    const existing = deleteDexJobTimeoutsRef.current.get(row.id);
-    if (existing) clearTimeout(existing);
+    const deleteKey = `${DEX_JOBS_DELETE_SCOPE}:${row.id}`;
 
-    const tid = setTimeout(async () => {
-      deleteDexJobTimeoutsRef.current.delete(row.id);
-      try {
-        await apiService.deletingJob(row.id);
-        dispatch(dbConfigActions.refetchJobsListPageResources());
-      } finally {
-        setPendingDeleteDexJobIds((prev) => {
-          const next = new Set(prev);
-          next.delete(row.id);
-          return next;
-        });
-      }
-    }, DELETE_UNDO_MS);
-    deleteDexJobTimeoutsRef.current.set(row.id, tid);
+    schedulePendingDelete(deleteKey, async () => {
+      await apiService.deletingJob(row.id);
+      dispatch(dbConfigActions.refetchJobsListPageResources());
+      setPendingDeleteDexJobIds((prev) => {
+        const next = new Set(prev);
+        next.delete(row.id);
+        return next;
+      });
+    });
 
     showDeleteToast({
       itemName: row.jobType ? `${row.jobType} (#${row.id})` : String(row.id),
       itemType: t[language].deleteType,
       onUndo: () => {
-        const scheduled = deleteDexJobTimeoutsRef.current.get(row.id);
-        if (scheduled) clearTimeout(scheduled);
-        deleteDexJobTimeoutsRef.current.delete(row.id);
+        cancelPendingDelete(deleteKey);
         setPendingDeleteDexJobIds((prev) => {
           const next = new Set(prev);
           next.delete(row.id);
@@ -537,13 +546,21 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded hover:bg-accent transition-colors"
+                    className="flex items-center justify-center p-2 bg-muted text-foreground rounded hover:bg-accent transition-colors"
+                    aria-label={t[language].actions}
+                    title={t[language].actions}
                   >
-                    <span className="text-sm">{t[language].actions}</span>
-                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    <Menu className="w-4 h-4" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    disabled={selectedCexJobIds.size === 0}
+                    onClick={() => setBulkBotsFormOpen(true)}
+                  >
+                    {t[language].createBotsFromSelected}
+                    {selectedCexJobIds.size > 0 ? ` (${selectedCexJobIds.size})` : ''}
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     disabled={selectedCexJobIds.size === 0}
                     variant="destructive"
@@ -638,6 +655,24 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
       />
 
       {type === 'cex' && (
+        <BulkCexBotsFromJobsForm
+          open={bulkBotsFormOpen}
+          onClose={() => {
+            if (isCreatingBots) return;
+            setBulkBotsFormOpen(false);
+          }}
+          onSave={handleCreateBotsFromSelectedJobs}
+          jobs={selectedCexJobsForBots.map((job) => ({
+            id: job.id,
+            jobType: job.jobType,
+            description: job.description,
+          }))}
+          language={language}
+          isSaving={isCreatingBots}
+        />
+      )}
+
+      {type === 'cex' && (
         <CexJobForm
           open={jobFormOpen}
           onClose={() => {
@@ -655,13 +690,13 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
               payload.checked = editingJobRaw.checked ?? null;
             }
 
-            if (editingJobRaw) {
-              const id = Number(editingJobRaw.id ?? editingJobRaw.cexJobId ?? editingJobRaw.cex_job_id);
-              await apiService.editCexJob(id, payload);
-            } else {
-              await apiService.createCexJob(payload);
-            }
-            dispatch(dbConfigActions.refetchCexJobsListPageResources());
+            const saved = editingJobRaw
+              ? await apiService.editCexJob(
+                  Number(editingJobRaw.id ?? editingJobRaw.cexJobId ?? editingJobRaw.cex_job_id),
+                  payload,
+                )
+              : await apiService.createCexJob(payload);
+            dispatch(dbConfigActions.upsertCexJob({ job: saved }));
           }}
           initialData={
             editingJobRaw

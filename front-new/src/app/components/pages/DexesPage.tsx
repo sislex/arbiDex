@@ -1,14 +1,15 @@
 import { Plus } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { selectDexesDataResponse, selectDexesMeta } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
+import { cancelPendingDelete, schedulePendingDelete } from '../../utils/pendingDeleteScheduler';
 import { apiService } from '../../services/api-service';
 import { DexForm } from '../forms/DexForm';
 
-const DELETE_UNDO_MS = 5000;
+const DEXES_DELETE_SCOPE = 'dexes';
 
 export function DexesPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
@@ -17,8 +18,6 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingDexRaw, setEditingDexRaw] = useState<any>(null);
   const [pendingDeleteDexIds, setPendingDeleteDexIds] = useState<Set<number>>(new Set());
-  const deleteDexTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
-
   useEffect(() => {
     if ((!dexesMeta.isLoaded || dexesMeta.error) && !dexesMeta.isLoading) {
       dispatch(dbConfigActions.setDexesData());
@@ -34,13 +33,6 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
       }))
       .filter((dex) => !pendingDeleteDexIds.has(dex.id));
   }, [dexesFromStore, pendingDeleteDexIds]);
-
-  useEffect(() => {
-    return () => {
-      deleteDexTimeoutsRef.current.forEach(clearTimeout);
-      deleteDexTimeoutsRef.current.clear();
-    };
-  }, []);
 
   const t = {
     en: {
@@ -88,31 +80,23 @@ export function DexesPage({ language }: { language: 'en' | 'ru' }) {
         }}
         onDelete={(row) => {
           setPendingDeleteDexIds((prev) => new Set(prev).add(row.id));
-          const existing = deleteDexTimeoutsRef.current.get(row.id);
-          if (existing) clearTimeout(existing);
+          const deleteKey = `${DEXES_DELETE_SCOPE}:${row.id}`;
 
-          const tid = setTimeout(async () => {
-            deleteDexTimeoutsRef.current.delete(row.id);
-            try {
-              await apiService.deletingDex(row.id);
-              dispatch(dbConfigActions.refetchDexesData());
-            } finally {
-              setPendingDeleteDexIds((prev) => {
-                const next = new Set(prev);
-                next.delete(row.id);
-                return next;
-              });
-            }
-          }, DELETE_UNDO_MS);
-          deleteDexTimeoutsRef.current.set(row.id, tid);
+          schedulePendingDelete(deleteKey, async () => {
+            await apiService.deletingDex(row.id);
+            dispatch(dbConfigActions.refetchDexesData());
+            setPendingDeleteDexIds((prev) => {
+              const next = new Set(prev);
+              next.delete(row.id);
+              return next;
+            });
+          });
 
           showDeleteToast({
             itemName: row.name,
             itemType: 'DEX',
             onUndo: () => {
-              const scheduled = deleteDexTimeoutsRef.current.get(row.id);
-              if (scheduled) clearTimeout(scheduled);
-              deleteDexTimeoutsRef.current.delete(row.id);
+              cancelPendingDelete(deleteKey);
               setPendingDeleteDexIds((prev) => {
                 const next = new Set(prev);
                 next.delete(row.id);

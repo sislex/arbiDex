@@ -1,14 +1,15 @@
 import { DataTable, Column } from '../DataTable';
 import { Plus } from 'lucide-react';
 import { showDeleteToast } from '../../utils/toast';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { cancelPendingDelete, schedulePendingDelete } from '../../utils/pendingDeleteScheduler';
+import { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { selectServersDataResponse, selectServersMeta } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
 import { ServerForm } from '../forms/ServerForm';
 
-const DELETE_UNDO_MS = 5000;
+const SERVERS_DELETE_SCOPE = 'servers';
 const STATUS_REFRESH_MS = 15000;
 
 function buildServerBaseUrl(ip: string, port: string): string {
@@ -31,7 +32,6 @@ export function ServersPage({
   const [selectedServer, setSelectedServer] = useState<any>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingServerRaw, setEditingServerRaw] = useState<any>(null);
-  const deleteServerTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   const [statusByServerId, setStatusByServerId] = useState<Record<number, 'pending' | 'success' | 'error'>>({});
 
   useEffect(() => {
@@ -39,13 +39,6 @@ export function ServersPage({
       dispatch(dbConfigActions.setServersData());
     }
   }, [dispatch, serversMeta.error, serversMeta.isLoaded, serversMeta.isLoading]);
-
-  useEffect(() => {
-    return () => {
-      deleteServerTimeoutsRef.current.forEach(clearTimeout);
-      deleteServerTimeoutsRef.current.clear();
-    };
-  }, []);
 
   const servers = useMemo(() => {
     return serversFromStore
@@ -211,31 +204,23 @@ export function ServersPage({
           }}
           onDelete={(row) => {
             setPendingDeleteServerIds((prev) => new Set(prev).add(row.id));
-            const existing = deleteServerTimeoutsRef.current.get(row.id);
-            if (existing) clearTimeout(existing);
+            const deleteKey = `${SERVERS_DELETE_SCOPE}:${row.id}`;
 
-            const tid = setTimeout(async () => {
-              deleteServerTimeoutsRef.current.delete(row.id);
-              try {
-                await apiService.deletingServer(row.id);
-                dispatch(dbConfigActions.refetchServersData());
-              } finally {
-                setPendingDeleteServerIds((prev) => {
-                  const next = new Set(prev);
-                  next.delete(row.id);
-                  return next;
-                });
-              }
-            }, DELETE_UNDO_MS);
-            deleteServerTimeoutsRef.current.set(row.id, tid);
+            schedulePendingDelete(deleteKey, async () => {
+              await apiService.deletingServer(row.id);
+              dispatch(dbConfigActions.refetchServersData());
+              setPendingDeleteServerIds((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              });
+            });
 
             showDeleteToast({
               itemName: row.name,
               itemType: language === 'en' ? 'Server' : 'Сервер',
               onUndo: () => {
-                const scheduled = deleteServerTimeoutsRef.current.get(row.id);
-                if (scheduled) clearTimeout(scheduled);
-                deleteServerTimeoutsRef.current.delete(row.id);
+                cancelPendingDelete(deleteKey);
                 setPendingDeleteServerIds((prev) => {
                   const next = new Set(prev);
                   next.delete(row.id);

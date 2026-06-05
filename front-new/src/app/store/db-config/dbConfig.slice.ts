@@ -53,6 +53,31 @@ const setSuccess = (state: AsyncState<any[]>, response: any[]) => {
   state.error = null;
 };
 
+const upsertListItem = (
+  list: any[],
+  item: any,
+  getId: (row: any) => number,
+  previousId?: number,
+) => {
+  const newId = getId(item);
+  let next = [...list];
+  if (previousId != null && Number.isFinite(previousId) && previousId !== newId) {
+    next = next.filter((row) => getId(row) !== previousId);
+  }
+  const idx = next.findIndex((row) => getId(row) === newId);
+  if (idx >= 0) {
+    next[idx] = { ...next[idx], ...item };
+  } else {
+    next.unshift(item);
+  }
+  return next;
+};
+
+const getDexChainId = (chain: any) => Number(chain.chainId ?? chain.id);
+const getCexChainId = (chain: any) => Number(chain.id ?? chain.chainId);
+const getCexPairId = (pair: any) => Number(pair.id ?? pair.pairId ?? pair.cexPairId ?? pair.cex_pair_id);
+const getCexJobId = (job: any) => Number(job.id ?? job.cexJobId ?? job.cex_job_id);
+
 const setFailure = (state: AsyncState<any[]>, error: string) => {
   state.loadingTime = state.startTime ? Date.now() - state.startTime : null;
   state.isLoading = false;
@@ -132,6 +157,22 @@ const dbConfigSlice = createSlice({
     setChainsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.chains, action.payload);
     },
+    removeChainsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.chains.response = (state.chains.response ?? []).filter((chain: any) => {
+        const chainId = Number(chain.chainId ?? chain.id);
+        return !ids.has(chainId);
+      });
+    },
+    upsertChain(state, action: PayloadAction<{ chain: any; previousId?: number }>) {
+      state.chains.response = upsertListItem(
+        state.chains.response ?? [],
+        action.payload.chain,
+        getDexChainId,
+        action.payload.previousId,
+      );
+    },
 
     setJobsData(state) {
       setLoading(state.jobs);
@@ -210,6 +251,13 @@ const dbConfigSlice = createSlice({
         return !ids.has(chainId);
       });
     },
+    upsertCexChain(state, action: PayloadAction<{ chain: any }>) {
+      state.cexChains.response = upsertListItem(
+        state.cexChains.response ?? [],
+        action.payload.chain,
+        getCexChainId,
+      );
+    },
 
     setCexPairsData(state) {
       setLoading(state.cexPairs);
@@ -228,6 +276,13 @@ const dbConfigSlice = createSlice({
         return !ids.has(pairId);
       });
     },
+    upsertCexPair(state, action: PayloadAction<{ pair: any }>) {
+      state.cexPairs.response = upsertListItem(
+        state.cexPairs.response ?? [],
+        action.payload.pair,
+        getCexPairId,
+      );
+    },
 
     setCexJobsData(state) {
       setLoading(state.cexJobs);
@@ -245,6 +300,13 @@ const dbConfigSlice = createSlice({
         const jobId = Number(job.id ?? job.cexJobId ?? job.cex_job_id);
         return !ids.has(jobId);
       });
+    },
+    upsertCexJob(state, action: PayloadAction<{ job: any }>) {
+      state.cexJobs.response = upsertListItem(
+        state.cexJobs.response ?? [],
+        action.payload.job,
+        getCexJobId,
+      );
     },
 
     refetchTokensData(state) {
