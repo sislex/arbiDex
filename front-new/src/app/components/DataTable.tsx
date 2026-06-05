@@ -48,6 +48,11 @@ interface DataTableProps {
   onFilteredDataChange?: (filteredData: any[]) => void;
   /** Stable row identity for AG Grid (e.g. pair rating rows). */
   getRowId?: (params: GetRowIdParams<any>) => string;
+  /** Row id to highlight (e.g. bot line on server page). */
+  highlightRowId?: string | null;
+  getRowHighlightId?: (row: any) => string;
+  /** Actions column: first (default, pinned left) or last (pinned right). */
+  actionsColumnPosition?: 'first' | 'last';
 }
 
 export function DataTable({
@@ -67,6 +72,9 @@ export function DataTable({
   selectionMode = 'none',
   onFilteredDataChange,
   getRowId,
+  highlightRowId,
+  getRowHighlightId,
+  actionsColumnPosition = 'first',
 }: DataTableProps) {
   const rows = Array.isArray(data) ? data : [];
   const gridApiRef = useRef<GridApi | null>(null);
@@ -120,6 +128,7 @@ export function DataTable({
 
   const columnDefs = useMemo<ColDef[]>(() => {
     const gridColumns: ColDef[] = columns.map((column) => {
+      const isCheckboxColumn = column.key === 'checkbox';
       const isAddressColumn = column.key.toLowerCase().includes('address');
       const HeaderComponent = column.headerRender
         ? () => <div className="flex h-full items-center justify-center">{column.headerRender?.()}</div>
@@ -129,11 +138,23 @@ export function DataTable({
         headerName: column.headerRender ? undefined : column.label,
         headerComponent: HeaderComponent,
         sortable: Boolean(column.sortable),
-        resizable: true,
+        resizable: !isCheckboxColumn,
         filter: column.filterable ? 'agTextColumnFilter' : false,
         floatingFilter: false,
-        flex: 1,
-        minWidth: column.key === 'checkbox' || column.key === 'actions' ? 64 : 120,
+        ...(isCheckboxColumn
+          ? {
+              pinned: 'left' as const,
+              width: 56,
+              minWidth: 56,
+              maxWidth: 56,
+              flex: 0,
+              lockPinned: true,
+              suppressSizeToFit: true,
+            }
+          : {
+              flex: 1,
+              minWidth: 120,
+            }),
         suppressHeaderMenuButton: true,
         suppressHeaderFilterButton: !column.filterable,
         menuTabs: column.filterable ? ['filterMenuTab'] : [],
@@ -151,7 +172,7 @@ export function DataTable({
     });
 
     if (onEdit || onDelete || extraActions) {
-      gridColumns.unshift({
+      const actionsCol: ColDef = {
         colId: 'actions',
         headerName: actionsHeader,
         width: extraActions ? 132 : 96,
@@ -159,7 +180,7 @@ export function DataTable({
         resizable: true,
         sortable: false,
         filter: false,
-        pinned: 'left',
+        pinned: actionsColumnPosition === 'last' ? 'right' : 'left',
         cellRenderer: (params: any) => (
           <div className="flex h-full items-center gap-2">
             {extraActions?.(params.data)}
@@ -189,11 +210,26 @@ export function DataTable({
             )}
           </div>
         ),
-      });
+      };
+
+      if (actionsColumnPosition === 'last') {
+        gridColumns.push(actionsCol);
+      } else {
+        gridColumns.unshift(actionsCol);
+      }
     }
 
     return gridColumns;
-  }, [actionsHeader, columns, deleteTitle, editTitle, extraActions, onDelete, onEdit]);
+  }, [
+    actionsColumnPosition,
+    actionsHeader,
+    columns,
+    deleteTitle,
+    editTitle,
+    extraActions,
+    onDelete,
+    onEdit,
+  ]);
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -236,9 +272,21 @@ export function DataTable({
 
   const getRowClass = useCallback(
     (params: RowClassParams) => {
-      return selectedRow && params.data === selectedRow ? 'ag-row-selected-local' : '';
+      const classes: string[] = [];
+      if (selectedRow && params.data === selectedRow) {
+        classes.push('ag-row-selected-local');
+      }
+      if (
+        highlightRowId &&
+        getRowHighlightId &&
+        params.data &&
+        getRowHighlightId(params.data) === highlightRowId
+      ) {
+        classes.push('ag-row-highlight-green');
+      }
+      return classes.join(' ');
     },
-    [selectedRow],
+    [getRowHighlightId, highlightRowId, selectedRow],
   );
 
   return (

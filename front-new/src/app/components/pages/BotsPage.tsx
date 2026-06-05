@@ -1,5 +1,5 @@
 import { DataTable, Column } from '../DataTable';
-import { Copy, Plus } from 'lucide-react';
+import { Copy, Play, Plus } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
@@ -14,12 +14,26 @@ import {
   selectServersDataResponse,
 } from '../../store/db-config/dbConfig.selectors';
 import { showDeleteToast } from '../../utils/toast';
+import { resolveBotDexJobId } from '../../utils/botJobId';
 import { apiService } from '../../services/api-service';
 import { BotForm, type BotFormValues } from '../forms/BotForm';
 
 const DELETE_UNDO_MS = 5000;
 
-export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBotClick?: (bot: any) => void }) {
+export function BotsPage({
+  language,
+  onBotClick,
+  onBotServerClick,
+}: {
+  language: 'en' | 'ru';
+  onBotClick?: (bot: any) => void;
+  onBotServerClick?: (bot: {
+    id: number;
+    name: string;
+    serverId: number;
+    serverName: string;
+  }) => void;
+}) {
   const dispatch = useAppDispatch();
   const botsFromStore = useAppSelector(selectBotsDataResponse);
   const botsMeta = useAppSelector(selectBotsMeta);
@@ -72,7 +86,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
   ]);
 
   const jobById = useMemo(() => {
-    return new Map(jobs.map((job: any) => [job.jobId ?? job.id, job]));
+    return new Map(jobs.map((job: any) => [Number(job.jobId ?? job.id), job]));
   }, [jobs]);
 
   const cexJobById = useMemo(() => {
@@ -87,17 +101,19 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
     return botsFromStore
       .map((bot: any) => {
         const id = bot.botId ?? bot.id;
-        const jobId = bot.jobId ?? bot.job_id;
+        const jobId = resolveBotDexJobId(bot);
         const cexJobId = bot.cexJobId ?? bot.cex_job_id;
-        const job = jobId ? jobById.get(jobId) : cexJobById.get(cexJobId);
-        const server = serverById.get(bot.serverId ?? bot.server_id);
+        const job = jobId != null ? jobById.get(jobId) : cexJobById.get(cexJobId);
+        const serverId = Number(bot.serverId ?? bot.server_id);
+        const server = serverById.get(serverId);
 
         return {
           id,
           name: bot.botName ?? bot.name ?? '',
           description: bot.description ?? '',
           job: bot.jobName ?? job?.jobType ?? job?.job_type ?? jobId ?? cexJobId ?? '',
-          server: bot.serverName ?? server?.serverName ?? server?.name ?? bot.serverId ?? '',
+          server: bot.serverName ?? server?.serverName ?? server?.name ?? String(serverId),
+          serverId,
           poolsCount:
             bot.poolsCount ??
             bot.pools_count ??
@@ -126,6 +142,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
       server: 'Server',
       poolsCount: 'Pools count',
       tableTitle: 'Bots',
+      openServer: 'Open server',
     },
     ru: {
       botId: 'ID бота',
@@ -135,6 +152,7 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
       server: 'Сервер',
       poolsCount: 'Кол-во пулов',
       tableTitle: 'Боты',
+      openServer: 'Открыть сервер',
     },
   };
 
@@ -181,18 +199,37 @@ export function BotsPage({ language, onBotClick }: { language: 'en' | 'ru'; onBo
             setFormOpen(true);
           }}
           extraActions={(row) => (
-            <button
-              onClick={(event) => {
-                event.stopPropagation();
-                setEditingBotRaw(null);
-                setCopiedBotInitialData(buildBotInitialData(row.raw ?? row));
-                setFormOpen(true);
-              }}
-              className="p-1.5 hover:bg-accent rounded transition-colors"
-              title={language === 'ru' ? 'Копировать' : 'Copy'}
-            >
-              <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
-            </button>
+            <>
+              {onBotServerClick && Number.isFinite(row.serverId) ? (
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onBotServerClick({
+                      id: row.id,
+                      name: row.name,
+                      serverId: row.serverId,
+                      serverName: row.server,
+                    });
+                  }}
+                  className="p-1.5 hover:bg-success/10 rounded transition-colors"
+                  title={t[language].openServer}
+                >
+                  <Play className="w-3.5 h-3.5 text-success" />
+                </button>
+              ) : null}
+              <button
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setEditingBotRaw(null);
+                  setCopiedBotInitialData(buildBotInitialData(row.raw ?? row));
+                  setFormOpen(true);
+                }}
+                className="p-1.5 hover:bg-accent rounded transition-colors"
+                title={language === 'ru' ? 'Копировать' : 'Copy'}
+              >
+                <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+              </button>
+            </>
           )}
           onDelete={(row) => {
             setPendingDeleteBotIds((prev) => new Set(prev).add(row.id));

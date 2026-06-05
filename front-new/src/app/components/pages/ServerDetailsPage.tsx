@@ -13,9 +13,16 @@ interface ServerDetailsPageProps {
   serverName: string;
   language: 'en' | 'ru';
   onBack: () => void;
+  highlightBotId?: number;
 }
 
-export function ServerDetailsPage({ serverId, serverName, language, onBack }: ServerDetailsPageProps) {
+export function ServerDetailsPage({
+  serverId,
+  serverName,
+  language,
+  onBack,
+  highlightBotId,
+}: ServerDetailsPageProps) {
   const [rowsRaw, setRowsRaw] = useState<any[]>([]);
   const [serverRaw, setServerRaw] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -266,6 +273,8 @@ export function ServerDetailsPage({ serverId, serverName, language, onBack }: Se
             isLoading={isLoading}
             loadingText={t[language].loading}
             getRowId={(params) => String(params.data?.rowId ?? '')}
+            highlightRowId={highlightBotId != null ? String(highlightBotId) : null}
+            getRowHighlightId={(row) => String(row.rowId)}
           />
         </div>
       )}

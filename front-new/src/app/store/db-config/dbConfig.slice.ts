@@ -202,6 +202,14 @@ const dbConfigSlice = createSlice({
     setCexChainsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.cexChains, action.payload);
     },
+    removeCexChainsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.cexChains.response = (state.cexChains.response ?? []).filter((chain: any) => {
+        const chainId = Number(chain.id ?? chain.chainId);
+        return !ids.has(chainId);
+      });
+    },
 
     setCexPairsData(state) {
       setLoading(state.cexPairs);

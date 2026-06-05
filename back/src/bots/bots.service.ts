@@ -89,6 +89,48 @@ export class BotsService {
     });
   }
 
+  async findAllByJobId(jobId: string) {
+    return await this.botRepository.find({
+      relationLoadStrategy: 'query',
+      relations: {
+        server: true,
+        job: {
+          poolsJobRelations: true,
+        },
+        cexJob: true,
+      },
+      select: {
+        botId: true,
+        botName: true,
+        description: true,
+        paused: true,
+        isRepeat: true,
+        delayBetweenRepeat: true,
+        maxErrors: true,
+        maxJobs: true,
+        timeoutMs: true,
+        job: {
+          jobId: true,
+          jobType: true,
+          poolsJobRelations: {
+            poolsJobRelationId: true,
+          },
+        },
+        server: {
+          serverId: true,
+          serverName: true,
+        },
+        cexJob: {
+          id: true,
+        },
+      },
+      where: {
+        job: { jobId },
+      },
+      order: { botId: 'DESC' },
+    });
+  }
+
   async findAllByServerId(serverId: string) {
     return await this.botRepository.find({
       relationLoadStrategy: 'join',

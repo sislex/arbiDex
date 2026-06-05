@@ -12,7 +12,7 @@ import { ChainsPage } from './components/pages/ChainsPage';
 import { PoolsPage } from './components/pages/PoolsPage';
 import { PairsPage } from './components/pages/PairsPage';
 import { JobsPage } from './components/pages/JobsPage';
-import { DexJobRelationsPage } from './components/pages/DexJobRelationsPage';
+import { JobBotsPage } from './components/pages/JobBotsPage';
 import { RpcUrlsPage } from './components/pages/RpcUrlsPage';
 import { DexesPage } from './components/pages/DexesPage';
 
@@ -21,7 +21,11 @@ export default function App() {
   const [language, setLanguage] = useState<'en' | 'ru'>('en');
   const [activePage, setActivePage] = useState('dex-chains');
   const [selectedBot, setSelectedBot] = useState<{ id: number; name: string } | null>(null);
-  const [selectedServer, setSelectedServer] = useState<{ id: number; name: string } | null>(null);
+  const [selectedServer, setSelectedServer] = useState<{
+    id: number;
+    name: string;
+    highlightBotId?: number;
+  } | null>(null);
   const [selectedDexJob, setSelectedDexJob] = useState<{ id: number; name: string } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -87,14 +91,41 @@ export default function App() {
     },
   };
 
+  const openBotServer = (bot: {
+    id: number;
+    name: string;
+    serverId: number;
+    serverName: string;
+  }) => {
+    setSelectedDexJob(null);
+    setSelectedBot(null);
+    setActivePage('servers');
+    setSelectedServer({
+      id: bot.serverId,
+      name: bot.serverName,
+      highlightBotId: bot.id,
+    });
+  };
+
   const renderPage = () => {
+    if (activePage === 'dex-jobs' && selectedDexJob && selectedBot) {
+      return (
+        <BotDetailsPage
+          botId={selectedBot.id}
+          botName={selectedBot.name}
+          language={language}
+          onBack={() => setSelectedBot(null)}
+        />
+      );
+    }
+
     if (activePage === 'dex-jobs' && selectedDexJob) {
       return (
-        <DexJobRelationsPage
-          jobId={selectedDexJob.id}
-          jobName={selectedDexJob.name}
+        <JobBotsPage
+          jobId={Number(selectedDexJob.id)}
           language={language}
           onBack={() => setSelectedDexJob(null)}
+          onBotClick={(bot) => setSelectedBot(bot)}
         />
       );
     }
@@ -117,6 +148,7 @@ export default function App() {
           serverName={selectedServer.name}
           language={language}
           onBack={() => setSelectedServer(null)}
+          highlightBotId={selectedServer.highlightBotId}
         />
       );
     }
@@ -136,7 +168,9 @@ export default function App() {
           <JobsPage
             language={language}
             type="dex"
-            onDexJobClick={(jobId, jobName) => setSelectedDexJob({ id: jobId, name: jobName })}
+            onDexJobClick={(jobId, jobName) =>
+              setSelectedDexJob({ id: Number(jobId), name: jobName })
+            }
           />
         );
       case 'cex-jobs':
@@ -146,7 +180,13 @@ export default function App() {
       case 'dexes':
         return <DexesPage language={language} />;
       case 'bots':
-        return <BotsPage language={language} onBotClick={(bot) => setSelectedBot({ id: bot.id, name: bot.name })} />;
+        return (
+          <BotsPage
+            language={language}
+            onBotClick={(bot) => setSelectedBot({ id: bot.id, name: bot.name })}
+            onBotServerClick={openBotServer}
+          />
+        );
       case 'servers':
         return (
           <ServersPage
@@ -181,10 +221,12 @@ export default function App() {
       />
       <TopBar
         pageTitle={
-          selectedDexJob
-            ? selectedDexJob.name
-            : selectedBot
+          selectedBot
             ? selectedBot.name
+            : selectedDexJob
+            ? language === 'ru'
+              ? `Job ID: ${selectedDexJob.id} — связи`
+              : `Job ID: ${selectedDexJob.id} — relations`
             : selectedServer
             ? selectedServer.name
             : pageTitles[language][activePage as keyof typeof pageTitles.en]

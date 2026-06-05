@@ -1,6 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { CexChainsService } from './cex-chains.service';
 import { CexChainDto } from '../dtos/cex-chains-dto/cex-chain.dto';
+import { BulkDeleteCexChainsDto } from '../dtos/cex-chains-dto/bulk-delete-cex-chains.dto';
 
 @Controller('cex-chains')
 export class CexChainsController {
@@ -14,6 +23,11 @@ export class CexChainsController {
   @Get()
   findAll() {
     return this.cexChainsService.findAll();
+  }
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeleteCexChainsDto) {
+    return this.cexChainsService.removeMany(body.ids ?? []);
   }
 
   @Get(':id')

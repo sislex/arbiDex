@@ -38,6 +38,14 @@
   background-color: hsl(var(--accent) / 0.5);
 }
 
+.arb-dex-grid .ag-row-highlight-green {
+  background-color: hsl(142 76% 36% / 0.25) !important;
+}
+
+.dark .arb-dex-grid .ag-row-highlight-green {
+  background-color: hsl(142 71% 45% / 0.22) !important;
+}
+
 .arb-dex-grid .text-muted-foreground {
   color: #000 !important;
 }

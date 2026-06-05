@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CexChain } from '../entities/entities/cex-chain.entity';
@@ -55,22 +59,42 @@ export class CexChainsService {
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    const result = await this.removeMany([id]);
+    return { deleted: true, deletedIds: result.deletedIds };
+  }
 
-    const pairsCount = await this.cexPairsRepository.count({
-      where: { source: id },
-    });
+  async removeMany(ids: number[]) {
+    const uniqueIds = [
+      ...new Set(
+        (ids ?? [])
+          .map((id) => Number(id))
+          .filter((id) => Number.isFinite(id) && id > 0),
+      ),
+    ];
 
-    if (pairsCount > 0) {
-      throw new ConflictException(
-        `Cannot delete CEX chain ${id}: ${pairsCount} CEX pair(s) still reference it. Delete or move those pairs first.`,
-      );
+    if (uniqueIds.length === 0) {
+      return { success: true as const, deletedIds: [] as number[] };
     }
 
-    const result = await this.cexChainsRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`CexChain ${id} not found`);
+    for (const id of uniqueIds) {
+      await this.findOne(id);
+
+      const pairsCount = await this.cexPairsRepository.count({
+        where: { source: id },
+      });
+
+      if (pairsCount > 0) {
+        throw new ConflictException(
+          `Cannot delete CEX chain ${id}: ${pairsCount} CEX pair(s) still reference it. Delete or move those pairs first.`,
+        );
+      }
     }
-    return { deleted: true };
+
+    const result = await this.cexChainsRepository.delete(uniqueIds);
+    if ((result.affected ?? 0) === 0) {
+      throw new NotFoundException('No CEX chains were deleted');
+    }
+
+    return { success: true as const, deletedIds: uniqueIds };
   }
 }

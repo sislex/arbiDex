@@ -81,6 +81,7 @@ export const apiService = {
 
   getBots: () => request<any[]>("GET", "/bots"),
   getBotsByServerId: (serverId: number) => request<any[]>("GET", "/bots/findAllByServerId", { params: { serverId } }),
+  getBotsByJobId: (jobId: number) => request<any[]>("GET", "/bots/findAllByJobId", { params: { jobId } }),
   setBotById: (id: number) => request<any>("GET", `/bots/${id}`),
   createBot: (data: any) => request<any>("POST", "/bots", { body: { ...data } }),
   editBot: (id: number, data: any) => request<any>("PUT", `/bots/${id}`, { body: data }),
@@ -147,6 +148,10 @@ export const apiService = {
   createCexChain: (data: any) => request<any>("POST", "/cex-chains", { body: { ...data } }),
   editCexChain: (id: number, data: any) => request<any>("PATCH", `/cex-chains/${id}`, { body: data }),
   deletingCexChain: (id: number) => request<any>("DELETE", `/cex-chains/${id}`),
+  bulkDeleteCexChains: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/cex-chains/bulk-delete", {
+      body: { ids },
+    }),
 
   getCexPairs: () => request<any[]>("GET", "/cex-pairs"),
   createCexPair: (data: any) => request<any>("POST", "/cex-pairs", { body: { ...data } }),

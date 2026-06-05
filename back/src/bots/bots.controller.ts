@@ -47,6 +47,27 @@ export class BotsController {
     return this.botsService.findAllByServerId(serverId);
   }
 
+  @Get('findAllByJobId')
+  async findAllByJobId(@Query('jobId') jobId: string) {
+    const bots = await this.botsService.findAllByJobId(jobId);
+    return bots.map((bot) => ({
+      botId: bot.botId,
+      botName: bot.botName,
+      delayBetweenRepeat: bot.delayBetweenRepeat,
+      description: bot.description,
+      isRepeat: bot.isRepeat,
+      maxErrors: bot.maxErrors,
+      maxJobs: bot.maxJobs,
+      paused: bot.paused,
+      timeoutMs: bot.timeoutMs,
+      poolsCount: bot.job?.poolsJobRelations?.length ?? 0,
+      serverId: bot.server?.serverId,
+      serverName: bot.server?.serverName ?? null,
+      jobId: bot.job?.jobId ?? null,
+      cexJobId: bot.cexJob?.id ?? null,
+    }));
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.botsService.findOne(+id);
