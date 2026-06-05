@@ -157,4 +157,8 @@ export const apiService = {
   createCexPair: (data: any) => request<any>("POST", "/cex-pairs", { body: { ...data } }),
   editCexPair: (id: number, data: any) => request<any>("PUT", `/cex-pairs/${id}`, { body: data }),
   deletingCexPair: (id: number) => request<any>("DELETE", `/cex-pairs/${id}`),
+  bulkDeleteCexPairs: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/cex-pairs/bulk-delete", {
+      body: { ids },
+    }),
 };

@@ -220,6 +220,14 @@ const dbConfigSlice = createSlice({
     setCexPairsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.cexPairs, action.payload);
     },
+    removeCexPairsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.cexPairs.response = (state.cexPairs.response ?? []).filter((pair: any) => {
+        const pairId = Number(pair.id ?? pair.pairId ?? pair.cexPairId ?? pair.cex_pair_id);
+        return !ids.has(pairId);
+      });
+    },
 
     setCexJobsData(state) {
       setLoading(state.cexJobs);
