@@ -1,11 +1,34 @@
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Menu, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
+import { Switch } from '../ui/switch';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { useAppDispatch } from '../../store/hooks';
+import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { apiService } from '../../services/api-service';
+import { buildBotEditPayload, normalizeBotForStore } from '../../utils/bot';
 import { mapPoolJobRelationToJobPair } from '../../utils/jobPairUtils';
 
-function getBotRowId(bot: any, idx: number): string {
-  return String(bot?.botId ?? bot?.id ?? idx);
+function getBotRowId(bot: any): string {
+  return String(bot?.botId ?? bot?.id ?? '');
+}
+
+function mapBotToTableRow(bot: any) {
+  return {
+    rowId: getBotRowId(bot),
+    paused: Boolean(bot.paused),
+    botName: bot.botName ?? '-',
+    botDescription: bot.description ?? '-',
+    chainId: bot.job?.chain?.chainId ?? '-',
+    jobName: bot.job?.jobType ?? '-',
+    poolsCount: bot.job?.poolsJobRelations?.length ?? '-',
+  };
 }
 
 interface ServerDetailsPageProps {
@@ -16,6 +39,19 @@ interface ServerDetailsPageProps {
   highlightBotId?: number;
 }
 
+function normalizeServerBotForUpdate(bot: any, serverId: number, paused: boolean) {
+  const cexJobId = bot.cexJobId ?? bot.cex_job_id ?? bot.cexJob?.id ?? null;
+  const jobId = bot.jobId ?? bot.job_id ?? bot.job?.jobId ?? null;
+
+  return buildBotEditPayload({
+    ...bot,
+    jobId,
+    cexJobId,
+    serverId: bot.serverId ?? bot.server?.serverId ?? serverId,
+    paused,
+  });
+}
+
 export function ServerDetailsPage({
   serverId,
   serverName,
@@ -23,9 +59,13 @@ export function ServerDetailsPage({
   onBack,
   highlightBotId,
 }: ServerDetailsPageProps) {
-  const [rowsRaw, setRowsRaw] = useState<any[]>([]);
+  const dispatch = useAppDispatch();
+  const botsRawByIdRef = useRef<Map<number, any>>(new Map());
+  const [tableRows, setTableRows] = useState<ReturnType<typeof mapBotToTableRow>[]>([]);
   const [serverRaw, setServerRaw] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUpdatingPause, setIsUpdatingPause] = useState(false);
+  const [updatingBotIds, setUpdatingBotIds] = useState<Set<number>>(new Set());
   const [showConfig, setShowConfig] = useState(false);
   const [configJson, setConfigJson] = useState('');
   const [selectedBotIds, setSelectedBotIds] = useState<Set<string>>(new Set());
@@ -40,8 +80,15 @@ export function ServerDetailsPage({
       chainId: 'Chain Id',
       jobName: 'Job Name',
       poolsCount: 'Pools count',
+      running: 'Running',
       getConfig: 'GET CONFIG',
       launchConfig: 'LAUNCH CONFIG',
+      actions: 'Actions',
+      startSelected: 'Start selected',
+      stopSelected: 'Stop selected',
+      pauseUpdateFailed: 'Failed to update bot pause state',
+      pauseUpdateSuccess: (count: number, paused: boolean) =>
+        paused ? `Stopped ${count} bot(s)` : `Started ${count} bot(s)`,
       cancel: 'CANCEL',
       loading: 'Loading server relations…',
     },
@@ -53,8 +100,15 @@ export function ServerDetailsPage({
       chainId: 'ID сети',
       jobName: 'Имя задачи',
       poolsCount: 'Кол-во пулов',
+      running: 'Запущен',
       getConfig: 'ПОЛУЧИТЬ КОНФИГ',
       launchConfig: 'ЗАПУСТИТЬ КОНФИГ',
+      actions: 'Действия',
+      startSelected: 'Запустить выбранные',
+      stopSelected: 'Остановить выбранные',
+      pauseUpdateFailed: 'Не удалось обновить состояние паузы ботов',
+      pauseUpdateSuccess: (count: number, paused: boolean) =>
+        paused ? `Остановлено ботов: ${count}` : `Запущено ботов: ${count}`,
       cancel: 'ОТМЕНА',
       loading: 'Загрузка связей сервера…',
       close: 'ЗАКРЫТЬ',
@@ -71,26 +125,36 @@ export function ServerDetailsPage({
           apiService.getBotsByServerId(serverId),
         ]);
         if (!mounted) return;
+
+        const nextBots = Array.isArray(bots) ? bots : [];
+        const nextBotsById = new Map<number, any>();
+        const nextTableRows: ReturnType<typeof mapBotToTableRow>[] = [];
+        const nextSelectedIds = new Set<string>();
+
+        nextBots.forEach((bot) => {
+          const id = Number(bot.botId ?? bot.id);
+          if (!Number.isFinite(id)) return;
+          nextBotsById.set(id, bot);
+          nextTableRows.push(mapBotToTableRow(bot));
+          nextSelectedIds.add(String(id));
+        });
+
+        botsRawByIdRef.current = nextBotsById;
         setServerRaw(server ?? null);
-        setRowsRaw(Array.isArray(bots) ? bots : []);
+        setTableRows(nextTableRows);
+        setSelectedBotIds(nextSelectedIds);
       } finally {
         if (mounted) setIsLoading(false);
       }
     };
+
     load();
     return () => {
       mounted = false;
     };
   }, [serverId]);
 
-  useEffect(() => {
-    setSelectedBotIds(new Set(rowsRaw.map((bot, idx) => getBotRowId(bot, idx))));
-  }, [rowsRaw]);
-
-  const allBotIds = useMemo(
-    () => rowsRaw.map((bot, idx) => getBotRowId(bot, idx)),
-    [rowsRaw],
-  );
+  const allBotIds = useMemo(() => tableRows.map((row) => String(row.rowId)), [tableRows]);
 
   const allSelected = allBotIds.length > 0 && allBotIds.every((id) => selectedBotIds.has(id));
   const someSelected = allBotIds.some((id) => selectedBotIds.has(id));
@@ -118,17 +182,83 @@ export function ServerDetailsPage({
     setSelectedBotIds(allSelected ? new Set() : new Set(allBotIds));
   }, [allBotIds, allSelected]);
 
-  const rows = useMemo(
-    () =>
-      rowsRaw.map((item: any, idx: number) => ({
-        rowId: `${item.botId ?? item.id ?? idx}`,
-        botName: item.botName ?? '-',
-        botDescription: item.description ?? '-',
-        chainId: item.job?.chain?.chainId ?? '-',
-        jobName: item.job?.jobType ?? '-',
-        poolsCount: item.job?.poolsJobRelations?.length ?? '-',
-      })),
-    [rowsRaw],
+  const patchBotsPause = useCallback((updates: Map<number, boolean>) => {
+    for (const [id, paused] of updates) {
+      const bot = botsRawByIdRef.current.get(id);
+      if (bot) {
+        botsRawByIdRef.current.set(id, { ...bot, paused });
+      }
+    }
+
+    setTableRows((current) =>
+      current.map((row) => {
+        const id = Number(row.rowId);
+        if (!updates.has(id)) return row;
+        return { ...row, paused: updates.get(id)! };
+      }),
+    );
+  }, []);
+
+  const applyPauseUpdates = useCallback(
+    async (bots: any[], paused: boolean) => {
+      const botsPayload = bots
+        .map((bot) => normalizeServerBotForUpdate(bot, serverId, paused))
+        .filter((bot) => Number.isFinite(Number(bot.botId)));
+
+      if (botsPayload.length === 0) return;
+
+      const result = await apiService.bulkUpdateBots(botsPayload);
+      if (!result?.success) {
+        throw new Error(t[language].pauseUpdateFailed);
+      }
+
+      const pauseById = new Map<number, boolean>();
+      for (const bot of result.bots ?? botsPayload) {
+        const id = Number(bot.botId ?? bot.id);
+        if (Number.isFinite(id)) {
+          pauseById.set(id, Boolean(bot.paused ?? paused));
+        }
+      }
+      patchBotsPause(pauseById);
+
+      dispatch(
+        dbConfigActions.upsertBots({
+          bots: (result.bots ?? botsPayload).map((bot) => normalizeBotForStore(bot)),
+        }),
+      );
+
+      return botsPayload.length;
+    },
+    [dispatch, language, patchBotsPause, serverId, t],
+  );
+
+  const handleToggleBotPaused = useCallback(
+    async (rowId: string, running: boolean) => {
+      const id = Number(rowId);
+      const bot = botsRawByIdRef.current.get(id);
+      if (!bot || updatingBotIds.has(id)) return;
+
+      const prevPaused = Boolean(bot.paused);
+      const nextPaused = !running;
+
+      patchBotsPause(new Map([[id, nextPaused]]));
+      setUpdatingBotIds((prev) => new Set(prev).add(id));
+
+      try {
+        await applyPauseUpdates([{ ...bot, paused: nextPaused }], nextPaused);
+      } catch (error) {
+        patchBotsPause(new Map([[id, prevPaused]]));
+        const message = error instanceof Error ? error.message : String(error);
+        toast.error(message || t[language].pauseUpdateFailed);
+      } finally {
+        setUpdatingBotIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      }
+    },
+    [applyPauseUpdates, patchBotsPause, t, updatingBotIds],
   );
 
   const columns: Column[] = useMemo(
@@ -165,14 +295,50 @@ export function ServerDetailsPage({
           />
         ),
       },
+      {
+        key: 'paused',
+        label: t[language].running,
+        sortable: true,
+        filterable: false,
+        render: (_, row) => (
+          <div
+            className="flex h-full items-center"
+            onClick={(event) => event.stopPropagation()}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <Switch
+              checked={!row.paused}
+              disabled={updatingBotIds.has(Number(row.rowId)) || isUpdatingPause}
+              onCheckedChange={(checked) => void handleToggleBotPaused(String(row.rowId), checked)}
+              aria-label={t[language].running}
+            />
+          </div>
+        ),
+      },
       { key: 'botName', label: t[language].botName, sortable: true, filterable: true },
       { key: 'botDescription', label: t[language].botDescription, sortable: true, filterable: true },
       { key: 'chainId', label: t[language].chainId, sortable: true, filterable: true },
       { key: 'jobName', label: t[language].jobName, sortable: true, filterable: true },
       { key: 'poolsCount', label: t[language].poolsCount, sortable: true, filterable: true },
     ],
-    [allSelected, language, selectedBotIds, t, toggleAllBots, toggleBot],
+    [
+      allSelected,
+      handleToggleBotPaused,
+      isUpdatingPause,
+      language,
+      selectedBotIds,
+      t,
+      toggleAllBots,
+      toggleBot,
+      updatingBotIds,
+    ],
   );
+
+  const getSelectedBotsRaw = useCallback(() => {
+    return [...botsRawByIdRef.current.values()].filter((bot) =>
+      selectedBotIds.has(getBotRowId(bot)),
+    );
+  }, [selectedBotIds]);
 
   const mapBotParams = (bot: any) => ({
     botType: bot?.botName ?? '',
@@ -218,15 +384,46 @@ export function ServerDetailsPage({
     token1: job?.token1 ?? job?.pair?.token1 ?? '',
   });
 
-  const buildServerBotConfigs = () => {
-    return (rowsRaw ?? [])
-      .filter((bot: any, idx: number) => selectedBotIds.has(getBotRowId(bot, idx)))
-      .map((bot: any) => ({
-        id: String(bot?.botId ?? bot?.id ?? ''),
-        botParams: mapBotParams(bot),
-        jobParams: bot?.job ? mapDexJobParams(bot.job) : mapCexJobParams(bot?.cexJob),
-      }));
-  };
+  const buildServerBotConfigs = useCallback(() => {
+    return getSelectedBotsRaw().map((bot: any) => ({
+      id: String(bot?.botId ?? bot?.id ?? ''),
+      botParams: mapBotParams(bot),
+      jobParams: bot?.job ? mapDexJobParams(bot.job) : mapCexJobParams(bot?.cexJob),
+    }));
+  }, [getSelectedBotsRaw]);
+
+  const handleSetPausedForSelected = useCallback(
+    async (paused: boolean) => {
+      const selectedBots = getSelectedBotsRaw();
+      if (selectedBots.length === 0) return;
+
+      const prevPausedById = new Map(
+        selectedBots.map((bot) => [Number(bot.botId ?? bot.id), Boolean(bot.paused)]),
+      );
+      const optimistic = new Map<number, boolean>();
+      selectedBots.forEach((bot) => {
+        const id = Number(bot.botId ?? bot.id);
+        if (Number.isFinite(id)) optimistic.set(id, paused);
+      });
+      patchBotsPause(optimistic);
+
+      setIsUpdatingPause(true);
+      try {
+        const count = await applyPauseUpdates(
+          selectedBots.map((bot) => ({ ...bot, paused })),
+          paused,
+        );
+        toast.success(t[language].pauseUpdateSuccess(count ?? selectedBots.length, paused));
+      } catch (error) {
+        patchBotsPause(prevPausedById);
+        const message = error instanceof Error ? error.message : String(error);
+        toast.error(message || t[language].pauseUpdateFailed);
+      } finally {
+        setIsUpdatingPause(false);
+      }
+    },
+    [applyPauseUpdates, getSelectedBotsRaw, language, patchBotsPause, t],
+  );
 
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-background">
@@ -240,7 +437,7 @@ export function ServerDetailsPage({
         </button>
         <div className="h-6 w-px bg-border" />
         <h2 className="text-foreground">
-          Server ID:{serverId} {t[language].relationsTable} ({rows.length})
+          Server ID:{serverId} {t[language].relationsTable} ({tableRows.length})
         </h2>
       </div>
 
@@ -267,8 +464,38 @@ export function ServerDetailsPage({
         <div className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden">
           <DataTable
             title={serverName}
+            headerActions={
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center p-2 bg-muted text-foreground rounded hover:bg-accent transition-colors"
+                    aria-label={t[language].actions}
+                    title={t[language].actions}
+                  >
+                    <Menu className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    disabled={selectedBotIds.size === 0 || isUpdatingPause}
+                    onClick={() => void handleSetPausedForSelected(false)}
+                  >
+                    {t[language].startSelected}
+                    {selectedBotIds.size > 0 ? ` (${selectedBotIds.size})` : ''}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={selectedBotIds.size === 0 || isUpdatingPause}
+                    onClick={() => void handleSetPausedForSelected(true)}
+                  >
+                    {t[language].stopSelected}
+                    {selectedBotIds.size > 0 ? ` (${selectedBotIds.size})` : ''}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            }
             columns={columns}
-            data={rows}
+            data={tableRows}
             language={language}
             isLoading={isLoading}
             loadingText={t[language].loading}
