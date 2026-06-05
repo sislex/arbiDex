@@ -1,6 +1,6 @@
 import { Menu, Plus } from 'lucide-react';
 import { DataTable, Column } from '../DataTable';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { showBulkDeleteToast, showDeleteToast } from '../../utils/toast';
 import {
   buildBulkDeleteKey,
@@ -10,8 +10,9 @@ import {
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
+  selectChainsDataResponse,
   selectChainsMeta,
-  selectTokensFullDataResponse,
+  selectTokensDataResponse,
   selectTokensMeta,
 } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
@@ -26,9 +27,25 @@ import {
 
 const TOKENS_DELETE_SCOPE = 'tokens';
 
+function mapTokenRow(token: any, rawToken?: any) {
+  return {
+    id: token.tokenId ?? token.id,
+    name: token.tokenName,
+    chainName: token.chainName ?? token.chainId ?? '',
+    address: token.address,
+    symbol: token.symbol,
+    decimals: token.decimals,
+    isActive: token.isActive,
+    isChecked: token.isChecked ?? token.is_checked ?? token.checked ?? false,
+    balance: token.balance ?? '',
+    raw: rawToken ?? token,
+  };
+}
+
 export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   const dispatch = useAppDispatch();
-  const tokensFromStore = useAppSelector(selectTokensFullDataResponse);
+  const tokensRaw = useAppSelector(selectTokensDataResponse);
+  const chainsRaw = useAppSelector(selectChainsDataResponse);
   const tokensMeta = useAppSelector(selectTokensMeta);
   const chainsMeta = useAppSelector(selectChainsMeta);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -36,7 +53,9 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   const [editingTokenRaw, setEditingTokenRaw] = useState<any>(null);
   const [pendingDeleteTokenIds, setPendingDeleteTokenIds] = useState<Set<number>>(new Set());
   const [selectedTokenIds, setSelectedTokenIds] = useState<Set<number>>(new Set());
+  const [tableRows, setTableRows] = useState<ReturnType<typeof mapTokenRow>[]>([]);
   const headerCheckboxRef = useRef<HTMLInputElement>(null);
+  const tokensFromStoreRef = useRef(tokensRaw);
 
   useEffect(() => {
     if ((!tokensMeta.isLoaded || tokensMeta.error) && !tokensMeta.isLoading) {
@@ -44,24 +63,64 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
     }
   }, [dispatch, tokensMeta.error, tokensMeta.isLoaded, tokensMeta.isLoading]);
 
-  const tokens = useMemo(() => {
-    return tokensFromStore
-      .map((token: any) => ({
-        id: token.tokenId,
-        name: token.tokenName,
-        chainName: token.chainName ?? token.chainId ?? '',
-        address: token.address,
-        symbol: token.symbol,
-        decimals: token.decimals,
-        isActive: token.isActive,
-        isChecked: token.isChecked ?? token.is_checked ?? token.checked ?? false,
-        balance: token.balance ?? '',
-        raw: token,
-      }))
-      .filter((token) => !pendingDeleteTokenIds.has(token.id));
-  }, [pendingDeleteTokenIds, tokensFromStore]);
+  const chainNameById = useMemo(() => {
+    const map = new Map<number, string>();
+    chainsRaw.forEach((chain: any) => {
+      const id = Number(chain.chainId ?? chain.id);
+      if (Number.isFinite(id)) {
+        map.set(id, chain.name ?? chain.chainName ?? String(id));
+      }
+    });
+    return map;
+  }, [chainsRaw]);
 
-  const allTokenIds = useMemo(() => tokens.map((token) => token.id), [tokens]);
+  const enrichTokenRow = useCallback(
+    (token: any) =>
+      mapTokenRow(
+        {
+          ...token,
+          chainName: chainNameById.get(Number(token.chainId)) ?? token.chainId,
+        },
+        token,
+      ),
+    [chainNameById],
+  );
+
+  useEffect(() => {
+    const prevStore = tokensFromStoreRef.current;
+    const nextStore = tokensRaw;
+    tokensFromStoreRef.current = nextStore;
+
+    const prevLen = prevStore.length;
+    const nextLen = nextStore.length;
+
+    if (prevLen > 0 && nextLen < prevLen) {
+      const nextIds = new Set(nextStore.map((token: any) => Number(token.tokenId ?? token.id)));
+      setTableRows((current) => current.filter((row) => nextIds.has(row.id)));
+      return;
+    }
+
+    if (prevLen === nextLen && prevStore === nextStore) {
+      return;
+    }
+
+    setTableRows(nextStore.map(enrichTokenRow));
+  }, [enrichTokenRow, tokensRaw]);
+
+  const visibleTokenIds = useMemo(() => {
+    if (pendingDeleteTokenIds.size === 0) {
+      return tableRows.map((token) => token.id);
+    }
+    const ids: number[] = [];
+    for (const token of tableRows) {
+      if (!pendingDeleteTokenIds.has(token.id)) {
+        ids.push(token.id);
+      }
+    }
+    return ids;
+  }, [pendingDeleteTokenIds, tableRows]);
+
+  const allTokenIds = visibleTokenIds;
   const allSelected = allTokenIds.length > 0 && allTokenIds.every((id) => selectedTokenIds.has(id));
   const someSelected = allTokenIds.some((id) => selectedTokenIds.has(id));
 
@@ -71,6 +130,12 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       el.indeterminate = someSelected && !allSelected;
     }
   }, [allSelected, someSelected]);
+
+  const updatePendingDeleteTokenIds = useCallback((updater: (prev: Set<number>) => Set<number>) => {
+    startTransition(() => {
+      setPendingDeleteTokenIds(updater);
+    });
+  }, []);
 
   const toggleToken = useCallback((id: number) => {
     setSelectedTokenIds((prev) => {
@@ -134,7 +199,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
 
   const scheduleDelete = useCallback(
     (row: { id: number; symbol: string }) => {
-      setPendingDeleteTokenIds((prev) => new Set(prev).add(row.id));
+      updatePendingDeleteTokenIds((prev) => new Set(prev).add(row.id));
       setSelectedTokenIds((prev) => {
         const next = new Set(prev);
         next.delete(row.id);
@@ -146,7 +211,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       schedulePendingDelete(deleteKey, async () => {
         const result = await apiService.bulkDeleteTokens([row.id]);
         dispatch(dbConfigActions.removeTokensByIds(result.deletedIds ?? [row.id]));
-        setPendingDeleteTokenIds((prev) => {
+        updatePendingDeleteTokenIds((prev) => {
           const next = new Set(prev);
           next.delete(row.id);
           return next;
@@ -158,7 +223,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
         itemType: t[language].deleteType,
         onUndo: () => {
           cancelPendingDelete(deleteKey);
-          setPendingDeleteTokenIds((prev) => {
+          updatePendingDeleteTokenIds((prev) => {
             const next = new Set(prev);
             next.delete(row.id);
             return next;
@@ -167,16 +232,15 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
         language,
       });
     },
-    [dispatch, language, t],
+    [dispatch, language, t, updatePendingDeleteTokenIds],
   );
 
   const handleDeleteSelected = useCallback(() => {
     if (selectedTokenIds.size === 0) return;
 
-    const toDelete = tokens.filter((token) => selectedTokenIds.has(token.id));
-    const deleteIds = toDelete.map((row) => row.id);
+    const deleteIds = [...selectedTokenIds];
 
-    setPendingDeleteTokenIds((prev) => {
+    updatePendingDeleteTokenIds((prev) => {
       const next = new Set(prev);
       deleteIds.forEach((id) => next.add(id));
       return next;
@@ -191,7 +255,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
         throw new Error(t[language].deleteFailed);
       }
       dispatch(dbConfigActions.removeTokensByIds(result.deletedIds ?? deleteIds));
-      setPendingDeleteTokenIds((prev) => {
+      updatePendingDeleteTokenIds((prev) => {
         const next = new Set(prev);
         deleteIds.forEach((id) => next.delete(id));
         return next;
@@ -199,11 +263,11 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
     });
 
     showBulkDeleteToast({
-      count: toDelete.length,
+      count: deleteIds.length,
       itemType: language === 'en' ? 'tokens' : 'токенов',
       onUndo: () => {
         cancelPendingDelete(bulkDeleteKey);
-        setPendingDeleteTokenIds((prev) => {
+        updatePendingDeleteTokenIds((prev) => {
           const next = new Set(prev);
           deleteIds.forEach((id) => next.delete(id));
           return next;
@@ -211,7 +275,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
       },
       language,
     });
-  }, [dispatch, language, selectedTokenIds, t, tokens]);
+  }, [dispatch, language, selectedTokenIds, t, updatePendingDeleteTokenIds]);
 
   const columns: Column[] = [
     {
@@ -318,16 +382,16 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
           </div>
         }
         columns={columns}
-        data={tokens}
+        data={tableRows}
+        excludeRowIds={pendingDeleteTokenIds}
+        getExcludeRowId={(row) => row.id}
         language={language}
         isLoading={tokensMeta.isLoading || chainsMeta.isLoading}
         loadingText={language === 'ru' ? 'Загрузка токенов…' : 'Loading Tokens…'}
         actionsColumnPosition="last"
         getRowId={(params) => String(params.data?.id ?? '')}
         onEdit={(row) => {
-          setEditingTokenRaw(row.raw ?? tokensFromStore.find(
-            (token: any) => Number(token.tokenId ?? token.id) === Number(row.id),
-          ) ?? null);
+          setEditingTokenRaw(row.raw ?? null);
           setFormOpen(true);
         }}
         onDelete={scheduleDelete}

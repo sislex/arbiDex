@@ -79,6 +79,8 @@ const getCexPairId = (pair: any) => Number(pair.id ?? pair.pairId ?? pair.cexPai
 const getCexJobId = (job: any) => Number(job.id ?? job.cexJobId ?? job.cex_job_id);
 const getDexJobId = (job: any) => Number(job.jobId ?? job.id);
 const getTokenId = (token: any) => Number(token.tokenId ?? token.id);
+const getPoolId = (pool: any) => Number(pool.poolId ?? pool.id);
+const getDexId = (dex: any) => Number(dex.dexId ?? dex.id);
 
 const setFailure = (state: AsyncState<any[]>, error: string) => {
   state.loadingTime = state.startTime ? Date.now() - state.startTime : null;
@@ -153,6 +155,21 @@ const dbConfigSlice = createSlice({
     },
     setPoolsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.pools, action.payload);
+    },
+    removePoolsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.pools.response = (state.pools.response ?? []).filter((pool: any) => {
+        const poolId = Number(pool.poolId ?? pool.id);
+        return !ids.has(poolId);
+      });
+    },
+    upsertPool(state, action: PayloadAction<{ pool: any }>) {
+      state.pools.response = upsertListItem(
+        state.pools.response ?? [],
+        action.payload.pool,
+        getPoolId,
+      );
     },
 
     setDexesData(state) {

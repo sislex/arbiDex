@@ -123,6 +123,32 @@ export class PoolsService {
   }
 
   async remove(id: number) {
-    return await this.poolRepository.delete(id);
+    const result = await this.removeMany([id]);
+    return { deleted: true, deletedIds: result.deletedIds };
+  }
+
+  async removeMany(ids: number[]) {
+    const uniqueIds = [
+      ...new Set(
+        (ids ?? [])
+          .map((id) => Number(id))
+          .filter((id) => Number.isFinite(id) && id > 0),
+      ),
+    ];
+
+    if (uniqueIds.length === 0) {
+      return { success: true as const, deletedIds: [] as number[] };
+    }
+
+    for (const id of uniqueIds) {
+      await this.findOne(id);
+    }
+
+    const result = await this.poolRepository.delete(uniqueIds);
+    if ((result.affected ?? 0) === 0) {
+      throw new Error('No pools were deleted');
+    }
+
+    return { success: true as const, deletedIds: uniqueIds };
   }
 }

@@ -53,6 +53,9 @@ interface DataTableProps {
   getRowHighlightId?: (row: any) => string;
   /** Actions column: first (default, pinned left) or last (pinned right). */
   actionsColumnPosition?: 'first' | 'last';
+  /** Hide rows without rebuilding rowData (fast path for large tables). */
+  excludeRowIds?: ReadonlySet<number | string>;
+  getExcludeRowId?: (row: any) => number | string;
 }
 
 export function DataTable({
@@ -75,6 +78,8 @@ export function DataTable({
   highlightRowId,
   getRowHighlightId,
   actionsColumnPosition = 'first',
+  excludeRowIds,
+  getExcludeRowId,
 }: DataTableProps) {
   const rows = Array.isArray(data) ? data : [];
   const gridApiRef = useRef<GridApi | null>(null);
@@ -119,6 +124,26 @@ export function DataTable({
     setFilteredCount(rows.length);
     setHasActiveFilters(false);
   }, [rows, emitFilteredData]);
+
+  useEffect(() => {
+    gridApiRef.current?.onFilterChanged();
+  }, [excludeRowIds]);
+
+  const isExternalFilterPresent = useCallback(
+    () => Boolean(excludeRowIds && excludeRowIds.size > 0),
+    [excludeRowIds],
+  );
+
+  const doesExternalFilterPass = useCallback(
+    (node: { data?: any }) => {
+      if (!excludeRowIds?.size || !node.data) return true;
+      const rowId = getExcludeRowId ? getExcludeRowId(node.data) : node.data.id;
+      return !excludeRowIds.has(rowId);
+    },
+    [excludeRowIds, getExcludeRowId],
+  );
+
+  const shouldAnimateRows = rows.length <= 1000;
 
   const actionsHeader = language === 'ru' ? 'ДЕЙСТВИЯ' : 'ACTIONS';
   const editTitle = language === 'ru' ? 'Изменить' : 'Edit';
@@ -322,7 +347,9 @@ export function DataTable({
             enableCellTextSelection
             ensureDomOrder
             suppressCellFocus
-            animateRows
+            animateRows={shouldAnimateRows}
+            isExternalFilterPresent={isExternalFilterPresent}
+            doesExternalFilterPass={doesExternalFilterPass}
             rowSelection={selectionMode === 'none' ? undefined : selectionMode}
             getRowId={getRowId}
             getRowClass={getRowClass}

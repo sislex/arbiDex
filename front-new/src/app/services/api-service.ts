@@ -72,11 +72,19 @@ export const apiService = {
   createPool: (data: any) => request<any>("POST", "/pools", { body: { ...data } }),
   editPool: (id: number, data: any) => request<any>("PUT", `/pools/by-id/${id}`, { body: data }),
   deletingPool: (id: number) => request<any>("DELETE", `/pools/${id}`),
+  bulkDeletePools: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/pools/bulk-delete", {
+      body: { ids },
+    }),
 
   getDexes: () => request<any[]>("GET", "/dexes"),
   createDex: (data: any) => request<any>("POST", "/dexes", { body: { ...data } }),
   editDex: (id: number, data: any) => request<any>("PUT", `/dexes/${id}`, { body: data }),
   deletingDex: (id: number) => request<any>("DELETE", `/dexes/${id}`),
+  bulkDeleteDexes: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/dexes/bulk-delete", {
+      body: { ids },
+    }),
 
   getChainsData: () => request<any[]>("GET", "/chains"),
   createChain: (data: any) => request<any>("POST", "/chains", { body: { ...data } }),
