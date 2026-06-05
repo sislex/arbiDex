@@ -81,6 +81,7 @@ const getDexJobId = (job: any) => Number(job.jobId ?? job.id);
 const getTokenId = (token: any) => Number(token.tokenId ?? token.id);
 const getPoolId = (pool: any) => Number(pool.poolId ?? pool.id);
 const getDexId = (dex: any) => Number(dex.dexId ?? dex.id);
+const getRpcUrlId = (rpcUrl: any) => Number(rpcUrl.rpcUrlId ?? rpcUrl.id);
 
 const setFailure = (state: AsyncState<any[]>, error: string) => {
   state.loadingTime = state.startTime ? Date.now() - state.startTime : null;
@@ -181,6 +182,21 @@ const dbConfigSlice = createSlice({
     setDexesDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.dexes, action.payload);
     },
+    removeDexesByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.dexes.response = (state.dexes.response ?? []).filter((dex: any) => {
+        const dexId = Number(dex.dexId ?? dex.id);
+        return !ids.has(dexId);
+      });
+    },
+    upsertDex(state, action: PayloadAction<{ dex: any }>) {
+      state.dexes.response = upsertListItem(
+        state.dexes.response ?? [],
+        action.payload.dex,
+        getDexId,
+      );
+    },
 
     setChainsData(state) {
       setLoading(state.chains);
@@ -271,6 +287,21 @@ const dbConfigSlice = createSlice({
     },
     setRpcUrlsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.rpcUrls, action.payload);
+    },
+    removeRpcUrlsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.rpcUrls.response = (state.rpcUrls.response ?? []).filter((rpcUrl: any) => {
+        const rpcUrlId = Number(rpcUrl.rpcUrlId ?? rpcUrl.id);
+        return !ids.has(rpcUrlId);
+      });
+    },
+    upsertRpcUrl(state, action: PayloadAction<{ rpcUrl: any }>) {
+      state.rpcUrls.response = upsertListItem(
+        state.rpcUrls.response ?? [],
+        action.payload.rpcUrl,
+        getRpcUrlId,
+      );
     },
 
     setSwapRate(state) {

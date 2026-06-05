@@ -55,7 +55,7 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
   const [selectedTokenIds, setSelectedTokenIds] = useState<Set<number>>(new Set());
   const [tableRows, setTableRows] = useState<ReturnType<typeof mapTokenRow>[]>([]);
   const headerCheckboxRef = useRef<HTMLInputElement>(null);
-  const tokensFromStoreRef = useRef(tokensRaw);
+  const tokensFromStoreRef = useRef<any[] | null>(null);
 
   useEffect(() => {
     if ((!tokensMeta.isLoaded || tokensMeta.error) && !tokensMeta.isLoading) {
@@ -90,6 +90,11 @@ export function TokensPage({ language }: { language: 'en' | 'ru' }) {
     const prevStore = tokensFromStoreRef.current;
     const nextStore = tokensRaw;
     tokensFromStoreRef.current = nextStore;
+
+    if (!prevStore) {
+      setTableRows(nextStore.map(enrichTokenRow));
+      return;
+    }
 
     const prevLen = prevStore.length;
     const nextLen = nextStore.length;

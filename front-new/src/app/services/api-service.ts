@@ -143,6 +143,10 @@ export const apiService = {
   createRpcUrl: (data: any) => request<any>("POST", "/rpc-urls", { body: { ...data } }),
   editRpcUrl: (id: number, data: any) => request<any>("PUT", `/rpc-urls/${id}`, { body: data }),
   deletingRpcUrl: (id: number) => request<any>("DELETE", `/rpc-urls/${id}`),
+  bulkDeleteRpcUrls: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/rpc-urls/bulk-delete", {
+      body: { ids },
+    }),
 
   getCexJobs: () => request<any[]>("GET", "/cex-jobs"),
   checkCexJob: (data: any) => {

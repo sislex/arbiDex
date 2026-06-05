@@ -66,7 +66,7 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
   const [selectedPoolIds, setSelectedPoolIds] = useState<Set<number>>(new Set());
   const [tableRows, setTableRows] = useState<ReturnType<typeof mapPoolRow>[]>([]);
   const headerCheckboxRef = useRef<HTMLInputElement>(null);
-  const poolsFromStoreRef = useRef(poolsRaw);
+  const poolsFromStoreRef = useRef<any[] | null>(null);
 
   const lookupMaps = useMemo(() => {
     const chain = new Map<number, string>();
@@ -149,6 +149,11 @@ export function PoolsPage({ language }: { language: 'en' | 'ru' }) {
     const prevStore = poolsFromStoreRef.current;
     const nextStore = poolsRaw;
     poolsFromStoreRef.current = nextStore;
+
+    if (!prevStore) {
+      setTableRows(nextStore.map(enrichPoolRow));
+      return;
+    }
 
     const prevLen = prevStore.length;
     const nextLen = nextStore.length;

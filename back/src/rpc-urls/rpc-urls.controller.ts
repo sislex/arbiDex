@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { RpcUrlsService } from './rpc-urls.service';
 import { RpcUrlsDto } from '../dtos/rpc-urls-dto/rpc-urls.dto';
+import { BulkDeleteRpcUrlsDto } from '../dtos/rpc-urls-dto/bulk-delete-rpc-urls.dto';
 
 @Controller('rpc-urls')
 export class RpcUrlsController {
@@ -17,6 +18,11 @@ export class RpcUrlsController {
   @Post()
   create(@Body() createRpcUrlDto: RpcUrlsDto) {
     return this.rpcUrlsService.create(createRpcUrlDto);
+  }
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeleteRpcUrlsDto) {
+    return this.rpcUrlsService.removeMany(body.ids ?? []);
   }
 
   @Get()
