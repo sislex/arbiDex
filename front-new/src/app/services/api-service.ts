@@ -63,6 +63,10 @@ export const apiService = {
   createToken: (data: any) => request<any>("POST", "/tokens", { body: { ...data } }),
   editToken: (id: number, data: any) => request<any>("PUT", `/tokens/${id}`, { body: data }),
   deletingToken: (id: number) => request<any>("DELETE", `/tokens/${id}`),
+  bulkDeleteTokens: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/tokens/bulk-delete", {
+      body: { ids },
+    }),
 
   getPools: () => request<any[]>("GET", "/pools"),
   createPool: (data: any) => request<any>("POST", "/pools", { body: { ...data } }),
@@ -96,6 +100,10 @@ export const apiService = {
   createJob: (data: any) => request<any>("POST", "/jobs", { body: { ...data } }),
   editJob: (id: number, data: any) => request<any>("PUT", `/jobs/${id}`, { body: data }),
   deletingJob: (id: number) => request<any>("DELETE", `/jobs/${id}`),
+  bulkDeleteJobs: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/jobs/bulk-delete", {
+      body: { ids },
+    }),
 
   getServers: () => request<any[]>("GET", "/servers"),
   setServerById: (id: number) => request<any>("GET", `/servers/${id}`),

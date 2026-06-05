@@ -23,6 +23,7 @@ import {
 } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
 import { buildCexChainNameById, resolveCexSourceFromJobAndPair } from '../../utils/cexPairSource';
+import { normalizeDexJobForStore } from '../../utils/dexJob';
 import { showBulkDeleteToast, showDeleteToast } from '../../utils/toast';
 import {
   buildBulkDeleteKey,
@@ -79,6 +80,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const [pendingDeleteDexJobIds, setPendingDeleteDexJobIds] = useState<Set<number>>(new Set());
   const [pendingDeleteCexJobIds, setPendingDeleteCexJobIds] = useState<Set<number>>(new Set());
   const [selectedCexJobIds, setSelectedCexJobIds] = useState<Set<number>>(new Set());
+  const [selectedDexJobIds, setSelectedDexJobIds] = useState<Set<number>>(new Set());
   const [bulkBotsFormOpen, setBulkBotsFormOpen] = useState(false);
   const [isCreatingBots, setIsCreatingBots] = useState(false);
   const headerCheckboxRef = useRef<HTMLInputElement>(null);
@@ -126,8 +128,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const cexChainNameById = useMemo(() => buildCexChainNameById(cexChains), [cexChains]);
 
   const dexJobs = useMemo(() => {
-    return dexJobsFromStore
-      .map((job: any) => {
+    return dexJobsFromStore.map((job: any) => {
       const jobId = job.jobId ?? job.id;
       return {
         id: jobId,
@@ -139,9 +140,13 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         additionalData: formatExtra(job.extraSettings ?? job.additionalData ?? job.additional_data),
         raw: job,
       };
-      })
-      .filter((row) => !pendingDeleteDexJobIds.has(row.id));
-  }, [chainById, dexJobsFromStore, pendingDeleteDexJobIds, rpcById]);
+    });
+  }, [chainById, dexJobsFromStore, rpcById]);
+
+  const dexJobsVisible = useMemo(
+    () => dexJobs.filter((row) => !pendingDeleteDexJobIds.has(row.id)),
+    [dexJobs, pendingDeleteDexJobIds],
+  );
 
   const cexJobs = useMemo(() => {
     return cexJobsFromStore.map((job: any) => {
@@ -173,19 +178,40 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
     [cexJobsVisible, selectedCexJobIds],
   );
 
+  const selectedDexJobsForBots = useMemo(
+    () => dexJobsVisible.filter((job) => selectedDexJobIds.has(job.id)),
+    [dexJobsVisible, selectedDexJobIds],
+  );
+
+  const selectedJobIds = type === 'cex' ? selectedCexJobIds : selectedDexJobIds;
+  const selectedJobsForBots = type === 'cex' ? selectedCexJobsForBots : selectedDexJobsForBots;
+
   const allCexJobIds = useMemo(() => cexJobsVisible.map((job) => job.id), [cexJobsVisible]);
+  const allDexJobIds = useMemo(() => dexJobsVisible.map((job) => job.id), [dexJobsVisible]);
   const allCexJobsSelected =
     type === 'cex' && allCexJobIds.length > 0 && allCexJobIds.every((id) => selectedCexJobIds.has(id));
   const someCexJobsSelected =
     type === 'cex' && allCexJobIds.some((id) => selectedCexJobIds.has(id));
+  const allDexJobsSelected =
+    type === 'dex' && allDexJobIds.length > 0 && allDexJobIds.every((id) => selectedDexJobIds.has(id));
+  const someDexJobsSelected =
+    type === 'dex' && allDexJobIds.some((id) => selectedDexJobIds.has(id));
 
   useEffect(() => {
-    if (type !== 'cex') return;
     const el = headerCheckboxRef.current;
-    if (el) {
+    if (!el) return;
+    if (type === 'cex') {
       el.indeterminate = someCexJobsSelected && !allCexJobsSelected;
+      return;
     }
-  }, [allCexJobsSelected, someCexJobsSelected, type]);
+    el.indeterminate = someDexJobsSelected && !allDexJobsSelected;
+  }, [
+    allCexJobsSelected,
+    allDexJobsSelected,
+    someCexJobsSelected,
+    someDexJobsSelected,
+    type,
+  ]);
 
   const toggleCexJob = useCallback((id: number) => {
     setSelectedCexJobIds((prev) => {
@@ -199,6 +225,19 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
   const toggleAllCexJobs = useCallback(() => {
     setSelectedCexJobIds(allCexJobsSelected ? new Set() : new Set(allCexJobIds));
   }, [allCexJobIds, allCexJobsSelected]);
+
+  const toggleDexJob = useCallback((id: number) => {
+    setSelectedDexJobIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleAllDexJobs = useCallback(() => {
+    setSelectedDexJobIds(allDexJobsSelected ? new Set() : new Set(allDexJobIds));
+  }, [allDexJobIds, allDexJobsSelected]);
 
   const t = {
     en: {
@@ -256,16 +295,16 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
       maxErrors: string;
       timeoutMs: string;
     }) => {
-      if (selectedCexJobsForBots.length === 0) return;
+      if (selectedJobsForBots.length === 0) return;
 
       setIsCreatingBots(true);
       try {
-        for (const job of selectedCexJobsForBots) {
+        for (const job of selectedJobsForBots) {
           await apiService.createBot({
             botName: data.botName.trim(),
             description: String(job.description ?? '').trim(),
-            jobId: null,
-            cexJobId: job.id,
+            jobId: type === 'dex' ? job.id : null,
+            cexJobId: type === 'cex' ? job.id : null,
             serverId: Number(data.serverId),
             paused: data.paused,
             isRepeat: data.isRepeat,
@@ -277,7 +316,11 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         }
         dispatch(dbConfigActions.refetchBotsListPageResources());
         setBulkBotsFormOpen(false);
-        setSelectedCexJobIds(new Set());
+        if (type === 'cex') {
+          setSelectedCexJobIds(new Set());
+        } else {
+          setSelectedDexJobIds(new Set());
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         toast.error(message);
@@ -285,10 +328,10 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         setIsCreatingBots(false);
       }
     },
-    [dispatch, selectedCexJobsForBots],
+    [dispatch, selectedJobsForBots, type],
   );
 
-  const dexColumns: Column[] = [
+  const dexDataColumns: Column[] = [
     { key: 'id', label: t[language].jobId, sortable: true, filterable: true },
     { key: 'jobType', label: t[language].jobType, sortable: true, filterable: true },
     { key: 'description', label: t[language].description, sortable: true, filterable: true },
@@ -310,19 +353,19 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
     },
   ];
 
-  const cexCheckboxColumn: Column = {
+  const checkboxColumn: Column = {
     key: 'checkbox',
     label: '',
     headerRender: () => (
       <input
         ref={headerCheckboxRef}
         type="checkbox"
-        checked={allCexJobsSelected}
-        onChange={toggleAllCexJobs}
+        checked={type === 'cex' ? allCexJobsSelected : allDexJobsSelected}
+        onChange={type === 'cex' ? toggleAllCexJobs : toggleAllDexJobs}
         className="w-4 h-4 rounded border-input bg-input accent-primary cursor-pointer"
         onClick={(event) => event.stopPropagation()}
         title={
-          allCexJobsSelected
+          (type === 'cex' ? allCexJobsSelected : allDexJobsSelected)
             ? language === 'ru'
               ? 'Снять все'
               : 'Deselect all'
@@ -335,8 +378,8 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
     render: (_, row) => (
       <input
         type="checkbox"
-        checked={selectedCexJobIds.has(row.id)}
-        onChange={() => toggleCexJob(row.id)}
+        checked={selectedJobIds.has(row.id)}
+        onChange={() => (type === 'cex' ? toggleCexJob(row.id) : toggleDexJob(row.id))}
         className="w-4 h-4 rounded border-input bg-input accent-primary cursor-pointer"
         onClick={(event) => event.stopPropagation()}
       />
@@ -371,8 +414,8 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
     },
   ];
 
-  const cexColumns: Column[] =
-    type === 'cex' ? [cexCheckboxColumn, ...cexDataColumns] : cexDataColumns;
+  const dexColumns: Column[] = [checkboxColumn, ...dexDataColumns];
+  const cexColumns: Column[] = [checkboxColumn, ...cexDataColumns];
 
   const handleCheckCexJob = async (row: any) => {
     const jobId = row.id;
@@ -494,85 +537,96 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
     });
   }, [cexJobsVisible, dispatch, language, selectedCexJobIds, type]);
 
-  const handleDeleteDexJob = (row: any) => {
-    setPendingDeleteDexJobIds((prev) => new Set(prev).add(row.id));
-    const deleteKey = `${DEX_JOBS_DELETE_SCOPE}:${row.id}`;
+  const getDexJobLabel = (row: { id: number; jobType?: string }) =>
+    row.jobType ? `${row.jobType} (#${row.id})` : String(row.id);
 
-    schedulePendingDelete(deleteKey, async () => {
-      await apiService.deletingJob(row.id);
-      dispatch(dbConfigActions.refetchJobsListPageResources());
-      setPendingDeleteDexJobIds((prev) => {
+  const handleDeleteDexJob = useCallback(
+    (row: { id: number; jobType?: string }) => {
+      setPendingDeleteDexJobIds((prev) => new Set(prev).add(row.id));
+      setSelectedDexJobIds((prev) => {
         const next = new Set(prev);
         next.delete(row.id);
         return next;
       });
-    });
 
-    showDeleteToast({
-      itemName: row.jobType ? `${row.jobType} (#${row.id})` : String(row.id),
-      itemType: t[language].deleteType,
-      onUndo: () => {
-        cancelPendingDelete(deleteKey);
+      const deleteKey = `${DEX_JOBS_DELETE_SCOPE}:${row.id}`;
+
+      schedulePendingDelete(deleteKey, async () => {
+        const result = await apiService.bulkDeleteJobs([row.id]);
+        dispatch(dbConfigActions.removeJobsByIds(result.deletedIds ?? [row.id]));
         setPendingDeleteDexJobIds((prev) => {
           const next = new Set(prev);
           next.delete(row.id);
           return next;
         });
+      });
+
+      showDeleteToast({
+        itemName: getDexJobLabel(row),
+        itemType: t[language].deleteType,
+        onUndo: () => {
+          cancelPendingDelete(deleteKey);
+          setPendingDeleteDexJobIds((prev) => {
+            const next = new Set(prev);
+            next.delete(row.id);
+            return next;
+          });
+        },
+        language,
+      });
+    },
+    [dispatch, language, t],
+  );
+
+  const handleDeleteSelectedDexJobs = useCallback(() => {
+    if (type !== 'dex' || selectedDexJobIds.size === 0) return;
+
+    const toDelete = dexJobsVisible.filter((job) => selectedDexJobIds.has(job.id));
+    const deleteIds = toDelete.map((row) => row.id);
+
+    setPendingDeleteDexJobIds((prev) => {
+      const next = new Set(prev);
+      deleteIds.forEach((id) => next.add(id));
+      return next;
+    });
+    setSelectedDexJobIds(new Set());
+
+    const bulkDeleteKey = buildBulkDeleteKey(DEX_JOBS_DELETE_SCOPE, deleteIds);
+
+    schedulePendingDelete(bulkDeleteKey, async () => {
+      const result = await apiService.bulkDeleteJobs(deleteIds);
+      if (!result?.success) {
+        throw new Error(language === 'ru' ? 'Не удалось удалить джобы' : 'Failed to delete jobs');
+      }
+      dispatch(dbConfigActions.removeJobsByIds(result.deletedIds ?? deleteIds));
+      setPendingDeleteDexJobIds((prev) => {
+        const next = new Set(prev);
+        deleteIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    });
+
+    showBulkDeleteToast({
+      count: toDelete.length,
+      itemType: language === 'en' ? 'jobs' : 'джоб',
+      onUndo: () => {
+        cancelPendingDelete(bulkDeleteKey);
+        setPendingDeleteDexJobIds((prev) => {
+          const next = new Set(prev);
+          deleteIds.forEach((id) => next.delete(id));
+          return next;
+        });
       },
       language,
     });
-  };
+  }, [dexJobsVisible, dispatch, language, selectedDexJobIds, type]);
 
   return (
     <div className="flex-1 flex flex-col bg-background">
       <DataTable
         title={type === 'cex' ? t[language].tableTitleCex : t[language].tableTitleDex}
         headerActions={
-          type === 'cex' ? (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingJobRaw(null);
-                  setCopiedDexJobInitialData(undefined);
-                  setJobFormOpen(true);
-                }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
-              >
-                <Plus className="w-4 h-4" />
-                <span className="text-sm">{t[language].addJob}</span>
-              </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex items-center justify-center p-2 bg-muted text-foreground rounded hover:bg-accent transition-colors"
-                    aria-label={t[language].actions}
-                    title={t[language].actions}
-                  >
-                    <Menu className="w-4 h-4" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    disabled={selectedCexJobIds.size === 0}
-                    onClick={() => setBulkBotsFormOpen(true)}
-                  >
-                    {t[language].createBotsFromSelected}
-                    {selectedCexJobIds.size > 0 ? ` (${selectedCexJobIds.size})` : ''}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    disabled={selectedCexJobIds.size === 0}
-                    variant="destructive"
-                    onClick={handleDeleteSelectedCexJobs}
-                  >
-                    {t[language].deleteSelected}
-                    {selectedCexJobIds.size > 0 ? ` (${selectedCexJobIds.size})` : ''}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : (
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -585,10 +639,39 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
               <Plus className="w-4 h-4" />
               <span className="text-sm">{t[language].addJob}</span>
             </button>
-          )
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center justify-center p-2 bg-muted text-foreground rounded hover:bg-accent transition-colors"
+                  aria-label={t[language].actions}
+                  title={t[language].actions}
+                >
+                  <Menu className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  disabled={selectedJobIds.size === 0}
+                  onClick={() => setBulkBotsFormOpen(true)}
+                >
+                  {t[language].createBotsFromSelected}
+                  {selectedJobIds.size > 0 ? ` (${selectedJobIds.size})` : ''}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={selectedJobIds.size === 0}
+                  variant="destructive"
+                  onClick={type === 'cex' ? handleDeleteSelectedCexJobs : handleDeleteSelectedDexJobs}
+                >
+                  {t[language].deleteSelected}
+                  {selectedJobIds.size > 0 ? ` (${selectedJobIds.size})` : ''}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         }
         columns={type === 'cex' ? cexColumns : dexColumns}
-        data={type === 'cex' ? cexJobsVisible : dexJobs}
+        data={type === 'cex' ? cexJobsVisible : dexJobsVisible}
         language={language}
         isLoading={
           type === 'cex'
@@ -596,8 +679,8 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
             : jobsMeta.isLoading || chainsMeta.isLoading || rpcUrlsMeta.isLoading
         }
         loadingText={type === 'cex' ? (language === 'ru' ? 'Загрузка CEX джоб…' : 'Loading CEX Jobs…') : language === 'ru' ? 'Загрузка DEX джоб…' : 'Loading DEX Jobs…'}
-        actionsColumnPosition={type === 'cex' ? 'last' : 'first'}
-        getRowId={type === 'cex' ? (params) => String(params.data?.id ?? '') : undefined}
+        actionsColumnPosition="last"
+        getRowId={(params) => String(params.data?.id ?? '')}
         onEdit={(row) => {
           setEditingJobRaw(row.raw);
           setCopiedDexJobInitialData(undefined);
@@ -654,23 +737,21 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         }
       />
 
-      {type === 'cex' && (
-        <BulkCexBotsFromJobsForm
-          open={bulkBotsFormOpen}
-          onClose={() => {
-            if (isCreatingBots) return;
-            setBulkBotsFormOpen(false);
-          }}
-          onSave={handleCreateBotsFromSelectedJobs}
-          jobs={selectedCexJobsForBots.map((job) => ({
-            id: job.id,
-            jobType: job.jobType,
-            description: job.description,
-          }))}
-          language={language}
-          isSaving={isCreatingBots}
-        />
-      )}
+      <BulkCexBotsFromJobsForm
+        open={bulkBotsFormOpen}
+        onClose={() => {
+          if (isCreatingBots) return;
+          setBulkBotsFormOpen(false);
+        }}
+        onSave={handleCreateBotsFromSelectedJobs}
+        jobs={selectedJobsForBots.map((job) => ({
+          id: job.id,
+          jobType: job.jobType,
+          description: job.description,
+        }))}
+        language={language}
+        isSaving={isCreatingBots}
+      />
 
       {type === 'cex' && (
         <CexJobForm
@@ -729,13 +810,10 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
               extraSettings: data.additionalData.trim(),
             };
 
-            if (editingJobRaw) {
-              const id = Number(editingJobRaw.jobId ?? editingJobRaw.id);
-              await apiService.editJob(id, payload);
-            } else {
-              await apiService.createJob(payload);
-            }
-            dispatch(dbConfigActions.refetchJobsListPageResources());
+            const saved = editingJobRaw
+              ? await apiService.editJob(Number(editingJobRaw.jobId ?? editingJobRaw.id), payload)
+              : await apiService.createJob(payload);
+            dispatch(dbConfigActions.upsertJob({ job: normalizeDexJobForStore(saved) }));
           }}
           initialData={
             copiedDexJobInitialData ?? (editingJobRaw ? buildDexJobInitialData(editingJobRaw) : undefined)

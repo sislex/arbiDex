@@ -77,6 +77,8 @@ const getDexChainId = (chain: any) => Number(chain.chainId ?? chain.id);
 const getCexChainId = (chain: any) => Number(chain.id ?? chain.chainId);
 const getCexPairId = (pair: any) => Number(pair.id ?? pair.pairId ?? pair.cexPairId ?? pair.cex_pair_id);
 const getCexJobId = (job: any) => Number(job.id ?? job.cexJobId ?? job.cex_job_id);
+const getDexJobId = (job: any) => Number(job.jobId ?? job.id);
+const getTokenId = (token: any) => Number(token.tokenId ?? token.id);
 
 const setFailure = (state: AsyncState<any[]>, error: string) => {
   state.loadingTime = state.startTime ? Date.now() - state.startTime : null;
@@ -126,6 +128,21 @@ const dbConfigSlice = createSlice({
     },
     setTokensDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.tokens, action.payload);
+    },
+    removeTokensByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.tokens.response = (state.tokens.response ?? []).filter((token: any) => {
+        const tokenId = Number(token.tokenId ?? token.id);
+        return !ids.has(tokenId);
+      });
+    },
+    upsertToken(state, action: PayloadAction<{ token: any }>) {
+      state.tokens.response = upsertListItem(
+        state.tokens.response ?? [],
+        action.payload.token,
+        getTokenId,
+      );
     },
 
     setPoolsData(state) {
@@ -182,6 +199,21 @@ const dbConfigSlice = createSlice({
     },
     setJobsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.jobs, action.payload);
+    },
+    removeJobsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.jobs.response = (state.jobs.response ?? []).filter((job: any) => {
+        const jobId = Number(job.jobId ?? job.id);
+        return !ids.has(jobId);
+      });
+    },
+    upsertJob(state, action: PayloadAction<{ job: any }>) {
+      state.jobs.response = upsertListItem(
+        state.jobs.response ?? [],
+        action.payload.job,
+        getDexJobId,
+      );
     },
 
     setBotsData(state) {

@@ -195,6 +195,7 @@ function* handleInitJobsListPage() {
   yield put(dbConfigActions.setJobsData());
   yield put(dbConfigActions.setChainsData());
   yield put(dbConfigActions.setRpcUrlsData());
+  yield put(dbConfigActions.setServersData());
 }
 
 function* handleInitBotsListPage() {

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { JobDto } from '../dtos/jobs-dto/job.dto';
+import { BulkDeleteJobsDto } from '../dtos/jobs-dto/bulk-delete-jobs.dto';
 
 @Controller('jobs')
 export class JobsController {
@@ -17,6 +18,11 @@ export class JobsController {
   @Post()
   create(@Body() createJobDto: JobDto) {
     return this.jobsService.create(createJobDto);
+  }
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeleteJobsDto) {
+    return this.jobsService.removeMany(body.ids ?? []);
   }
 
   @Get()
