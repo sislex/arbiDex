@@ -274,6 +274,13 @@ const dbConfigSlice = createSlice({
         getBotId,
       );
     },
+    upsertBots(state, action: PayloadAction<{ bots: any[] }>) {
+      let next = state.bots.response ?? [];
+      for (const bot of action.payload.bots ?? []) {
+        next = upsertListItem(next, bot, getBotId);
+      }
+      state.bots.response = next;
+    },
 
     setBotsByServerId(state) {
       setLoading(state.botsByServerId);

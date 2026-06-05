@@ -11,6 +11,7 @@ import {
 import { BotsService } from './bots.service';
 import { BotDto } from '../dtos/bots-dto/bot.dto';
 import { BulkDeleteBotsDto } from '../dtos/bots-dto/bulk-delete-bots.dto';
+import { BulkUpdateBotsDto } from '../dtos/bots-dto/bulk-update-bots.dto';
 
 @Controller('bots')
 export class BotsController {
@@ -51,6 +52,11 @@ export class BotsController {
   @Post('bulk-delete')
   removeMany(@Body() body: BulkDeleteBotsDto) {
     return this.botsService.removeMany(body.ids ?? []);
+  }
+
+  @Post('bulk-update')
+  updateMany(@Body() body: BulkUpdateBotsDto) {
+    return this.botsService.updateMany(body.bots ?? []);
   }
 
   @Get('findAllByJobId')

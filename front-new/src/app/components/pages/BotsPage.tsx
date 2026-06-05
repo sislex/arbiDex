@@ -1,4 +1,5 @@
 import { ArrowRight, Copy, Menu, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -21,8 +22,12 @@ import {
 } from '../../utils/pendingDeleteScheduler';
 import { resolveBotDexJobId } from '../../utils/botJobId';
 import { apiService } from '../../services/api-service';
-import { normalizeBotForStore } from '../../utils/bot';
+import { buildBotEditPayload, normalizeBotForStore } from '../../utils/bot';
 import { BotForm, type BotFormValues } from '../forms/BotForm';
+import {
+  BulkSetBotsServerForm,
+  type BulkSetBotsServerFormValues,
+} from '../forms/BulkSetBotsServerForm';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,6 +99,8 @@ export function BotsPage({
   const [pendingDeleteBotIds, setPendingDeleteBotIds] = useState<Set<number>>(new Set());
   const [selectedBotIds, setSelectedBotIds] = useState<Set<number>>(new Set());
   const [tableRows, setTableRows] = useState<ReturnType<typeof mapBotRow>[]>([]);
+  const [setServerFormOpen, setSetServerFormOpen] = useState(false);
+  const [isSettingServer, setIsSettingServer] = useState(false);
   const headerCheckboxRef = useRef<HTMLInputElement>(null);
   const botsFromStoreRef = useRef<any[] | null>(null);
 
@@ -235,6 +242,9 @@ export function BotsPage({
       deleteSelected: 'Delete selected',
       deleteFailed: 'Failed to delete bots',
       deleteType: 'Bot',
+      setServer: 'Set server',
+      setServerFailed: 'Failed to set server for bots',
+      setServerSuccess: (count: number) => `Server updated for ${count} bot(s)`,
     },
     ru: {
       botId: 'ID бота',
@@ -250,8 +260,66 @@ export function BotsPage({
       deleteSelected: 'Удалить выбранные',
       deleteFailed: 'Не удалось удалить ботов',
       deleteType: 'Bot',
+      setServer: 'Задать сервер',
+      setServerFailed: 'Не удалось задать сервер для ботов',
+      setServerSuccess: (count: number) => `Сервер обновлён для ${count} бот(ов)`,
     },
   };
+
+  const botRawById = useMemo(() => {
+    const map = new Map<number, any>();
+    (Array.isArray(botsRaw) ? botsRaw : []).forEach((bot: any) => {
+      const id = Number(bot.botId ?? bot.id);
+      if (Number.isFinite(id)) map.set(id, bot);
+    });
+    return map;
+  }, [botsRaw]);
+
+  const selectedBotsForServer = useMemo(() => {
+    return [...selectedBotIds].map((id) => {
+      const row = tableRows.find((bot) => bot.id === id);
+      return { id, name: row?.name ?? `Bot #${id}` };
+    });
+  }, [selectedBotIds, tableRows]);
+
+  const handleSetServerForSelected = useCallback(
+    async ({ serverId }: BulkSetBotsServerFormValues) => {
+      const ids = [...selectedBotIds];
+      const nextServerId = Number(serverId);
+      if (!Number.isFinite(nextServerId) || ids.length === 0) return;
+
+      const botsPayload = ids
+        .map((id) => {
+          const bot = botRawById.get(id);
+          if (!bot) return null;
+          return buildBotEditPayload(bot, { serverId: nextServerId });
+        })
+        .filter((bot): bot is NonNullable<typeof bot> => bot != null);
+
+      if (botsPayload.length === 0) return;
+
+      setIsSettingServer(true);
+      try {
+        const result = await apiService.bulkUpdateBots(botsPayload);
+        if (!result?.success) {
+          throw new Error(t[language].setServerFailed);
+        }
+        dispatch(
+          dbConfigActions.upsertBots({
+            bots: (result.bots ?? botsPayload).map((bot) => normalizeBotForStore(bot)),
+          }),
+        );
+        toast.success(t[language].setServerSuccess(botsPayload.length));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        toast.error(message || t[language].setServerFailed);
+        throw error;
+      } finally {
+        setIsSettingServer(false);
+      }
+    },
+    [botRawById, dispatch, language, selectedBotIds, t],
+  );
 
   const scheduleDelete = useCallback(
     (row: { id: number; name: string }) => {
@@ -406,6 +474,13 @@ export function BotsPage({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     disabled={selectedBotIds.size === 0}
+                    onClick={() => setSetServerFormOpen(true)}
+                  >
+                    {t[language].setServer}
+                    {selectedBotIds.size > 0 ? ` (${selectedBotIds.size})` : ''}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={selectedBotIds.size === 0}
                     variant="destructive"
                     onClick={handleDeleteSelected}
                   >
@@ -478,6 +553,18 @@ export function BotsPage({
         />
       </div>
 
+      <BulkSetBotsServerForm
+        open={setServerFormOpen}
+        onClose={() => {
+          if (isSettingServer) return;
+          setSetServerFormOpen(false);
+        }}
+        onSave={handleSetServerForSelected}
+        bots={selectedBotsForServer}
+        language={language}
+        isSaving={isSettingServer}
+      />
+
       <BotForm
         open={formOpen}
         onClose={() => {
@@ -486,19 +573,24 @@ export function BotsPage({
           setCopiedBotInitialData(undefined);
         }}
         onSave={async (data) => {
-          const payload = {
-            botName: data.botName.trim(),
-            description: data.description.trim(),
-            jobId: data.mode === 'DEX' ? Number(data.dexJobId) : null,
-            cexJobId: data.mode === 'CEX' ? Number(data.cexJobId) : null,
-            serverId: Number(data.serverId),
-            paused: data.paused,
-            isRepeat: data.isRepeat,
-            delayBetweenRepeat: Number(data.delayBetweenRepeat),
-            maxJobs: Number(data.maxJobs),
-            maxErrors: Number(data.maxErrors),
-            timeoutMs: Number(data.timeoutMs),
-          };
+          const base = editingBotRaw ?? {};
+          const payload = buildBotEditPayload(
+            {
+              ...base,
+              botName: data.botName.trim(),
+              description: data.description.trim(),
+              jobId: data.mode === 'DEX' ? Number(data.dexJobId) : null,
+              cexJobId: data.mode === 'CEX' ? Number(data.cexJobId) : null,
+              serverId: Number(data.serverId),
+              paused: data.paused,
+              isRepeat: data.isRepeat,
+              delayBetweenRepeat: Number(data.delayBetweenRepeat),
+              maxJobs: Number(data.maxJobs),
+              maxErrors: Number(data.maxErrors),
+              timeoutMs: Number(data.timeoutMs),
+            },
+            { serverId: Number(data.serverId) },
+          );
 
           if (editingBotRaw) {
             const id = Number(editingBotRaw.botId ?? editingBotRaw.id);

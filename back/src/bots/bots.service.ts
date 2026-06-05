@@ -172,6 +172,46 @@ export class BotsService {
     return bot;
   }
 
+  async updateMany(items: BotDto[]) {
+    const bots = (items ?? []).filter(
+      (item) => item != null && Number.isFinite(Number(item.botId)) && Number(item.botId) > 0,
+    );
+
+    if (bots.length === 0) {
+      return { success: true as const, bots: [] as Array<ReturnType<BotsService['mapBotListItem']>> };
+    }
+
+    const updated: Array<ReturnType<BotsService['mapBotListItem']>> = [];
+
+    for (const item of bots) {
+      const saved = await this.update(Number(item.botId), item);
+      if (!saved) {
+        throw new Error(`Bot with id ${item.botId} not found after update`);
+      }
+      updated.push(this.mapBotListItem(saved));
+    }
+
+    return { success: true as const, bots: updated };
+  }
+
+  mapBotListItem(bot: Bots) {
+    return {
+      botId: Number(bot.botId),
+      botName: bot.botName,
+      delayBetweenRepeat: bot.delayBetweenRepeat,
+      description: bot.description,
+      isRepeat: bot.isRepeat,
+      maxErrors: bot.maxErrors,
+      maxJobs: bot.maxJobs,
+      paused: bot.paused,
+      timeoutMs: bot.timeoutMs,
+      poolsCount: bot.job?.poolsJobRelations?.length ?? 0,
+      serverId: bot.server?.serverId ?? null,
+      jobId: bot.job?.jobId ?? null,
+      cexJobId: bot.cexJob?.id ?? null,
+    };
+  }
+
   async update(id: number, updateBotDto: BotDto) {
     const bot = await this.findOne(id);
 
@@ -203,7 +243,20 @@ export class BotsService {
     bot.maxErrors = updateBotDto.maxErrors;
     bot.timeoutMs = updateBotDto.timeoutMs;
 
-    return await this.botRepository.save(bot);
+    const saved = await this.botRepository.save(bot);
+    const reloaded = await this.botRepository.findOne({
+      relationLoadStrategy: 'query',
+      relations: {
+        server: true,
+        job: { poolsJobRelations: true },
+        cexJob: true,
+      },
+      where: { botId: saved.botId },
+    });
+    if (!reloaded) {
+      throw new Error(`Bot with id ${id} not found after update`);
+    }
+    return reloaded;
   }
 
   async remove(id: number) {
