@@ -41,7 +41,7 @@ export function ServerDetailsPage({
       jobName: 'Job Name',
       poolsCount: 'Pools count',
       getConfig: 'GET CONFIG',
-      resetServer: 'RESET SERVER',
+      launchConfig: 'LAUNCH CONFIG',
       cancel: 'CANCEL',
       loading: 'Loading server relations…',
     },
@@ -54,7 +54,7 @@ export function ServerDetailsPage({
       jobName: 'Имя задачи',
       poolsCount: 'Кол-во пулов',
       getConfig: 'ПОЛУЧИТЬ КОНФИГ',
-      resetServer: 'СБРОСИТЬ СЕРВЕР',
+      launchConfig: 'ЗАПУСТИТЬ КОНФИГ',
       cancel: 'ОТМЕНА',
       loading: 'Загрузка связей сервера…',
       close: 'ЗАКРЫТЬ',
@@ -293,7 +293,7 @@ export function ServerDetailsPage({
           className="px-6 py-2 bg-destructive text-destructive-foreground rounded hover:opacity-90 transition-opacity flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RefreshCw className="w-4 h-4" />
-          {t[language].resetServer}
+          {t[language].launchConfig}
         </button>
         <button
           onClick={() => {

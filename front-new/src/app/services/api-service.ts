@@ -126,6 +126,10 @@ export const apiService = {
   createServer: (data: any) => request<any>("POST", "/servers", { body: { ...data } }),
   editServer: (id: number, data: any) => request<any>("PUT", `/servers/${id}`, { body: data }),
   deletingServer: (id: number) => request<any>("DELETE", `/servers/${id}`),
+  bulkDeleteServers: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/servers/bulk-delete", {
+      body: { ids },
+    }),
   resetServerSettings: (ip: string, port: string, data: any) => {
     return fetch(`${buildServerBaseUrl(ip, port)}/setBotsRulesList`, {
       method: "POST",

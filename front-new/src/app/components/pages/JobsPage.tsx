@@ -708,6 +708,18 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
               )
             : (row) => (
                 <>
+                  {onDexJobClick ? (
+                    <button
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDexJobClick(row.id, row.description || `Job #${row.id}`);
+                      }}
+                      className="p-1.5 hover:bg-success/10 rounded transition-colors"
+                      title={language === 'ru' ? 'Связи' : 'Relations'}
+                    >
+                      <ArrowRight className="w-3.5 h-3.5 text-success" />
+                    </button>
+                  ) : null}
                   <button
                     onClick={(event) => {
                       event.stopPropagation();
@@ -720,18 +732,6 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
                   >
                     <Copy className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
                   </button>
-                  {onDexJobClick ? (
-                    <button
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onDexJobClick(row.id, row.description || `Job #${row.id}`);
-                      }}
-                      className="p-1.5 hover:bg-accent rounded transition-colors"
-                      title={language === 'ru' ? 'Связи' : 'Relations'}
-                    >
-                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
-                    </button>
-                  ) : null}
                 </>
               )
         }

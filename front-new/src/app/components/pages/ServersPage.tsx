@@ -1,13 +1,24 @@
+import { Menu, Plus } from 'lucide-react';
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
-import { Plus } from 'lucide-react';
-import { showDeleteToast } from '../../utils/toast';
-import { cancelPendingDelete, schedulePendingDelete } from '../../utils/pendingDeleteScheduler';
-import { useEffect, useMemo, useState } from 'react';
+import { showBulkDeleteToast, showDeleteToast } from '../../utils/toast';
+import {
+  buildBulkDeleteKey,
+  cancelPendingDelete,
+  schedulePendingDelete,
+} from '../../utils/pendingDeleteScheduler';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { selectServersDataResponse, selectServersMeta } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
+import { normalizeServerForStore } from '../../utils/server';
 import { ServerForm } from '../forms/ServerForm';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 const SERVERS_DELETE_SCOPE = 'servers';
 const STATUS_REFRESH_MS = 15000;
@@ -18,6 +29,17 @@ function buildServerBaseUrl(ip: string, port: string): string {
   return normalizedPort ? `http://${normalizedIp}:${normalizedPort}` : `http://${normalizedIp}`;
 }
 
+function mapServerRow(server: any) {
+  return {
+    id: Number(server.serverId ?? server.id),
+    status: server.status ?? '',
+    ip: server.ip ?? '',
+    port: server.port ?? '',
+    name: server.serverName ?? server.name ?? '',
+    raw: server,
+  };
+}
+
 export function ServersPage({
   language,
   onServerClick,
@@ -26,13 +48,17 @@ export function ServersPage({
   onServerClick?: (server: { id: number; name: string }) => void;
 }) {
   const dispatch = useAppDispatch();
-  const serversFromStore = useAppSelector(selectServersDataResponse);
+  const serversRaw = useAppSelector(selectServersDataResponse);
   const serversMeta = useAppSelector(selectServersMeta);
   const [pendingDeleteServerIds, setPendingDeleteServerIds] = useState<Set<number>>(new Set());
-  const [selectedServer, setSelectedServer] = useState<any>(null);
+  const [selectedServerIds, setSelectedServerIds] = useState<Set<number>>(new Set());
+  const [highlightedServer, setHighlightedServer] = useState<any>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingServerRaw, setEditingServerRaw] = useState<any>(null);
+  const [tableRows, setTableRows] = useState<ReturnType<typeof mapServerRow>[]>([]);
   const [statusByServerId, setStatusByServerId] = useState<Record<number, 'pending' | 'success' | 'error'>>({});
+  const headerCheckboxRef = useRef<HTMLInputElement>(null);
+  const serversFromStoreRef = useRef<any[] | null>(null);
 
   useEffect(() => {
     if ((!serversMeta.isLoaded || serversMeta.error) && !serversMeta.isLoading) {
@@ -40,31 +66,91 @@ export function ServersPage({
     }
   }, [dispatch, serversMeta.error, serversMeta.isLoaded, serversMeta.isLoading]);
 
-  const servers = useMemo(() => {
-    return serversFromStore
-      .map((server: any) => ({
-        id: server.serverId ?? server.id,
-        status: server.status ?? '',
-        ip: server.ip ?? '',
-        port: server.port ?? '',
-        name: server.serverName ?? server.name ?? '',
-        raw: server,
-      }))
-      .filter((server) => !pendingDeleteServerIds.has(server.id));
-  }, [pendingDeleteServerIds, serversFromStore]);
+  useEffect(() => {
+    const prevStore = serversFromStoreRef.current;
+    const nextStore = Array.isArray(serversRaw) ? serversRaw : [];
+    serversFromStoreRef.current = nextStore;
+
+    if (!prevStore) {
+      setTableRows(nextStore.map(mapServerRow));
+      return;
+    }
+
+    const prevLen = prevStore.length;
+    const nextLen = nextStore.length;
+
+    if (prevLen > 0 && nextLen < prevLen) {
+      const nextIds = new Set(nextStore.map((server: any) => Number(server.serverId ?? server.id)));
+      setTableRows((current) => current.filter((row) => nextIds.has(row.id)));
+      return;
+    }
+
+    if (prevLen === nextLen && prevStore === nextStore) {
+      return;
+    }
+
+    setTableRows(nextStore.map(mapServerRow));
+  }, [serversRaw]);
+
+  const visibleServerIds = useMemo(() => {
+    if (pendingDeleteServerIds.size === 0) {
+      return tableRows.map((server) => server.id);
+    }
+    const ids: number[] = [];
+    for (const server of tableRows) {
+      if (!pendingDeleteServerIds.has(server.id)) {
+        ids.push(server.id);
+      }
+    }
+    return ids;
+  }, [pendingDeleteServerIds, tableRows]);
+
+  const visibleServersForStatus = useMemo(() => {
+    return tableRows.filter((server) => !pendingDeleteServerIds.has(server.id));
+  }, [pendingDeleteServerIds, tableRows]);
+
+  const allServerIds = visibleServerIds;
+  const allSelected = allServerIds.length > 0 && allServerIds.every((id) => selectedServerIds.has(id));
+  const someSelected = allServerIds.some((id) => selectedServerIds.has(id));
 
   useEffect(() => {
-    if (!servers.length) {
+    const el = headerCheckboxRef.current;
+    if (el) {
+      el.indeterminate = someSelected && !allSelected;
+    }
+  }, [allSelected, someSelected]);
+
+  const updatePendingDeleteServerIds = useCallback((updater: (prev: Set<number>) => Set<number>) => {
+    startTransition(() => {
+      setPendingDeleteServerIds(updater);
+    });
+  }, []);
+
+  const toggleServer = useCallback((id: number) => {
+    setSelectedServerIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleAllServers = useCallback(() => {
+    setSelectedServerIds(allSelected ? new Set() : new Set(allServerIds));
+  }, [allServerIds, allSelected]);
+
+  useEffect(() => {
+    if (!visibleServersForStatus.length) {
       setStatusByServerId({});
       return;
     }
 
     let cancelled = false;
-    const activeIds = new Set(servers.map((server) => server.id));
+    const activeIds = new Set(visibleServersForStatus.map((server) => server.id));
 
     setStatusByServerId((current) => {
       const next: Record<number, 'pending' | 'success' | 'error'> = {};
-      servers.forEach((server) => {
+      visibleServersForStatus.forEach((server) => {
         next[server.id] = current[server.id] ?? 'pending';
       });
       return next;
@@ -85,7 +171,7 @@ export function ServersPage({
     };
 
     const runChecks = () => {
-      servers.forEach((server) => {
+      visibleServersForStatus.forEach((server) => {
         setStatusByServerId((current) => ({ ...current, [server.id]: 'pending' }));
         void checkServer(server);
       });
@@ -98,7 +184,7 @@ export function ServersPage({
       cancelled = true;
       clearInterval(timer);
     };
-  }, [servers]);
+  }, [visibleServersForStatus]);
 
   const t = {
     en: {
@@ -109,6 +195,10 @@ export function ServersPage({
       serverName: 'Server Name',
       tableTitle: 'Servers',
       add: 'Add Server',
+      actions: 'Actions',
+      deleteSelected: 'Delete selected',
+      deleteFailed: 'Failed to delete servers',
+      deleteType: 'Server',
       pending: 'Waiting',
       success: 'OK',
       error: 'Error',
@@ -121,6 +211,10 @@ export function ServersPage({
       serverName: 'Имя сервера',
       tableTitle: 'Серверы',
       add: 'Добавить сервер',
+      actions: 'Действия',
+      deleteSelected: 'Удалить выбранные',
+      deleteFailed: 'Не удалось удалить серверы',
+      deleteType: 'Сервер',
       pending: 'Ожидание',
       success: 'Успех',
       error: 'Ошибка',
@@ -154,7 +248,119 @@ export function ServersPage({
     );
   };
 
+  const scheduleDelete = useCallback(
+    (row: { id: number; name: string }) => {
+      updatePendingDeleteServerIds((prev) => new Set(prev).add(row.id));
+      setSelectedServerIds((prev) => {
+        const next = new Set(prev);
+        next.delete(row.id);
+        return next;
+      });
+
+      const deleteKey = `${SERVERS_DELETE_SCOPE}:${row.id}`;
+
+      schedulePendingDelete(deleteKey, async () => {
+        const result = await apiService.bulkDeleteServers([row.id]);
+        dispatch(dbConfigActions.removeServersByIds(result.deletedIds ?? [row.id]));
+        updatePendingDeleteServerIds((prev) => {
+          const next = new Set(prev);
+          next.delete(row.id);
+          return next;
+        });
+      });
+
+      showDeleteToast({
+        itemName: row.name,
+        itemType: t[language].deleteType,
+        onUndo: () => {
+          cancelPendingDelete(deleteKey);
+          updatePendingDeleteServerIds((prev) => {
+            const next = new Set(prev);
+            next.delete(row.id);
+            return next;
+          });
+        },
+        language,
+      });
+    },
+    [dispatch, language, t, updatePendingDeleteServerIds],
+  );
+
+  const handleDeleteSelected = useCallback(() => {
+    if (selectedServerIds.size === 0) return;
+
+    const deleteIds = [...selectedServerIds];
+
+    updatePendingDeleteServerIds((prev) => {
+      const next = new Set(prev);
+      deleteIds.forEach((id) => next.add(id));
+      return next;
+    });
+    setSelectedServerIds(new Set());
+
+    const bulkDeleteKey = buildBulkDeleteKey(SERVERS_DELETE_SCOPE, deleteIds);
+
+    schedulePendingDelete(bulkDeleteKey, async () => {
+      const result = await apiService.bulkDeleteServers(deleteIds);
+      if (!result?.success) {
+        throw new Error(t[language].deleteFailed);
+      }
+      dispatch(dbConfigActions.removeServersByIds(result.deletedIds ?? deleteIds));
+      updatePendingDeleteServerIds((prev) => {
+        const next = new Set(prev);
+        deleteIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    });
+
+    showBulkDeleteToast({
+      count: deleteIds.length,
+      itemType: language === 'en' ? 'servers' : 'серверов',
+      onUndo: () => {
+        cancelPendingDelete(bulkDeleteKey);
+        updatePendingDeleteServerIds((prev) => {
+          const next = new Set(prev);
+          deleteIds.forEach((id) => next.delete(id));
+          return next;
+        });
+      },
+      language,
+    });
+  }, [dispatch, language, selectedServerIds, t, updatePendingDeleteServerIds]);
+
   const columns: Column[] = [
+    {
+      key: 'checkbox',
+      label: '',
+      headerRender: () => (
+        <input
+          ref={headerCheckboxRef}
+          type="checkbox"
+          checked={allSelected}
+          onChange={toggleAllServers}
+          className="w-4 h-4 rounded border-input bg-input accent-primary cursor-pointer"
+          onClick={(event) => event.stopPropagation()}
+          title={
+            allSelected
+              ? language === 'ru'
+                ? 'Снять все'
+                : 'Deselect all'
+              : language === 'ru'
+                ? 'Отметить все'
+                : 'Select all'
+          }
+        />
+      ),
+      render: (_, row) => (
+        <input
+          type="checkbox"
+          checked={selectedServerIds.has(row.id)}
+          onChange={() => toggleServer(row.id)}
+          className="w-4 h-4 rounded border-input bg-input accent-primary cursor-pointer"
+          onClick={(event) => event.stopPropagation()}
+        />
+      ),
+    },
     { key: 'id', label: t[language].serverId, sortable: true, filterable: true },
     {
       key: 'status',
@@ -178,65 +384,65 @@ export function ServersPage({
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      <div className="flex-1 flex flex-col border-b border-border overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <DataTable
           title={t[language].tableTitle}
           headerActions={
-            <button
-              onClick={() => {
-                setEditingServerRaw(null);
-                setFormOpen(true);
-              }}
-              className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="text-sm">{t[language].add}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setEditingServerRaw(null);
+                  setFormOpen(true);
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm">{t[language].add}</span>
+              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center p-2 bg-muted text-foreground rounded hover:bg-accent transition-colors"
+                    aria-label={t[language].actions}
+                    title={t[language].actions}
+                  >
+                    <Menu className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    disabled={selectedServerIds.size === 0}
+                    variant="destructive"
+                    onClick={handleDeleteSelected}
+                  >
+                    {t[language].deleteSelected}
+                    {selectedServerIds.size > 0 ? ` (${selectedServerIds.size})` : ''}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           }
           columns={columns}
-          data={servers}
+          data={tableRows}
+          excludeRowIds={pendingDeleteServerIds}
+          getExcludeRowId={(row) => row.id}
           language={language}
           isLoading={serversMeta.isLoading}
           loadingText={language === 'ru' ? 'Загрузка серверов…' : 'Loading Servers…'}
+          actionsColumnPosition="last"
+          getRowId={(params) => String(params.data?.id ?? '')}
           onEdit={(row) => {
             setEditingServerRaw(row.raw ?? row);
             setFormOpen(true);
           }}
-          onDelete={(row) => {
-            setPendingDeleteServerIds((prev) => new Set(prev).add(row.id));
-            const deleteKey = `${SERVERS_DELETE_SCOPE}:${row.id}`;
-
-            schedulePendingDelete(deleteKey, async () => {
-              await apiService.deletingServer(row.id);
-              dispatch(dbConfigActions.refetchServersData());
-              setPendingDeleteServerIds((prev) => {
-                const next = new Set(prev);
-                next.delete(row.id);
-                return next;
-              });
-            });
-
-            showDeleteToast({
-              itemName: row.name,
-              itemType: language === 'en' ? 'Server' : 'Сервер',
-              onUndo: () => {
-                cancelPendingDelete(deleteKey);
-                setPendingDeleteServerIds((prev) => {
-                  const next = new Set(prev);
-                  next.delete(row.id);
-                  return next;
-                });
-              },
-              language,
-            });
-          }}
+          onDelete={scheduleDelete}
           onRowDoubleClick={(row) => {
-            setSelectedServer(row);
+            setHighlightedServer(row);
             onServerClick?.({ id: Number(row.id), name: row.name || `Server #${row.id}` });
           }}
-          onRowClick={(row) => setSelectedServer(row)}
-          selectedRow={selectedServer}
-          selectionMode="single"
+          onRowClick={(row) => setHighlightedServer(row)}
+          selectedRow={highlightedServer}
         />
       </div>
 
@@ -254,11 +460,12 @@ export function ServersPage({
           };
           if (editingServerRaw) {
             const id = Number(editingServerRaw.serverId ?? editingServerRaw.id);
-            await apiService.editServer(id, payload);
+            const saved = await apiService.editServer(id, payload);
+            dispatch(dbConfigActions.upsertServer({ server: normalizeServerForStore(saved) }));
           } else {
-            await apiService.createServer(payload);
+            const saved = await apiService.createServer(payload);
+            dispatch(dbConfigActions.upsertServer({ server: normalizeServerForStore(saved) }));
           }
-          dispatch(dbConfigActions.refetchServersData());
         }}
         initialData={
           editingServerRaw

@@ -539,7 +539,7 @@ export function BotsPage({
                 className="p-1.5 hover:bg-accent rounded transition-colors"
                 title={language === 'ru' ? 'Копировать' : 'Copy'}
               >
-                <Copy className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                <Copy className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
               </button>
             </>
           )}
