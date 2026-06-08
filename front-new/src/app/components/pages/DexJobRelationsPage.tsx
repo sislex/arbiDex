@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Columns2, Plus, Rows2, Save, Trash2 } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { DataTable, Column } from '../DataTable';
@@ -8,8 +8,10 @@ import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import {
   selectDexesMeta,
   selectFullPoolsData,
+  selectJobsDataResponse,
   selectPoolsMeta,
 } from '../../store/db-config/dbConfig.selectors';
+import { normalizeDexJobForStore } from '../../utils/dexJob';
 
 interface DexJobRelationsPageProps {
   jobId: number;
@@ -52,9 +54,19 @@ const mapPoolToRow = (pool: any, relationId?: number): PoolJobRow => ({
   fee: String(pool.fee ?? '-'),
 });
 
+const extractRelationMeta = (relation: any): { poolId: number; relationId: number } | null => {
+  const poolId = Number(relation?.pool?.poolId ?? relation?.poolId);
+  const relationId = Number(
+    relation?.poolsJobRelationId ?? relation?.pools_job_relation_id ?? relation?.id,
+  );
+  if (!Number.isFinite(poolId) || !Number.isFinite(relationId)) return null;
+  return { poolId, relationId };
+};
+
 export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJobRelationsPageProps) {
   const dispatch = useAppDispatch();
   const pools = useAppSelector(selectFullPoolsData);
+  const jobsFromStore = useAppSelector(selectJobsDataResponse);
   const poolsMeta = useAppSelector(selectPoolsMeta);
   const dexesMeta = useAppSelector(selectDexesMeta);
 
@@ -63,10 +75,22 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
   const [activePoolIds, setActivePoolIds] = useState<Set<number>>(new Set());
   const [initialActivePoolIds, setInitialActivePoolIds] = useState<Set<number>>(new Set());
   const [relationIdByPoolId, setRelationIdByPoolId] = useState<Map<number, number>>(new Map());
+  const [inTableRows, setInTableRows] = useState<PoolJobRow[]>([]);
+  const [notInTableRows, setNotInTableRows] = useState<PoolJobRow[]>([]);
   const [selectedInRows, setSelectedInRows] = useState<Set<number>>(new Set());
   const [selectedNotInRows, setSelectedNotInRows] = useState<Set<number>>(new Set());
-  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const inTableRowsRef = useRef<PoolJobRow[]>([]);
+  const notInTableRowsRef = useRef<PoolJobRow[]>([]);
+
+  useEffect(() => {
+    inTableRowsRef.current = inTableRows;
+  }, [inTableRows]);
+
+  useEffect(() => {
+    notInTableRowsRef.current = notInTableRows;
+  }, [notInTableRows]);
 
   const t = {
     en: {
@@ -117,62 +141,84 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
     return (pools ?? []).filter((pool: any) => Number(pool.chainId) === jobChainId);
   }, [jobChainId, pools]);
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const [job, activeRelationsRaw] = await Promise.all([
-        apiService.getJobById(jobId),
-        apiService.getPoolJobRelationsByJobId(jobId),
-      ]);
+  const poolById = useMemo(
+    () => new Map(chainPools.map((pool: any) => [Number(pool.poolId ?? pool.id), pool])),
+    [chainPools],
+  );
 
-      const chainId = Number(job?.chainId);
-      setJobChainId(Number.isFinite(chainId) ? chainId : null);
+  const applyRelationState = useCallback(
+    (
+      nextActivePoolIds: Set<number>,
+      nextRelationMap: Map<number, number>,
+      poolsForRows: any[],
+    ) => {
+      const inRows: PoolJobRow[] = [];
+      const notRows: PoolJobRow[] = [];
 
-      const nextActivePoolIds = new Set<number>();
-      const nextRelationMap = new Map<number, number>();
-
-      (activeRelationsRaw ?? []).forEach((relation: any) => {
-        const poolId = Number(relation?.pool?.poolId ?? relation?.poolId);
-        const relationId = Number(
-          relation?.poolsJobRelationId ?? relation?.pools_job_relation_id ?? relation?.id,
-        );
-        if (Number.isFinite(poolId)) {
-          nextActivePoolIds.add(poolId);
-          if (Number.isFinite(relationId)) nextRelationMap.set(poolId, relationId);
+      poolsForRows.forEach((pool) => {
+        const poolId = Number(pool.poolId ?? pool.id);
+        if (nextActivePoolIds.has(poolId)) {
+          inRows.push(mapPoolToRow(pool, nextRelationMap.get(poolId)));
+        } else {
+          notRows.push(mapPoolToRow(pool));
         }
       });
 
       setActivePoolIds(nextActivePoolIds);
       setInitialActivePoolIds(new Set(nextActivePoolIds));
       setRelationIdByPoolId(nextRelationMap);
+      setInTableRows(inRows);
+      setNotInTableRows(notRows);
       setSelectedInRows(new Set());
       setSelectedNotInRows(new Set());
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!poolsMeta.isLoaded || poolsMeta.isLoading) return;
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobId, poolsMeta.isLoaded, poolsMeta.isLoading]);
 
-  const inRelations = useMemo(
-    () =>
-      chainPools
-        .filter((pool: any) => activePoolIds.has(Number(pool.poolId)))
-        .map((pool: any) => mapPoolToRow(pool, relationIdByPoolId.get(Number(pool.poolId)))),
-    [activePoolIds, chainPools, relationIdByPoolId],
-  );
+    let mounted = true;
 
-  const notInRelations = useMemo(
-    () =>
-      chainPools
-        .filter((pool: any) => !activePoolIds.has(Number(pool.poolId)))
-        .map((pool: any) => mapPoolToRow(pool)),
-    [activePoolIds, chainPools],
-  );
+    const loadInitialData = async () => {
+      setIsInitialLoading(true);
+      try {
+        const [job, activeRelationsRaw] = await Promise.all([
+          apiService.getJobById(jobId),
+          apiService.getPoolJobRelationsByJobId(jobId),
+        ]);
+        if (!mounted) return;
+
+        const chainId = Number(job?.chainId);
+        const resolvedChainId = Number.isFinite(chainId) ? chainId : null;
+        setJobChainId(resolvedChainId);
+
+        const poolsForChain = (pools ?? []).filter(
+          (pool: any) => resolvedChainId == null || Number(pool.chainId) === resolvedChainId,
+        );
+
+        const nextActivePoolIds = new Set<number>();
+        const nextRelationMap = new Map<number, number>();
+
+        (activeRelationsRaw ?? []).forEach((relation: any) => {
+          const meta = extractRelationMeta(relation);
+          if (!meta) return;
+          nextActivePoolIds.add(meta.poolId);
+          nextRelationMap.set(meta.poolId, meta.relationId);
+        });
+
+        applyRelationState(nextActivePoolIds, nextRelationMap, poolsForChain);
+      } finally {
+        if (mounted) setIsInitialLoading(false);
+      }
+    };
+
+    void loadInitialData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [applyRelationState, jobId, pools, poolsMeta.isLoaded, poolsMeta.isLoading]);
 
   const hasChanges = useMemo(
     () => !areSetsEqual(activePoolIds, initialActivePoolIds),
@@ -191,66 +237,143 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
     });
   };
 
+  const moveRowsBetweenTables = useCallback(
+    (poolIds: Iterable<number>, toActive: boolean) => {
+      const ids = [...poolIds];
+      if (ids.length === 0) return;
+
+      const idSet = new Set(ids);
+      const movingRows: PoolJobRow[] = [];
+
+      if (toActive) {
+        const nextNot = notInTableRowsRef.current.filter((row) => {
+          if (!idSet.has(row.poolId)) return true;
+          const pool = poolById.get(row.poolId);
+          if (pool) movingRows.push(mapPoolToRow(pool));
+          return false;
+        });
+        setNotInTableRows(nextNot);
+        setInTableRows([...inTableRowsRef.current, ...movingRows]);
+      } else {
+        const nextIn = inTableRowsRef.current.filter((row) => {
+          if (!idSet.has(row.poolId)) return true;
+          const pool = poolById.get(row.poolId);
+          if (pool) movingRows.push(mapPoolToRow(pool));
+          return false;
+        });
+        setInTableRows(nextIn);
+        setNotInTableRows([...notInTableRowsRef.current, ...movingRows]);
+      }
+
+      setActivePoolIds((prev) => {
+        const next = new Set(prev);
+        ids.forEach((poolId) => {
+          if (toActive) next.add(poolId);
+          else next.delete(poolId);
+        });
+        return next;
+      });
+
+      setSelectedInRows((prev) => {
+        const next = new Set(prev);
+        ids.forEach((id) => next.delete(id));
+        return next;
+      });
+      setSelectedNotInRows((prev) => {
+        const next = new Set(prev);
+        ids.forEach((id) => next.delete(id));
+        return next;
+      });
+    },
+    [poolById],
+  );
+
   const moveSingle = (poolId: number, toActive: boolean) => {
-    setActivePoolIds((prev) => {
-      const next = new Set(prev);
-      if (toActive) next.add(poolId);
-      else next.delete(poolId);
-      return next;
-    });
-    setSelectedInRows((prev) => {
-      const next = new Set(prev);
-      next.delete(poolId);
-      return next;
-    });
-    setSelectedNotInRows((prev) => {
-      const next = new Set(prev);
-      next.delete(poolId);
-      return next;
-    });
+    moveRowsBetweenTables([poolId], toActive);
   };
 
   const handleRemoveSelected = () => {
-    setActivePoolIds((prev) => {
-      const next = new Set(prev);
-      selectedInRows.forEach((id) => next.delete(id));
-      return next;
-    });
-    setSelectedInRows(new Set());
+    moveRowsBetweenTables(selectedInRows, false);
   };
 
   const handleAddSelected = () => {
-    setActivePoolIds((prev) => {
-      const next = new Set(prev);
-      selectedNotInRows.forEach((id) => next.add(id));
-      return next;
-    });
-    setSelectedNotInRows(new Set());
+    moveRowsBetweenTables(selectedNotInRows, true);
   };
+
+  const patchJobPoolsCountInStore = useCallback(
+    (poolsCount: number) => {
+      const existing = (jobsFromStore ?? []).find(
+        (job: any) => Number(job.jobId ?? job.id) === jobId,
+      );
+      if (!existing) return;
+
+      dispatch(
+        dbConfigActions.upsertJob({
+          job: normalizeDexJobForStore({
+            ...existing,
+            poolsCount,
+          }),
+        }),
+      );
+    },
+    [dispatch, jobId, jobsFromStore],
+  );
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       const toCreate = Array.from(activePoolIds).filter((poolId) => !initialActivePoolIds.has(poolId));
-      const removedPoolIds = Array.from(initialActivePoolIds).filter((poolId) => !activePoolIds.has(poolId));
+      const removedPoolIds = Array.from(initialActivePoolIds).filter(
+        (poolId) => !activePoolIds.has(poolId),
+      );
       const toDelete = removedPoolIds
         .map((poolId) => relationIdByPoolId.get(poolId))
         .filter((id): id is number => Number.isFinite(Number(id)));
 
+      let createdRelations: any[] = [];
       if (toCreate.length > 0) {
-        await apiService.createPoolJobRelations(
+        const result = await apiService.createPoolJobRelations(
           toCreate.map((poolId) => ({
             jobId,
             poolId,
           })),
         );
+        createdRelations = Array.isArray(result) ? result : result ? [result] : [];
       }
 
       if (toDelete.length > 0) {
         await apiService.deletePoolJobRelations(toDelete);
       }
 
-      await fetchData();
+      setRelationIdByPoolId((prev) => {
+        const next = new Map(prev);
+        removedPoolIds.forEach((poolId) => next.delete(poolId));
+        createdRelations.forEach((relation) => {
+          const meta = extractRelationMeta(relation);
+          if (meta) next.set(meta.poolId, meta.relationId);
+        });
+        return next;
+      });
+
+      if (createdRelations.length > 0) {
+        const relationIdByCreatedPoolId = new Map<number, number>();
+        createdRelations.forEach((relation) => {
+          const meta = extractRelationMeta(relation);
+          if (meta) relationIdByCreatedPoolId.set(meta.poolId, meta.relationId);
+        });
+
+        setInTableRows((current) =>
+          current.map((row) => {
+            const relationId = relationIdByCreatedPoolId.get(row.poolId);
+            return relationId != null && row.relationId !== relationId
+              ? { ...row, relationId }
+              : row;
+          }),
+        );
+      }
+
+      setInitialActivePoolIds(new Set(activePoolIds));
+      patchJobPoolsCountInStore(activePoolIds.size);
     } finally {
       setIsSaving(false);
     }
@@ -323,7 +446,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
           columns={columnsWithCheckbox}
           data={data}
           language={language}
-          isLoading={isLoading || poolsMeta.isLoading}
+          isLoading={isInitialLoading || poolsMeta.isLoading}
           loadingText={t[language].loading}
           onFilteredDataChange={onFilteredDataChange}
           getRowId={(params) => String(params.data?.poolId ?? '')}
@@ -358,7 +481,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
           <div className="flex h-full min-h-0 min-w-0 flex-col">
             <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
               {renderTable(
-                inRelations,
+                inTableRows,
                 selectedInRows,
                 (id) => toggleSelected(setSelectedInRows, id),
                 t[language].inRelations,
@@ -377,7 +500,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
           <div className="flex h-full min-h-0 min-w-0 flex-col">
             <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
               {renderTable(
-                notInRelations,
+                notInTableRows,
                 selectedNotInRows,
                 (id) => toggleSelected(setSelectedNotInRows, id),
                 t[language].notInRelations,
@@ -407,7 +530,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
           {t[language].addSelected} ({selectedNotInRows.size})
         </button>
         <button
-          onClick={handleSave}
+          onClick={() => void handleSave()}
           disabled={isSaving || !hasChanges}
           className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >

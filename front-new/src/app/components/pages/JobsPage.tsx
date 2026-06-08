@@ -41,7 +41,8 @@ interface JobsPageProps {
   language: 'en' | 'ru';
   type: 'dex' | 'cex';
   highlightJobId?: number | null;
-  onDexJobClick?: (jobId: number, jobName: string) => void;
+  onDexJobBotsClick?: (jobId: number, jobName: string) => void;
+  onDexJobPoolsClick?: (jobId: number, jobName: string) => void;
 }
 
 const CEX_JOBS_DELETE_SCOPE = 'cex-jobs';
@@ -60,7 +61,13 @@ const normalizeCexSource = (raw: any) => {
   return value ? value.toLowerCase() : '';
 };
 
-export function JobsPage({ language, type, highlightJobId, onDexJobClick }: JobsPageProps) {
+export function JobsPage({
+  language,
+  type,
+  highlightJobId,
+  onDexJobBotsClick,
+  onDexJobPoolsClick,
+}: JobsPageProps) {
   const dispatch = useAppDispatch();
   const dexJobsFromStore = useAppSelector(selectJobsDataResponse);
   const cexJobsFromStore = useAppSelector(selectCexJobsDataResponse);
@@ -694,7 +701,7 @@ export function JobsPage({ language, type, highlightJobId, onDexJobClick }: Jobs
         onDelete={type === 'cex' ? handleDeleteCexJob : handleDeleteDexJob}
         onRowDoubleClick={(row) => {
           if (type === 'dex') {
-            onDexJobClick?.(row.id, row.description || `Job #${row.id}`);
+            onDexJobPoolsClick?.(row.id, row.description || `Job #${row.id}`);
           }
         }}
         extraActions={
@@ -713,14 +720,14 @@ export function JobsPage({ language, type, highlightJobId, onDexJobClick }: Jobs
               )
             : (row) => (
                 <>
-                  {onDexJobClick ? (
+                  {onDexJobBotsClick ? (
                     <button
                       onClick={(event) => {
                         event.stopPropagation();
-                        onDexJobClick(row.id, row.description || `Job #${row.id}`);
+                        onDexJobBotsClick(row.id, row.description || `Job #${row.id}`);
                       }}
                       className="p-1.5 hover:bg-success/10 rounded transition-colors"
-                      title={language === 'ru' ? 'Связи' : 'Relations'}
+                      title={language === 'ru' ? 'Боты job' : 'Job bots'}
                     >
                       <ArrowRight className="w-3.5 h-3.5 text-success" />
                     </button>
