@@ -25,8 +25,15 @@ export default function App() {
     id: number;
     name: string;
     highlightBotId?: number;
+    returnBot?: { id: number; name: string };
+    returnDexJob?: { id: number; name: string };
   } | null>(null);
-  const [selectedDexJob, setSelectedDexJob] = useState<{ id: number; name: string } | null>(null);
+  const [selectedDexJob, setSelectedDexJob] = useState<{
+    id: number;
+    name: string;
+    highlightBotId?: number;
+  } | null>(null);
+  const [highlightDexJobId, setHighlightDexJobId] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userLogin, setUserLogin] = useState('');
@@ -47,6 +54,7 @@ export default function App() {
     setSelectedBot(null);
     setSelectedServer(null);
     setSelectedDexJob(null);
+    setHighlightDexJobId(null);
   };
 
   const handleLogout = () => {
@@ -56,6 +64,7 @@ export default function App() {
     setSelectedBot(null);
     setSelectedServer(null);
     setSelectedDexJob(null);
+    setHighlightDexJobId(null);
   };
 
   const pageTitles = {
@@ -91,20 +100,53 @@ export default function App() {
     },
   };
 
+  const openBotJob = (payload: { jobId: number; jobName: string; botId: number }) => {
+    setSelectedServer(null);
+    setSelectedBot(null);
+    setHighlightDexJobId(null);
+    setActivePage('dex-jobs');
+    setSelectedDexJob({
+      id: payload.jobId,
+      name: payload.jobName,
+      highlightBotId: payload.botId,
+    });
+  };
+
   const openBotServer = (bot: {
     id: number;
     name: string;
     serverId: number;
     serverName: string;
   }) => {
+    const returnDexJob =
+      activePage === 'dex-jobs' && selectedDexJob
+        ? { id: selectedDexJob.id, name: selectedDexJob.name }
+        : undefined;
+
     setSelectedDexJob(null);
     setSelectedBot(null);
+    setHighlightDexJobId(null);
     setActivePage('servers');
     setSelectedServer({
       id: bot.serverId,
       name: bot.serverName,
       highlightBotId: bot.id,
+      returnBot: { id: bot.id, name: bot.name },
+      returnDexJob,
     });
+  };
+
+  const handleServerBack = () => {
+    if (selectedServer?.returnBot) {
+      setSelectedBot(selectedServer.returnBot);
+      if (selectedServer.returnDexJob) {
+        setSelectedDexJob(selectedServer.returnDexJob);
+        setActivePage('dex-jobs');
+      } else {
+        setActivePage('bots');
+      }
+    }
+    setSelectedServer(null);
   };
 
   const renderPage = () => {
@@ -114,7 +156,14 @@ export default function App() {
           botId={selectedBot.id}
           botName={selectedBot.name}
           language={language}
+          backLabel={
+            language === 'ru'
+              ? `К Job:${selectedDexJob.id}`
+              : `Back to Job:${selectedDexJob.id}`
+          }
           onBack={() => setSelectedBot(null)}
+          onGoToJob={openBotJob}
+          onGoToServer={openBotServer}
         />
       );
     }
@@ -124,7 +173,11 @@ export default function App() {
         <JobBotsPage
           jobId={Number(selectedDexJob.id)}
           language={language}
-          onBack={() => setSelectedDexJob(null)}
+          highlightBotId={selectedDexJob.highlightBotId}
+          onBack={() => {
+            setHighlightDexJobId(Number(selectedDexJob.id));
+            setSelectedDexJob(null);
+          }}
           onBotClick={(bot) => setSelectedBot(bot)}
         />
       );
@@ -137,6 +190,8 @@ export default function App() {
           botName={selectedBot.name}
           language={language}
           onBack={() => setSelectedBot(null)}
+          onGoToJob={openBotJob}
+          onGoToServer={openBotServer}
         />
       );
     }
@@ -147,7 +202,14 @@ export default function App() {
           serverId={selectedServer.id}
           serverName={selectedServer.name}
           language={language}
-          onBack={() => setSelectedServer(null)}
+          backLabel={
+            selectedServer.returnBot
+              ? language === 'ru'
+                ? `К Bot:${selectedServer.returnBot.id}`
+                : `Back to Bot:${selectedServer.returnBot.id}`
+              : undefined
+          }
+          onBack={handleServerBack}
           highlightBotId={selectedServer.highlightBotId}
         />
       );
@@ -168,9 +230,11 @@ export default function App() {
           <JobsPage
             language={language}
             type="dex"
-            onDexJobClick={(jobId, jobName) =>
-              setSelectedDexJob({ id: Number(jobId), name: jobName })
-            }
+            highlightJobId={highlightDexJobId}
+            onDexJobClick={(jobId, jobName) => {
+              setHighlightDexJobId(null);
+              setSelectedDexJob({ id: Number(jobId), name: jobName });
+            }}
           />
         );
       case 'cex-jobs':
@@ -250,6 +314,7 @@ export default function App() {
               setSelectedBot(null);
               setSelectedServer(null);
               setSelectedDexJob(null);
+              setHighlightDexJobId(null);
             }}
             language={language}
           />

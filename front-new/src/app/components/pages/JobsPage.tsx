@@ -1,4 +1,4 @@
-import { ArrowRight, Copy, Menu, Plus } from 'lucide-react';
+import { ArrowRight, Copy, Menu, Play, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
@@ -40,6 +40,7 @@ import {
 interface JobsPageProps {
   language: 'en' | 'ru';
   type: 'dex' | 'cex';
+  highlightJobId?: number | null;
   onDexJobClick?: (jobId: number, jobName: string) => void;
 }
 
@@ -59,7 +60,7 @@ const normalizeCexSource = (raw: any) => {
   return value ? value.toLowerCase() : '';
 };
 
-export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
+export function JobsPage({ language, type, highlightJobId, onDexJobClick }: JobsPageProps) {
   const dispatch = useAppDispatch();
   const dexJobsFromStore = useAppSelector(selectJobsDataResponse);
   const cexJobsFromStore = useAppSelector(selectCexJobsDataResponse);
@@ -681,6 +682,10 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
         loadingText={type === 'cex' ? (language === 'ru' ? 'Загрузка CEX джоб…' : 'Loading CEX Jobs…') : language === 'ru' ? 'Загрузка DEX джоб…' : 'Loading DEX Jobs…'}
         actionsColumnPosition="last"
         getRowId={(params) => String(params.data?.id ?? '')}
+        highlightRowId={
+          type === 'dex' && highlightJobId != null ? String(highlightJobId) : null
+        }
+        getRowHighlightId={(row) => String(row.id)}
         onEdit={(row) => {
           setEditingJobRaw(row.raw);
           setCopiedDexJobInitialData(undefined);
@@ -703,7 +708,7 @@ export function JobsPage({ language, type, onDexJobClick }: JobsPageProps) {
                   className="p-1.5 hover:bg-success/10 rounded transition-colors"
                   title={t[language].checkAction}
                 >
-                  <ArrowRight className="w-3.5 h-3.5 text-success" />
+                  <Play className="w-3.5 h-3.5 text-success" />
                 </button>
               )
             : (row) => (

@@ -17,11 +17,18 @@ import { botUsesDexJob } from '../../utils/botJobId';
 interface JobBotsPageProps {
   jobId: number;
   language: 'en' | 'ru';
+  highlightBotId?: number;
   onBack: () => void;
   onBotClick?: (bot: { id: number; name: string }) => void;
 }
 
-export function JobBotsPage({ jobId, language, onBack, onBotClick }: JobBotsPageProps) {
+export function JobBotsPage({
+  jobId,
+  language,
+  highlightBotId,
+  onBack,
+  onBotClick,
+}: JobBotsPageProps) {
   const dispatch = useAppDispatch();
   const normalizedJobId = Number(jobId);
   const botsFromStore = useAppSelector(selectBotsDataResponse);
@@ -208,6 +215,8 @@ export function JobBotsPage({ jobId, language, onBack, onBotClick }: JobBotsPage
               : undefined
           }
           getRowId={(params) => String(params.data?.id ?? '')}
+          highlightRowId={highlightBotId != null ? String(highlightBotId) : null}
+          getRowHighlightId={(row) => String(row.id)}
         />
       </div>
     </div>

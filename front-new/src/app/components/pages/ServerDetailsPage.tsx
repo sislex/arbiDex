@@ -1,4 +1,4 @@
-import { ArrowLeft, Menu, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Menu, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
@@ -13,6 +13,7 @@ import { useAppDispatch } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { apiService } from '../../services/api-service';
 import { buildBotEditPayload, normalizeBotForStore } from '../../utils/bot';
+import { buildServerControlPanelUrl } from '../../utils/server';
 import { mapPoolJobRelationToJobPair } from '../../utils/jobPairUtils';
 
 function getBotRowId(bot: any): string {
@@ -35,6 +36,7 @@ interface ServerDetailsPageProps {
   serverId: number;
   serverName: string;
   language: 'en' | 'ru';
+  backLabel?: string;
   onBack: () => void;
   highlightBotId?: number;
 }
@@ -56,6 +58,7 @@ export function ServerDetailsPage({
   serverId,
   serverName,
   language,
+  backLabel,
   onBack,
   highlightBotId,
 }: ServerDetailsPageProps) {
@@ -91,6 +94,7 @@ export function ServerDetailsPage({
         paused ? `Stopped ${count} bot(s)` : `Started ${count} bot(s)`,
       cancel: 'CANCEL',
       loading: 'Loading server relations…',
+      toControl: 'To control',
     },
     ru: {
       back: 'К списку серверов',
@@ -112,8 +116,14 @@ export function ServerDetailsPage({
       cancel: 'ОТМЕНА',
       loading: 'Загрузка связей сервера…',
       close: 'ЗАКРЫТЬ',
+      toControl: 'К control',
     },
   };
+
+  const controlPanelUrl = useMemo(
+    () => buildServerControlPanelUrl(serverRaw?.ip ?? '', serverRaw?.port ?? ''),
+    [serverRaw],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -433,12 +443,24 @@ export function ServerDetailsPage({
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          {t[language].back}
+          {backLabel ?? t[language].back}
         </button>
         <div className="h-6 w-px bg-border" />
         <h2 className="text-foreground">
           Server ID:{serverId} {t[language].relationsTable} ({tableRows.length})
         </h2>
+        {controlPanelUrl ? (
+          <a
+            href={controlPanelUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto flex items-center gap-2 px-3 py-1.5 bg-success/15 text-success rounded hover:bg-success/25 transition-colors text-sm"
+            title={t[language].toControl}
+          >
+            <span>{t[language].toControl}</span>
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        ) : null}
       </div>
 
       {showConfig ? (

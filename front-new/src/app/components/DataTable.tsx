@@ -129,6 +129,25 @@ export function DataTable({
     gridApiRef.current?.onFilterChanged();
   }, [excludeRowIds]);
 
+  useEffect(() => {
+    if (isLoading || !highlightRowId || !getRowHighlightId) return;
+
+    const api = gridApiRef.current;
+    if (!api) return;
+
+    requestAnimationFrame(() => {
+      let targetIndex = -1;
+      api.forEachNodeAfterFilterAndSort((node, index) => {
+        if (node.data && getRowHighlightId(node.data) === highlightRowId) {
+          targetIndex = index;
+        }
+      });
+      if (targetIndex >= 0) {
+        api.ensureIndexVisible(targetIndex, 'middle');
+      }
+    });
+  }, [getRowHighlightId, highlightRowId, isLoading, rows]);
+
   const isExternalFilterPresent = useCallback(
     () => Boolean(excludeRowIds && excludeRowIds.size > 0),
     [excludeRowIds],

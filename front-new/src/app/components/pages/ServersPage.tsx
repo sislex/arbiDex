@@ -1,4 +1,4 @@
-import { Menu, Plus } from 'lucide-react';
+import { ArrowRight, Menu, Plus } from 'lucide-react';
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { showBulkDeleteToast, showDeleteToast } from '../../utils/toast';
@@ -11,7 +11,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { dbConfigActions } from '../../store/db-config/dbConfig.slice';
 import { selectServersDataResponse, selectServersMeta } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
-import { normalizeServerForStore } from '../../utils/server';
+import { buildServerControlPanelUrl, normalizeServerForStore } from '../../utils/server';
 import { ServerForm } from '../forms/ServerForm';
 import {
   DropdownMenu,
@@ -202,6 +202,7 @@ export function ServersPage({
       pending: 'Waiting',
       success: 'OK',
       error: 'Error',
+      toControl: 'To control',
     },
     ru: {
       serverId: 'ID сервера',
@@ -218,6 +219,7 @@ export function ServersPage({
       pending: 'Ожидание',
       success: 'Успех',
       error: 'Ошибка',
+      toControl: 'К control',
     },
   };
 
@@ -437,6 +439,23 @@ export function ServersPage({
             setFormOpen(true);
           }}
           onDelete={scheduleDelete}
+          extraActions={(row) => {
+            const controlUrl = buildServerControlPanelUrl(row.ip, row.port);
+            if (!controlUrl) return null;
+
+            return (
+              <a
+                href={controlUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                className="p-1.5 hover:bg-success/10 rounded transition-colors inline-flex"
+                title={t[language].toControl}
+              >
+                <ArrowRight className="w-3.5 h-3.5 text-success" />
+              </a>
+            );
+          }}
           onRowDoubleClick={(row) => {
             setHighlightedServer(row);
             onServerClick?.({ id: Number(row.id), name: row.name || `Server #${row.id}` });
