@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { PoolsService } from './pools.service';
 import { PoolDto, UpdatePoolDto, UpdateReservesDto } from '../dtos/pools-dto/pool.dto';
+import { BulkDeletePoolsDto } from '../dtos/pools-dto/bulk-delete-pools.dto';
 
 @Controller('pools')
 export class PoolsController {
@@ -17,6 +18,11 @@ export class PoolsController {
   @Post()
   create(@Body() createPoolDto: PoolDto) {
     return this.poolsService.create(createPoolDto);
+  }
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeletePoolsDto) {
+    return this.poolsService.removeMany(body.ids ?? []);
   }
 
   @Get()

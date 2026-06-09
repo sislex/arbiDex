@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { BotsService } from './bots.service';
 import { BotDto } from '../dtos/bots-dto/bot.dto';
+import { BulkDeleteBotsDto } from '../dtos/bots-dto/bulk-delete-bots.dto';
+import { BulkUpdateBotsDto } from '../dtos/bots-dto/bulk-update-bots.dto';
 
 @Controller('bots')
 export class BotsController {
@@ -45,6 +47,37 @@ export class BotsController {
   @Get('findAllByServerId')
   findAllByServerId(@Query('serverId') serverId: string) {
     return this.botsService.findAllByServerId(serverId);
+  }
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeleteBotsDto) {
+    return this.botsService.removeMany(body.ids ?? []);
+  }
+
+  @Post('bulk-update')
+  updateMany(@Body() body: BulkUpdateBotsDto) {
+    return this.botsService.updateMany(body.bots ?? []);
+  }
+
+  @Get('findAllByJobId')
+  async findAllByJobId(@Query('jobId') jobId: string) {
+    const bots = await this.botsService.findAllByJobId(jobId);
+    return bots.map((bot) => ({
+      botId: bot.botId,
+      botName: bot.botName,
+      delayBetweenRepeat: bot.delayBetweenRepeat,
+      description: bot.description,
+      isRepeat: bot.isRepeat,
+      maxErrors: bot.maxErrors,
+      maxJobs: bot.maxJobs,
+      paused: bot.paused,
+      timeoutMs: bot.timeoutMs,
+      poolsCount: bot.job?.poolsJobRelations?.length ?? 0,
+      serverId: bot.server?.serverId,
+      serverName: bot.server?.serverName ?? null,
+      jobId: bot.job?.jobId ?? null,
+      cexJobId: bot.cexJob?.id ?? null,
+    }));
   }
 
   @Get(':id')

@@ -89,6 +89,48 @@ export class BotsService {
     });
   }
 
+  async findAllByJobId(jobId: string) {
+    return await this.botRepository.find({
+      relationLoadStrategy: 'query',
+      relations: {
+        server: true,
+        job: {
+          poolsJobRelations: true,
+        },
+        cexJob: true,
+      },
+      select: {
+        botId: true,
+        botName: true,
+        description: true,
+        paused: true,
+        isRepeat: true,
+        delayBetweenRepeat: true,
+        maxErrors: true,
+        maxJobs: true,
+        timeoutMs: true,
+        job: {
+          jobId: true,
+          jobType: true,
+          poolsJobRelations: {
+            poolsJobRelationId: true,
+          },
+        },
+        server: {
+          serverId: true,
+          serverName: true,
+        },
+        cexJob: {
+          id: true,
+        },
+      },
+      where: {
+        job: { jobId },
+      },
+      order: { botId: 'DESC' },
+    });
+  }
+
   async findAllByServerId(serverId: string) {
     return await this.botRepository.find({
       relationLoadStrategy: 'join',
@@ -130,6 +172,46 @@ export class BotsService {
     return bot;
   }
 
+  async updateMany(items: BotDto[]) {
+    const bots = (items ?? []).filter(
+      (item) => item != null && Number.isFinite(Number(item.botId)) && Number(item.botId) > 0,
+    );
+
+    if (bots.length === 0) {
+      return { success: true as const, bots: [] as Array<ReturnType<BotsService['mapBotListItem']>> };
+    }
+
+    const updated: Array<ReturnType<BotsService['mapBotListItem']>> = [];
+
+    for (const item of bots) {
+      const saved = await this.update(Number(item.botId), item);
+      if (!saved) {
+        throw new Error(`Bot with id ${item.botId} not found after update`);
+      }
+      updated.push(this.mapBotListItem(saved));
+    }
+
+    return { success: true as const, bots: updated };
+  }
+
+  mapBotListItem(bot: Bots) {
+    return {
+      botId: Number(bot.botId),
+      botName: bot.botName,
+      delayBetweenRepeat: bot.delayBetweenRepeat,
+      description: bot.description,
+      isRepeat: bot.isRepeat,
+      maxErrors: bot.maxErrors,
+      maxJobs: bot.maxJobs,
+      paused: bot.paused,
+      timeoutMs: bot.timeoutMs,
+      poolsCount: bot.job?.poolsJobRelations?.length ?? 0,
+      serverId: bot.server?.serverId ?? null,
+      jobId: bot.job?.jobId ?? null,
+      cexJobId: bot.cexJob?.id ?? null,
+    };
+  }
+
   async update(id: number, updateBotDto: BotDto) {
     const bot = await this.findOne(id);
 
@@ -161,10 +243,49 @@ export class BotsService {
     bot.maxErrors = updateBotDto.maxErrors;
     bot.timeoutMs = updateBotDto.timeoutMs;
 
-    return await this.botRepository.save(bot);
+    const saved = await this.botRepository.save(bot);
+    const reloaded = await this.botRepository.findOne({
+      relationLoadStrategy: 'query',
+      relations: {
+        server: true,
+        job: { poolsJobRelations: true },
+        cexJob: true,
+      },
+      where: { botId: saved.botId },
+    });
+    if (!reloaded) {
+      throw new Error(`Bot with id ${id} not found after update`);
+    }
+    return reloaded;
   }
 
   async remove(id: number) {
-    return this.botRepository.delete(id);
+    const result = await this.removeMany([id]);
+    return { deleted: true, deletedIds: result.deletedIds };
+  }
+
+  async removeMany(ids: number[]) {
+    const uniqueIds = [
+      ...new Set(
+        (ids ?? [])
+          .map((id) => Number(id))
+          .filter((id) => Number.isFinite(id) && id > 0),
+      ),
+    ];
+
+    if (uniqueIds.length === 0) {
+      return { success: true as const, deletedIds: [] as number[] };
+    }
+
+    for (const id of uniqueIds) {
+      await this.findOne(id);
+    }
+
+    const result = await this.botRepository.delete(uniqueIds);
+    if ((result.affected ?? 0) === 0) {
+      throw new Error('No bots were deleted');
+    }
+
+    return { success: true as const, deletedIds: uniqueIds };
   }
 }

@@ -195,6 +195,7 @@ function* handleInitJobsListPage() {
   yield put(dbConfigActions.setJobsData());
   yield put(dbConfigActions.setChainsData());
   yield put(dbConfigActions.setRpcUrlsData());
+  yield put(dbConfigActions.setServersData());
 }
 
 function* handleInitBotsListPage() {
@@ -213,6 +214,7 @@ function* handleInitCexJobsListPage() {
   yield put(dbConfigActions.setCexJobsData());
   yield put(dbConfigActions.setCexChainsData());
   yield put(dbConfigActions.setCexPairsData());
+  yield put(dbConfigActions.setServersData());
 }
 
 function* handleRefetchPoolsPageResources() {

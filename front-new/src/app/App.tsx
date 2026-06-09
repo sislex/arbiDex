@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { Toaster } from 'sonner';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
@@ -12,21 +13,39 @@ import { ChainsPage } from './components/pages/ChainsPage';
 import { PoolsPage } from './components/pages/PoolsPage';
 import { PairsPage } from './components/pages/PairsPage';
 import { JobsPage } from './components/pages/JobsPage';
+import { JobBotsPage } from './components/pages/JobBotsPage';
 import { DexJobRelationsPage } from './components/pages/DexJobRelationsPage';
 import { RpcUrlsPage } from './components/pages/RpcUrlsPage';
 import { DexesPage } from './components/pages/DexesPage';
+import {
+  botPath,
+  jobBotPath,
+  jobPath,
+  jobPoolsPath,
+  NavigationState,
+  parseAppRoute,
+  serverPath,
+  sidebarIdFromRoute,
+  sidebarPath,
+} from './routing/appRoutes';
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const route = useMemo(
+    () => parseAppRoute(location.pathname, location.search),
+    [location.pathname, location.search],
+  );
+  const navState = (location.state ?? {}) as NavigationState;
+
   const [isDark, setIsDark] = useState(true);
   const [language, setLanguage] = useState<'en' | 'ru'>('en');
-  const [activePage, setActivePage] = useState('dex-chains');
-  const [selectedBot, setSelectedBot] = useState<{ id: number; name: string } | null>(null);
-  const [selectedServer, setSelectedServer] = useState<{ id: number; name: string } | null>(null);
-  const [selectedDexJob, setSelectedDexJob] = useState<{ id: number; name: string } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userLogin, setUserLogin] = useState('');
   const [userRole, setUserRole] = useState('admin');
+
+  const activePage = sidebarIdFromRoute(route);
 
   useEffect(() => {
     if (isDark) {
@@ -36,22 +55,22 @@ export default function App() {
     }
   }, [isDark]);
 
-  const handleLogin = (login: string, password: string) => {
-    setUserLogin(login);
+  useEffect(() => {
+    if (isAuthenticated && location.pathname === '/') {
+      navigate(sidebarPath('dex-chains'), { replace: true });
+    }
+  }, [isAuthenticated, location.pathname, navigate]);
+
+  const handleLogin = (_login: string, _password: string) => {
+    setUserLogin(_login);
     setIsAuthenticated(true);
-    setActivePage('dex-chains');
-    setSelectedBot(null);
-    setSelectedServer(null);
-    setSelectedDexJob(null);
+    navigate(sidebarPath('dex-chains'), { replace: true });
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserLogin('');
-    setActivePage('dex-chains');
-    setSelectedBot(null);
-    setSelectedServer(null);
-    setSelectedDexJob(null);
+    navigate(sidebarPath('dex-chains'), { replace: true });
   };
 
   const pageTitles = {
@@ -87,48 +106,178 @@ export default function App() {
     },
   };
 
-  const renderPage = () => {
-    if (activePage === 'dex-jobs' && selectedDexJob) {
-      return (
-        <DexJobRelationsPage
-          jobId={selectedDexJob.id}
-          jobName={selectedDexJob.name}
-          language={language}
-          onBack={() => setSelectedDexJob(null)}
-        />
-      );
+  const openBotJob = (payload: { jobId: number; jobName: string; botId: number }) => {
+    navigate(jobPath(payload.jobId, { highlightBot: payload.botId }), {
+      state: { jobName: payload.jobName } satisfies NavigationState,
+    });
+  };
+
+  const openBotServer = (bot: {
+    id: number;
+    name: string;
+    serverId: number;
+    serverName: string;
+  }) => {
+    const fromJob = route.kind === 'job-bot' ? route.jobId : undefined;
+
+    navigate(
+      serverPath(bot.serverId, {
+        highlightBot: bot.id,
+        fromBot: bot.id,
+        fromJob,
+      }),
+      {
+        state: {
+          serverName: bot.serverName,
+          botName: bot.name,
+          ...(fromJob != null ? { jobName: navState.jobName } : {}),
+        } satisfies NavigationState,
+      },
+    );
+  };
+
+  const handleServerBack = () => {
+    if (route.kind !== 'server' || route.fromBot == null) {
+      navigate(sidebarPath('servers'));
+      return;
     }
 
-    if (activePage === 'bots' && selectedBot) {
+    if (route.fromJob != null) {
+      navigate(jobBotPath(route.fromJob, route.fromBot), {
+        state: {
+          botName: navState.botName,
+          jobName: navState.jobName,
+        } satisfies NavigationState,
+      });
+      return;
+    }
+
+    navigate(botPath(route.fromBot), {
+      state: { botName: navState.botName } satisfies NavigationState,
+    });
+  };
+
+  const pageTitle = useMemo(() => {
+    switch (route.kind) {
+      case 'bot':
+        return navState.botName ?? `Bot #${route.botId}`;
+      case 'job-bot':
+        return navState.botName ?? `Bot #${route.botId}`;
+      case 'job':
+        return language === 'ru'
+          ? `Job ID: ${route.jobId} — боты`
+          : `Job ID: ${route.jobId} — bots`;
+      case 'job-pools':
+        return language === 'ru'
+          ? `Job ID: ${route.jobId} — пулы`
+          : `Job ID: ${route.jobId} — pools`;
+      case 'server':
+        return navState.serverName ?? `Server #${route.serverId}`;
+      default:
+        return pageTitles[language][route.page as keyof typeof pageTitles.en];
+    }
+  }, [language, navState.botName, navState.jobName, navState.serverName, pageTitles, route]);
+
+  const renderPage = () => {
+    if (route.kind === 'job-bot') {
       return (
         <BotDetailsPage
-          botId={selectedBot.id}
-          botName={selectedBot.name}
+          botId={route.botId}
+          botName={navState.botName ?? `Bot #${route.botId}`}
           language={language}
-          onBack={() => setSelectedBot(null)}
+          backLabel={
+            language === 'ru' ? `К Job:${route.jobId}` : `Back to Job:${route.jobId}`
+          }
+          onBack={() =>
+            navigate(jobPath(route.jobId), {
+              state: { jobName: navState.jobName } satisfies NavigationState,
+            })
+          }
+          onGoToJob={openBotJob}
+          onGoToServer={openBotServer}
         />
       );
     }
 
-    if (activePage === 'servers' && selectedServer) {
+    if (route.kind === 'job-pools') {
+      return (
+        <DexJobRelationsPage
+          jobId={route.jobId}
+          jobName={navState.jobName ?? `Job #${route.jobId}`}
+          language={language}
+          onBack={() =>
+            navigate(sidebarPath('dex-jobs', { highlightJob: route.jobId }))
+          }
+        />
+      );
+    }
+
+    if (route.kind === 'job') {
+      return (
+        <JobBotsPage
+          jobId={route.jobId}
+          language={language}
+          highlightBotId={route.highlightBot}
+          onBack={() =>
+            navigate(sidebarPath('dex-jobs', { highlightJob: route.jobId }))
+          }
+          onBotClick={(bot) =>
+            navigate(jobBotPath(route.jobId, bot.id), {
+              state: {
+                botName: bot.name,
+                jobName: navState.jobName,
+              } satisfies NavigationState,
+            })
+          }
+        />
+      );
+    }
+
+    if (route.kind === 'bot') {
+      return (
+        <BotDetailsPage
+          botId={route.botId}
+          botName={navState.botName ?? `Bot #${route.botId}`}
+          language={language}
+          onBack={() => navigate(sidebarPath('bots'))}
+          onGoToJob={openBotJob}
+          onGoToServer={openBotServer}
+        />
+      );
+    }
+
+    if (route.kind === 'server') {
       return (
         <ServerDetailsPage
-          serverId={selectedServer.id}
-          serverName={selectedServer.name}
+          serverId={route.serverId}
+          serverName={navState.serverName ?? `Server #${route.serverId}`}
           language={language}
-          onBack={() => setSelectedServer(null)}
+          backLabel={
+            route.fromBot != null
+              ? language === 'ru'
+                ? `К Bot:${route.fromBot}`
+                : `Back to Bot:${route.fromBot}`
+              : undefined
+          }
+          onBack={handleServerBack}
+          highlightBotId={route.highlightBot}
         />
       );
     }
 
-    switch (activePage) {
+    switch (route.page) {
       case 'tokens':
         return <TokensPage language={language} />;
       case 'pools':
         return <PoolsPage language={language} />;
       case 'dex-chains':
       case 'cex-chains':
-        return <ChainsPage language={language} type={activePage === 'cex-chains' ? 'cex' : 'dex'} />;
+        return (
+          <ChainsPage
+            language={language}
+            type={route.page === 'cex-chains' ? 'cex' : 'dex'}
+          />
+        );
       case 'cex-pairs':
         return <PairsPage language={language} />;
       case 'dex-jobs':
@@ -136,7 +285,17 @@ export default function App() {
           <JobsPage
             language={language}
             type="dex"
-            onDexJobClick={(jobId, jobName) => setSelectedDexJob({ id: jobId, name: jobName })}
+            highlightJobId={route.highlightJob ?? null}
+            onDexJobBotsClick={(jobId, jobName) =>
+              navigate(jobPath(jobId), {
+                state: { jobName } satisfies NavigationState,
+              })
+            }
+            onDexJobPoolsClick={(jobId, jobName) =>
+              navigate(jobPoolsPath(jobId), {
+                state: { jobName } satisfies NavigationState,
+              })
+            }
           />
         );
       case 'cex-jobs':
@@ -146,12 +305,26 @@ export default function App() {
       case 'dexes':
         return <DexesPage language={language} />;
       case 'bots':
-        return <BotsPage language={language} onBotClick={(bot) => setSelectedBot({ id: bot.id, name: bot.name })} />;
+        return (
+          <BotsPage
+            language={language}
+            onBotClick={(bot) =>
+              navigate(botPath(bot.id), {
+                state: { botName: bot.name } satisfies NavigationState,
+              })
+            }
+            onBotServerClick={openBotServer}
+          />
+        );
       case 'servers':
         return (
           <ServersPage
             language={language}
-            onServerClick={(server) => setSelectedServer({ id: server.id, name: server.name })}
+            onServerClick={(server) =>
+              navigate(serverPath(server.id), {
+                state: { serverName: server.name } satisfies NavigationState,
+              })
+            }
           />
         );
       default:
@@ -180,15 +353,7 @@ export default function App() {
         richColors
       />
       <TopBar
-        pageTitle={
-          selectedDexJob
-            ? selectedDexJob.name
-            : selectedBot
-            ? selectedBot.name
-            : selectedServer
-            ? selectedServer.name
-            : pageTitles[language][activePage as keyof typeof pageTitles.en]
-        }
+        pageTitle={pageTitle}
         onThemeToggle={() => setIsDark(!isDark)}
         isDark={isDark}
         language={language}
@@ -203,12 +368,7 @@ export default function App() {
         {!sidebarCollapsed && (
           <Sidebar
             activeItem={activePage}
-            onItemClick={(page) => {
-              setActivePage(page);
-              setSelectedBot(null);
-              setSelectedServer(null);
-              setSelectedDexJob(null);
-            }}
+            onItemClick={(page) => navigate(sidebarPath(page as Parameters<typeof sidebarPath>[0]))}
             language={language}
           />
         )}

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CexJobsService } from './cex-jobs.service';
 import { CexJobDto } from '../dtos/cex-jobs-dto/cex-job.dto';
+import { BulkDeleteCexJobsDto } from '../dtos/cex-jobs-dto/bulk-delete-cex-jobs.dto';
 
 @Controller('cex-jobs')
 export class CexJobsController {
@@ -22,6 +23,11 @@ export class CexJobsController {
   @Get()
   findAll() {
     return this.cexJobsService.findAll();
+  }
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeleteCexJobsDto) {
+    return this.cexJobsService.removeMany(body.ids ?? []);
   }
 
   @Get(':id')

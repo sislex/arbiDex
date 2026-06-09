@@ -48,6 +48,14 @@ interface DataTableProps {
   onFilteredDataChange?: (filteredData: any[]) => void;
   /** Stable row identity for AG Grid (e.g. pair rating rows). */
   getRowId?: (params: GetRowIdParams<any>) => string;
+  /** Row id to highlight (e.g. bot line on server page). */
+  highlightRowId?: string | null;
+  getRowHighlightId?: (row: any) => string;
+  /** Actions column: first (default, pinned left) or last (pinned right). */
+  actionsColumnPosition?: 'first' | 'last';
+  /** Hide rows without rebuilding rowData (fast path for large tables). */
+  excludeRowIds?: ReadonlySet<number | string>;
+  getExcludeRowId?: (row: any) => number | string;
 }
 
 export function DataTable({
@@ -67,9 +75,15 @@ export function DataTable({
   selectionMode = 'none',
   onFilteredDataChange,
   getRowId,
+  highlightRowId,
+  getRowHighlightId,
+  actionsColumnPosition = 'first',
+  excludeRowIds,
+  getExcludeRowId,
 }: DataTableProps) {
   const rows = Array.isArray(data) ? data : [];
   const gridApiRef = useRef<GridApi | null>(null);
+  const [popupParent, setPopupParent] = useState<HTMLElement | null>(null);
   const [filteredCount, setFilteredCount] = useState(rows.length);
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
 
@@ -112,6 +126,54 @@ export function DataTable({
     setHasActiveFilters(false);
   }, [rows, emitFilteredData]);
 
+  useEffect(() => {
+    gridApiRef.current?.onFilterChanged();
+  }, [excludeRowIds]);
+
+  useEffect(() => {
+    if (isLoading || !highlightRowId || !getRowHighlightId) return;
+
+    const api = gridApiRef.current;
+    if (!api) return;
+
+    requestAnimationFrame(() => {
+      let targetIndex = -1;
+      api.forEachNodeAfterFilterAndSort((node, index) => {
+        if (node.data && getRowHighlightId(node.data) === highlightRowId) {
+          targetIndex = index;
+        }
+      });
+      if (targetIndex >= 0) {
+        api.ensureIndexVisible(targetIndex, 'middle');
+      }
+    });
+  }, [getRowHighlightId, highlightRowId, isLoading, rows]);
+
+  const isExternalFilterPresent = useCallback(
+    () => Boolean(excludeRowIds && excludeRowIds.size > 0),
+    [excludeRowIds],
+  );
+
+  const doesExternalFilterPass = useCallback(
+    (node: { data?: any }) => {
+      if (!excludeRowIds?.size || !node.data) return true;
+      const rowId = getExcludeRowId ? getExcludeRowId(node.data) : node.data.id;
+      return !excludeRowIds.has(rowId);
+    },
+    [excludeRowIds, getExcludeRowId],
+  );
+
+  const shouldAnimateRows = rows.length <= 1000;
+
+  const rowSelection = useMemo(() => {
+    if (selectionMode === 'none') return undefined;
+    return {
+      mode: selectionMode === 'single' ? ('singleRow' as const) : ('multiRow' as const),
+      checkboxes: false,
+      enableClickSelection: true,
+    };
+  }, [selectionMode]);
+
   const actionsHeader = language === 'ru' ? 'ДЕЙСТВИЯ' : 'ACTIONS';
   const editTitle = language === 'ru' ? 'Изменить' : 'Edit';
   const deleteTitle = language === 'ru' ? 'Удалить' : 'Delete';
@@ -120,6 +182,7 @@ export function DataTable({
 
   const columnDefs = useMemo<ColDef[]>(() => {
     const gridColumns: ColDef[] = columns.map((column) => {
+      const isCheckboxColumn = column.key === 'checkbox';
       const isAddressColumn = column.key.toLowerCase().includes('address');
       const HeaderComponent = column.headerRender
         ? () => <div className="flex h-full items-center justify-center">{column.headerRender?.()}</div>
@@ -129,11 +192,23 @@ export function DataTable({
         headerName: column.headerRender ? undefined : column.label,
         headerComponent: HeaderComponent,
         sortable: Boolean(column.sortable),
-        resizable: true,
+        resizable: !isCheckboxColumn,
         filter: column.filterable ? 'agTextColumnFilter' : false,
         floatingFilter: false,
-        flex: 1,
-        minWidth: column.key === 'checkbox' || column.key === 'actions' ? 64 : 120,
+        ...(isCheckboxColumn
+          ? {
+              pinned: 'left' as const,
+              width: 56,
+              minWidth: 56,
+              maxWidth: 56,
+              flex: 0,
+              lockPinned: true,
+              suppressSizeToFit: true,
+            }
+          : {
+              flex: 1,
+              minWidth: 120,
+            }),
         suppressHeaderMenuButton: true,
         suppressHeaderFilterButton: !column.filterable,
         menuTabs: column.filterable ? ['filterMenuTab'] : [],
@@ -151,7 +226,7 @@ export function DataTable({
     });
 
     if (onEdit || onDelete || extraActions) {
-      gridColumns.unshift({
+      const actionsCol: ColDef = {
         colId: 'actions',
         headerName: actionsHeader,
         width: extraActions ? 132 : 96,
@@ -159,7 +234,7 @@ export function DataTable({
         resizable: true,
         sortable: false,
         filter: false,
-        pinned: 'left',
+        pinned: actionsColumnPosition === 'last' ? 'right' : 'left',
         cellRenderer: (params: any) => (
           <div className="flex h-full items-center gap-2">
             {extraActions?.(params.data)}
@@ -189,18 +264,32 @@ export function DataTable({
             )}
           </div>
         ),
-      });
+      };
+
+      if (actionsColumnPosition === 'last') {
+        gridColumns.push(actionsCol);
+      } else {
+        gridColumns.unshift(actionsCol);
+      }
     }
 
     return gridColumns;
-  }, [actionsHeader, columns, deleteTitle, editTitle, extraActions, onDelete, onEdit]);
+  }, [
+    actionsColumnPosition,
+    actionsHeader,
+    columns,
+    deleteTitle,
+    editTitle,
+    extraActions,
+    onDelete,
+    onEdit,
+  ]);
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
       resizable: true,
       filterParams: {
         defaultOption: 'contains',
-        filterOptions: ['contains'],
         maxNumConditions: 1,
         buttons: ['reset'],
         debounceMs: 150,
@@ -236,9 +325,21 @@ export function DataTable({
 
   const getRowClass = useCallback(
     (params: RowClassParams) => {
-      return selectedRow && params.data === selectedRow ? 'ag-row-selected-local' : '';
+      const classes: string[] = [];
+      if (selectedRow && params.data === selectedRow) {
+        classes.push('ag-row-selected-local');
+      }
+      if (
+        highlightRowId &&
+        getRowHighlightId &&
+        params.data &&
+        getRowHighlightId(params.data) === highlightRowId
+      ) {
+        classes.push('ag-row-highlight-green');
+      }
+      return classes.join(' ');
     },
-    [selectedRow],
+    [getRowHighlightId, highlightRowId, selectedRow],
   );
 
   return (
@@ -256,6 +357,7 @@ export function DataTable({
           {headerActions ? <div className="shrink-0">{headerActions}</div> : null}
         </div>
       )}
+      <div ref={setPopupParent} className="arb-ag-popup-root" aria-hidden="true" />
       <div className="ag-theme-quartz arb-dex-grid flex-1 min-h-0 min-w-0 w-full">
         {isLoading ? (
           <div className="size-full flex items-center justify-center">
@@ -269,13 +371,16 @@ export function DataTable({
             rowData={rows}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
+            popupParent={popupParent ?? undefined}
             localeText={localeText}
             enableBrowserTooltips
             enableCellTextSelection
             ensureDomOrder
             suppressCellFocus
-            animateRows
-            rowSelection={selectionMode === 'none' ? undefined : selectionMode}
+            animateRows={shouldAnimateRows}
+            isExternalFilterPresent={isExternalFilterPresent}
+            doesExternalFilterPass={doesExternalFilterPass}
+            rowSelection={rowSelection}
             getRowId={getRowId}
             getRowClass={getRowClass}
             onGridReady={(event) => {

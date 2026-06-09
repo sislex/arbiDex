@@ -53,6 +53,38 @@ const setSuccess = (state: AsyncState<any[]>, response: any[]) => {
   state.error = null;
 };
 
+const upsertListItem = (
+  list: any[],
+  item: any,
+  getId: (row: any) => number,
+  previousId?: number,
+) => {
+  const newId = getId(item);
+  let next = [...list];
+  if (previousId != null && Number.isFinite(previousId) && previousId !== newId) {
+    next = next.filter((row) => getId(row) !== previousId);
+  }
+  const idx = next.findIndex((row) => getId(row) === newId);
+  if (idx >= 0) {
+    next[idx] = { ...next[idx], ...item };
+  } else {
+    next.unshift(item);
+  }
+  return next;
+};
+
+const getDexChainId = (chain: any) => Number(chain.chainId ?? chain.id);
+const getCexChainId = (chain: any) => Number(chain.id ?? chain.chainId);
+const getCexPairId = (pair: any) => Number(pair.id ?? pair.pairId ?? pair.cexPairId ?? pair.cex_pair_id);
+const getCexJobId = (job: any) => Number(job.id ?? job.cexJobId ?? job.cex_job_id);
+const getDexJobId = (job: any) => Number(job.jobId ?? job.id);
+const getTokenId = (token: any) => Number(token.tokenId ?? token.id);
+const getPoolId = (pool: any) => Number(pool.poolId ?? pool.id);
+const getDexId = (dex: any) => Number(dex.dexId ?? dex.id);
+const getRpcUrlId = (rpcUrl: any) => Number(rpcUrl.rpcUrlId ?? rpcUrl.id);
+const getBotId = (bot: any) => Number(bot.botId ?? bot.id);
+const getServerId = (server: any) => Number(server.serverId ?? server.id);
+
 const setFailure = (state: AsyncState<any[]>, error: string) => {
   state.loadingTime = state.startTime ? Date.now() - state.startTime : null;
   state.isLoading = false;
@@ -102,6 +134,21 @@ const dbConfigSlice = createSlice({
     setTokensDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.tokens, action.payload);
     },
+    removeTokensByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.tokens.response = (state.tokens.response ?? []).filter((token: any) => {
+        const tokenId = Number(token.tokenId ?? token.id);
+        return !ids.has(tokenId);
+      });
+    },
+    upsertToken(state, action: PayloadAction<{ token: any }>) {
+      state.tokens.response = upsertListItem(
+        state.tokens.response ?? [],
+        action.payload.token,
+        getTokenId,
+      );
+    },
 
     setPoolsData(state) {
       setLoading(state.pools);
@@ -111,6 +158,21 @@ const dbConfigSlice = createSlice({
     },
     setPoolsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.pools, action.payload);
+    },
+    removePoolsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.pools.response = (state.pools.response ?? []).filter((pool: any) => {
+        const poolId = Number(pool.poolId ?? pool.id);
+        return !ids.has(poolId);
+      });
+    },
+    upsertPool(state, action: PayloadAction<{ pool: any }>) {
+      state.pools.response = upsertListItem(
+        state.pools.response ?? [],
+        action.payload.pool,
+        getPoolId,
+      );
     },
 
     setDexesData(state) {
@@ -122,6 +184,21 @@ const dbConfigSlice = createSlice({
     setDexesDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.dexes, action.payload);
     },
+    removeDexesByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.dexes.response = (state.dexes.response ?? []).filter((dex: any) => {
+        const dexId = Number(dex.dexId ?? dex.id);
+        return !ids.has(dexId);
+      });
+    },
+    upsertDex(state, action: PayloadAction<{ dex: any }>) {
+      state.dexes.response = upsertListItem(
+        state.dexes.response ?? [],
+        action.payload.dex,
+        getDexId,
+      );
+    },
 
     setChainsData(state) {
       setLoading(state.chains);
@@ -131,6 +208,22 @@ const dbConfigSlice = createSlice({
     },
     setChainsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.chains, action.payload);
+    },
+    removeChainsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.chains.response = (state.chains.response ?? []).filter((chain: any) => {
+        const chainId = Number(chain.chainId ?? chain.id);
+        return !ids.has(chainId);
+      });
+    },
+    upsertChain(state, action: PayloadAction<{ chain: any; previousId?: number }>) {
+      state.chains.response = upsertListItem(
+        state.chains.response ?? [],
+        action.payload.chain,
+        getDexChainId,
+        action.payload.previousId,
+      );
     },
 
     setJobsData(state) {
@@ -142,6 +235,21 @@ const dbConfigSlice = createSlice({
     setJobsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.jobs, action.payload);
     },
+    removeJobsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.jobs.response = (state.jobs.response ?? []).filter((job: any) => {
+        const jobId = Number(job.jobId ?? job.id);
+        return !ids.has(jobId);
+      });
+    },
+    upsertJob(state, action: PayloadAction<{ job: any }>) {
+      state.jobs.response = upsertListItem(
+        state.jobs.response ?? [],
+        action.payload.job,
+        getDexJobId,
+      );
+    },
 
     setBotsData(state) {
       setLoading(state.bots);
@@ -151,6 +259,28 @@ const dbConfigSlice = createSlice({
     },
     setBotsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.bots, action.payload);
+    },
+    removeBotsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.bots.response = (state.bots.response ?? []).filter((bot: any) => {
+        const botId = Number(bot.botId ?? bot.id);
+        return !ids.has(botId);
+      });
+    },
+    upsertBot(state, action: PayloadAction<{ bot: any }>) {
+      state.bots.response = upsertListItem(
+        state.bots.response ?? [],
+        action.payload.bot,
+        getBotId,
+      );
+    },
+    upsertBots(state, action: PayloadAction<{ bots: any[] }>) {
+      let next = state.bots.response ?? [];
+      for (const bot of action.payload.bots ?? []) {
+        next = upsertListItem(next, bot, getBotId);
+      }
+      state.bots.response = next;
     },
 
     setBotsByServerId(state) {
@@ -172,6 +302,21 @@ const dbConfigSlice = createSlice({
     setServersDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.servers, action.payload);
     },
+    removeServersByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.servers.response = (state.servers.response ?? []).filter((server: any) => {
+        const serverId = Number(server.serverId ?? server.id);
+        return !ids.has(serverId);
+      });
+    },
+    upsertServer(state, action: PayloadAction<{ server: any }>) {
+      state.servers.response = upsertListItem(
+        state.servers.response ?? [],
+        action.payload.server,
+        getServerId,
+      );
+    },
 
     setRpcUrlsData(state) {
       setLoading(state.rpcUrls);
@@ -181,6 +326,21 @@ const dbConfigSlice = createSlice({
     },
     setRpcUrlsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.rpcUrls, action.payload);
+    },
+    removeRpcUrlsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.rpcUrls.response = (state.rpcUrls.response ?? []).filter((rpcUrl: any) => {
+        const rpcUrlId = Number(rpcUrl.rpcUrlId ?? rpcUrl.id);
+        return !ids.has(rpcUrlId);
+      });
+    },
+    upsertRpcUrl(state, action: PayloadAction<{ rpcUrl: any }>) {
+      state.rpcUrls.response = upsertListItem(
+        state.rpcUrls.response ?? [],
+        action.payload.rpcUrl,
+        getRpcUrlId,
+      );
     },
 
     setSwapRate(state) {
@@ -202,6 +362,21 @@ const dbConfigSlice = createSlice({
     setCexChainsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.cexChains, action.payload);
     },
+    removeCexChainsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.cexChains.response = (state.cexChains.response ?? []).filter((chain: any) => {
+        const chainId = Number(chain.id ?? chain.chainId);
+        return !ids.has(chainId);
+      });
+    },
+    upsertCexChain(state, action: PayloadAction<{ chain: any }>) {
+      state.cexChains.response = upsertListItem(
+        state.cexChains.response ?? [],
+        action.payload.chain,
+        getCexChainId,
+      );
+    },
 
     setCexPairsData(state) {
       setLoading(state.cexPairs);
@@ -212,6 +387,21 @@ const dbConfigSlice = createSlice({
     setCexPairsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.cexPairs, action.payload);
     },
+    removeCexPairsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.cexPairs.response = (state.cexPairs.response ?? []).filter((pair: any) => {
+        const pairId = Number(pair.id ?? pair.pairId ?? pair.cexPairId ?? pair.cex_pair_id);
+        return !ids.has(pairId);
+      });
+    },
+    upsertCexPair(state, action: PayloadAction<{ pair: any }>) {
+      state.cexPairs.response = upsertListItem(
+        state.cexPairs.response ?? [],
+        action.payload.pair,
+        getCexPairId,
+      );
+    },
 
     setCexJobsData(state) {
       setLoading(state.cexJobs);
@@ -221,6 +411,21 @@ const dbConfigSlice = createSlice({
     },
     setCexJobsDataFailure(state, action: PayloadAction<string>) {
       setFailure(state.cexJobs, action.payload);
+    },
+    removeCexJobsByIds(state, action: PayloadAction<number[]>) {
+      const ids = new Set(action.payload.map((id) => Number(id)));
+      if (ids.size === 0) return;
+      state.cexJobs.response = (state.cexJobs.response ?? []).filter((job: any) => {
+        const jobId = Number(job.id ?? job.cexJobId ?? job.cex_job_id);
+        return !ids.has(jobId);
+      });
+    },
+    upsertCexJob(state, action: PayloadAction<{ job: any }>) {
+      state.cexJobs.response = upsertListItem(
+        state.cexJobs.response ?? [],
+        action.payload.job,
+        getCexJobId,
+      );
     },
 
     refetchTokensData(state) {

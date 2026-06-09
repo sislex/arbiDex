@@ -63,40 +63,73 @@ export const apiService = {
   createToken: (data: any) => request<any>("POST", "/tokens", { body: { ...data } }),
   editToken: (id: number, data: any) => request<any>("PUT", `/tokens/${id}`, { body: data }),
   deletingToken: (id: number) => request<any>("DELETE", `/tokens/${id}`),
+  bulkDeleteTokens: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/tokens/bulk-delete", {
+      body: { ids },
+    }),
 
   getPools: () => request<any[]>("GET", "/pools"),
   createPool: (data: any) => request<any>("POST", "/pools", { body: { ...data } }),
   editPool: (id: number, data: any) => request<any>("PUT", `/pools/by-id/${id}`, { body: data }),
   deletingPool: (id: number) => request<any>("DELETE", `/pools/${id}`),
+  bulkDeletePools: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/pools/bulk-delete", {
+      body: { ids },
+    }),
 
   getDexes: () => request<any[]>("GET", "/dexes"),
   createDex: (data: any) => request<any>("POST", "/dexes", { body: { ...data } }),
   editDex: (id: number, data: any) => request<any>("PUT", `/dexes/${id}`, { body: data }),
   deletingDex: (id: number) => request<any>("DELETE", `/dexes/${id}`),
+  bulkDeleteDexes: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/dexes/bulk-delete", {
+      body: { ids },
+    }),
 
   getChainsData: () => request<any[]>("GET", "/chains"),
   createChain: (data: any) => request<any>("POST", "/chains", { body: { ...data } }),
   editChain: (id: number, data: any) => request<any>("PUT", `/chains/${id}`, { body: data }),
   deletingChain: (id: number) => request<any>("DELETE", `/chains/${id}`),
+  bulkDeleteChains: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/chains/bulk-delete", {
+      body: { ids },
+    }),
 
   getBots: () => request<any[]>("GET", "/bots"),
   getBotsByServerId: (serverId: number) => request<any[]>("GET", "/bots/findAllByServerId", { params: { serverId } }),
+  getBotsByJobId: (jobId: number) => request<any[]>("GET", "/bots/findAllByJobId", { params: { jobId } }),
   setBotById: (id: number) => request<any>("GET", `/bots/${id}`),
   createBot: (data: any) => request<any>("POST", "/bots", { body: { ...data } }),
   editBot: (id: number, data: any) => request<any>("PUT", `/bots/${id}`, { body: data }),
   deletingBot: (id: number) => request<any>("DELETE", `/bots/${id}`),
+  bulkDeleteBots: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/bots/bulk-delete", {
+      body: { ids },
+    }),
+  bulkUpdateBots: (bots: any[]) =>
+    request<{ success: boolean; bots: any[] }>("POST", "/bots/bulk-update", {
+      body: { bots },
+    }),
 
   getJobs: () => request<any[]>("GET", "/jobs"),
   getJobById: (id: number) => request<any>("GET", `/jobs/${id}`),
   createJob: (data: any) => request<any>("POST", "/jobs", { body: { ...data } }),
   editJob: (id: number, data: any) => request<any>("PUT", `/jobs/${id}`, { body: data }),
   deletingJob: (id: number) => request<any>("DELETE", `/jobs/${id}`),
+  bulkDeleteJobs: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/jobs/bulk-delete", {
+      body: { ids },
+    }),
 
   getServers: () => request<any[]>("GET", "/servers"),
   setServerById: (id: number) => request<any>("GET", `/servers/${id}`),
   createServer: (data: any) => request<any>("POST", "/servers", { body: { ...data } }),
   editServer: (id: number, data: any) => request<any>("PUT", `/servers/${id}`, { body: data }),
   deletingServer: (id: number) => request<any>("DELETE", `/servers/${id}`),
+  bulkDeleteServers: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/servers/bulk-delete", {
+      body: { ids },
+    }),
   resetServerSettings: (ip: string, port: string, data: any) => {
     return fetch(`${buildServerBaseUrl(ip, port)}/setBotsRulesList`, {
       method: "POST",
@@ -122,6 +155,10 @@ export const apiService = {
   createRpcUrl: (data: any) => request<any>("POST", "/rpc-urls", { body: { ...data } }),
   editRpcUrl: (id: number, data: any) => request<any>("PUT", `/rpc-urls/${id}`, { body: data }),
   deletingRpcUrl: (id: number) => request<any>("DELETE", `/rpc-urls/${id}`),
+  bulkDeleteRpcUrls: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/rpc-urls/bulk-delete", {
+      body: { ids },
+    }),
 
   getCexJobs: () => request<any[]>("GET", "/cex-jobs"),
   checkCexJob: (data: any) => {
@@ -142,14 +179,26 @@ export const apiService = {
   editCexJob: (id: number, data: any) => request<any>("PUT", `/cex-jobs/${id}`, { body: data }),
   updateCexJobStatus: (id: number, checked: boolean | null) => request<any>("PATCH", `/cex-jobs/${id}/status`, { body: { checked } }),
   deletingCexJob: (id: number) => request<any>("DELETE", `/cex-jobs/${id}`),
+  bulkDeleteCexJobs: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/cex-jobs/bulk-delete", {
+      body: { ids },
+    }),
 
   getCexChainsData: () => request<any[]>("GET", "/cex-chains"),
   createCexChain: (data: any) => request<any>("POST", "/cex-chains", { body: { ...data } }),
   editCexChain: (id: number, data: any) => request<any>("PATCH", `/cex-chains/${id}`, { body: data }),
   deletingCexChain: (id: number) => request<any>("DELETE", `/cex-chains/${id}`),
+  bulkDeleteCexChains: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/cex-chains/bulk-delete", {
+      body: { ids },
+    }),
 
   getCexPairs: () => request<any[]>("GET", "/cex-pairs"),
   createCexPair: (data: any) => request<any>("POST", "/cex-pairs", { body: { ...data } }),
   editCexPair: (id: number, data: any) => request<any>("PUT", `/cex-pairs/${id}`, { body: data }),
   deletingCexPair: (id: number) => request<any>("DELETE", `/cex-pairs/${id}`),
+  bulkDeleteCexPairs: (ids: number[]) =>
+    request<{ success: boolean; deletedIds: number[] }>("POST", "/cex-pairs/bulk-delete", {
+      body: { ids },
+    }),
 };

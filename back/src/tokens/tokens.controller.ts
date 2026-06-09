@@ -10,10 +10,16 @@ import {
 } from '@nestjs/common';
 import { TokensService } from './tokens.service';
 import { CreateTokenDto } from '../dtos/token-dto/token.dto';
+import { BulkDeleteTokensDto } from '../dtos/token-dto/bulk-delete-tokens.dto';
 
 @Controller('tokens')
 export class TokensController {
   constructor(private readonly tokensService: TokensService) {}
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeleteTokensDto) {
+    return this.tokensService.removeMany(body.ids ?? []);
+  }
 
   @Get()
   async findAll() {

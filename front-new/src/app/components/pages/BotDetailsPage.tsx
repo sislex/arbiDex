@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { DataTable, Column } from '../DataTable';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -12,16 +12,33 @@ import {
   selectRpcUrlsMeta,
 } from '../../store/db-config/dbConfig.selectors';
 import { apiService } from '../../services/api-service';
+import { resolveBotDexJobId } from '../../utils/botJobId';
 import { mapPoolJobRelationToJobPair } from '../../utils/jobPairUtils';
 
 interface BotDetailsPageProps {
   botId: number;
   botName: string;
   language: 'en' | 'ru';
+  backLabel?: string;
   onBack: () => void;
+  onGoToJob?: (payload: { jobId: number; jobName: string; botId: number }) => void;
+  onGoToServer?: (payload: {
+    id: number;
+    name: string;
+    serverId: number;
+    serverName: string;
+  }) => void;
 }
 
-export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsPageProps) {
+export function BotDetailsPage({
+  botId,
+  botName,
+  language,
+  backLabel,
+  onBack,
+  onGoToJob,
+  onGoToServer,
+}: BotDetailsPageProps) {
   const dispatch = useAppDispatch();
   const jobsMeta = useAppSelector(selectJobsMeta);
   const chainsMeta = useAppSelector(selectChainsMeta);
@@ -52,6 +69,8 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
       createForError: 'CREATE FOR ERROR',
       config: 'Configuration',
       close: 'Close',
+      goToJob: 'Go to job',
+      goToServer: 'Go to server',
     },
     ru: {
       back: 'К списку ботов',
@@ -66,8 +85,39 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
       createForError: 'СОЗДАТЬ ДЛЯ ОШИБКИ',
       config: 'Конфигурация',
       close: 'Закрыть',
+      goToJob: 'К задаче',
+      goToServer: 'На сервер',
     },
   };
+
+  const jobTarget = useMemo(() => {
+    const jobId = resolveBotDexJobId(activeBotRaw);
+    if (jobId == null) return null;
+
+    const jobName =
+      activeBotRaw?.job?.description ??
+      activeBotRaw?.jobName ??
+      activeBotRaw?.job?.jobType ??
+      activeBotRaw?.job?.job_type ??
+      `Job #${jobId}`;
+
+    return { jobId, jobName: String(jobName) };
+  }, [activeBotRaw]);
+
+  const serverTarget = useMemo(() => {
+    const serverId = Number(
+      activeBotRaw?.server?.serverId ?? activeBotRaw?.serverId ?? activeBotRaw?.server_id,
+    );
+    if (!Number.isFinite(serverId)) return null;
+
+    const serverName =
+      activeBotRaw?.server?.serverName ??
+      activeBotRaw?.serverName ??
+      activeBotRaw?.server?.name ??
+      `Server #${serverId}`;
+
+    return { serverId, serverName };
+  }, [activeBotRaw]);
 
   useEffect(() => {
     if ((!jobsMeta.isLoaded || jobsMeta.error) && !jobsMeta.isLoading) {
@@ -330,12 +380,51 @@ export function BotDetailsPage({ botId, botName, language, onBack }: BotDetailsP
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          {t[language].back}
+          {backLabel ?? t[language].back}
         </button>
         <div className="h-6 w-px bg-border" />
         <h2 className="text-foreground">
           Bot ID:{botId} {t[language].relationsTable} ({jobs.length})
         </h2>
+        {(onGoToJob && jobTarget) || (onGoToServer && serverTarget) ? (
+          <div className="ml-auto flex items-center gap-2">
+            {onGoToJob && jobTarget ? (
+              <button
+                type="button"
+                onClick={() =>
+                  onGoToJob({
+                    jobId: jobTarget.jobId,
+                    jobName: jobTarget.jobName,
+                    botId,
+                  })
+                }
+                className="flex items-center gap-2 px-3 py-1.5 bg-success/15 text-success rounded hover:bg-success/25 transition-colors text-sm"
+                title={t[language].goToJob}
+              >
+                <span>Job</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : null}
+            {onGoToServer && serverTarget ? (
+              <button
+                type="button"
+                onClick={() =>
+                  onGoToServer({
+                    id: botId,
+                    name: botName,
+                    serverId: serverTarget.serverId,
+                    serverName: serverTarget.serverName,
+                  })
+                }
+                className="flex items-center gap-2 px-3 py-1.5 bg-success/15 text-success rounded hover:bg-success/25 transition-colors text-sm"
+                title={t[language].goToServer}
+              >
+                <span>Server</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       {showConfig ? (

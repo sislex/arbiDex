@@ -10,7 +10,11 @@ import {
   selectCexPairsDataResponse,
   selectCexPairsMeta,
 } from '../../store/db-config/dbConfig.selectors';
-import { buildCexChainNameById, resolveCexPairSourceLabel } from '../../utils/cexPairSource';
+import {
+  buildCexChainNameById,
+  buildCexJobDescriptionFromPair,
+  resolveCexPairSourceLabel,
+} from '../../utils/cexPairSource';
 import { hasFormChanges, isSubmitDisabled } from '../../utils/form-utils';
 
 export interface CexJobFormValues {
@@ -44,6 +48,17 @@ export function CexJobForm({ open, onClose, onSave, initialData, language }: Cex
     !cexChainsMeta.isLoaded;
 
   const cexChainNameById = useMemo(() => buildCexChainNameById(cexChainsFromStore), [cexChainsFromStore]);
+
+  const cexPairById = useMemo(() => {
+    const map = new Map<string, any>();
+    (cexPairsFromStore ?? []).forEach((pair: any) => {
+      const id = pair.id ?? pair.pairId ?? pair.cexPairId ?? pair.cex_pair_id;
+      if (id !== undefined && id !== null) {
+        map.set(String(id), pair);
+      }
+    });
+    return map;
+  }, [cexPairsFromStore]);
 
   const t = {
     en: {
@@ -112,7 +127,13 @@ export function CexJobForm({ open, onClose, onSave, initialData, language }: Cex
             label={t[language].selectPool}
             options={pairOptions}
             value={form.cexPairId}
-            onChange={(v) => setForm({ ...form, cexPairId: v })}
+            onChange={(cexPairId) => {
+              const pair = cexPairById.get(cexPairId);
+              const description = pair
+                ? buildCexJobDescriptionFromPair(pair, cexChainNameById)
+                : form.description;
+              setForm({ ...form, cexPairId, description });
+            }}
             placeholder="pool"
             required
             disabled={isFormLoading}

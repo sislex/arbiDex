@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { DexesService } from './dexes.service';
 import { DexDto } from '../dtos/dexes-dto/dex.dto';
+import { BulkDeleteDexesDto } from '../dtos/dexes-dto/bulk-delete-dexes.dto';
 
 @Controller('dexes')
 export class DexesController {
@@ -17,6 +18,11 @@ export class DexesController {
   @Post()
   create(@Body() createDexDto: DexDto) {
     return this.dexesService.create(createDexDto);
+  }
+
+  @Post('bulk-delete')
+  removeMany(@Body() body: BulkDeleteDexesDto) {
+    return this.dexesService.removeMany(body.ids ?? []);
   }
 
   @Get()
