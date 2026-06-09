@@ -83,6 +83,7 @@ export function DataTable({
 }: DataTableProps) {
   const rows = Array.isArray(data) ? data : [];
   const gridApiRef = useRef<GridApi | null>(null);
+  const [popupParent, setPopupParent] = useState<HTMLElement | null>(null);
   const [filteredCount, setFilteredCount] = useState(rows.length);
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
 
@@ -289,7 +290,6 @@ export function DataTable({
       resizable: true,
       filterParams: {
         defaultOption: 'contains',
-        filterOptions: ['contains'],
         maxNumConditions: 1,
         buttons: ['reset'],
         debounceMs: 150,
@@ -357,6 +357,7 @@ export function DataTable({
           {headerActions ? <div className="shrink-0">{headerActions}</div> : null}
         </div>
       )}
+      <div ref={setPopupParent} className="arb-ag-popup-root" aria-hidden="true" />
       <div className="ag-theme-quartz arb-dex-grid flex-1 min-h-0 min-w-0 w-full">
         {isLoading ? (
           <div className="size-full flex items-center justify-center">
@@ -370,6 +371,7 @@ export function DataTable({
             rowData={rows}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
+            popupParent={popupParent ?? undefined}
             localeText={localeText}
             enableBrowserTooltips
             enableCellTextSelection
