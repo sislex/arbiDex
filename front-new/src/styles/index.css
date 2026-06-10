@@ -3,6 +3,21 @@
 @import './theme.css';
 
 .arb-dex-grid {
+  height: 100%;
+}
+
+.arb-dex-grid .ag-root-wrapper {
+  height: 100%;
+}
+
+.arb-dex-grid .ag-pinned-left-cols-container,
+.arb-dex-grid .ag-pinned-right-cols-container,
+.arb-dex-grid .ag-pinned-left-header,
+.arb-dex-grid .ag-pinned-right-header {
+  z-index: 2;
+}
+
+.arb-dex-grid {
   --ag-background-color: hsl(var(--background));
   --ag-foreground-color: #000;
   --ag-header-background-color: hsl(var(--muted));

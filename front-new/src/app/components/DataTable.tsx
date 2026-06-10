@@ -26,6 +26,7 @@ export interface Column {
   label: string;
   sortable?: boolean;
   filterable?: boolean;
+  pinned?: 'left' | 'right';
   render?: (value: any, row: any) => React.ReactNode;
   headerRender?: () => React.ReactNode;
 }
@@ -54,6 +55,8 @@ interface DataTableProps {
   getRowHighlightId?: (row: any) => string;
   /** Actions column: first (default, pinned left) or last (pinned right). */
   actionsColumnPosition?: 'first' | 'last';
+  /** Override actions column header; pass empty string to hide it. */
+  actionsColumnLabel?: string;
   /** Hide rows without rebuilding rowData (fast path for large tables). */
   excludeRowIds?: ReadonlySet<number | string>;
   getExcludeRowId?: (row: any) => number | string;
@@ -79,6 +82,7 @@ export function DataTable({
   highlightRowId,
   getRowHighlightId,
   actionsColumnPosition = 'first',
+  actionsColumnLabel,
   excludeRowIds,
   getExcludeRowId,
 }: DataTableProps) {
@@ -194,15 +198,22 @@ export function DataTable({
     [language],
   );
 
+  const resolvedActionsHeader =
+    actionsColumnLabel !== undefined ? actionsColumnLabel : actionsHeader;
+
   const columnDefs = useMemo<ColDef[]>(() => {
-    const gridColumns: ColDef[] = columns.map((column) => {
+    const gridColumns: ColDef[] = columns
+      .filter((column) => column.key !== 'actions')
+      .map((column) => {
       const isCheckboxColumn = column.key === 'checkbox';
       const isAddressColumn = column.key.toLowerCase().includes('address');
       const HeaderComponent = column.headerRender
         ? () => <div className="flex h-full items-center justify-center">{column.headerRender?.()}</div>
         : undefined;
       return {
-        field: column.key,
+        ...(isCheckboxColumn
+          ? { colId: column.key, valueGetter: () => '' }
+          : { field: column.key }),
         headerName: column.headerRender ? undefined : column.label,
         headerComponent: HeaderComponent,
         sortable: Boolean(column.sortable),
@@ -215,9 +226,8 @@ export function DataTable({
             width: 56,
             minWidth: 56,
             maxWidth: 56,
-            flex: 0,
             lockPinned: true,
-            suppressSizeToFit: true,
+            suppressMovable: true,
           }
           : {
             flex: 1,
@@ -240,15 +250,20 @@ export function DataTable({
     });
 
     if (onEdit || onDelete || extraActions) {
+      const hasBuiltinActions = Boolean(onEdit || onDelete);
+      const actionsWidth = hasBuiltinActions ? (extraActions ? 132 : 96) : 52;
       const actionsCol: ColDef = {
         colId: 'actions',
-        headerName: actionsHeader,
-        width: extraActions ? 132 : 96,
-        minWidth: extraActions ? 132 : 96,
-        resizable: true,
+        headerName: resolvedActionsHeader,
+        width: actionsWidth,
+        minWidth: actionsWidth,
+        maxWidth: actionsWidth,
+        resizable: false,
         sortable: false,
         filter: false,
         pinned: actionsColumnPosition === 'last' ? 'right' : 'left',
+        lockPinned: true,
+        suppressMovable: true,
         cellRenderer: (params: any) => (
           <div className="flex h-full items-center gap-2">
             {extraActions?.(params.data)}
@@ -290,8 +305,8 @@ export function DataTable({
     return gridColumns;
   }, [
     actionsColumnPosition,
-    actionsHeader,
     columns,
+    resolvedActionsHeader,
     deleteTitle,
     editTitle,
     extraActions,
