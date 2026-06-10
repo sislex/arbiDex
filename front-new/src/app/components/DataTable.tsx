@@ -386,7 +386,8 @@ export function DataTable({
             defaultColDef={defaultColDef}
             popupParent={popupParent}
             localeText={localeText}
-            getLocaleText={language === 'ru' ? getLocaleText : undefined}
+            getLocaleText={getLocaleText}
+            key={language}
             enableBrowserTooltips
             enableCellTextSelection
             ensureDomOrder
