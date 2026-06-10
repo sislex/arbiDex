@@ -81,3 +81,24 @@ export const agGridLocaleRu: Record<string, string> = {
   paste: 'Вставить',
   ctrlV: 'Ctrl+V',
 };
+
+export function getAgGridLocaleText(
+  key: string,
+  defaultValue: string,
+  variableValues?: string[],
+): string {
+  const translated = agGridLocaleRu[key];
+  if (translated == null) {
+    return defaultValue;
+  }
+
+  if (!variableValues?.length) {
+    return translated;
+  }
+
+  let result = translated;
+  for (const value of variableValues) {
+    result = result.replace('${variable}', value);
+  }
+  return result;
+}

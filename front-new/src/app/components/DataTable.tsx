@@ -6,6 +6,7 @@ import {
   AllCommunityModule,
   ModuleRegistry,
   type ColDef,
+  type GetLocaleTextParams,
   type GetRowIdParams,
   type GridApi,
   type ModelUpdatedEvent,
@@ -16,7 +17,7 @@ import {
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 
-import { agGridLocaleRu } from '../utils/agGridLocale';
+import { agGridLocaleRu, getAgGridLocaleText } from '../utils/agGridLocale';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -83,7 +84,10 @@ export function DataTable({
 }: DataTableProps) {
   const rows = Array.isArray(data) ? data : [];
   const gridApiRef = useRef<GridApi | null>(null);
-  const [popupParent, setPopupParent] = useState<HTMLElement | null>(null);
+  const popupParent = useMemo(
+    () => (typeof document !== 'undefined' ? document.body : undefined),
+    [],
+  );
   const [filteredCount, setFilteredCount] = useState(rows.length);
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
 
@@ -180,6 +184,16 @@ export function DataTable({
 
   const localeText = useMemo(() => (language === 'ru' ? agGridLocaleRu : undefined), [language]);
 
+  const getLocaleText = useCallback(
+    (params: GetLocaleTextParams) => {
+      if (language !== 'ru') {
+        return params.defaultValue;
+      }
+      return getAgGridLocaleText(params.key, params.defaultValue, params.variableValues);
+    },
+    [language],
+  );
+
   const columnDefs = useMemo<ColDef[]>(() => {
     const gridColumns: ColDef[] = columns.map((column) => {
       const isCheckboxColumn = column.key === 'checkbox';
@@ -197,27 +211,27 @@ export function DataTable({
         floatingFilter: false,
         ...(isCheckboxColumn
           ? {
-              pinned: 'left' as const,
-              width: 56,
-              minWidth: 56,
-              maxWidth: 56,
-              flex: 0,
-              lockPinned: true,
-              suppressSizeToFit: true,
-            }
+            pinned: 'left' as const,
+            width: 56,
+            minWidth: 56,
+            maxWidth: 56,
+            flex: 0,
+            lockPinned: true,
+            suppressSizeToFit: true,
+          }
           : {
-              flex: 1,
-              minWidth: 120,
-            }),
+            flex: 1,
+            minWidth: 120,
+          }),
         suppressHeaderMenuButton: true,
         suppressHeaderFilterButton: !column.filterable,
         menuTabs: column.filterable ? ['filterMenuTab'] : [],
         tooltipValueGetter: isAddressColumn
           ? (params: any) => {
-              const value = params?.value;
-              if (value === null || value === undefined || value === '') return null;
-              return String(value);
-            }
+            const value = params?.value;
+            if (value === null || value === undefined || value === '') return null;
+            return String(value);
+          }
           : undefined,
         cellRenderer: column.render
           ? (params: any) => column.render?.(params.value, params.data)
@@ -357,7 +371,6 @@ export function DataTable({
           {headerActions ? <div className="shrink-0">{headerActions}</div> : null}
         </div>
       )}
-      <div ref={setPopupParent} className="arb-ag-popup-root" aria-hidden="true" />
       <div className="ag-theme-quartz arb-dex-grid flex-1 min-h-0 min-w-0 w-full">
         {isLoading ? (
           <div className="size-full flex items-center justify-center">
@@ -371,8 +384,9 @@ export function DataTable({
             rowData={rows}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
-            popupParent={popupParent ?? undefined}
+            popupParent={popupParent}
             localeText={localeText}
+            getLocaleText={language === 'ru' ? getLocaleText : undefined}
             enableBrowserTooltips
             enableCellTextSelection
             ensureDomOrder
