@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Columns2, Plus, Rows2, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, Columns2, Plus, RotateCcw, Rows2, Save, Trash2, Undo2 } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { DataTable, Column } from '../DataTable';
 import { apiService } from '../../services/api-service';
@@ -54,6 +54,11 @@ const mapPoolToRow = (pool: any, relationId?: number): PoolJobRow => ({
   fee: String(pool.fee ?? '-'),
 });
 
+interface MoveHistoryEntry {
+  poolIds: number[];
+  toActive: boolean;
+}
+
 const extractRelationMeta = (relation: any): { poolId: number; relationId: number } | null => {
   const poolId = Number(relation?.pool?.poolId ?? relation?.poolId);
   const relationId = Number(
@@ -81,6 +86,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
   const [selectedNotInRows, setSelectedNotInRows] = useState<Set<number>>(new Set());
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [undoStack, setUndoStack] = useState<MoveHistoryEntry[]>([]);
   const inTableRowsRef = useRef<PoolJobRow[]>([]);
   const notInTableRowsRef = useRef<PoolJobRow[]>([]);
 
@@ -107,6 +113,8 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
       addSelected: 'Add selected',
       removeSelected: 'Remove selected',
       saveChanges: 'Save changes',
+      undo: 'Undo',
+      reset: 'Reset',
       loading: 'Loading job pools…',
     },
     ru: {
@@ -123,6 +131,8 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
       addSelected: 'Добавить выбранные',
       removeSelected: 'Удалить выбранные',
       saveChanges: 'Сохранить',
+      undo: 'Отменить',
+      reset: 'Сбросить',
       loading: 'Загрузка пулов задачи…',
     },
   };
@@ -171,6 +181,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
       setNotInTableRows(notRows);
       setSelectedInRows(new Set());
       setSelectedNotInRows(new Set());
+      setUndoStack([]);
     },
     [],
   );
@@ -225,6 +236,35 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
     [activePoolIds, initialActivePoolIds],
   );
 
+  const rebuildTablesFromActiveIds = useCallback(
+    (activeIds: Set<number>) => {
+      const inRows: PoolJobRow[] = [];
+      const notRows: PoolJobRow[] = [];
+
+      chainPools.forEach((pool) => {
+        const poolId = Number(pool.poolId ?? pool.id);
+        if (activeIds.has(poolId)) {
+          inRows.push(mapPoolToRow(pool, relationIdByPoolId.get(poolId)));
+        } else {
+          notRows.push(mapPoolToRow(pool));
+        }
+      });
+
+      setInTableRows(inRows);
+      setNotInTableRows(notRows);
+    },
+    [chainPools, relationIdByPoolId],
+  );
+
+  const handleResetChanges = useCallback(() => {
+    const restored = new Set(initialActivePoolIds);
+    setActivePoolIds(restored);
+    rebuildTablesFromActiveIds(restored);
+    setSelectedInRows(new Set());
+    setSelectedNotInRows(new Set());
+    setUndoStack([]);
+  }, [initialActivePoolIds, rebuildTablesFromActiveIds]);
+
   const toggleSelected = (
     setState: (value: Set<number> | ((prev: Set<number>) => Set<number>)) => void,
     id: number,
@@ -238,9 +278,13 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
   };
 
   const moveRowsBetweenTables = useCallback(
-    (poolIds: Iterable<number>, toActive: boolean) => {
+    (poolIds: Iterable<number>, toActive: boolean, recordHistory = true) => {
       const ids = [...poolIds];
       if (ids.length === 0) return;
+
+      if (recordHistory) {
+        setUndoStack((prev) => [...prev, { poolIds: ids, toActive }]);
+      }
 
       const idSet = new Set(ids);
       const movingRows: PoolJobRow[] = [];
@@ -299,6 +343,13 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
   const handleAddSelected = () => {
     moveRowsBetweenTables(selectedNotInRows, true);
   };
+
+  const handleUndoLast = useCallback(() => {
+    const last = undoStack[undoStack.length - 1];
+    if (!last) return;
+    setUndoStack((prev) => prev.slice(0, -1));
+    moveRowsBetweenTables(last.poolIds, !last.toActive, false);
+  }, [moveRowsBetweenTables, undoStack]);
 
   const patchJobPoolsCountInStore = useCallback(
     (poolsCount: number) => {
@@ -373,6 +424,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
       }
 
       setInitialActivePoolIds(new Set(activePoolIds));
+      setUndoStack([]);
       patchJobPoolsCountInStore(activePoolIds.size);
     } finally {
       setIsSaving(false);
@@ -418,25 +470,6 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
         ),
       },
       ...relationColumns,
-      {
-        key: 'actions',
-        label: '',
-        render: (_, row) => (
-          <button
-            onClick={(event) => {
-              event.stopPropagation();
-              moveSingle(row.poolId, action === 'add');
-            }}
-            className={`p-1.5 rounded transition-colors ${
-              action === 'remove'
-                ? 'hover:bg-destructive/10 text-destructive'
-                : 'hover:bg-success/10 text-success'
-            }`}
-          >
-            {action === 'remove' ? <Trash2 className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-          </button>
-        ),
-      },
     ];
 
     return (
@@ -448,6 +481,23 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
           language={language}
           isLoading={isInitialLoading || poolsMeta.isLoading}
           loadingText={t[language].loading}
+          actionsColumnPosition="last"
+          actionsColumnLabel=""
+          extraActions={(row) => (
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                moveSingle(row.poolId, action === 'add');
+              }}
+              className={`p-1.5 rounded transition-colors ${
+                action === 'remove'
+                  ? 'hover:bg-destructive/10 text-destructive'
+                  : 'hover:bg-success/10 text-success'
+              }`}
+            >
+              {action === 'remove' ? <Trash2 className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+            </button>
+          )}
           onFilteredDataChange={onFilteredDataChange}
           getRowId={(params) => String(params.data?.poolId ?? '')}
         />
@@ -468,6 +518,14 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
         <div className="h-6 w-px bg-border" />
         <h2 className="text-foreground">{jobName}</h2>
         <div className="flex-1" />
+        <button
+          onClick={handleUndoLast}
+          disabled={isSaving || !hasChanges || undoStack.length === 0}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Undo2 className="w-4 h-4" />
+          {t[language].undo}
+        </button>
         <button
           onClick={() => setLayoutMode(layoutMode === 'vertical' ? 'horizontal' : 'vertical')}
           className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
@@ -512,7 +570,16 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
         </Panel>
       </PanelGroup>
 
-      <div className="h-16 border-t border-border bg-card flex items-center justify-end gap-3 px-4">
+      <div className="h-16 border-t border-border bg-card flex items-center justify-between gap-3 px-4">
+        <button
+          onClick={handleResetChanges}
+          disabled={isSaving || !hasChanges}
+          className="flex items-center gap-2 px-4 py-2 border border-border text-foreground rounded hover:bg-muted transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RotateCcw className="w-4 h-4" />
+          {t[language].reset}
+        </button>
+        <div className="flex items-center gap-3">
         <button
           disabled={selectedInRows.size === 0}
           onClick={handleRemoveSelected}
@@ -537,6 +604,7 @@ export function DexJobRelationsPage({ jobId, jobName, language, onBack }: DexJob
           <Save className="w-4 h-4" />
           {t[language].saveChanges}
         </button>
+        </div>
       </div>
     </div>
   );

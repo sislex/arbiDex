@@ -6,6 +6,7 @@ import {
   AllCommunityModule,
   ModuleRegistry,
   type ColDef,
+  type GetLocaleTextParams,
   type GetRowIdParams,
   type GridApi,
   type ModelUpdatedEvent,
@@ -16,7 +17,7 @@ import {
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 
-import { agGridLocaleRu } from '../utils/agGridLocale';
+import { agGridLocaleRu, getAgGridLocaleText } from '../utils/agGridLocale';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -25,6 +26,7 @@ export interface Column {
   label: string;
   sortable?: boolean;
   filterable?: boolean;
+  pinned?: 'left' | 'right';
   render?: (value: any, row: any) => React.ReactNode;
   headerRender?: () => React.ReactNode;
 }
@@ -53,6 +55,8 @@ interface DataTableProps {
   getRowHighlightId?: (row: any) => string;
   /** Actions column: first (default, pinned left) or last (pinned right). */
   actionsColumnPosition?: 'first' | 'last';
+  /** Override actions column header; pass empty string to hide it. */
+  actionsColumnLabel?: string;
   /** Hide rows without rebuilding rowData (fast path for large tables). */
   excludeRowIds?: ReadonlySet<number | string>;
   getExcludeRowId?: (row: any) => number | string;
@@ -78,12 +82,16 @@ export function DataTable({
   highlightRowId,
   getRowHighlightId,
   actionsColumnPosition = 'first',
+  actionsColumnLabel,
   excludeRowIds,
   getExcludeRowId,
 }: DataTableProps) {
   const rows = Array.isArray(data) ? data : [];
   const gridApiRef = useRef<GridApi | null>(null);
-  const [popupParent, setPopupParent] = useState<HTMLElement | null>(null);
+  const popupParent = useMemo(
+    () => (typeof document !== 'undefined' ? document.body : undefined),
+    [],
+  );
   const [filteredCount, setFilteredCount] = useState(rows.length);
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
 
@@ -180,15 +188,32 @@ export function DataTable({
 
   const localeText = useMemo(() => (language === 'ru' ? agGridLocaleRu : undefined), [language]);
 
+  const getLocaleText = useCallback(
+    (params: GetLocaleTextParams) => {
+      if (language !== 'ru') {
+        return params.defaultValue;
+      }
+      return getAgGridLocaleText(params.key, params.defaultValue, params.variableValues);
+    },
+    [language],
+  );
+
+  const resolvedActionsHeader =
+    actionsColumnLabel !== undefined ? actionsColumnLabel : actionsHeader;
+
   const columnDefs = useMemo<ColDef[]>(() => {
-    const gridColumns: ColDef[] = columns.map((column) => {
+    const gridColumns: ColDef[] = columns
+      .filter((column) => column.key !== 'actions')
+      .map((column) => {
       const isCheckboxColumn = column.key === 'checkbox';
       const isAddressColumn = column.key.toLowerCase().includes('address');
       const HeaderComponent = column.headerRender
         ? () => <div className="flex h-full items-center justify-center">{column.headerRender?.()}</div>
         : undefined;
       return {
-        field: column.key,
+        ...(isCheckboxColumn
+          ? { colId: column.key, valueGetter: () => '' }
+          : { field: column.key }),
         headerName: column.headerRender ? undefined : column.label,
         headerComponent: HeaderComponent,
         sortable: Boolean(column.sortable),
@@ -197,27 +222,26 @@ export function DataTable({
         floatingFilter: false,
         ...(isCheckboxColumn
           ? {
-              pinned: 'left' as const,
-              width: 56,
-              minWidth: 56,
-              maxWidth: 56,
-              flex: 0,
-              lockPinned: true,
-              suppressSizeToFit: true,
-            }
+            pinned: 'left' as const,
+            width: 56,
+            minWidth: 56,
+            maxWidth: 56,
+            lockPinned: true,
+            suppressMovable: true,
+          }
           : {
-              flex: 1,
-              minWidth: 120,
-            }),
+            flex: 1,
+            minWidth: 120,
+          }),
         suppressHeaderMenuButton: true,
         suppressHeaderFilterButton: !column.filterable,
         menuTabs: column.filterable ? ['filterMenuTab'] : [],
         tooltipValueGetter: isAddressColumn
           ? (params: any) => {
-              const value = params?.value;
-              if (value === null || value === undefined || value === '') return null;
-              return String(value);
-            }
+            const value = params?.value;
+            if (value === null || value === undefined || value === '') return null;
+            return String(value);
+          }
           : undefined,
         cellRenderer: column.render
           ? (params: any) => column.render?.(params.value, params.data)
@@ -226,15 +250,20 @@ export function DataTable({
     });
 
     if (onEdit || onDelete || extraActions) {
+      const hasBuiltinActions = Boolean(onEdit || onDelete);
+      const actionsWidth = hasBuiltinActions ? (extraActions ? 132 : 96) : 52;
       const actionsCol: ColDef = {
         colId: 'actions',
-        headerName: actionsHeader,
-        width: extraActions ? 132 : 96,
-        minWidth: extraActions ? 132 : 96,
-        resizable: true,
+        headerName: resolvedActionsHeader,
+        width: actionsWidth,
+        minWidth: actionsWidth,
+        maxWidth: actionsWidth,
+        resizable: false,
         sortable: false,
         filter: false,
         pinned: actionsColumnPosition === 'last' ? 'right' : 'left',
+        lockPinned: true,
+        suppressMovable: true,
         cellRenderer: (params: any) => (
           <div className="flex h-full items-center gap-2">
             {extraActions?.(params.data)}
@@ -276,8 +305,8 @@ export function DataTable({
     return gridColumns;
   }, [
     actionsColumnPosition,
-    actionsHeader,
     columns,
+    resolvedActionsHeader,
     deleteTitle,
     editTitle,
     extraActions,
@@ -357,7 +386,6 @@ export function DataTable({
           {headerActions ? <div className="shrink-0">{headerActions}</div> : null}
         </div>
       )}
-      <div ref={setPopupParent} className="arb-ag-popup-root" aria-hidden="true" />
       <div className="ag-theme-quartz arb-dex-grid flex-1 min-h-0 min-w-0 w-full">
         {isLoading ? (
           <div className="size-full flex items-center justify-center">
@@ -371,8 +399,10 @@ export function DataTable({
             rowData={rows}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
-            popupParent={popupParent ?? undefined}
+            popupParent={popupParent}
             localeText={localeText}
+            getLocaleText={getLocaleText}
+            key={language}
             enableBrowserTooltips
             enableCellTextSelection
             ensureDomOrder
