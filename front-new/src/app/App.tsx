@@ -28,7 +28,22 @@ import {
   sidebarIdFromRoute,
   sidebarPath,
 } from './routing/appRoutes';
-import { clearAuthSession, getAuthSession, saveAuthSession } from './utils/authSession';
+import {
+  clearAuthSession,
+  getAuthSession,
+  saveAuthSession,
+  updateAuthSessionPreferences,
+} from './utils/authSession';
+
+function getInitialAppState() {
+  const session = getAuthSession();
+  return {
+    isAuthenticated: session !== null,
+    userLogin: session?.login ?? '',
+    language: session?.language ?? 'en',
+    isDark: session?.isDark ?? true,
+  } as const;
+}
 
 export default function App() {
   const navigate = useNavigate();
@@ -39,11 +54,12 @@ export default function App() {
   );
   const navState = (location.state ?? {}) as NavigationState;
 
-  const [isDark, setIsDark] = useState(true);
-  const [language, setLanguage] = useState<'en' | 'ru'>('en');
+  const [initialState] = useState(getInitialAppState);
+  const [isDark, setIsDark] = useState(initialState.isDark);
+  const [language, setLanguage] = useState<'en' | 'ru'>(initialState.language);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(() => getAuthSession() !== null);
-  const [userLogin, setUserLogin] = useState(() => getAuthSession()?.login ?? '');
+  const [isAuthenticated, setIsAuthenticated] = useState(initialState.isAuthenticated);
+  const [userLogin, setUserLogin] = useState(initialState.userLogin);
   const [userRole, setUserRole] = useState('admin');
 
   const activePage = sidebarIdFromRoute(route);
@@ -62,8 +78,13 @@ export default function App() {
     }
   }, [isAuthenticated, location.pathname, navigate]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    updateAuthSessionPreferences({ language, isDark });
+  }, [isAuthenticated, language, isDark]);
+
   const handleLogin = (_login: string, _password: string) => {
-    saveAuthSession(_login, _password);
+    saveAuthSession(_login, _password, { language, isDark });
     setUserLogin(_login);
     setIsAuthenticated(true);
     navigate(sidebarPath('dex-chains'), { replace: true });
