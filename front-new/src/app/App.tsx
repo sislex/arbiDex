@@ -28,6 +28,7 @@ import {
   sidebarIdFromRoute,
   sidebarPath,
 } from './routing/appRoutes';
+import { clearAuthSession, getAuthSession, saveAuthSession } from './utils/authSession';
 
 export default function App() {
   const navigate = useNavigate();
@@ -41,8 +42,8 @@ export default function App() {
   const [isDark, setIsDark] = useState(true);
   const [language, setLanguage] = useState<'en' | 'ru'>('en');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userLogin, setUserLogin] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => getAuthSession() !== null);
+  const [userLogin, setUserLogin] = useState(() => getAuthSession()?.login ?? '');
   const [userRole, setUserRole] = useState('admin');
 
   const activePage = sidebarIdFromRoute(route);
@@ -62,12 +63,14 @@ export default function App() {
   }, [isAuthenticated, location.pathname, navigate]);
 
   const handleLogin = (_login: string, _password: string) => {
+    saveAuthSession(_login, _password);
     setUserLogin(_login);
     setIsAuthenticated(true);
     navigate(sidebarPath('dex-chains'), { replace: true });
   };
 
   const handleLogout = () => {
+    clearAuthSession();
     setIsAuthenticated(false);
     setUserLogin('');
     navigate(sidebarPath('dex-chains'), { replace: true });
