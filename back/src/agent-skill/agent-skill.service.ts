@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 const SKILL_FILENAME = 'arbidex-assistant.skill.md';
+const SPEC_FILENAME = 'arbidex-assistant.spec.json';
 const SKILL_NAME = 'arbidex-assistant';
 const SKILL_DESCRIPTION =
   'Read and manage the arbiDex configuration (servers, bots, jobs, pools, ' +
@@ -11,34 +12,45 @@ const SKILL_DESCRIPTION =
 @Injectable()
 export class AgentSkillService {
   private readonly logger = new Logger(AgentSkillService.name);
-  private cachedMarkdown: string | null = null;
+  private readonly cache = new Map<string, string>();
 
-  getMarkdown(): string {
-    if (this.cachedMarkdown !== null) {
-      return this.cachedMarkdown;
+  // Assets are copied next to the compiled JS (see nest-cli.json). Try the runtime
+  // dir first, then fall back to the source/dist trees for `nest start`.
+  private readAsset(filename: string): string {
+    const cached = this.cache.get(filename);
+    if (cached !== undefined) {
+      return cached;
     }
 
-    // The .md is copied next to the compiled JS (see nest-cli.json assets).
-    // Try the runtime dir first, then fall back to the source tree for `nest start`.
     const candidates = [
-      join(__dirname, SKILL_FILENAME),
-      join(process.cwd(), 'dist', 'agent-skill', SKILL_FILENAME),
-      join(process.cwd(), 'src', 'agent-skill', SKILL_FILENAME),
+      join(__dirname, filename),
+      join(process.cwd(), 'dist', 'src', 'agent-skill', filename),
+      join(process.cwd(), 'dist', 'agent-skill', filename),
+      join(process.cwd(), 'src', 'agent-skill', filename),
     ];
 
     for (const path of candidates) {
       try {
-        this.cachedMarkdown = readFileSync(path, 'utf-8');
-        return this.cachedMarkdown;
+        const content = readFileSync(path, 'utf-8');
+        this.cache.set(filename, content);
+        return content;
       } catch {
         // try next candidate
       }
     }
 
     this.logger.error(
-      `Could not read ${SKILL_FILENAME} from any of: ${candidates.join(', ')}`,
+      `Could not read ${filename} from any of: ${candidates.join(', ')}`,
     );
-    throw new Error('Agent skill document is not available');
+    throw new Error(`Agent skill asset "${filename}" is not available`);
+  }
+
+  getMarkdown(): string {
+    return this.readAsset(SKILL_FILENAME);
+  }
+
+  getSpec(): unknown {
+    return JSON.parse(this.readAsset(SPEC_FILENAME));
   }
 
   getJson() {
@@ -47,6 +59,7 @@ export class AgentSkillService {
       description: SKILL_DESCRIPTION,
       format: 'markdown',
       markdown: this.getMarkdown(),
+      specUrl: '/agent-skill/spec',
     };
   }
 }

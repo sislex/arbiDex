@@ -15,4 +15,9 @@ export class AgentSkillController {
   getJson() {
     return this.agentSkillService.getJson();
   }
+
+  @Get('spec')
+  getSpec() {
+    return this.agentSkillService.getSpec();
+  }
 }

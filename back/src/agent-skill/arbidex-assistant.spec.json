@@ -1,0 +1,243 @@
+{
+  "name": "arbidex-assistant",
+  "version": "1.1",
+  "description": "Machine-readable spec for reading and managing arbiDex config via the same REST API the frontend uses.",
+  "baseUrl": "http://89.125.68.35:3001",
+  "cexQuotesUrl": "http://89.125.68.35:1001",
+  "auth": "none",
+  "note": "The host you fetched this from IS the base host. Use that origin for every path below.",
+  "safety": {
+    "reads": "GET requests may be run freely.",
+    "mutations": "POST/PUT/PATCH/DELETE require explicit user confirmation of the exact change first.",
+    "rules": [
+      "Never guess ids — resolve them with a GET and confirm the target.",
+      "For bulk deletes / resets, list affected items before executing.",
+      "After a mutation, GET the entity again and report the new state."
+    ]
+  },
+  "dryRun": {
+    "supported": "protocol-level (no backend flag)",
+    "protocol": [
+      "1. Resolve targets with GET requests.",
+      "2. Compute the exact request(s): method, url, and body for each mutation.",
+      "3. Compute the affected set and the before -> after diff per item.",
+      "4. Present that plan to the user as a dry-run and WAIT for confirmation.",
+      "5. Only then execute; afterwards re-GET and report the actual new state."
+    ],
+    "planShape": {
+      "action": "string",
+      "affected": [{ "id": "number", "before": "object", "after": "object" }],
+      "requests": [{ "method": "string", "url": "string", "body": "object|null" }],
+      "reversible": "boolean"
+    }
+  },
+  "entities": {
+    "servers": {
+      "shape": { "serverId": "string", "ip": "string", "port": "string", "serverName": "string" },
+      "endpoints": {
+        "list": { "method": "GET", "path": "/servers" },
+        "get": { "method": "GET", "path": "/servers/{id}" },
+        "create": { "method": "POST", "path": "/servers", "body": { "ip": "string", "port": "string", "serverName": "string" } },
+        "update": { "method": "PUT", "path": "/servers/{id}", "body": { "ip": "string", "port": "string", "serverName": "string" } },
+        "delete": { "method": "DELETE", "path": "/servers/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/servers/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "bots": {
+      "shape": {
+        "botId": "string", "botName": "string", "description": "string",
+        "serverId": "string", "jobId": "string|null", "cexJobId": "string|null",
+        "paused": "boolean", "isRepeat": "boolean", "delayBetweenRepeat": "number",
+        "timeoutMs": "number", "maxErrors": "number", "maxJobs": "number", "poolsCount": "number"
+      },
+      "updateShape": {
+        "botId": "number", "botName": "string", "description": "string",
+        "jobId": "number|null", "cexJobId": "number|null", "serverId": "number",
+        "paused": "boolean", "isRepeat": "boolean", "delayBetweenRepeat": "number",
+        "maxJobs": "number", "maxErrors": "number", "timeoutMs": "number"
+      },
+      "endpoints": {
+        "list": { "method": "GET", "path": "/bots" },
+        "get": { "method": "GET", "path": "/bots/{id}" },
+        "byServer": { "method": "GET", "path": "/bots/findAllByServerId", "params": { "serverId": "number" } },
+        "byJob": { "method": "GET", "path": "/bots/findAllByJobId", "params": { "jobId": "number" } },
+        "create": { "method": "POST", "path": "/bots" },
+        "update": { "method": "PUT", "path": "/bots/{id}", "body": "updateShape" },
+        "bulkUpdate": { "method": "POST", "path": "/bots/bulk-update", "body": { "bots": "updateShape[]" } },
+        "delete": { "method": "DELETE", "path": "/bots/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/bots/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "jobs": {
+      "shape": { "jobId": "string", "jobType": "string", "description": "string", "chainId": "number", "rpcUrlId": "number", "extraSettings": "string(JSON)", "poolsCount": "number" },
+      "endpoints": {
+        "list": { "method": "GET", "path": "/jobs" },
+        "get": { "method": "GET", "path": "/jobs/{id}" },
+        "create": { "method": "POST", "path": "/jobs" },
+        "update": { "method": "PUT", "path": "/jobs/{id}" },
+        "delete": { "method": "DELETE", "path": "/jobs/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/jobs/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "cexJobs": {
+      "shape": { "id": "number", "job_type": "string", "cex_pair_id": "number", "description": "string", "checked": "boolean" },
+      "endpoints": {
+        "list": { "method": "GET", "path": "/cex-jobs" },
+        "get": { "method": "GET", "path": "/cex-jobs/{id}" },
+        "create": { "method": "POST", "path": "/cex-jobs" },
+        "update": { "method": "PUT", "path": "/cex-jobs/{id}" },
+        "setStatus": { "method": "PATCH", "path": "/cex-jobs/{id}/status", "body": { "checked": "boolean|null" } },
+        "delete": { "method": "DELETE", "path": "/cex-jobs/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/cex-jobs/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "pools": {
+      "endpoints": {
+        "list": { "method": "GET", "path": "/pools" },
+        "create": { "method": "POST", "path": "/pools" },
+        "update": { "method": "PUT", "path": "/pools/by-id/{id}" },
+        "delete": { "method": "DELETE", "path": "/pools/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/pools/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "poolJobRelations": {
+      "endpoints": {
+        "byJob": { "method": "GET", "path": "/pool-job-relations/by-job-id/{jobId}" },
+        "create": { "method": "POST", "path": "/pool-job-relations", "body": "[{ jobId, poolId }]" },
+        "delete": { "method": "DELETE", "path": "/pool-job-relations", "body": "number[]" }
+      }
+    },
+    "tokens": {
+      "endpoints": {
+        "list": { "method": "GET", "path": "/tokens" },
+        "create": { "method": "POST", "path": "/tokens" },
+        "update": { "method": "PUT", "path": "/tokens/{id}" },
+        "delete": { "method": "DELETE", "path": "/tokens/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/tokens/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "dexes": {
+      "endpoints": {
+        "list": { "method": "GET", "path": "/dexes" },
+        "create": { "method": "POST", "path": "/dexes" },
+        "update": { "method": "PUT", "path": "/dexes/{id}" },
+        "delete": { "method": "DELETE", "path": "/dexes/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/dexes/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "chains": {
+      "endpoints": {
+        "list": { "method": "GET", "path": "/chains" },
+        "create": { "method": "POST", "path": "/chains" },
+        "update": { "method": "PUT", "path": "/chains/{id}" },
+        "delete": { "method": "DELETE", "path": "/chains/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/chains/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "rpcUrls": {
+      "endpoints": {
+        "list": { "method": "GET", "path": "/rpc-urls" },
+        "create": { "method": "POST", "path": "/rpc-urls" },
+        "update": { "method": "PUT", "path": "/rpc-urls/{id}" },
+        "delete": { "method": "DELETE", "path": "/rpc-urls/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/rpc-urls/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "cexChains": {
+      "endpoints": {
+        "list": { "method": "GET", "path": "/cex-chains" },
+        "create": { "method": "POST", "path": "/cex-chains" },
+        "update": { "method": "PATCH", "path": "/cex-chains/{id}" },
+        "delete": { "method": "DELETE", "path": "/cex-chains/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/cex-chains/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    },
+    "cexPairs": {
+      "endpoints": {
+        "list": { "method": "GET", "path": "/cex-pairs" },
+        "create": { "method": "POST", "path": "/cex-pairs" },
+        "update": { "method": "PUT", "path": "/cex-pairs/{id}" },
+        "delete": { "method": "DELETE", "path": "/cex-pairs/{id}" },
+        "bulkDelete": { "method": "POST", "path": "/cex-pairs/bulk-delete", "body": { "ids": "number[]" } }
+      }
+    }
+  },
+  "extraActions": {
+    "swapRate": { "method": "GET", "path": "/swap-rate" },
+    "blockchainRefresh": { "method": "POST", "path": "/blockchain", "body": {} },
+    "checkCexJob": { "method": "POST", "url": "{cexQuotesUrl}/jobs/cex-quotes" },
+    "resetServerRules": { "method": "POST", "url": "http://{server.ip}:{server.port}/setBotsRulesList", "note": "Goes to the server directly, not the base host." }
+  },
+  "recipes": [
+    {
+      "id": "pause-bots-on-server",
+      "title": "Pause (or resume) all bots on a server",
+      "mutates": true,
+      "confirm": true,
+      "params": [
+        { "name": "server", "desc": "serverId or serverName" },
+        { "name": "paused", "type": "boolean", "default": true, "desc": "true = pause, false = resume" }
+      ],
+      "steps": [
+        "GET /servers — resolve serverId if a name was given.",
+        "GET /bots/findAllByServerId?serverId={id} — list its bots.",
+        "DRY-RUN: select bots whose paused != target; show them (botId, botName, before->after).",
+        "CONFIRM with the user.",
+        "POST /bots/bulk-update with body { bots: [ <each bot mapped to updateShape with paused=target> ] }.",
+        "VERIFY: GET /bots/findAllByServerId?serverId={id} and report."
+      ],
+      "notes": "bulk-update needs the FULL updateShape per bot, not just {botId, paused}. Copy existing bot fields and override paused."
+    },
+    {
+      "id": "pause-bot",
+      "title": "Pause or resume a single bot",
+      "mutates": true,
+      "confirm": true,
+      "params": [
+        { "name": "botId", "type": "number" },
+        { "name": "paused", "type": "boolean", "default": true }
+      ],
+      "steps": [
+        "GET /bots/{botId} — read current values.",
+        "DRY-RUN: show paused before->after.",
+        "CONFIRM.",
+        "PUT /bots/{botId} with the updateShape (existing fields, paused=target).",
+        "VERIFY: GET /bots/{botId}."
+      ]
+    },
+    {
+      "id": "jobs-without-bots",
+      "title": "Find jobs that have no bots attached",
+      "mutates": false,
+      "confirm": false,
+      "steps": [
+        "GET /jobs and GET /bots.",
+        "referenced = set of bot.jobId (non-null).",
+        "Result = jobs whose jobId is NOT in referenced.",
+        "Optionally do the same for CEX: GET /cex-jobs vs set of bot.cexJobId."
+      ]
+    },
+    {
+      "id": "find-invalid-configs",
+      "title": "Find invalid / suspicious configuration",
+      "mutates": false,
+      "confirm": false,
+      "steps": [
+        "GET /servers — flag port not in 1..65535, empty ip, or ip=127.0.0.1 (local).",
+        "GET /bots + /servers + /jobs — flag bots whose serverId or jobId has no matching record (orphans).",
+        "GET /jobs — flag missing chainId/rpcUrlId or unparseable extraSettings JSON.",
+        "Report grouped by kind; propose fixes but do NOT change anything without confirmation."
+      ]
+    },
+    {
+      "id": "bots-on-server",
+      "title": "Show bots on a server with status",
+      "mutates": false,
+      "confirm": false,
+      "steps": [
+        "GET /servers — resolve serverId by name.",
+        "GET /bots/findAllByServerId?serverId={id} — report botName, paused, jobId/cexJobId."
+      ]
+    }
+  ]
+}

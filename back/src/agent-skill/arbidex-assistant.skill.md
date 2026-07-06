@@ -11,6 +11,19 @@ The host you fetched this from is the API base host. By default that is
 ## Auth
 None. Requests send only `Content-Type: application/json`. You can `curl` reads directly.
 
+## Machine-readable spec
+A structured JSON version of everything here (entities, endpoints, body shapes,
+recipes) is at **`GET /agent-skill/spec`**. Prefer it when you need exact paths /
+payload shapes programmatically; use this markdown for narrative and judgement.
+
+## Dry-run protocol for mutations
+There is no backend dry-run flag, so simulate it yourself before any write:
+1. Resolve targets with GET requests.
+2. Compute the exact request(s): method, url, body for each mutation.
+3. Compute the affected set and a `before -> after` diff per item.
+4. Present that plan to the user and WAIT for confirmation.
+5. Only then execute; afterwards re-GET and report the real new state.
+
 ## Safety rules (IMPORTANT)
 This is a live production system.
 1. `GET` reads — run freely to answer questions.
@@ -80,3 +93,24 @@ Extra actions:
 - "Where do I change a bot/server/job config?" → answer from the UI navigation map;
   no API call needed.
 - Default to read+report. Only mutate on a clearly-requested, confirmed change.
+
+## Recipes (typical chat requests)
+Full machine version in `GET /agent-skill/spec` under `recipes`. Summary:
+
+- **"Pause / resume all bots on server X"** (`pause-bots-on-server`, mutating) →
+  `GET /servers` (resolve id) → `GET /bots/findAllByServerId?serverId={id}` →
+  dry-run the bots whose `paused` differs → confirm →
+  `POST /bots/bulk-update` `{ bots: [...] }`, each bot as the **full** update shape
+  (`botId, botName, description, jobId, cexJobId, serverId, paused, isRepeat,
+  delayBetweenRepeat, maxJobs, maxErrors, timeoutMs`) with `paused` overridden →
+  verify with another GET. (bulk-update needs full bot objects, not `{botId,paused}`.)
+- **"Pause / resume bot N"** (`pause-bot`, mutating) → `GET /bots/{N}` → dry-run →
+  confirm → `PUT /bots/{N}` (full update shape, `paused` overridden) → verify.
+- **"Show jobs without bots"** (`jobs-without-bots`, read-only) → `GET /jobs` +
+  `GET /bots`; result = jobs whose `jobId` is in no bot. Same idea for CEX via `cexJobId`.
+- **"Find invalid configs"** (`find-invalid-configs`, read-only) → `GET /servers`
+  (bad port not 1..65535 / empty ip / 127.0.0.1), orphan bots (serverId/jobId with no
+  record), jobs with missing chainId/rpcUrlId or unparseable `extraSettings`. Report;
+  propose fixes but never apply without confirmation.
+- **"What bots run on server X"** (`bots-on-server`, read-only) → resolve id → 
+  `GET /bots/findAllByServerId?serverId={id}`.

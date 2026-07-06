@@ -14,10 +14,33 @@ Lets me answer config questions and assist with management by calling the **same
 REST API the frontend (`front-new`) uses**, and by navigating the user around the UI.
 
 ## Served over HTTP too
-This same runbook is exposed by the backend at **`GET /agent-skill`** (markdown) and
-`GET /agent-skill/json`. If the user pastes that URL and asks you to "read the skill",
-fetch it and follow it. Source: `back/src/agent-skill/arbidex-assistant.skill.md`
-(keep the two in sync when endpoints change).
+This same runbook is exposed by the backend at **`GET /agent-skill`** (markdown),
+`GET /agent-skill/json`, and a machine-readable **`GET /agent-skill/spec`** (JSON:
+entities, endpoints, body shapes, recipes). If the user pastes that URL and asks you
+to "read the skill", fetch it and follow it. Sources:
+`back/src/agent-skill/arbidex-assistant.skill.md` and `.spec.json` — keep all three
+(this file + those two) in sync when endpoints, shapes, or recipes change.
+
+## Dry-run protocol for mutations
+No backend dry-run flag exists — simulate it before any write:
+1. Resolve targets with GETs. 2. Compute exact request(s) (method, url, body).
+3. Compute the affected set + `before -> after` diff per item. 4. Present the plan and
+WAIT for confirmation. 5. Execute, then re-GET and report the real new state.
+
+## Recipes (typical chat requests)
+Machine version in `GET /agent-skill/spec` → `recipes`.
+- **Pause/resume all bots on server X** (mutating): `GET /servers` → resolve id →
+  `GET /bots/findAllByServerId?serverId={id}` → dry-run bots whose `paused` differs →
+  confirm → `POST /bots/bulk-update {bots:[...]}` with each bot as the FULL update shape
+  (`botId,botName,description,jobId,cexJobId,serverId,paused,isRepeat,delayBetweenRepeat,
+  maxJobs,maxErrors,timeoutMs`), `paused` overridden → verify. Not `{botId,paused}` only.
+- **Pause/resume bot N** (mutating): `GET /bots/N` → dry-run → confirm →
+  `PUT /bots/N` (full update shape, paused overridden) → verify.
+- **Jobs without bots** (read-only): `GET /jobs` + `GET /bots`; jobs whose `jobId` is in
+  no bot. Same for CEX via `cexJobId`.
+- **Find invalid configs** (read-only): `GET /servers` (port not 1..65535 / empty ip /
+  127.0.0.1), orphan bots (serverId/jobId with no record), jobs missing chainId/rpcUrlId
+  or with unparseable `extraSettings`. Report; never fix without confirmation.
 
 ## How the API is reached
 - Base host (`VITE_HOST_URL`): **`http://89.125.68.35:3001`** — almost all endpoints.
