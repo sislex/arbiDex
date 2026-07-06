@@ -26,6 +26,7 @@ import { PoolsJobRelations } from './entities/entities/PoolsJobRelations';
 import { CexPairsModule } from './cex-pairs/cex-pairs.module';
 import { CexChainsModule } from './cex-chains/cex-chains.module';
 import { CexJobsModule } from './cex-jobs/cex-jobs.module';
+import { AgentSkillModule } from './agent-skill/agent-skill.module';
 import { CexJob } from './entities/entities/cex-job.entity';
 import { CexPair } from './entities/entities/cex-pair.entity';
 import { CexChain } from './entities/entities/cex-chain.entity';
@@ -80,6 +81,7 @@ import { CexChain } from './entities/entities/cex-chain.entity';
     CexChainsModule,
     CexPairsModule,
     CexJobsModule,
+    AgentSkillModule,
   ],
   controllers: [AppController],
   providers: [AppService],
