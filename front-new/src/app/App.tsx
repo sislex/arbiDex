@@ -17,8 +17,10 @@ import { JobBotsPage } from './components/pages/JobBotsPage';
 import { DexJobRelationsPage } from './components/pages/DexJobRelationsPage';
 import { RpcUrlsPage } from './components/pages/RpcUrlsPage';
 import { DexesPage } from './components/pages/DexesPage';
+import { GuidePage } from './components/pages/GuidePage';
 import {
   botPath,
+  helpPath,
   jobBotPath,
   jobPath,
   jobPoolsPath,
@@ -183,6 +185,8 @@ export default function App() {
 
   const pageTitle = useMemo(() => {
     switch (route.kind) {
+      case 'help':
+        return language === 'ru' ? 'Инструкция по проекту' : 'Project guide';
       case 'bot':
         return navState.botName ?? `Bot #${route.botId}`;
       case 'job-bot':
@@ -203,6 +207,15 @@ export default function App() {
   }, [language, navState.botName, navState.jobName, navState.serverName, pageTitles, route]);
 
   const renderPage = () => {
+    if (route.kind === 'help') {
+      return (
+        <GuidePage
+          language={language}
+          onBack={() => navigate(sidebarPath('dex-chains'))}
+        />
+      );
+    }
+
     if (route.kind === 'job-bot') {
       return (
         <BotDetailsPage
@@ -387,6 +400,7 @@ export default function App() {
         login={userLogin}
         role={userRole}
         onLogout={handleLogout}
+        onOpenHelp={() => navigate(helpPath())}
       />
       <div className="flex-1 flex overflow-hidden">
         {!sidebarCollapsed && (

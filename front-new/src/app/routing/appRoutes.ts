@@ -16,6 +16,7 @@ export type SidebarPage = (typeof SIDEBAR_PAGES)[number];
 
 export type ParsedRoute =
   | { kind: 'sidebar'; page: SidebarPage; highlightJob?: number }
+  | { kind: 'help' }
   | { kind: 'bot'; botId: number }
   | { kind: 'server'; serverId: number; highlightBot?: number; fromBot?: number; fromJob?: number }
   | { kind: 'job'; jobId: number; highlightBot?: number }
@@ -77,8 +78,16 @@ export function jobBotPath(jobId: number, botId: number): string {
   return `/job/${jobId}/bot/${botId}`;
 }
 
+export function helpPath(): string {
+  return '/help';
+}
+
 export function parseAppRoute(pathname: string, search: string): ParsedRoute {
   const params = new URLSearchParams(search);
+
+  if ((pathname.replace(/\/+$/, '') || '/') === '/help') {
+    return { kind: 'help' };
+  }
 
   const jobBotMatch = pathname.match(/^\/job\/(\d+)\/bot\/(\d+)\/?$/);
   if (jobBotMatch) {
@@ -136,6 +145,8 @@ export function parseAppRoute(pathname: string, search: string): ParsedRoute {
 
 export function sidebarIdFromRoute(route: ParsedRoute): string {
   switch (route.kind) {
+    case 'help':
+      return 'help';
     case 'bot':
       return 'bots';
     case 'server':

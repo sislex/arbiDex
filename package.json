@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "front-start": "npm run front-start --prefix front",
-    "front-build": "npm run build --prefix front",
+    "front-start": "npm run dev --prefix front-new",
+    "front-build": "npm run build --prefix front-new",
 
     "back-start": "npm run back-start --prefix back",
     "back-start:dev": "npm run start:dev --prefix back",

@@ -1,4 +1,4 @@
-import { Menu, X } from 'lucide-react';
+import { Menu, X, BookOpen } from 'lucide-react';
 import { ProfileMenu } from './ProfileMenu';
 
 interface TopBarProps {
@@ -12,9 +12,10 @@ interface TopBarProps {
   login: string;
   role: string;
   onLogout: () => void;
+  onOpenHelp: () => void;
 }
 
-export function TopBar({ pageTitle, onThemeToggle, isDark, language, onLanguageChange, onToggleSidebar, sidebarCollapsed, login, role, onLogout }: TopBarProps) {
+export function TopBar({ pageTitle, onThemeToggle, isDark, language, onLanguageChange, onToggleSidebar, sidebarCollapsed, login, role, onLogout, onOpenHelp }: TopBarProps) {
   return (
     <div className="h-14 bg-card border-b border-border flex items-center justify-between px-4">
       <div className="flex items-center gap-3">
@@ -40,6 +41,14 @@ export function TopBar({ pageTitle, onThemeToggle, isDark, language, onLanguageC
       </div>
 
       <div className="flex items-center gap-3">
+        <button
+          onClick={onOpenHelp}
+          className="p-2 rounded hover:bg-muted transition-colors"
+          title={language === 'ru' ? 'Инструкция по проекту' : 'Project guide'}
+          aria-label={language === 'ru' ? 'Инструкция по проекту' : 'Project guide'}
+        >
+          <BookOpen className="w-4 h-4 text-muted-foreground" />
+        </button>
         <ProfileMenu
           login={login}
           role={role}

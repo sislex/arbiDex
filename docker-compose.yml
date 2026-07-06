@@ -1,14 +1,4 @@
 services:
-#  frontend:
-#    build:
-#      context: ./front
-#      dockerfile: ../docker/DockerfileFrontend
-#    container_name: arbi-front
-#    ports:
-#      - "4203:80"
-#    depends_on:
-#      - backend
-
   frontend-new:
     build:
       context: ./front-new

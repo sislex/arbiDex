@@ -1,6 +1,6 @@
 const env = (import.meta as any).env ?? {};
-const hostUrl = env.VITE_HOST_URL ?? "http://localhost:3001";
-const cexQuotesUrl = env.VITE_CEX_QUOTES_URL ?? "http://45.135.182.251:1001";
+const hostUrl = env.VITE_HOST_URL ?? "http://89.125.68.35:3001";
+const cexQuotesUrl = env.VITE_CEX_QUOTES_URL ?? "http://89.125.68.35:1001";
 
 type RequestOptions = {
   body?: unknown;
